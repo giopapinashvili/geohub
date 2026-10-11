@@ -44,7 +44,8 @@ async function listIndexes() {
   const out = [];
   let page = '';
   do {
-    const r = await api(`/collectionGroups/-/indexes?pageSize=200${page ? `&pageToken=${page}` : ''}`);
+    // Listing across all collection groups ('-') accepts no page size.
+    const r = await api(`/collectionGroups/-/indexes${page ? `?pageToken=${encodeURIComponent(page)}` : ''}`);
     if (r.status !== 200) throw new Error(`list indexes failed: ${r.status} ${JSON.stringify(r.body).slice(0, 300)}`);
     for (const ix of r.body.indexes || []) {
       const cg = ix.name.split('/collectionGroups/')[1].split('/')[0];

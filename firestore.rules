@@ -49,17 +49,22 @@ service cloud.firestore {
     // query on posts must carry a constraint that proves one of these branches
     // (visibility == 'public', authorId == me, audienceIds/closeFriendIds
     // array-contains me, …). The audience lists are written by the author.
+    // Every default below is the restrictive one: when a query leaves a field
+    // unconstrained, the rules engine evaluates get(field, default) with the
+    // default, so a default of 'public' would let an unfiltered query read
+    // every post. Posts without a visibility field are therefore not public
+    // (the privacy migration gives every post one).
     function canReadPostData(d) {
-      return d.get('visibility', 'public') == 'public'
-        || (d.get('visibility', 'public') == 'group' && isGroupMember(d.get('groupId', '')))
+      return d.get('visibility', '') == 'public'
+        || (d.get('visibility', '') == 'group' && isGroupMember(d.get('groupId', '')))
         || (signedIn() && (
              d.get('authorId', '') == uid()
           || d.get('userId', '') == uid()
           || uid() in d.get('audienceIds', [])
           || uid() in d.get('closeFriendIds', [])
-          || (d.get('visibility', 'public') == 'friends'
+          || (d.get('visibility', '') == 'friends'
               && areFriendsAny(uid(), d.get('authorId', d.get('userId', ''))))
-          || (d.get('visibility', 'public') == 'followers'
+          || (d.get('visibility', '') == 'followers'
               && (isFollowing(uid(), d.get('authorId', d.get('userId', '')))
                   || areFriendsAny(uid(), d.get('authorId', d.get('userId', '')))))
           || isAdmin()
@@ -595,8 +600,10 @@ service cloud.firestore {
 
     match /stories/{storyId} {
       // Close-friends stories are readable by the author and the people on
-      // the list. Public stories carry closeFriends == false explicitly.
-      allow read: if !resource.data.get('closeFriends', false)
+      // the list. Public stories carry closeFriends == false explicitly; a
+      // story without the field counts as close-friends (restrictive default,
+      // see canReadPostData).
+      allow read: if resource.data.get('closeFriends', true) == false
         || (signedIn()
             && (resource.data.get('authorId', '') == uid()
                 || resource.data.get('userId', '') == uid()
@@ -1025,7 +1032,7 @@ service cloud.firestore {
       // Public-group posts are readable by everyone; private/secret group posts
       // are restricted to members.  groupPrivacy is denormalised onto each post
       // at creation time to avoid a get() per rule evaluation.
-      allow read: if resource.data.get('groupPrivacy', 'public') == 'public'
+      allow read: if resource.data.get('groupPrivacy', '') == 'public'
         || isGroupMember(resource.data.get('groupId', ''))
         || isAdmin();
       allow create: if newOwnerMatches();

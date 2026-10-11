@@ -46,7 +46,11 @@ async function allowed(label, fn) {
   catch (e) { fail++; results.push(`  FAIL  ${label} — expected allowed, got ${e.code || e.message}`); }
 }
 async function denied(label, fn) {
-  try { await fn(); fail++; results.push(`  FAIL  ${label} — expected permission-denied, but it was allowed`); }
+  try {
+    const r = await fn();
+    const n = r && typeof r.size === 'number' ? ` (returned ${r.size} document${r.size === 1 ? '' : 's'})` : '';
+    fail++; results.push(`  FAIL  ${label} — expected permission-denied, but it was allowed${n}`);
+  }
   catch (e) {
     if (e.code === 'permission-denied') { pass++; results.push(`  ok    ${label} (refused)`); }
     else { fail++; results.push(`  FAIL  ${label} — expected permission-denied, got ${e.code || e.message}`); }
@@ -82,6 +86,9 @@ await post('p_group_closed', { visibility: 'group', groupId: 'g_closed', targetT
 
 await admin.doc('stories/s_public').set({ authorId: A.uid, userId: A.uid, closeFriends: false, createdAt: ts(5), expiresAt: Timestamp.fromMillis(Date.now() + 3600000) });
 await admin.doc('stories/s_close').set({ authorId: A.uid, userId: A.uid, closeFriends: true, closeFriendsList: [D.uid], createdAt: ts(6), expiresAt: Timestamp.fromMillis(Date.now() + 3600000) });
+await admin.doc('stories/s_legacy').set({ authorId: A.uid, userId: A.uid, createdAt: ts(7), expiresAt: Timestamp.fromMillis(Date.now() + 3600000) });
+await admin.doc('groupPosts/gp_closed').set({ groupId: 'g_closed', groupPrivacy: 'private', authorId: C.uid, text: 'members only', createdAt: ts(30) });
+await admin.doc('groupPosts/gp_legacy').set({ groupId: 'g_closed', authorId: C.uid, text: 'no privacy field', createdAt: ts(31) });
 
 await admin.doc(`users/${C.uid}`).set({ uid: C.uid, fullName: 'C', username: `c${stamp}`, email: 'legacy@test.ge', phone: '+995 555 000 000', createdAt: Date.now() });
 await admin.doc('rewards/r1').set({ title: 'Coffee', active: true, pointPrice: 50, businessId: '', createdAt: ts(50) });
@@ -89,7 +96,9 @@ await admin.doc('rewards/r1').set({ title: 'Coffee', active: true, pointPrice: 5
 /* ── Posts ────────────────────────────────────────────────── */
 results.push('Posts');
 await allowed('guest reads a public post', () => getDoc(doc(G.db, 'posts', 'p_public')));
-await allowed('guest reads a legacy post without visibility', () => getDoc(doc(G.db, 'posts', 'p_legacy')));
+// Restrictive default: no visibility field = not public (the migration gives every post one).
+await denied('stranger reads a post without a visibility field', () => getDoc(doc(C.db, 'posts', 'p_legacy')));
+await allowed('author reads own post without a visibility field', () => getDoc(doc(A.db, 'posts', 'p_legacy')));
 await denied('guest reads an only-me post', () => getDoc(doc(G.db, 'posts', 'p_me')));
 await denied('stranger reads an only-me post', () => getDoc(doc(C.db, 'posts', 'p_me')));
 await allowed('author reads own only-me post', () => getDoc(doc(A.db, 'posts', 'p_me')));
@@ -111,11 +120,20 @@ await allowed('own posts query', () => getDocs(query(collection(A.db, 'posts'), 
 await allowed('shared-with-me query (audienceIds)', () => getDocs(query(collection(B.db, 'posts'), where('audienceIds', 'array-contains', B.uid), orderBy('createdAt', 'desc'), limit(40))));
 await allowed('close-friends query (closeFriendIds)', () => getDocs(query(collection(D.db, 'posts'), where('closeFriendIds', 'array-contains', D.uid), orderBy('createdAt', 'desc'), limit(40))));
 await denied('someone else\'s audience query', () => getDocs(query(collection(C.db, 'posts'), where('audienceIds', 'array-contains', B.uid), limit(10))));
-await allowed('profile: friend lists friends posts', () => getDocs(query(collection(B.db, 'posts'), where('authorId', '==', A.uid), where('visibility', 'in', ['friends', 'followers']), limit(40))));
-await denied('profile: stranger lists friends posts', () => getDocs(query(collection(C.db, 'posts'), where('authorId', '==', A.uid), where('visibility', 'in', ['friends', 'followers']), limit(40))));
-await allowed('profile: public posts of someone', () => getDocs(query(collection(C.db, 'posts'), where('authorId', '==', A.uid), where('visibility', '==', 'public'), limit(40))));
-await allowed('group wall: member lists members-only posts', () => getDocs(query(collection(C.db, 'posts'), where('groupId', '==', 'g_closed'), where('visibility', '==', 'group'), limit(40))));
-await denied('group wall: non-member lists members-only posts', () => getDocs(query(collection(B.db, 'posts'), where('groupId', '==', 'g_closed'), where('visibility', '==', 'group'), limit(40))));
+const newest = [orderBy('createdAt', 'desc'), limit(40)];
+await allowed('profile: friend lists friends posts', () => getDocs(query(collection(B.db, 'posts'), where('authorId', '==', A.uid), where('visibility', 'in', ['friends', 'followers']), ...newest)));
+await denied('profile: stranger lists friends posts', () => getDocs(query(collection(C.db, 'posts'), where('authorId', '==', A.uid), where('visibility', 'in', ['friends', 'followers']), ...newest)));
+await allowed('profile: public posts of someone', () => getDocs(query(collection(C.db, 'posts'), where('authorId', '==', A.uid), where('visibility', '==', 'public'), ...newest)));
+await allowed('profile: guest lists public posts', () => getDocs(query(collection(G.db, 'posts'), where('authorId', '==', A.uid), where('visibility', '==', 'public'), ...newest)));
+await allowed('profile: legacy userId public posts', () => getDocs(query(collection(G.db, 'posts'), where('userId', '==', A.uid), where('visibility', '==', 'public'), ...newest)));
+await allowed('profile: owner lists all own posts (legacy userId)', () => getDocs(query(collection(A.db, 'posts'), where('userId', '==', A.uid), ...newest)));
+await allowed('profile: shared with me on someone\'s profile', () => getDocs(query(collection(B.db, 'posts'), where('authorId', '==', A.uid), where('audienceIds', 'array-contains', B.uid), ...newest)));
+await denied('stranger lists friends/only-me posts of everyone', () => getDocs(query(collection(C.db, 'posts'), where('visibility', 'in', ['friends', 'onlyme']), limit(40))));
+await denied('stranger lists posts by author only', () => getDocs(query(collection(C.db, 'posts'), where('authorId', '==', A.uid), limit(40))));
+await allowed('group wall: member lists members-only posts', () => getDocs(query(collection(C.db, 'posts'), where('groupId', '==', 'g_closed'), where('visibility', '==', 'group'), ...newest)));
+await denied('group wall: non-member lists members-only posts', () => getDocs(query(collection(B.db, 'posts'), where('groupId', '==', 'g_closed'), where('visibility', '==', 'group'), ...newest)));
+await allowed('group wall: own posts in a group', () => getDocs(query(collection(C.db, 'posts'), where('groupId', '==', 'g_closed'), where('authorId', '==', C.uid), ...newest)));
+await denied('legacy groupPosts: stranger lists everything', () => getDocs(query(collection(B.db, 'groupPosts'), limit(20))));
 
 results.push('Writing posts');
 await allowed('author changes audience and lists', () => updateDoc(doc(A.db, 'posts', 'p_public'), { visibility: 'friends', audienceIds: [A.uid, B.uid], closeFriendIds: [], updatedAt: serverTimestamp() }));
@@ -124,6 +142,9 @@ await denied('stranger edits someone\'s audience list', () => updateDoc(doc(C.db
 /* ── Stories ──────────────────────────────────────────────── */
 results.push('Stories');
 await allowed('public tray query', () => getDocs(query(collection(G.db, 'stories'), where('closeFriends', '==', false), orderBy('createdAt', 'desc'), limit(40))));
+await allowed('tray: stories shared with me', () => getDocs(query(collection(D.db, 'stories'), where('closeFriendsList', 'array-contains', D.uid), orderBy('createdAt', 'desc'), limit(40))));
+await allowed('tray: my own stories', () => getDocs(query(collection(A.db, 'stories'), where('authorId', '==', A.uid), orderBy('createdAt', 'desc'), limit(20))));
+await denied('story without closeFriends field is not public', () => getDoc(doc(C.db, 'stories', 's_legacy')));
 await denied('stranger reads a close-friends story', () => getDoc(doc(C.db, 'stories', 's_close')));
 await allowed('listed friend reads a close-friends story', () => getDoc(doc(D.db, 'stories', 's_close')));
 await denied('unconstrained story query (stranger)', () => getDocs(query(collection(C.db, 'stories'), orderBy('createdAt', 'desc'), limit(40))));
