@@ -9,6 +9,7 @@
 //   node web/tools/admin-deploy.mjs backup-rules    save the live rules to firestore.rules.production-<time>
 //   node web/tools/admin-deploy.mjs release-rules   save the live rules, then compile and release firestore.rules
 //   node web/tools/admin-deploy.mjs rollback-rules <file>   release an earlier saved rules file
+//   node web/tools/admin-deploy.mjs make-admin <uid>   give an account the admin panel (admins/{uid})
 //   node web/tools/admin-deploy.mjs enable-redeem   turn on reward redemption (after redeemReward is deployed)
 //   node web/tools/admin-deploy.mjs disable-redeem  turn it off again
 //   node web/tools/admin-deploy.mjs fix-reward-prices   copy pointPrice → cost on rewards (for the old function)
@@ -124,6 +125,18 @@ async function main() {
     return;
   }
   if (cmd === 'indexes') { await indexes(); return; }
+  if (cmd === 'make-admin') {
+    // admins/{uid} is what the rules' isAdmin() and the admin panel check.
+    const target = process.argv[3];
+    if (!target) { console.error('Usage: make-admin <uid>'); process.exitCode = 2; return; }
+    const { getAuth } = await import('firebase-admin/auth');
+    let email = '';
+    try { email = (await getAuth().getUser(target)).email || ''; }
+    catch (e) { console.error(`No such user ${target}: ${e.message}`); process.exitCode = 1; return; }
+    await getFirestore().doc(`admins/${target}`).set({ uid: target, email, role: 'admin', createdAt: new Date(), addedBy: 'admin-deploy' }, { merge: true });
+    console.log(`ADMIN ADDED: ${target} (${email})`);
+    return;
+  }
   if (cmd === 'enable-redeem' || cmd === 'disable-redeem') {
     // The Rewards page offers redemption only when meta/features.redeem is true
     // (the redeemReward Cloud Function must be deployed — Blaze plan).
@@ -143,7 +156,7 @@ async function main() {
     console.log(`rewards updated with cost: ${n}`);
     return;
   }
-  console.error('Usage: node web/tools/admin-deploy.mjs list-indexes | backup-rules | check-rules | indexes | release-rules | rollback-rules <file> | enable-redeem | disable-redeem | fix-reward-prices');
+  console.error('Usage: node web/tools/admin-deploy.mjs list-indexes | backup-rules | check-rules | indexes | release-rules | rollback-rules <file> | make-admin <uid> | enable-redeem | disable-redeem | fix-reward-prices');
   process.exitCode = 2;
 }
 
