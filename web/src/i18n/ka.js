@@ -373,6 +373,8 @@ export default {
   'post.options': 'პოსტის პარამეტრები',
   'post.save': 'შენახვა',
   'post.saveSub': 'დაამატე შენახულებში',
+  'post.unsave': 'შენახულიდან ამოღება',
+  'post.unsaveSub': 'ეს პოსტი შენახულებშია',
   'post.edit': 'პოსტის რედაქტირება',
   'post.text': 'ტექსტი',
   'post.delete': 'პოსტის წაშლა',

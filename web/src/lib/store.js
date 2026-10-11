@@ -11,6 +11,7 @@ import { pageTitle } from './hooks.js';
 import { listenNotifications } from '../data/notify.js';
 import { listenConversations } from '../data/messages.js';
 import { listenFriendIds, listenSafety, listenIncomingRequests } from '../data/social.js';
+import { listenSaved } from '../data/posts.js';
 import { claimPendingInvite, ensureMyCode } from '../data/referrals.js';
 
 /* ── Dialog state ──────────────────────────────────────────── */
@@ -49,6 +50,8 @@ export const conversations = signal([]);
 export const friendIds = signal(new Set());
 export const followingIds = signal(new Set());
 export const incomingRequests = signal([]);
+/** Ids of posts the viewer saved (bookmark state on every post card). */
+export const savedPostIds = signal(new Set());
 export const safety = signal({ hidden: new Set(), blocked: new Set(), muted: new Set() });
 
 /** The viewer's close-friends list (kept private in users/{uid}/private/account); only current friends count. */
@@ -77,6 +80,7 @@ effect(() => {
     friendIds.value = new Set();
     followingIds.value = new Set();
     incomingRequests.value = [];
+    savedPostIds.value = new Set();
     safety.value = { hidden: new Set(), blocked: new Set(), muted: new Set() };
     return;
   }
@@ -85,6 +89,7 @@ effect(() => {
     listenConversations((list) => { conversations.value = list; }),
     listenFriendIds(id, (ids) => { friendIds.value = new Set(ids); }),
     listenIncomingRequests((list) => { incomingRequests.value = list; }),
+    listenSaved((items) => { savedPostIds.value = new Set(items.filter((x) => x.type === 'post').map((x) => x.itemId)); }),
     listenSafety((s) => { safety.value = { hidden: new Set(s.hiddenPostIds), blocked: new Set(s.blockedUserIds), muted: new Set(s.mutedUserIds) }; }),
     onSnapshot(query(collection(db, 'follows'), where('followerId', '==', id), limit(500)),
       (s) => { followingIds.value = new Set(s.docs.map((d) => d.data().followingId)); }, () => {}),

@@ -439,7 +439,8 @@ export async function addComment(post, text, { voiceUrl = '' } = {}) {
 }
 
 export async function editComment(postId, commentId, text) {
-  await updateDoc(doc(db, 'posts', postId, 'comments', commentId), { text: String(text).trim(), updatedAt: serverTimestamp() });
+  // An explicit flag: likes and replies also touch updatedAt, so it cannot mean "edited".
+  await updateDoc(doc(db, 'posts', postId, 'comments', commentId), { text: String(text).trim(), edited: true, editedAt: serverTimestamp(), updatedAt: serverTimestamp() });
 }
 
 /** Own comment → soft delete (keeps replies); post owner → hard delete. */

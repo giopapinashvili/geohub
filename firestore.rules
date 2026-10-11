@@ -281,7 +281,7 @@ service cloud.firestore {
     // Comment author may only change text/updatedAt on their own comments.
     function onlyCommentTextChanged() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['text', 'updatedAt']);
+        .hasOnly(['text', 'updatedAt', 'edited', 'editedAt']);
     }
 
     function onlyCommentCountersChanged() {

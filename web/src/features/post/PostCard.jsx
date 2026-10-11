@@ -9,7 +9,7 @@ import { TextArea, Segmented } from '../../ui/Field.jsx';
 import { t, tn, formatCount } from '../../lib/i18n.js';
 import { timeAgo, formatDate } from '../../lib/format.js';
 import { uid, isAdmin } from '../../lib/auth.js';
-import { requireLogin, friendIds, closeFriendIds } from '../../lib/store.js';
+import { requireLogin, friendIds, closeFriendIds, savedPostIds } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import {
   getMyReaction, setReaction, isSaved, setSaved, deletePost, editPost, getPost, trackView, REACTION_EMOJI,
@@ -96,7 +96,8 @@ export function PostCard({ post: initial, openComments = false, highlightComment
   const [post, setPost] = useState(initial);
   const [mine, setMine] = useState('');
   const [likes, setLikes] = useState(initial.likeCount);
-  const [saved, setSavedState] = useState(false);
+  // Bookmark state comes from the session's saved list, so it is right on first paint.
+  const saved = savedPostIds.value.has(initial.id);
   const [showComments, setShowComments] = useState(openComments);
   const [focusComment, setFocusComment] = useState(false);
   const [dialog, setDialog] = useState(null);
@@ -133,7 +134,13 @@ export function PostCard({ post: initial, openComments = false, highlightComment
   const toggleSave = async () => {
     if (!requireLogin('save')) return;
     const was = saved || (await isSaved('post', post.id));
-    try { await setSaved('post', post.id, !was); setSavedState(!was); toast(t(was ? 'saved.removed' : 'saved.added')); }
+    try {
+      await setSaved('post', post.id, !was);
+      const next = new Set(savedPostIds.value);
+      if (was) next.delete(post.id); else next.add(post.id);
+      savedPostIds.value = next;
+      toast(t(was ? 'saved.removed' : 'saved.added'));
+    }
     catch { toast.error(t('common.error')); }
   };
 
@@ -142,7 +149,7 @@ export function PostCard({ post: initial, openComments = false, highlightComment
   const authorHref = post.authorType === 'business' && post.businessId ? `/business/${post.businessId}` : `/u/${post.authorId}`;
 
   const menuItems = [
-    { icon: 'bookmark-simple', label: t('post.save'), sub: t('post.saveSub'), onClick: toggleSave },
+    { icon: 'bookmark-simple', label: t(saved ? 'post.unsave' : 'post.save'), sub: t(saved ? 'post.unsaveSub' : 'post.saveSub'), onClick: toggleSave },
     { icon: 'link', label: t('common.copyLink'), onClick: () => copyLink(postUrl(post.id)) },
     { divider: true, hidden: !own && !isAdmin.value },
     { icon: 'pencil-simple', label: t('post.edit'), onClick: () => setDialog('edit'), hidden: !own },

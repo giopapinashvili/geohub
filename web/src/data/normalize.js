@@ -125,7 +125,8 @@ export function normComment(id, d = {}) {
     replyCount: n(d.replyCount),
     reactionCount: n(d.reactionCount ?? d.likes ?? d.likeCount),
     status: s(d.status || 'active'),
-    edited: !!(d.updatedAt && d.createdAt && tsToMillis(d.updatedAt) - tsToMillis(d.createdAt) > 5000 && d.edited !== false),
+    // Only a real text edit sets this (likes/replies bump updatedAt too).
+    edited: d.edited === true || !!d.editedAt,
     createdAt: tsToMillis(d.createdAt),
     raw: d,
   };

@@ -135,6 +135,11 @@ await denied('group wall: non-member lists members-only posts', () => getDocs(qu
 await allowed('group wall: own posts in a group', () => getDocs(query(collection(C.db, 'posts'), where('groupId', '==', 'g_closed'), where('authorId', '==', C.uid), ...newest)));
 await denied('legacy groupPosts: stranger lists everything', () => getDocs(query(collection(B.db, 'groupPosts'), limit(20))));
 
+results.push('Comments');
+await allowed('author edits own comment (edited flag)', () => updateDoc(doc(A.db, 'posts', 'p_public', 'comments', 'c1'), { text: 'hello (edited)', edited: true, editedAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+await denied('stranger edits someone else\'s comment', () => updateDoc(doc(C.db, 'posts', 'p_public', 'comments', 'c1'), { text: 'hacked', edited: true }));
+await allowed('anyone signed in bumps comment counters', () => updateDoc(doc(B.db, 'posts', 'p_public', 'comments', 'c1'), { reactionCount: 1, updatedAt: serverTimestamp() }));
+
 results.push('Writing posts');
 await allowed('author changes audience and lists', () => updateDoc(doc(A.db, 'posts', 'p_public'), { visibility: 'friends', audienceIds: [A.uid, B.uid], closeFriendIds: [], updatedAt: serverTimestamp() }));
 await denied('stranger edits someone\'s audience list', () => updateDoc(doc(C.db, 'posts', 'p_friends'), { audienceIds: [A.uid, B.uid, C.uid] }));
