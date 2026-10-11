@@ -53,7 +53,8 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(null);
   const [avail, setAvail] = useState(null);
-  const set = (k) => (e) => setForm({ ...form, [k]: k === 'username' ? e.currentTarget.value.toLowerCase().replace(/\s/g, '') : e.currentTarget.value });
+  // Functional update: browser autofill fills several fields in one tick.
+  const set = (k) => (e) => { const raw = e.currentTarget.value; const v = k === 'username' ? raw.toLowerCase().replace(/\s/g, '') : raw; setForm((cur) => ({ ...cur, [k]: v })); };
   const uname = useDebounced(form.username, 400);
 
   useEffect(() => { if (signedIn.value && profile.value) navigate(afterAuthTarget(), { replace: true }); }, [signedIn.value, profile.value]);

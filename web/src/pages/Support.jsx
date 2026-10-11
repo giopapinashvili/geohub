@@ -26,7 +26,7 @@ export default function Support() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [sent, setSent] = useState(false);
-  const set = (k) => (e) => setF({ ...f, [k]: e.currentTarget.value });
+  const set = (k) => (e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, [k]: v })); };
 
   const submit = async (e) => {
     e.preventDefault();

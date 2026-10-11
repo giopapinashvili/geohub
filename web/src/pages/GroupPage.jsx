@@ -120,10 +120,10 @@ function Events({ group, manager }) {
       <Modal open={open} onClose={() => setOpen(false)} title={t('events.create')} size="sm"
         footer={<><Button variant="secondary" onClick={() => setOpen(false)}>{t('common.cancel')}</Button><Button variant="primary" disabled={!f.title.trim() || !f.date} onClick={create}>{t('common.publish')}</Button></>}>
         <div class="stack">
-          <TextField label={t('events.title')} value={f.title} onInput={(e) => setF({ ...f, title: e.currentTarget.value })} maxLength={100} />
-          <TextField label={t('events.starts')} type="datetime-local" value={f.date} onInput={(e) => setF({ ...f, date: e.currentTarget.value })} />
-          <TextField label={t('events.venue')} optional={t('common.optional')} value={f.venue} onInput={(e) => setF({ ...f, venue: e.currentTarget.value })} maxLength={100} />
-          <TextArea label={t('common.description')} optional={t('common.optional')} value={f.description} onInput={(e) => setF({ ...f, description: e.currentTarget.value })} maxLength={1000} minRows={2} />
+          <TextField label={t('events.title')} value={f.title} onInput={(e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, title: v })); }} maxLength={100} />
+          <TextField label={t('events.starts')} type="datetime-local" value={f.date} onInput={(e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, date: v })); }} />
+          <TextField label={t('events.venue')} optional={t('common.optional')} value={f.venue} onInput={(e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, venue: v })); }} maxLength={100} />
+          <TextArea label={t('common.description')} optional={t('common.optional')} value={f.description} onInput={(e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, description: v })); }} maxLength={1000} minRows={2} />
         </div>
       </Modal>
     </Card>

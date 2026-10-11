@@ -21,7 +21,7 @@ export function EditProfileDialog({ user, onClose }) {
   });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState('');
-  const set = (k) => (e) => setF({ ...f, [k]: e.currentTarget.value });
+  const set = (k) => (e) => { const v = e.currentTarget.value; setF((cur) => ({ ...cur, [k]: v })); };
   const pick = (field) => (e) => {
     const file = e.currentTarget.files[0];
     e.currentTarget.value = '';
@@ -63,7 +63,7 @@ export function EditProfileDialog({ user, onClose }) {
         </section>
         <section class="edit-section stack">
           <TextField label={t('auth.fullName')} value={f.fullName} onInput={set('fullName')} maxLength={60} />
-          <TextField label={t('auth.username')} icon="at" value={f.username} onInput={(e) => setF({ ...f, username: e.currentTarget.value.toLowerCase().replace(/\s/g, '') })} maxLength={24} hint={t('auth.usernameHint')} />
+          <TextField label={t('auth.username')} icon="at" value={f.username} onInput={(e) => { const v = e.currentTarget.value.toLowerCase().replace(/\s/g, ''); setF((cur) => ({ ...cur, username: v })); }} maxLength={24} hint={t('auth.usernameHint')} />
           <TextArea label={t('profile.bio')} value={f.bio} onInput={set('bio')} maxLength={300} showCount minRows={3} />
           <Select label={t('common.city')} value={f.city} onChange={set('city')} options={cityOptions()} placeholder={t('auth.chooseCity')} />
           <TextField label={t('profile.work')} icon="briefcase" value={f.work} onInput={set('work')} maxLength={80} />
