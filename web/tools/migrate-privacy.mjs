@@ -9,12 +9,13 @@
 //   1. posts without `visibility`            → visibility: 'public'  (the feed query asks for it)
 //   2. posts in private/secret groups marked 'public' → visibility: 'group' (members only)
 //   3. friends-only posts without audienceIds → audienceIds: [author, ...friends]
+//      close-friends posts without closeFriendIds → closeFriendIds: [author, ...friends]
 //   4. unexpired stories without closeFriends → closeFriends: false
 //   5. users with email/phone/birthday/searchHistory in the public document
 //      → moved to users/{uid}/private/account and removed from users/{uid}
 
 import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { existsSync, readFileSync } from 'node:fs';
 
 const APPLY = process.argv.includes('--apply');
@@ -82,9 +83,16 @@ async function privacyOf(groupId) {
 }
 
 /* 1–3: posts */
-const counts = { noVisibility: 0, privateGroup: 0, friendsAudience: 0, stories: 0, users: 0 };
+const counts = { noVisibility: 0, privateGroup: 0, friendsAudience: 0, closeAudience: 0, stories: 0, users: 0 };
+const info = { posts: 0, byVisibility: {}, noCreatedAt: 0, oddCreatedAt: 0, noAuthorId: 0 };
 for await (const d of each('posts')) {
   const p = d.data();
+  info.posts++;
+  const v0 = 'visibility' in p ? String(p.visibility) : '(none)';
+  info.byVisibility[v0] = (info.byVisibility[v0] || 0) + 1;
+  if (!('createdAt' in p)) info.noCreatedAt++;
+  else if (!(p.createdAt instanceof Timestamp)) info.oddCreatedAt++;
+  if (!p.authorId) info.noAuthorId++;
   const patch = {};
   if (!('visibility' in p)) { patch.visibility = 'public'; counts.noVisibility++; }
   const groupId = p.groupId || (p.targetType === 'group' ? p.targetId : null);
@@ -94,8 +102,13 @@ for await (const d of each('posts')) {
     const author = p.authorId || p.userId;
     if (author) { patch.audienceIds = [author, ...(await friendsOf(author))].slice(0, 2000); counts.friendsAudience++; }
   }
+  // Older close-friends posts had no list; the old app showed them to all friends.
+  if (vis === 'close_friends' && !Array.isArray(p.closeFriendIds)) {
+    const author = p.authorId || p.userId;
+    if (author) { patch.closeFriendIds = [author, ...(await friendsOf(author))].slice(0, 2000); counts.closeAudience++; }
+  }
   if (Object.keys(patch).length) {
-    if (total < 15) console.log(`posts/${d.id}`, patch.visibility ? `visibility → ${patch.visibility}` : '', patch.audienceIds ? `audienceIds (${patch.audienceIds.length})` : '');
+    if (total < 15) console.log(`posts/${d.id}`, patch.visibility ? `visibility → ${patch.visibility}` : '', patch.audienceIds ? `audienceIds (${patch.audienceIds.length})` : '', patch.closeFriendIds ? `closeFriendIds (${patch.closeFriendIds.length})` : '');
     await write((b) => b.update(d.ref, patch));
   }
 }
@@ -123,10 +136,14 @@ for await (const d of each('users')) {
 }
 
 await flush();
+console.log('\nPosts in the database (read only)');
+console.log(`  total: ${info.posts}   by visibility: ${JSON.stringify(info.byVisibility)}`);
+console.log(`  without createdAt: ${info.noCreatedAt}   createdAt not a timestamp: ${info.oddCreatedAt}   without authorId: ${info.noAuthorId}`);
 console.log('\nSummary');
 console.log(`  posts without visibility → public:        ${counts.noVisibility}`);
 console.log(`  private-group posts → members only:       ${counts.privateGroup}`);
 console.log(`  friends-only posts given an audience list: ${counts.friendsAudience}`);
+console.log(`  close-friends posts given a list:          ${counts.closeAudience}`);
 console.log(`  live stories marked public explicitly:     ${counts.stories}`);
 console.log(`  profiles with private fields moved:        ${counts.users}`);
 console.log(APPLY ? '\nDone.' : '\nNothing was written. Run again with --apply to make these changes.');

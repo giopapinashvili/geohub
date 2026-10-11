@@ -167,18 +167,20 @@ function uniqueById(list) {
 export function listenUserPosts(userId, onData, n = 40, rel = {}) {
   const posts = collection(db, 'posts');
   const viewer = myUid.value;
+  // Newest first on the server, so a long history shows its latest posts.
+  const newest = [orderBy('createdAt', 'desc'), limit(n)];
   const qs = [];
   if (viewer && viewer === userId) {
-    qs.push(query(posts, where('authorId', '==', userId), limit(n)));
-    qs.push(query(posts, where('userId', '==', userId), limit(n)));
+    qs.push(query(posts, where('authorId', '==', userId), ...newest));
+    qs.push(query(posts, where('userId', '==', userId), ...newest));
   } else {
-    qs.push(query(posts, where('authorId', '==', userId), PUBLIC, limit(n)));
-    qs.push(query(posts, where('userId', '==', userId), PUBLIC, limit(n)));
+    qs.push(query(posts, where('authorId', '==', userId), PUBLIC, ...newest));
+    qs.push(query(posts, where('userId', '==', userId), PUBLIC, ...newest));
     if (viewer) {
-      qs.push(query(posts, where('authorId', '==', userId), where('audienceIds', 'array-contains', viewer), limit(n)));
-      qs.push(query(posts, where('authorId', '==', userId), where('closeFriendIds', 'array-contains', viewer), limit(n)));
-      if (rel.friend) qs.push(query(posts, where('authorId', '==', userId), where('visibility', 'in', ['friends', 'followers']), limit(n)));
-      else if (rel.following) qs.push(query(posts, where('authorId', '==', userId), where('visibility', '==', 'followers'), limit(n)));
+      qs.push(query(posts, where('authorId', '==', userId), where('audienceIds', 'array-contains', viewer), ...newest));
+      qs.push(query(posts, where('authorId', '==', userId), where('closeFriendIds', 'array-contains', viewer), ...newest));
+      if (rel.friend) qs.push(query(posts, where('authorId', '==', userId), where('visibility', 'in', ['friends', 'followers']), ...newest));
+      else if (rel.following) qs.push(query(posts, where('authorId', '==', userId), where('visibility', '==', 'followers'), ...newest));
     }
   }
   return listenMerged(qs, onData, (list) => uniqueById(list)
@@ -193,10 +195,11 @@ export function listenUserPosts(userId, onData, n = 40, rel = {}) {
 export function listenTargetPosts(targetType, targetId, onData, n = 40, { member = false } = {}) {
   const field = targetType === 'business' ? 'businessId' : 'groupId';
   const posts = collection(db, 'posts');
-  const qs = [query(posts, where(field, '==', targetId), PUBLIC, limit(n))];
-  if (targetType === 'group' && member) qs.push(query(posts, where(field, '==', targetId), where('visibility', '==', 'group'), limit(n)));
+  const newest = [orderBy('createdAt', 'desc'), limit(n)];
+  const qs = [query(posts, where(field, '==', targetId), PUBLIC, ...newest)];
+  if (targetType === 'group' && member) qs.push(query(posts, where(field, '==', targetId), where('visibility', '==', 'group'), ...newest));
   const viewer = myUid.value;
-  if (viewer) qs.push(query(posts, where(field, '==', targetId), where('authorId', '==', viewer), limit(n)));
+  if (viewer) qs.push(query(posts, where(field, '==', targetId), where('authorId', '==', viewer), ...newest));
   return listenMerged(qs, onData, (list) => uniqueById(list)
     .filter((p) => p.status === 'active' || p.status === 'pending')
     .sort((a, b) => (b.pinned - a.pinned) || (b.createdAt - a.createdAt)));
