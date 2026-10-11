@@ -124,7 +124,9 @@ export default function Profile({ params }) {
   const posts = postsLive.data || [];
   const isFriend = friendIds.value.has(userId);
   const restricted = !own && user && (user.privacy?.profilePref === 'friends' || user.privacy?.profilePref === 'private') && !isFriend;
-  const visiblePosts = posts.filter((p) => own || p.visibility === 'public' || !p.visibility || (isFriend && ['friends', 'followers', 'close_friends'].includes(p.visibility)));
+  const visiblePosts = posts.filter((p) => own || p.visibility === 'public' || !p.visibility
+    || (isFriend && ['friends', 'followers'].includes(p.visibility))
+    || (p.visibility === 'close_friends' && (p.raw.closeFriendIds || []).includes(uid.value)));
 
   if (resolved.loading || (userId && live.loading)) return <PageSpinner />;
   if (!userId || !user || user.suspended || blocked.data) {

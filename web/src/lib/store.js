@@ -6,7 +6,7 @@ import { actor } from './actor.js';
 import { signal, effect, computed } from '@preact/signals';
 import { collection, query, where, limit, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase.js';
-import { uid } from './auth.js';
+import { uid, account } from './auth.js';
 import { pageTitle } from './hooks.js';
 import { listenNotifications } from '../data/notify.js';
 import { listenConversations } from '../data/messages.js';
@@ -50,6 +50,9 @@ export const friendIds = signal(new Set());
 export const followingIds = signal(new Set());
 export const incomingRequests = signal([]);
 export const safety = signal({ hidden: new Set(), blocked: new Set(), muted: new Set() });
+
+/** The viewer's close-friends list (kept private in users/{uid}/private/account); only current friends count. */
+export const closeFriendIds = computed(() => (account.value?.closeFriends || []).filter((id) => friendIds.value.has(id)));
 
 export const unreadNotifications = computed(() => notifications.value.filter((n) => !n.read && n.type !== 'message').length);
 export const unreadMessages = computed(() => conversations.value.filter((c) => c.unread).length);

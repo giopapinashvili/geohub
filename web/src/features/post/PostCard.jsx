@@ -9,7 +9,7 @@ import { TextArea, Segmented } from '../../ui/Field.jsx';
 import { t, tn, formatCount } from '../../lib/i18n.js';
 import { timeAgo, formatDate } from '../../lib/format.js';
 import { uid, isAdmin } from '../../lib/auth.js';
-import { requireLogin, friendIds } from '../../lib/store.js';
+import { requireLogin, friendIds, closeFriendIds } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import {
   getMyReaction, setReaction, isSaved, setSaved, deletePost, editPost, getPost, trackView, REACTION_EMOJI,
@@ -66,7 +66,7 @@ function EditDialog({ post, onClose }) {
     setBusy(true);
     // Audience lists are rebuilt only when the audience really changed.
     const patch = { text: text.trim(), ...(aud !== (post.visibility || 'public') ? { visibility: aud } : {}) };
-    try { await editPost(post.id, patch, { authorId: post.authorId, friendIds: [...friendIds.value] }); toast.success(t('common.saved')); onClose(true, { text: text.trim(), visibility: aud }); }
+    try { await editPost(post.id, patch, { authorId: post.authorId, friendIds: [...friendIds.value], closeFriendIds: [...closeFriendIds.value] }); toast.success(t('common.saved')); onClose(true, { text: text.trim(), visibility: aud }); }
     catch { toast.error(t('common.error')); }
     setBusy(false);
   };
@@ -79,6 +79,8 @@ function EditDialog({ post, onClose }) {
         <Segmented value={aud} onChange={setAud} label={t('audience.title')} options={[
           { value: 'public', label: t('audience.public'), icon: 'globe-hemisphere-east' },
           { value: 'friends', label: t('audience.friends'), icon: 'users' },
+          // Close friends only when a list exists (it is chosen in the composer).
+          ...(closeFriendIds.value.length || post.visibility === 'close_friends' ? [{ value: 'close_friends', label: t('audience.closeFriends'), icon: 'star' }] : []),
           { value: 'onlyme', label: t('audience.onlyMe'), icon: 'lock' },
         ]} />
       </div>

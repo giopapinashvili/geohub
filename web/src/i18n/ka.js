@@ -348,6 +348,12 @@ export default {
   'audience.close_friendsSub': 'მეგობრები, რომლებსაც აირჩევ',
   'audience.onlyMe': 'მხოლოდ მე',
   'audience.onlymeSub': 'მხოლოდ შენ ნახავ',
+  'closeFriends.title': 'ახლო მეგობრები',
+  'closeFriends.hint': 'მონიშნე მეგობრები, ვინც „ახლო მეგობრების“ პოსტებს ნახავს. ამ სიას მხოლოდ შენ ხედავ.',
+  'closeFriends.search': 'მეგობრის ძებნა',
+  'closeFriends.noFriends': 'ჯერ მეგობრები არ გყავს. დაამატე მეგობრები და მერე აირჩიე ახლო მეგობრები.',
+  'closeFriends.save': 'შენახვა ({n})',
+  'closeFriends.count': 'სიაში {n} ადამიანია · შეცვლა',
 
   // ── პოსტი ──
   'post.comment': 'კომენტარი',

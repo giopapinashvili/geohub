@@ -8,12 +8,12 @@ import { SearchInput } from '../../ui/Field.jsx';
 import { Spinner } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
 import { profile } from '../../lib/auth.js';
-import { composer, friendIds } from '../../lib/store.js';
+import { composer, friendIds, closeFriendIds } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import { upload } from '../../lib/media.js';
 import { useDebounced } from '../../lib/hooks.js';
 import { createPost } from '../../data/posts.js';
-import { getUsers, searchUsers } from '../../data/users.js';
+import { getUsers, searchUsers, saveCloseFriends } from '../../data/users.js';
 import { searchPlaces } from '../../data/search.js';
 import { BACKGROUNDS } from './backgrounds.js';
 import { AUDIENCE } from './PostCard.jsx';
@@ -54,6 +54,46 @@ function PeoplePicker({ selected, onChange, onBack }) {
           </button>
         ))}
       </div>
+    </Picker>
+  );
+}
+
+/** Choose who is on the close-friends list (friends only). Saved privately. */
+function CloseFriendsPicker({ onDone, onBack }) {
+  const [q, setQ] = useState('');
+  const [all, setAll] = useState(null);
+  const [sel, setSel] = useState(() => new Set(closeFriendIds.value));
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    getUsers([...friendIds.value].slice(0, 1000)).then((r) => alive && setAll(r.sort((a, b) => a.name.localeCompare(b.name))));
+    return () => { alive = false; };
+  }, []);
+  const term = q.trim().toLowerCase();
+  const list = (all || []).filter((u) => !term || u.name.toLowerCase().includes(term));
+  const toggle = (id) => setSel((cur) => { const next = new Set(cur); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const save = async () => {
+    setSaving(true);
+    try { await saveCloseFriends([...sel]); onDone(); } catch { toast.error(t('common.error')); }
+    setSaving(false);
+  };
+  return (
+    <Picker title={t('closeFriends.title')} onBack={onBack}>
+      <p class="muted small">{t('closeFriends.hint')}</p>
+      {all === null ? <div class="center-pad"><Spinner /></div> : !all.length ? <p class="muted">{t('closeFriends.noFriends')}</p> : (
+        <>
+          <SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('closeFriends.search')} autoFocus />
+          <div class="picker-list">
+            {list.map((u) => (
+              <button key={u.id} type="button" class={`picker-row${sel.has(u.id) ? ' is-active' : ''}`} aria-pressed={sel.has(u.id)} onClick={() => toggle(u.id)}>
+                <Avatar src={u.avatar} name={u.name} size={40} /><span>{u.name}</span>
+                <Icon name={sel.has(u.id) ? 'check-circle-fill' : 'circle'} size={20} />
+              </button>
+            ))}
+          </div>
+          <Button variant="primary" block onClick={save} loading={saving} disabled={!sel.size}>{t('closeFriends.save', { n: sel.size })}</Button>
+        </>
+      )}
     </Picker>
   );
 }
@@ -134,6 +174,8 @@ export default function Composer() {
 
   const publish = async () => {
     if (!canPost) return;
+    // A close-friends post needs someone on the list, or only the author would see it.
+    if (audience === 'close_friends' && !opts.groupId && !closeFriendIds.value.length) { setView('close'); return; }
     setBusy(true);
     try {
       const created = await createPost({
@@ -152,7 +194,7 @@ export default function Composer() {
         asBusiness: opts.asBusiness || null,
         onBusinessId: opts.onBusinessId || null,
         sharedPostId: opts.sharedPost?.id || null,
-        closeFriendIds: audience === 'close_friends' ? [...friendIds.value] : undefined,
+        closeFriendIds: audience === 'close_friends' ? [...closeFriendIds.value] : undefined,
         friendIds: audience === 'friends' ? [...friendIds.value] : undefined,
       });
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
@@ -177,6 +219,7 @@ export default function Composer() {
       footer={view === 'main' ? <Button variant="primary" block size="lg" onClick={publish} disabled={!canPost} loading={busy}>{uploading ? t('common.uploading') : t('common.publish')}</Button> : null}>
       {view === 'tag' && <PeoplePicker selected={tagged} onChange={setTagged} onBack={() => setView('main')} />}
       {view === 'place' && <PlacePicker onBack={() => setView('main')} onPick={(l) => { setLocation(l); setView('main'); }} />}
+      {view === 'close' && <CloseFriendsPicker onBack={() => setView('main')} onDone={() => { setAudience('close_friends'); setView('main'); }} />}
       {view === 'feeling' && (
         <Picker title={t('composer.feeling')} onBack={() => setView('main')}>
           <div class="feeling-grid">
@@ -196,9 +239,13 @@ export default function Composer() {
               </strong>
               {!opts.groupId && !opts.asBusiness && (
                 <Menu label={t('audience.title')} align="start" width={280} items={['public', 'friends', 'close_friends', 'onlyme'].map((k) => ({
-                  icon: AUDIENCE[k].icon, label: t(AUDIENCE[k].label), sub: t(`audience.${k}Sub`), onClick: () => setAudience(k),
+                  icon: AUDIENCE[k].icon,
+                  label: t(AUDIENCE[k].label),
+                  sub: k === 'close_friends' && closeFriendIds.value.length ? t('closeFriends.count', { n: closeFriendIds.value.length }) : t(`audience.${k}Sub`),
+                  // Picking close friends opens the list, so it can be checked or changed first.
+                  onClick: () => (k === 'close_friends' ? setView('close') : setAudience(k)),
                 }))} trigger={(tp) => (
-                  <button type="button" {...tp} class="audience-btn"><Icon name={aud.icon} size={14} />{t(aud.label)}<Icon name="caret-down" size={12} /></button>
+                  <button type="button" {...tp} class="audience-btn"><Icon name={aud.icon} size={14} />{t(aud.label)}{audience === 'close_friends' && closeFriendIds.value.length ? ` (${closeFriendIds.value.length})` : ''}<Icon name="caret-down" size={12} /></button>
                 )} />
               )}
             </div>

@@ -87,6 +87,15 @@ export async function updateMyProfile(patch) {
   cache.delete(id);
 }
 
+/** Save the viewer's close-friends list. It stays private: users/{uid}/private/account. */
+export async function saveCloseFriends(ids) {
+  const id = myUid.value;
+  if (!id) throw new Error('auth');
+  const list = [...new Set(ids.filter(Boolean))].slice(0, 1000);
+  await setDoc(accountRef(id), { closeFriends: list, updatedAt: Date.now() }, { merge: true });
+  return list;
+}
+
 export async function changeUsername(next, previous) {
   const id = myUid.value;
   const name = String(next || '').trim().toLowerCase();
