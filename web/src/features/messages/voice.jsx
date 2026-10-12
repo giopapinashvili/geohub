@@ -22,8 +22,10 @@ function pickMime() {
 
 /**
  * Microphone recording with MediaRecorder.
- * start() asks for the microphone; stop() resolves { blob, duration, type };
- * cancel() throws the recording away. Stops on its own at VOICE_MAX_SECONDS.
+ * start() asks for the microphone; stop() resolves { blob, duration, type }
+ * (a second stop() while the first is finishing resolves null, so a recording
+ * is sent once); cancel() throws the recording away. The composer stops and
+ * sends it at VOICE_MAX_SECONDS.
  */
 export function useVoiceRecorder() {
   const [recording, setRecording] = useState(false);
@@ -52,7 +54,7 @@ export function useVoiceRecorder() {
     let recorder;
     try { recorder = new window.MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 48000 } : undefined); }
     catch (e) { stream.getTracks().forEach((track) => track.stop()); throw e; }
-    const r = { recorder, stream, chunks: [], started: Date.now(), timer: null, resolve: null };
+    const r = { recorder, stream, chunks: [], started: Date.now(), timer: null, resolve: null, stopping: false };
     recorder.ondataavailable = (e) => { if (e.data && e.data.size) r.chunks.push(e.data); };
     recorder.onstop = () => {
       const type = recorder.mimeType || mime || 'audio/webm';
@@ -70,7 +72,8 @@ export function useVoiceRecorder() {
 
   const stop = () => new Promise((resolve) => {
     const r = rec.current;
-    if (!r) { resolve(null); return; }
+    if (!r || r.stopping) { resolve(null); return; }
+    r.stopping = true;
     r.resolve = resolve;
     try { r.recorder.stop(); } catch { cleanup(); resolve(null); }
   });
@@ -79,6 +82,8 @@ export function useVoiceRecorder() {
     const r = rec.current;
     if (!r) return;
     r.resolve = null;
+    if (r.stopping) return; // already finishing; onstop cleans up and sends nothing
+    r.stopping = true;
     try { r.recorder.stop(); } catch { cleanup(); }
   };
 
