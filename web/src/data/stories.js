@@ -52,7 +52,7 @@ export function listenStoryTray(onData) {
   return () => unsubs.forEach((u) => u());
 }
 
-export async function createStory({ text = '', mediaUrl = null, mediaType = '', bg = null, textStyle = null, duration = '24h', closeFriends = false, closeFriendsList = [], link = null, locationName = '' }) {
+export async function createStory({ text = '', mediaUrl = null, mediaType = '', bg = null, textStyle = null, duration = '24h', closeFriends = false, closeFriendsList = [], link = null, locationName = '', placeId = '' }) {
   const m = me();
   if (!m) throw Object.assign(new Error('auth'), { code: 'auth' });
   const data = {
@@ -71,6 +71,9 @@ export async function createStory({ text = '', mediaUrl = null, mediaType = '', 
   if (textStyle) data.textStyle = textStyle;
   if (link) data.link = link;
   if (locationName) data.locationName = locationName;
+  // Only a place explicitly chosen in the map supplies this relation. An
+  // author's profile or business ownership never implies a place link.
+  if (typeof placeId === 'string' && placeId.trim()) data.placeId = placeId.trim();
   // Always explicit: the public tray query asks for closeFriends == false.
   data.closeFriends = !!closeFriends;
   if (closeFriends) data.closeFriendsList = closeFriendsList;

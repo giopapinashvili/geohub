@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Button, IconButton } from '../ui/Button.jsx';
 import { Icon } from '../ui/Icon.jsx';
-import { Img, Spinner, Empty } from '../ui/misc.jsx';
+import { Spinner, Empty } from '../ui/misc.jsx';
 import { SearchInput } from '../ui/Field.jsx';
 import { t, tn, lang } from '../lib/i18n.js';
 import { useTitle, isDesktop } from '../lib/hooks.js';
@@ -9,39 +9,15 @@ import { theme } from '../lib/theme.js';
 import { query, setQuery, navigate } from '../lib/router.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
-import { GEORGIA_CENTER, cityLabel, getPosition, distanceKm } from '../lib/geo.js';
+import { GEORGIA_CENTER, getPosition, distanceKm } from '../lib/geo.js';
 import { loadMapLibre, styleUrl, localizeLabels, addPlaceLayers, placesToGeoJSON } from '../lib/map.js';
-import { listPlaces } from '../data/places.js';
+import { getPlace, listPlaces } from '../data/places.js';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
+import { MapPlacePreview } from '../features/places/MapPlacePreview.jsx';
+import { MapPlaceDetails } from '../features/places/MapPlaceDetails.jsx';
 import { useCategories, categoryOf } from '../features/places/categories.js';
 import { CheckinDialog } from '../features/places/CheckinDialog.jsx';
 import { AddPlaceDialog } from '../features/places/AddPlaceDialog.jsx';
-
-function directionsUrl(p) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-}
-
-function SelectedCard({ place, onClose, onCheckin }) {
-  const cat = categoryOf(place);
-  return (
-    <div class="map-selected card">
-      <a href={`/place/${place.id}`} class="map-selected-img">
-        <Img src={place.image} width={240} alt="" fallback={<span class="place-row-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={28} /></span>} />
-      </a>
-      <div class="map-selected-body">
-        <a href={`/place/${place.id}`} class="map-selected-name">{place.name}</a>
-        <span class="muted small ellipsis">{[cat.label, cityLabel(place.city)].filter(Boolean).join(' · ')}</span>
-        {place.rating > 0 && <span class="place-rating small"><Icon name="star-fill" size={14} />{place.rating.toFixed(1).replace('.', ',')}<span class="muted">· {tn('place.checkins', place.checkinCount)}</span></span>}
-        <div class="map-selected-actions">
-          <Button variant="primary" size="sm" icon="map-pin" onClick={onCheckin}>{t('checkin.short')}</Button>
-          <Button variant="secondary" size="sm" href={`/place/${place.id}`}>{t('common.open')}</Button>
-          {place.lat != null && <IconButton icon="navigation-arrow" label={t('place.directions')} size={32} variant="soft" href={directionsUrl(place)} target="_blank" rel="noopener" />}
-        </div>
-      </div>
-      <IconButton icon="x" label={t('common.close')} size={30} class="map-selected-close" onClick={onClose} />
-    </div>
-  );
-}
 
 /** Places on a map with category filters, search, check-in and add-place. */
 export default function MapPage() {
@@ -59,20 +35,35 @@ export default function MapPage() {
   const [bounds, setBounds] = useState(null);
   const [cat, setCat] = useState('all');
   const [q, setQ] = useState('');
-  const [selectedId, setSelectedId] = useState(query.value.get('place') || null);
+  const selectedId = query.value.get('place') || null;
+  const expanded = !!selectedId && query.value.get('details') === '1';
+  const [linkedPlace, setLinkedPlace] = useState(null);
   const [sheet, setSheet] = useState(false);
   const [me, setMe] = useState(null);
   const [checkin, setCheckin] = useState(() => (query.value.get('checkin') === '1' ? { place: null } : null));
   const [adding, setAdding] = useState(() => query.value.get('add') === '1');
 
   useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); }, []);
+  // A shared place link can point outside the first page of map results.
+  useEffect(() => {
+    let active = true;
+    setLinkedPlace(null);
+    if (selectedId && places && !places.some((p) => p.id === selectedId)) {
+      getPlace(selectedId).then((p) => { if (active) setLinkedPlace(p); }).catch(() => {});
+    }
+    return () => { active = false; };
+  }, [selectedId, places]);
+  const selected = places?.find((p) => p.id === selectedId) || (linkedPlace?.id === selectedId ? linkedPlace : null);
 
   const filtered = useMemo(() => {
     if (!places) return [];
     const needle = q.trim().toLowerCase();
     return places.filter((p) => (cat === 'all' || p.category === cat) && (!needle || `${p.name} ${p.city} ${p.address}`.toLowerCase().includes(needle)));
   }, [places, cat, q]);
-  const geojson = useMemo(() => placesToGeoJSON(filtered, (p) => categoryOf(p).tone), [filtered]);
+  const geojson = useMemo(() => placesToGeoJSON(
+    selected && !filtered.some((p) => p.id === selected.id) ? [...filtered, selected] : filtered,
+    (p) => categoryOf(p).tone, (p) => categoryOf(p).icon,
+  ), [filtered, selected]);
   const geoRef = useRef(geojson);
   geoRef.current = geojson;
 
@@ -84,11 +75,10 @@ export default function MapPage() {
       .slice(0, 80);
   }, [filtered, bounds, me]);
 
-  const selected = places?.find((p) => p.id === selectedId) || null;
-
   // Create the map once.
   useEffect(() => {
     let map;
+    let resizeObserver;
     let alive = true;
     loadMapLibre().then((maplibregl) => {
       if (!alive || !box.current) return;
@@ -105,6 +95,8 @@ export default function MapPage() {
         geo.on('error', () => toast.error(t('map.locationDenied')));
       }
       mapRef.current = map;
+      resizeObserver = new ResizeObserver(() => map.resize());
+      resizeObserver.observe(box.current);
       libRef.current = maplibregl;
       const onStyle = () => {
         localizeLabels(map);
@@ -124,7 +116,6 @@ export default function MapPage() {
       });
       map.on('click', 'gh-points', (e) => {
         const id = e.features[0].properties.id;
-        setSelectedId(id);
         setQuery({ place: id });
       });
       for (const layer of ['gh-clusters', 'gh-points']) {
@@ -134,7 +125,7 @@ export default function MapPage() {
     }).catch(() => setFailed(true));
     // A basemap that never arrives (offline, blocked) shouldn't spin forever.
     const timer = setTimeout(() => { if (alive && !mapRef.current?.isStyleLoaded()) setFailed(true); }, 20000);
-    return () => { alive = false; clearTimeout(timer); map?.remove(); mapRef.current = null; };
+    return () => { alive = false; clearTimeout(timer); resizeObserver?.disconnect(); map?.remove(); mapRef.current = null; };
   }, []);
 
   // Theme or language switch: new basemap, layers re-added on style.load.
@@ -166,6 +157,26 @@ export default function MapPage() {
     }
   }, [selectedId, ready, !!selected]);
 
+  // Keep the selected location visible even while nearby places are clustered.
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!ready || !map || !lib || selected?.lat == null || selected?.lng == null) return undefined;
+    const marker = new lib.Marker({ color: '#2563eb', scale: 1.05 })
+      .setLngLat([selected.lng, selected.lat]).addTo(map);
+    const element = marker.getElement();
+    element.classList.add('map-selected-pin');
+    element.setAttribute('role', 'button');
+    element.setAttribute('aria-label', `${selected.name} — ${t('map.details')}`);
+    element.tabIndex = 0;
+    const open = (event) => { event?.stopPropagation(); setQuery({ details: '1' }); };
+    element.addEventListener('click', open);
+    element.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(event); }
+    });
+    return () => marker.remove();
+  }, [selected?.id, selected?.lat, selected?.lng, ready, lang.value]);
+
   // "My location" dot for the phone button (desktop uses MapLibre's control).
   useEffect(() => {
     const map = mapRef.current;
@@ -177,8 +188,13 @@ export default function MapPage() {
     } else meMarker.current.setLngLat([me.lng, me.lat]);
   }, [me, ready]);
 
-  const select = (p) => { setSelectedId(p.id); setQuery({ place: p.id }); setSheet(false); };
-  const clearSelection = () => { setSelectedId(null); setQuery({ place: null }); };
+  const select = (p) => { setQuery({ place: p.id, details: null }); setSheet(false); };
+  const clearSelection = () => setQuery({ place: null, details: null });
+  const expand = () => setQuery({ details: '1' });
+  const collapse = () => {
+    setQuery({ details: null });
+    requestAnimationFrame(() => document.querySelector('[data-testid="map-place-expand"]')?.focus({ preventScroll: true }));
+  };
   const startCheckin = (place = null) => { if (requireLogin('checkin')) setCheckin({ place }); };
   const startAdd = () => { if (requireLogin('place')) { setCheckin(null); setAdding(true); } };
   const locate = () => getPosition().then((p) => { setMe(p); mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: 12 }); }).catch((e) => toast.error(t(e.message === 'denied' ? 'map.locationDenied' : 'map.locationFailed')));
@@ -195,13 +211,13 @@ export default function MapPage() {
   );
   const list = !places ? <div class="center-pad"><Spinner /></div> : visible.length ? (
     <div class="map-list">
-      {visible.map(({ p, d }) => <PlaceCard key={p.id} place={p} distance={d} compact active={p.id === selectedId} href={`/place/${p.id}`} onClick={(e) => { e.preventDefault(); select(p); }} />)}
+      {visible.map(({ p, d }) => <PlaceCard key={p.id} place={p} distance={d} compact showDescription active={p.id === selectedId} href={`/place/${p.id}`} onClick={(e) => { e.preventDefault(); select(p); }} />)}
     </div>
   ) : <Empty compact icon="map-trifold" title={t('map.nothingHere')} text={t('map.nothingHereText')} />;
 
   return (
-    <div class={`map-page${desktop ? ' is-split' : ''}`}>
-      {desktop && (
+    <div class={`map-page${desktop ? ' is-split' : ''}${selected && expanded ? ' has-place-details' : ''}`}>
+      {desktop && (selected && expanded ? <MapPlaceDetails key={selected.id} place={selected} onClose={collapse} onCheckin={() => startCheckin(selected)} /> : (
         <aside class="map-panel">
           <div class="map-panel-head">
             <h1 class="page-title">{t('nav.map')}</h1>
@@ -215,7 +231,7 @@ export default function MapPage() {
           <p class="muted small map-count">{tn('map.placesInView', visible.length)}</p>
           {list}
         </aside>
-      )}
+      ))}
       <div class="map-stage">
         <div ref={box} class="map-canvas" aria-label={t('nav.map')} role="region" />
         {!ready && !failed && <div class="map-loading"><Spinner size={28} /></div>}
@@ -229,7 +245,8 @@ export default function MapPage() {
             {chips}
           </div>
         )}
-        {selected && <SelectedCard place={selected} onClose={clearSelection} onCheckin={() => startCheckin(selected)} />}
+        {selected && !expanded && <MapPlacePreview place={selected} onExpand={expand} onClose={clearSelection} onCheckin={() => startCheckin(selected)} />}
+        {!desktop && selected && expanded && <MapPlaceDetails key={selected.id} place={selected} onClose={collapse} onCheckin={() => startCheckin(selected)} />}
         {!desktop && !selected && (
           <div class={`map-sheet${sheet ? ' is-open' : ''}`}>
             <button type="button" class="map-sheet-handle" onClick={() => setSheet((s) => !s)} aria-expanded={sheet}>

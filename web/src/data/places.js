@@ -1,5 +1,5 @@
 import {
-  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, limit, onSnapshot,
+  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit, onSnapshot,
   serverTimestamp, increment,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
@@ -43,10 +43,10 @@ export async function createPlace({ name, description = '', category = 'other', 
   return ref.id;
 }
 
-export function listenPlaceReviews(placeId, onData) {
-  return onSnapshot(query(collection(db, 'placeReviews'), where('placeId', '==', placeId), limit(60)), (s) => {
+export function listenPlaceReviews(placeId, onData, onError) {
+  return onSnapshot(query(collection(db, 'placeReviews'), where('placeId', '==', placeId), orderBy('createdAt', 'desc'), limit(60)), (s) => {
     onData(s.docs.map((d) => ({ id: d.id, ...d.data(), createdAt: tsToMillis(d.data().createdAt) })).sort((a, b) => b.createdAt - a.createdAt));
-  }, () => onData([]));
+  }, (error) => { if (onError) onError(error); else onData([]); });
 }
 
 export async function addPlaceReview(placeId, rating, comment) {

@@ -1,6 +1,7 @@
 import { createPortal } from 'preact/compat';
 import { useEffect, useRef } from 'preact/hooks';
 import { useBodyLock, useEscape } from '../lib/hooks.js';
+import { isTopmostModal } from '../lib/modalFocus.js';
 import { IconButton } from './Button.jsx';
 import { t } from '../lib/i18n.js';
 
@@ -33,7 +34,13 @@ function useFocusTrap(ref, open) {
 export function Modal({ open, onClose, title, children, footer, size = 'md', noPad, labelledBy, class: cls = '' }) {
   const ref = useRef(null);
   useBodyLock(open);
-  useEscape(() => onClose?.(), open);
+  useEscape((event) => {
+    if (event.defaultPrevented || !isTopmostModal(ref.current?.closest('.modal-layer'))) return;
+    // Mark the event before closing: the portal may unmount synchronously,
+    // otherwise an underlying viewer can consume this same Escape as well.
+    event.preventDefault();
+    onClose?.();
+  }, open);
   useFocusTrap(ref, open);
   if (!open) return null;
   return createPortal(

@@ -11,6 +11,7 @@ serviceAccountKey.json
 # Node / Playwright
 node_modules/
 playwright-report/
+.codex/artifacts/
 test-results/
 .playwright/
 # Development report files — not for production

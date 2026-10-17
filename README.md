@@ -40,6 +40,34 @@ business, page switching …), `web/tools/e2e-call.mjs` (voice/video calls with 
 
 Old links such as `/feed.html?post=…` or `/profile.html?id=…` are redirected by `web/src/legacy.js`.
 
+## Map place cards
+
+Selecting a pin opens a compact preview; expanding it keeps the same map canvas,
+selection and position. Details replace the desktop results panel or open as a
+phone sheet. `/map?place=<id>&details=1` also opens the panel directly. Both cards
+link to the public place page in a new tab.
+
+Photos, reviews, check-ins and stories use real place data. The recent strip
+means a check-in within two hours, not live presence. Stories require an explicit
+`placeId` or the place's explicit `businessId`; the map story creator persists its
+place context. Private or expired stories never enter the public panel.
+
+With the emulators and `dev:emulator` running:
+
+```bash
+node --experimental-vm-modules web/tools/place-activity-check.mjs
+npm run test:map-panel
+```
+
+The browser test creates and removes its own local fixtures and refuses a remote
+server. It covers compact/expanded cards, map retention, narrow screens, media,
+empty/error states and authenticated submissions.
+
+Before publishing these cards, deploy the four additive indexes from
+`firestore.indexes.json` and wait until they are READY. They cover ordered
+place check-ins, reviews, public place stories and public business stories.
+No database rules change or data migration is required for this feature.
+
 ## Share cards (link previews)
 
 Facebook, Messenger, Telegram, Viber, WhatsApp, Discord and search engines do

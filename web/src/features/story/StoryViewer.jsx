@@ -9,6 +9,7 @@ import { t, tn } from '../../lib/i18n.js';
 import { timeAgo } from '../../lib/format.js';
 import { img } from '../../lib/media.js';
 import { useBodyLock } from '../../lib/hooks.js';
+import { isTopmostModal, useModalFocus } from '../../lib/modalFocus.js';
 import { uid } from '../../lib/auth.js';
 import { requireLogin } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
@@ -22,12 +23,15 @@ const QUICK = ['❤️', '😂', '😮', '😢', '👏', '🔥'];
 
 function Viewers({ story, onClose }) {
   const [users, setUsers] = useState(null);
+  const viewerRef = useRef(null);
+  const closeRef = useRef(null);
+  useModalFocus(viewerRef, closeRef);
   useEffect(() => { getUsers(story.viewedBy.slice(0, 100)).then(setUsers); }, [story.id]);
   return (
-    <div class="story-viewers" role="dialog" aria-label={t('stories.viewers')}>
+    <div ref={viewerRef} tabIndex={-1} class="story-viewers" role="dialog" aria-label={t('stories.viewers')}>
       <div class="story-viewers-head">
         <strong>{tn('stories.viewCount', story.viewedBy.length)}</strong>
-        <IconButton icon="x" label={t('common.close')} size={32} onClick={onClose} />
+        <IconButton ref={closeRef} icon="x" label={t('common.close')} size={32} onClick={onClose} />
       </div>
       <div class="story-viewers-list">
         {users?.map((u) => <a key={u.id} href={`/u/${u.id}`} class="picker-row"><Avatar src={u.avatar} name={u.name} size={36} /><span>{u.name}</span></a>)}
@@ -49,10 +53,13 @@ export function StoryViewer({ groups, start, onClose }) {
   const [muted, setMuted] = useState(true);
   const videoRef = useRef(null);
   const holdRef = useRef(0);
+  const viewerRef = useRef(null);
+  const closeRef = useRef(null);
   useBodyLock(true);
 
   const group = groups[gi];
   const story = group?.stories[si];
+  useModalFocus(viewerRef, closeRef, !!story);
   const own = story && story.authorId === uid.value;
   const isVideo = story && (story.mediaType?.startsWith('video') || /\/video\/upload\/|\.(mp4|webm|mov)(\?|$)/i.test(story.mediaUrl || ''));
 
@@ -95,11 +102,18 @@ export function StoryViewer({ groups, start, onClose }) {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (document.activeElement?.tagName === 'INPUT') { if (e.key === 'Escape') document.activeElement.blur(); return; }
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowRight') next();
-      else if (e.key === 'ArrowLeft') prev();
-      else if (e.key === ' ') { e.preventDefault(); setPaused((p) => !p); }
+      if (e.defaultPrevented || !isTopmostModal(viewerRef.current)) return;
+      if (document.activeElement?.matches('input, textarea, select, [contenteditable="true"]')) {
+        if (e.key === 'Escape') { e.preventDefault(); document.activeElement.blur(); closeRef.current?.focus(); }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (viewers) { setViewers(false); setPaused(false); } else onClose();
+      }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      else if (e.key === ' ' && !document.activeElement?.closest('button, a, [role="button"]')) { e.preventDefault(); setPaused((p) => !p); }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -119,7 +133,7 @@ export function StoryViewer({ groups, start, onClose }) {
   };
 
   return createPortal(
-    <div class="story-viewer" role="dialog" aria-modal="true" aria-label={t('stories.of', { name: group.name })}>
+    <div ref={viewerRef} tabIndex={-1} class="story-viewer" role="dialog" aria-modal="true" aria-label={t('stories.of', { name: group.name })}>
       <div class="story-stage">
         {gi > 0 || si > 0 ? <IconButton icon="caret-left" label={t('common.back')} class="story-arrow is-left" variant="onmedia" size={44} onClick={prev} /> : null}
         <div class="story-frame"
@@ -160,7 +174,7 @@ export function StoryViewer({ groups, start, onClose }) {
                   { icon: 'trash', label: t('stories.delete'), danger: true, hidden: !own, onClick: () => { setPaused(true); setConfirmDel(true); } },
                   { icon: 'flag', label: t('common.report'), hidden: own, onClick: () => report('story', story.id, 'inappropriate').then(() => toast(t('report.sent'))).catch(() => toast.error(t('common.error'))) },
                 ]} trigger={(p) => <IconButton {...p} icon="dots-three" label={t('common.more')} variant="onmedia" size={36} />} />
-                <IconButton icon="x" label={t('common.close')} variant="onmedia" size={36} onClick={onClose} />
+                <IconButton ref={closeRef} icon="x" label={t('common.close')} variant="onmedia" size={36} onClick={onClose} />
               </div>
             </div>
           </div>

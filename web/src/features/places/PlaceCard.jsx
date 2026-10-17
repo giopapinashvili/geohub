@@ -14,7 +14,7 @@ function Rating({ place }) {
 }
 
 /** Place tile: photo, category, name, city, rating. `compact` = list row. */
-export function PlaceCard({ place, distance, compact, active, onClick, href = `/place/${place.id}` }) {
+export function PlaceCard({ place, distance, compact, showDescription, active, onClick, href = `/place/${place.id}` }) {
   const cat = categoryOf(place);
   const meta = [cityLabel(place.city), Number.isFinite(distance) ? formatDistance(distance) : ''].filter(Boolean).join(' · ');
   if (compact) {
@@ -24,6 +24,7 @@ export function PlaceCard({ place, distance, compact, active, onClick, href = `/
         <span class="place-row-text">
           <strong class="ellipsis">{place.name}</strong>
           <span class="muted small ellipsis">{cat.label}{meta ? ` · ${meta}` : ''}</span>
+          {showDescription && place.description && <span class="place-row-description">{place.description}</span>}
           <span class="row gap-8 small"><Rating place={place} />{place.checkinCount > 0 && <span class="muted">{tn('place.checkins', place.checkinCount)}</span>}</span>
         </span>
       </a>

@@ -3,6 +3,7 @@
 
 import { theme } from './theme.js';
 import { lang } from './i18n.js';
+import { ICONS } from '../ui/icons.js';
 
 const STYLES = {
   light: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -10,6 +11,30 @@ const STYLES = {
 };
 // Carto's glyph server only has Georgian letters in Noto Sans.
 export const LABEL_FONT = ['Noto Sans Regular'];
+
+const MARKER_ICONS = ['map-pin', 'mountains', 'castle-turret', 'bank', 'fork-knife', 'coffee', 'wine', 'umbrella', 'buildings', 'bed', 'shopping-bag', 'martini', 'soccer-ball'];
+const markerIcon = (name) => MARKER_ICONS.includes(name) && ICONS[name] ? name : 'map-pin';
+
+/** Rasterize the bundled Phosphor paths synchronously: no font or image fetch. */
+function addMarkerIcons(map) {
+  if (typeof document === 'undefined' || typeof Path2D === 'undefined') return false;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return false;
+  for (const name of MARKER_ICONS) {
+    if (!ICONS[name] || map.hasImage(`gh-icon-${name}`)) continue;
+    ctx.clearRect(0, 0, 64, 64);
+    ctx.save();
+    ctx.translate(12, 12);
+    ctx.scale(40 / 256, 40 / 256);
+    ctx.fillStyle = '#ffffff';
+    for (const [, path] of ICONS[name].matchAll(/<path\b[^>]*\bd="([^"]+)"/g)) ctx.fill(new Path2D(path));
+    ctx.restore();
+    map.addImage(`gh-icon-${name}`, ctx.getImageData(0, 0, 64, 64), { pixelRatio: 2 });
+  }
+  return true;
+}
 
 let loading = null;
 /** The maplibre-gl module and its stylesheet, loaded on first use. */
@@ -48,6 +73,7 @@ export function addPlaceLayers(map, data, dark) {
   }
   const brand = dark ? '#3b82f6' : '#2563eb';
   const halo = dark ? '#0d0f13' : '#ffffff';
+  const hasIcons = addMarkerIcons(map);
   map.addLayer({
     id: 'gh-clusters', type: 'circle', source: 'gh-places', filter: ['has', 'point_count'],
     paint: {
@@ -61,32 +87,50 @@ export function addPlaceLayers(map, data, dark) {
     paint: { 'text-color': '#ffffff' },
   });
   map.addLayer({
-    id: 'gh-points', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
+    id: 'gh-point-halos', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
     paint: {
       'circle-color': ['get', 'tone'],
-      'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], 11, 8],
-      'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 4, 2.5],
-      'circle-stroke-color': halo,
+      'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 26 : 17, hasIcons ? 21 : 12],
+      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.24, 0.12],
+      'circle-blur': 0.15,
     },
   });
   map.addLayer({
+    id: 'gh-points', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
+    paint: {
+      'circle-color': ['get', 'tone'],
+      'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 20 : 11, hasIcons ? 17 : 8],
+      'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3.5, 2.5],
+      'circle-stroke-color': halo,
+    },
+  });
+  if (hasIcons) {
+    map.addLayer({
+      id: 'gh-point-icons', type: 'symbol', source: 'gh-places', filter: ['!', ['has', 'point_count']],
+      layout: {
+        'icon-image': ['concat', 'gh-icon-', ['coalesce', ['get', 'icon'], 'map-pin']],
+        'icon-size': 1, 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      },
+    });
+  }
+  map.addLayer({
     id: 'gh-labels', type: 'symbol', source: 'gh-places', filter: ['!', ['has', 'point_count']], minzoom: 9,
     layout: {
-      'text-field': ['get', 'name'], 'text-font': LABEL_FONT, 'text-size': 12, 'text-offset': [0, 1.1], 'text-anchor': 'top',
-      'text-max-width': 9, 'text-optional': true,
+      'text-field': ['get', 'name'], 'text-font': LABEL_FONT, 'text-size': 12, 'text-offset': [0, hasIcons ? 1.85 : 1.1], 'text-anchor': 'top',
+      'text-max-width': 9, 'text-optional': true, 'text-padding': 4,
     },
     paint: { 'text-color': dark ? '#f3ecea' : '#2a2224', 'text-halo-color': halo, 'text-halo-width': 1.6 },
   });
 }
 
 /** GeoJSON features for places that have coordinates. */
-export function placesToGeoJSON(places, toneOf) {
+export function placesToGeoJSON(places, toneOf, iconOf = () => 'map-pin') {
   return {
     type: 'FeatureCollection',
     features: places.filter((p) => p.lat != null && p.lng != null).map((p) => ({
       type: 'Feature', id: p.id,
       geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-      properties: { id: p.id, name: p.name, tone: toneOf(p) },
+      properties: { id: p.id, name: p.name, tone: toneOf(p), icon: markerIcon(iconOf(p)) },
     })),
   };
 }

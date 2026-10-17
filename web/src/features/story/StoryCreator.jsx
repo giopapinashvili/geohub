@@ -13,6 +13,11 @@ import { BACKGROUNDS } from '../post/backgrounds.js';
 
 /** Create a photo, video or text story. */
 export default function StoryCreator() {
+  const [placeContext] = useState(() => {
+    const context = storyCreator.value;
+    if (!context || typeof context !== 'object' || typeof context.placeId !== 'string' || !context.placeId.trim()) return null;
+    return { placeId: context.placeId.trim(), placeName: typeof context.placeName === 'string' ? context.placeName.trim() : '' };
+  });
   const [mode, setMode] = useState(null); // 'media' | 'text'
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
@@ -47,6 +52,8 @@ export default function StoryCreator() {
         bg: mode === 'text' ? bg.key : null,
         closeFriends: audience === 'friends',
         closeFriendsList: audience === 'friends' ? [...friendIds.value] : [],
+        placeId: placeContext?.placeId || '',
+        locationName: placeContext?.placeName || '',
       });
       toast.success(t('stories.published'));
       close();
@@ -65,6 +72,7 @@ export default function StoryCreator() {
           <Button variant="primary" onClick={publish} loading={busy} disabled={mode === 'text' && !text.trim()}>{busy && mode === 'media' ? `${progress}%` : t('stories.share')}</Button>
         </>
       ) : null}>
+      {placeContext?.placeName && <p class="row gap-8 muted small"><Icon name="map-pin" size={16} />{t('map.storyAt', { name: placeContext.placeName })}</p>}
       {!mode && (
         <div class="story-new-choices">
           <button type="button" class="story-new-choice is-media" onClick={() => input.current?.click()}>

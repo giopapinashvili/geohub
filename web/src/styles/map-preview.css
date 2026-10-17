@@ -1,0 +1,114 @@
+/* Compact place preview. All navigation and map controls remain in the shell. */
+.map-place-preview {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  z-index: 4;
+  width: min(460px, calc(100% - 24px));
+  transform: translateX(-50%);
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--shadow-3);
+  container: map-place-preview / inline-size;
+}
+
+.is-mobile .map-place-preview { bottom: 12px; width: calc(100% - 20px); }
+
+.map-place-preview-main {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 108px;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  background: none;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+
+.map-place-preview-main:focus-visible,
+.map-place-preview-page:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.map-place-preview-image {
+  position: relative;
+  display: block;
+  flex: 0 0 98px;
+  width: 98px;
+  min-height: 108px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: var(--surface-2);
+}
+
+.map-place-preview-image > .img,
+.map-place-preview-fallback { display: block; width: 100%; height: 100%; min-height: 108px; }
+.map-place-preview-image > .img { position: absolute; inset: 0; min-height: 0; object-fit: cover; }
+.map-place-preview-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--tone);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--tone) 16%, var(--surface)), color-mix(in srgb, var(--tone) 5%, var(--surface)));
+}
+
+.map-place-preview-text { display: flex; flex: 1; flex-direction: column; align-items: flex-start; min-width: 0; padding: 2px 25px 1px 0; }
+.map-place-preview-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+.map-place-preview-meta { display: block; max-width: 100%; margin-top: 3px; color: var(--text-2); font-size: 11px; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-place-preview-rating { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; color: var(--warning); font-size: 12px; line-height: 1.4; }
+.map-place-preview-rating > span { color: var(--text-2); font-size: 11px; }
+.map-place-preview-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.map-place-preview-description.is-empty { color: var(--text-3); }
+
+.map-place-preview-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 11px; }
+.map-place-preview-actions > .icon-btn { flex: none; border-radius: 12px; }
+.map-place-preview-expand { flex: 1 1 125px; min-height: 44px; border-radius: 12px; font-size: 12px; background: var(--gradient-brand); }
+.map-place-preview-page { display: inline-flex; flex: 1 1 100px; align-items: center; justify-content: center; gap: 4px; min-height: 44px; padding: 0 3px; border-radius: 10px; color: var(--brand-text); font-size: 11px; font-weight: 700; line-height: 1.4; text-align: center; text-decoration: none; }
+.map-place-preview-page:hover { color: var(--brand-hover); background: var(--brand-soft); }
+.map-place-preview-close { position: absolute; top: 3px; right: 3px; background: var(--surface); }
+
+@container map-place-preview (max-width: 360px) {
+  .map-place-preview-image { flex-basis: 84px; width: 84px; }
+  .map-place-preview-main { gap: 10px; }
+  .map-place-preview-name { font-size: 16px; }
+  .map-place-preview-expand { flex-basis: 100px; padding-inline: 10px; }
+  .map-place-preview-page { flex-basis: 85px; }
+}
+
+@container map-place-preview (max-width: 310px) {
+  .map-place-preview-image { flex-basis: 72px; width: 72px; }
+  .map-place-preview-actions > .map-place-preview-page { flex-basis: 100%; min-height: 32px; }
+}
+/* Results use the same card rhythm, inside the existing GeoHub navigation. */
+.map-list .place-row { border: 1px solid var(--border); border-radius: var(--r-lg); padding: 10px; margin-bottom: 9px; background: var(--surface); }
+.map-list .place-row.is-active { border-color: var(--brand); background: var(--brand-soft); }
+.map-list .place-row-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-2); font-size: var(--fs-xs); line-height: var(--lh); }
+.map-selected-pin { cursor: pointer; z-index: 1; filter: drop-shadow(0 3px 5px rgb(0 0 0 / 0.25)); }
+.map-selected-pin:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: 50%; }
