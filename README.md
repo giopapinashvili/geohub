@@ -47,6 +47,11 @@ selection and position. Details replace the desktop results panel or open as a
 phone sheet. `/map?place=<id>&details=1` also opens the panel directly. Both cards
 link to the public place page in a new tab.
 
+The desktop panel's middle edge handle resizes by dragging and collapses/restores
+on click. Arrow keys resize; Home collapses, End widens and Enter/Space toggles.
+Its width is remembered on the device. Collapsing preserves the current panel's
+scroll and form state; the phone layout keeps its existing bottom sheet.
+
 Photos, reviews, check-ins and stories use real place data. The recent strip
 means a check-in within two hours, not live presence. Stories require an explicit
 `placeId` or the place's explicit `businessId`; the map story creator persists its
@@ -57,6 +62,7 @@ With the emulators and `dev:emulator` running:
 ```bash
 node --experimental-vm-modules web/tools/place-activity-check.mjs
 npm run test:map-panel
+npm run test:map-resize
 ```
 
 The browser test creates and removes its own local fixtures and refuses a remote

@@ -15,6 +15,7 @@ import { getPlace, listPlaces } from '../data/places.js';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
 import { MapPlacePreview } from '../features/places/MapPlacePreview.jsx';
 import { MapPlaceDetails } from '../features/places/MapPlaceDetails.jsx';
+import { MapSidebarHandle, useMapSidebar } from '../features/places/MapSidebar.jsx';
 import { useCategories, categoryOf } from '../features/places/categories.js';
 import { CheckinDialog } from '../features/places/CheckinDialog.jsx';
 import { AddPlaceDialog } from '../features/places/AddPlaceDialog.jsx';
@@ -24,6 +25,7 @@ export default function MapPage() {
   useTitle(t('nav.map'));
   const cats = useCategories();
   const desktop = isDesktop();
+  const pageRef = useRef(null);
   const box = useRef(null);
   const mapRef = useRef(null);
   const selectedRef = useRef(null);
@@ -37,6 +39,9 @@ export default function MapPage() {
   const [q, setQ] = useState('');
   const selectedId = query.value.get('place') || null;
   const expanded = !!selectedId && query.value.get('details') === '1';
+  const sidebar = useMapSidebar(pageRef, desktop, expanded);
+  const showSidebar = useRef(sidebar.show);
+  showSidebar.current = sidebar.show;
   const [linkedPlace, setLinkedPlace] = useState(null);
   const [sheet, setSheet] = useState(false);
   const [me, setMe] = useState(null);
@@ -116,6 +121,7 @@ export default function MapPage() {
       });
       map.on('click', 'gh-points', (e) => {
         const id = e.features[0].properties.id;
+        if (query.value.get('details') === '1') showSidebar.current();
         setQuery({ place: id });
       });
       for (const layer of ['gh-clusters', 'gh-points']) {
@@ -169,7 +175,7 @@ export default function MapPage() {
     element.setAttribute('role', 'button');
     element.setAttribute('aria-label', `${selected.name} — ${t('map.details')}`);
     element.tabIndex = 0;
-    const open = (event) => { event?.stopPropagation(); setQuery({ details: '1' }); };
+    const open = (event) => { event?.stopPropagation(); showSidebar.current(); setQuery({ details: '1' }); };
     element.addEventListener('click', open);
     element.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(event); }
@@ -190,7 +196,7 @@ export default function MapPage() {
 
   const select = (p) => { setQuery({ place: p.id, details: null }); setSheet(false); };
   const clearSelection = () => setQuery({ place: null, details: null });
-  const expand = () => setQuery({ details: '1' });
+  const expand = () => { sidebar.show(); setQuery({ details: '1' }); };
   const collapse = () => {
     setQuery({ details: null });
     requestAnimationFrame(() => document.querySelector('[data-testid="map-place-expand"]')?.focus({ preventScroll: true }));
@@ -216,8 +222,11 @@ export default function MapPage() {
   ) : <Empty compact icon="map-trifold" title={t('map.nothingHere')} text={t('map.nothingHereText')} />;
 
   return (
-    <div class={`map-page${desktop ? ' is-split' : ''}${selected && expanded ? ' has-place-details' : ''}`}>
-      {desktop && (selected && expanded ? <MapPlaceDetails key={selected.id} place={selected} onClose={collapse} onCheckin={() => startCheckin(selected)} /> : (
+    <div ref={pageRef} class={`map-page${desktop ? ' is-split' : ''}${selected && expanded ? ' has-place-details' : ''}${desktop && sidebar.collapsed ? ' is-sidebar-collapsed' : ''}${desktop && sidebar.resizing ? ' is-sidebar-resizing' : ''}`}
+      style={desktop ? { '--map-sidebar-width': `${sidebar.width}px`, '--map-sidebar-visible': `${sidebar.collapsed ? 0 : sidebar.width}px` } : undefined}>
+      {desktop && <div id="map-sidebar-content" class="map-sidebar-shell" inert={sidebar.collapsed || undefined} aria-hidden={sidebar.collapsed ? 'true' : undefined}>
+        <div class="map-sidebar-content">
+        {selected && expanded ? <MapPlaceDetails key={selected.id} place={selected} onClose={collapse} onCheckin={() => startCheckin(selected)} /> : (
         <aside class="map-panel">
           <div class="map-panel-head">
             <h1 class="page-title">{t('nav.map')}</h1>
@@ -231,7 +240,9 @@ export default function MapPage() {
           <p class="muted small map-count">{tn('map.placesInView', visible.length)}</p>
           {list}
         </aside>
-      ))}
+        )}
+        </div>
+      </div>}
       <div class="map-stage">
         <div ref={box} class="map-canvas" aria-label={t('nav.map')} role="region" />
         {!ready && !failed && <div class="map-loading"><Spinner size={28} /></div>}
@@ -264,6 +275,7 @@ export default function MapPage() {
           </div>
         )}
       </div>
+      {desktop && <MapSidebarHandle sidebar={sidebar} />}
       {checkin && <CheckinDialog place={checkin.place} onClose={() => { setCheckin(null); if (query.value.get('checkin')) setQuery({ checkin: null }); }} onAddPlace={startAdd} />}
       {adding && <AddPlaceDialog at={me} onClose={() => { setAdding(false); if (query.value.get('add')) setQuery({ add: null }); }} onCreated={(id) => navigate(`/place/${id}`)} />}
     </div>

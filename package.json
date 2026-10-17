@@ -15,6 +15,7 @@
     "i18n:check": "node web/tools/check-i18n.mjs",
     "test:e2e": "node web/tools/e2e-flows.mjs && node web/tools/e2e-call.mjs && node web/tools/sweep.mjs --as=nino",
     "test:map-panel": "node web/tools/e2e-map-panel.mjs",
+    "test:map-resize": "node web/tools/e2e-map-resize.mjs",
     "test:rules": "firebase emulators:exec --only auth,firestore --project demo-geohub \"node web/tools/rules-check.mjs\"",
     "test:e2e:ci": "firebase emulators:exec --only auth,firestore --project demo-geohub \"node web/tools/e2e-ci.mjs\"",
     "lint": "eslint web/src web/worker"
