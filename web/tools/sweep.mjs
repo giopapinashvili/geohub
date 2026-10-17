@@ -18,7 +18,10 @@ for (const w of widths) {
   const page = await ctx.newPage();
   let errs = [];
   page.on('pageerror', (e) => errs.push(`pageerror ${e.message}`));
-  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load resource|youtube|ytimg|cartocdn|net::/i.test(m.text())) errs.push(m.text().slice(0, 160)); });
+  // Third-party noise is ignored: network errors, YouTube/map tiles, and
+  // "Permissions policy violation" messages from embedded players (newer
+  // Chromium reports e.g. compute-pressure use inside the YouTube iframe).
+  page.on('console', (m) => { if (m.type() === 'error' && !/ERR_|Failed to load resource|youtube|ytimg|cartocdn|net::|Permissions policy violation/i.test(m.text())) errs.push(m.text().slice(0, 160)); });
   await page.addInitScript((th) => { try { localStorage.setItem('gh_theme', th); } catch {} }, args.theme || 'light');
   await page.goto(base + '/');
   if (args.as) {
