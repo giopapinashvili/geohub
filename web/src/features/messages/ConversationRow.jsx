@@ -28,7 +28,10 @@ export function ConversationRow({ conv, active, onClick, href, actorId }) {
         <span class="conv-row-last">
           {typing ? <em class="conv-typing">{t('messages.typing')}</em> : (
             <>
-              <span class="conv-row-preview">{mine ? `${t('messages.you')}: ` : ''}{truncate(conv.lastMessage || t('messages.startChat'), 60)}</span>
+              <span class="conv-row-preview">
+                {mine ? `${t('messages.you')}: ` : ''}
+                {conv.lastMessageDeleted ? <em>{t('messages.deleted')}</em> : truncate(conv.lastMessage || t('messages.startChat'), 60)}
+              </span>
               {conv.updatedAt ? <span class="conv-row-time"> · {timeAgo(conv.updatedAt)}</span> : null}
             </>
           )}

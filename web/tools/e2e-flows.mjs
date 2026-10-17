@@ -99,6 +99,23 @@ await step('B receives, reads, reacts and answers', B, `
   return { msgId: m.id };`);
 await step('A edits and deletes own message', A, `await api.messages.editMessage(ctx.cid, ctx.msgId, 'გამარჯობა! (შეცვლილი)'); await api.messages.deleteMessage(ctx.cid, ctx.msgId, true);`);
 await step('B sees the conversation in the inbox', B, `const l = await once((cb) => api.messages.listenConversations(cb), (d) => d && d.some((c) => c.id === ctx.cid)); ${expect('l', 'not in inbox')}`);
+await step('A edits the newest message → the inbox preview follows', A, `
+  await api.messages.sendMessage(ctx.cid, { text: 'QA preview' });
+  const msgs = await once((cb) => api.messages.listenMessages(ctx.cid, cb), (d) => d && d.some((m) => m.text === 'QA preview' && !m.pending));
+  const m = msgs.find((x) => x.text === 'QA preview');
+  await api.messages.editMessage(ctx.cid, m.id, 'QA preview (edited)', { isLast: true });
+  const l = await once((cb) => api.messages.listenConversations(cb), (d) => d && d.some((c) => c.id === ctx.cid && c.lastMessage === 'QA preview (edited)'));
+  ${expect('l', 'preview kept the old text')}
+  return { previewMsg: m.id };`);
+await step("A deletes it for everyone → B's inbox no longer shows the text", A, `
+  await api.messages.deleteMessage(ctx.cid, ctx.previewMsg, true, undefined, { isLast: true });
+  const l = await once((cb) => api.messages.listenConversations(cb), (d) => d && d.some((c) => c.id === ctx.cid && c.lastMessageDeleted && !c.lastMessage));
+  ${expect('l', 'deleted text still in the preview')}`);
+await step('B sees the deleted placeholder, not the text', B, `
+  const l = await once((cb) => api.messages.listenConversations(cb), (d) => d && d.some((c) => c.id === ctx.cid && c.lastMessageDeleted));
+  ${expect('l && !l.find((c) => c.id === ctx.cid).lastMessage', 'B still sees the deleted text')}
+  const msgs = await once((cb) => api.messages.listenMessages(ctx.cid, cb), (d) => d && d.some((m) => m.id === ctx.previewMsg && m.deletedForEveryone));
+  ${expect('msgs && msgs.find((m) => m.id === ctx.previewMsg).text === ""', 'text kept on the message')}`);
 
 console.log('Stories');
 await step('A posts a story', A, `await api.stories.createStory({ text: 'QA სთორი ✨', bg: 'linear-gradient(135deg,#2563eb,#06b6d4)' });`);

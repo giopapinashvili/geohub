@@ -5,7 +5,7 @@
 
 import {
   doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, orderBy, limit,
-  limitToLast, onSnapshot, serverTimestamp, arrayUnion, arrayRemove, deleteField, writeBatch,
+  limitToLast, onSnapshot, serverTimestamp, arrayUnion, arrayRemove, deleteField, writeBatch, runTransaction,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { me, uid as myUid } from '../lib/auth.js';
@@ -37,6 +37,7 @@ function normConv(id, d, viewer) {
     participants,
     otherId: participants.find((p) => p !== viewer) || (d.memberUids || []).find((p) => p !== viewer) || '',
     lastMessage: d.lastMessage || '',
+    lastMessageDeleted: d.lastMessageDeleted === true,
     lastSenderId: d.lastSenderId || '',
     updatedAt: tsToMillis(d.updatedAt || d.lastMessageAt || d.createdAt),
     unread: !!unread && d.lastSenderId !== viewer,
@@ -212,7 +213,7 @@ export async function sendMessage(cid, { text = '', attachments = [], replyTo = 
     senderName = b?.data()?.title || b?.data()?.name || senderName;
     senderAvatar = b?.data()?.logoUrl || b?.data()?.logo || '';
   }
-  await addDoc(collection(db, 'conversations', cid, 'messages'), {
+  const msgRef = await addDoc(collection(db, 'conversations', cid, 'messages'), {
     conversationId: cid,
     senderId: m.uid,
     authorId: m.uid,
@@ -251,6 +252,8 @@ export async function sendMessage(cid, { text = '', attachments = [], replyTo = 
   const unreadTarget = isBiz ? (actorType === 'business' ? conv.customerUid : conv.ownerUid || otherId) : otherId;
   const patch = {
     lastMessage: preview.slice(0, 200),
+    lastMessageId: msgRef.id,
+    lastMessageDeleted: false,
     lastSenderId: m.uid,
     lastMessageSenderActorId: actorId,
     updatedAt: serverTimestamp(),
@@ -321,19 +324,43 @@ export async function toggleMessageReaction(cid, msg, emoji, actorId) {
   });
 }
 
-export async function deleteMessage(cid, msgId, forEveryone, actorId) {
+/**
+ * Keep the inbox preview in step when the newest message is edited or
+ * deleted for everyone (otherwise the old text stays visible in both inboxes).
+ * Older conversations have no lastMessageId; then the caller's "this is the
+ * newest message on screen" decides.
+ */
+async function syncPreview(cid, msgId, patch) {
+  const convRef = doc(db, 'conversations', cid);
+  // In a transaction, so a message the other person sends meanwhile keeps its preview.
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(convRef);
+    const lastId = snap.exists() ? snap.data().lastMessageId : null;
+    if (!snap.exists() || (lastId && lastId !== msgId)) return;
+    tx.update(convRef, patch);
+  }).catch(() => {});
+}
+
+export async function deleteMessage(cid, msgId, forEveryone, actorId, { isLast = false } = {}) {
   const viewer = myUid.value;
   const actor = actorId || `user_${viewer}`;
   const ref = doc(db, 'conversations', cid, 'messages', msgId);
   if (forEveryone) {
-    await updateDoc(ref, { deletedForEveryone: true, deletedAt: serverTimestamp(), deletedByActorId: actor, text: '', deleted: true, deletedBy: viewer, updatedAt: serverTimestamp() });
+    // The text and any photo, file or voice recording go for both people.
+    await updateDoc(ref, {
+      deletedForEveryone: true, deletedAt: serverTimestamp(), deletedByActorId: actor, text: '', deleted: true, deletedBy: viewer,
+      attachments: [], mediaUrl: '', mediaType: '', fileName: '', fileSize: 0, updatedAt: serverTimestamp(),
+    });
+    if (isLast) await syncPreview(cid, msgId, { lastMessage: '', lastMessageDeleted: true });
   } else {
     await updateDoc(ref, { deletedForActors: arrayUnion(actor), deletedFor: arrayUnion(viewer), updatedAt: serverTimestamp() });
   }
 }
 
-export async function editMessage(cid, msgId, text) {
-  await updateDoc(doc(db, 'conversations', cid, 'messages', msgId), { text: String(text).trim(), edited: true, editedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+export async function editMessage(cid, msgId, text, { isLast = false } = {}) {
+  const clean = String(text).trim();
+  await updateDoc(doc(db, 'conversations', cid, 'messages', msgId), { text: clean, edited: true, editedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  if (isLast) await syncPreview(cid, msgId, { lastMessage: clean.slice(0, 200), lastMessageDeleted: false });
 }
 
 /** Hide a conversation from the viewer's inbox until a new message arrives. */

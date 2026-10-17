@@ -129,18 +129,29 @@ export function Thread({ cid, actorId, compact, header }) {
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }, [text]);
 
+  const isNewest = (m) => !!m && msgs?.[msgs.length - 1]?.id === m.id;
+
+  // The box clears as soon as the message is on its way (the bubble shows at
+  // once); on failure the text, reply or edit comes back.
   const send = async (override) => {
     const value = (override ?? text).trim();
-    if (!value || sending) return;
+    if (!value) return;
+    const wasEditing = editing;
+    const wasReply = replyTo;
+    if (override === undefined) setText('');
+    setReplyTo(null);
+    setEditing(null);
+    atBottom.current = true;
     setSending(true);
     try {
-      if (editing) { await editMessage(cid, editing.id, value); setEditing(null); }
-      else await sendMessage(cid, { text: value, replyTo: replyTo ? { id: replyTo.id, text: quoteText(replyTo), senderId: replyTo.senderId } : null, asBusiness });
-      if (override === undefined) setText('');
-      setReplyTo(null);
-      atBottom.current = true;
+      if (wasEditing) await editMessage(cid, wasEditing.id, value, { isLast: isNewest(wasEditing) });
+      else await sendMessage(cid, { text: value, replyTo: wasReply ? { id: wasReply.id, text: quoteText(wasReply), senderId: wasReply.senderId } : null, asBusiness });
       setTyping(cid, false, myActor);
-    } catch { toast.error(t('common.error')); }
+    } catch {
+      toast.error(t('common.error'));
+      if (override === undefined) setText((cur) => cur || value);
+      if (wasEditing) setEditing(wasEditing); else setReplyTo(wasReply);
+    }
     setSending(false);
   };
 
@@ -219,7 +230,7 @@ export function Thread({ cid, actorId, compact, header }) {
                 onReply={(x) => { setReplyTo(x); setEditing(null); input.current?.focus(); }}
                 onReact={(x, e) => toggleMessageReaction(cid, x, e, myActor).catch(() => toast.error(t('common.error')))}
                 onEdit={(x) => { setEditing(x); setReplyTo(null); setText(x.text); input.current?.focus(); }}
-                onDelete={(x, all) => deleteMessage(cid, x.id, all, myActor).catch(() => toast.error(t('common.error')))}
+                onDelete={(x, all) => deleteMessage(cid, x.id, all, myActor, { isLast: isNewest(x) }).catch(() => toast.error(t('common.error')))}
                 onOpenImage={(media, idx) => setViewer({ media, idx })} />
             </Fragment>
           );
@@ -263,7 +274,7 @@ export function Thread({ cid, actorId, compact, header }) {
           />
         </div>
         {uploading ? <Spinner size={20} class="tone-brand" /> : text.trim()
-          ? <IconButton icon="paper-plane-right" label={t('common.send')} size={36} class="tone-brand" onClick={() => send()} disabled={sending} />
+          ? <IconButton icon="paper-plane-right" label={t('common.send')} size={36} class="tone-brand" onClick={() => send()} />
           : <IconButton icon="thumbs-up" label="👍" size={36} class="tone-brand" onClick={() => send('👍')} disabled={sending} />}
         <input ref={fileRef} type="file" accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" hidden onChange={(e) => { attach(e.currentTarget.files); e.currentTarget.value = ''; }} />
       </div>
