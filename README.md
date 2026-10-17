@@ -40,6 +40,26 @@ business, page switching …), `web/tools/e2e-call.mjs` (voice/video calls with 
 
 Old links such as `/feed.html?post=…` or `/profile.html?id=…` are redirected by `web/src/legacy.js`.
 
+## Share cards (link previews)
+
+Facebook, Messenger, Telegram, Viber, WhatsApp, Discord and search engines do
+not run JavaScript, so a shared link would always show the generic GeoHub card.
+`web/worker/og-worker.js` is built into `dist/_worker.js` (Cloudflare Pages
+"advanced mode"; `web/public/_routes.json` limits it to `/post/*`, `/u/*`,
+`/place/*`, `/business/*`, `/events/*`, `/groups/*`, `/marketplace/*`,
+`/watch/*`, `/reels/*`, `/video/channel/*`). For those bots it reads the public
+document through Firestore's REST API **without credentials** — the security
+rules decide what may appear (an only-me post gets the generic card) — and
+rewrites the title, description and picture in `<head>`. People get the normal
+app shell. Any error falls back to the plain page. Pages does not apply
+`_headers` to worker responses, so the build copies the site-wide headers from
+`web/public/_headers` into the worker.
+
+`node web/tools/smoke-site.mjs <site> --expect-worker` checks a deployment for
+people and for bots (the deploy scripts run it on the branch preview before
+publishing and on the live site after). Facebook caches cards: re-scrape a link
+at https://developers.facebook.com/tools/debug/ after changing it.
+
 ## Security model (read before touching data access)
 
 `firestore.rules` is the source of truth for who may read what. Rules are not

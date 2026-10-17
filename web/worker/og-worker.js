@@ -1,0 +1,377 @@
+// Cloudflare Pages "advanced mode" worker (built to dist/_worker.js).
+//
+// Share previews: when Facebook, Messenger, Telegram, Viber, WhatsApp,
+// iMessage, Discord or a search engine fetches a GeoHub link
+// (/post/…, /u/…, /place/…, /business/…, /events/…, /groups/…,
+// /marketplace/…, /watch/…, /reels/…, /video/channel/…), the app shell gets
+// that page's real title, text and picture in its <head>. Link-preview bots do
+// not run JavaScript, so without this every link showed the same generic card.
+//
+// - Only the routes listed in _routes.json reach this worker; every other file
+//   is served by Pages directly.
+// - People get the normal app shell untouched (no extra reads, no delay).
+// - Data comes from Firestore's public REST API without credentials, so the
+//   security rules decide: an only-me / friends post, a private profile field,
+//   anything the rules refuse simply falls back to the generic card.
+// - Any error serves the app exactly as before — this worker must never take
+//   the site down.
+// - Pages does not apply _headers to worker responses, so the same security
+//   headers (copied from _headers at build time) are attached here.
+
+const SECURITY_HEADERS = '__SECURITY_HEADERS__';
+const WORKER_VERSION = '__WORKER_VERSION__';
+
+const PROJECT = 'geohub-main';
+const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
+const SITE = 'GeoHub';
+const PROD_ORIGIN = 'https://geohub-main.pages.dev';
+const CACHE_SECONDS = 600;
+
+// Link-preview fetchers and search crawlers.
+const BOTS = /facebookexternalhit|facebot|meta-externalagent|twitterbot|telegrambot|whatsapp|viber|slackbot|slack-imgproxy|discordbot|linkedinbot|skypeuripreview|microsoft preview|teams|pinterest|redditbot|applebot|googlebot|google-inspectiontool|googleother|bingbot|bingpreview|yandex|duckduckbot|baiduspider|petalbot|seznambot|mastodon|bluesky|cardyb|embedly|iframely|vkshare|odnoklassniki|okru|snapchat|kakaotalk|line\/|zalo|quora link preview|tumblr|flipboard|bitlybot|nuzzel|outbrain|ia_archiver|w3c_validator|metainspector|opengraph|preview/i;
+
+const ROUTES = [
+  [/^\/post\/([^/]+)\/?$/, 'post'],
+  [/^\/u\/([^/]+)\/?$/, 'user'],
+  [/^\/place\/([^/]+)\/?$/, 'place'],
+  [/^\/business\/([^/]+)\/?$/, 'business'],
+  [/^\/events\/([^/]+)\/?$/, 'event'],
+  [/^\/groups\/([^/]+)\/?$/, 'group'],
+  [/^\/marketplace\/([^/]+)\/?$/, 'item'],
+  [/^\/watch\/([^/]+)\/?$/, 'video'],
+  [/^\/reels\/([^/]+)\/?$/, 'video'],
+  [/^\/video\/channel\/([^/]+)\/?$/, 'channel'],
+];
+const NOT_IDS = new Set(['new', 'me', 'manage', 'edit']);
+
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      return await handle(request, env, ctx);
+    } catch {
+      try { return withHeaders(await env.ASSETS.fetch(request)); }
+      catch { return new Response('GeoHub is temporarily unavailable', { status: 503 }); }
+    }
+  },
+};
+
+async function handle(request, env, ctx) {
+  const url = new URL(request.url);
+  const asset = await env.ASSETS.fetch(request);
+  const wantsPreview = request.method === 'GET'
+    && (BOTS.test(request.headers.get('user-agent') || '') || url.searchParams.has('og'));
+  const html = asset.status === 200 && (asset.headers.get('content-type') || '').includes('text/html');
+  const target = wantsPreview && html ? match(url.pathname) : null;
+  if (!target) return withHeaders(asset, { 'X-GeoHub-Worker': 'pass' });
+
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+  // Keyed by the worker version and the shell's etag, so a new deployment never
+  // serves an old shell or a card built by older code.
+  const shell = (asset.headers.get('etag') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40) || 'shell';
+  const cacheKey = new Request(`${url.origin}${url.pathname}?__geohub_og=${WORKER_VERSION}-${shell}`);
+  const cached = cache ? await cache.match(cacheKey).catch(() => null) : null;
+  if (cached) return withHeaders(cached, { 'X-GeoHub-Preview': 'cached' });
+
+  const meta = await loadMeta(target, env, url.origin).catch(() => null);
+  const body = await rewrite(asset, meta, url).text();
+  const headers = { 'Content-Type': 'text/html; charset=utf-8', 'X-GeoHub-Preview': meta ? 'page' : 'default' };
+  // Only real cards are cached: a missing page or a slow read is tried again next time.
+  if (meta && cache && ctx?.waitUntil) {
+    ctx.waitUntil(cache.put(cacheKey, new Response(body, { headers: { ...headers, 'Cache-Control': `public, max-age=${CACHE_SECONDS}` } })).catch(() => {}));
+  }
+  return withHeaders(new Response(body, { status: 200, headers }), { 'Cache-Control': 'public, max-age=0, must-revalidate' });
+}
+
+function match(pathname) {
+  for (const [re, kind] of ROUTES) {
+    const m = pathname.match(re);
+    if (!m) continue;
+    let id = '';
+    try { id = decodeURIComponent(m[1]); } catch { return null; }
+    if (!id || NOT_IDS.has(id) || id.length > 128 || /[/\\?#]/.test(id)) return null;
+    return { kind, id };
+  }
+  return null;
+}
+
+function withHeaders(res, extra = {}) {
+  const out = new Response(res.body, res);
+  const sec = typeof SECURITY_HEADERS === 'object' && SECURITY_HEADERS ? SECURITY_HEADERS : {};
+  for (const [k, v] of Object.entries(sec)) if (!out.headers.has(k)) out.headers.set(k, v);
+  for (const [k, v] of Object.entries(extra)) out.headers.set(k, v);
+  return out;
+}
+
+/* ── Firestore REST (anonymous: the security rules apply) ───────────────── */
+
+async function getDocument(env, path) {
+  const base = (env && env.FIRESTORE_BASE) || FIRESTORE;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 3000);
+  try {
+    const r = await fetch(`${base}/${path.split('/').map(encodeURIComponent).join('/')}`, { signal: ctl.signal, headers: { Accept: 'application/json' } });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && j.fields ? decodeFields(j.fields) : null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function decodeValue(v) {
+  if (!v || typeof v !== 'object') return undefined;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return Number(v.doubleValue);
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('timestampValue' in v) return Date.parse(v.timestampValue);
+  if ('nullValue' in v) return null;
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(decodeValue);
+  if ('mapValue' in v) return decodeFields(v.mapValue.fields || {});
+  if ('geoPointValue' in v) return v.geoPointValue;
+  if ('referenceValue' in v) return v.referenceValue;
+  return undefined;
+}
+
+function decodeFields(fields) {
+  const out = {};
+  for (const [k, v] of Object.entries(fields || {})) out[k] = decodeValue(v);
+  return out;
+}
+
+/* ── Meta per page type (field fallbacks mirror web/src/data/normalize.js) ─ */
+
+const str = (v) => (typeof v === 'string' ? v : v == null ? '' : String(v));
+const first = (...vals) => { for (const v of vals) if (v) return v; return ''; };
+const arr = (v) => (Array.isArray(v) ? v : []);
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const clean = (t) => str(t).replace(/\s+/g, ' ').trim();
+const cut = (t, n) => { const c = clean(t); return c.length > n ? `${c.slice(0, n - 1).trimEnd()}…` : c; };
+const garbled = (d) => Object.keys(d).some((k) => k.startsWith('isSeed') && d[k] === true)
+  && ['name', 'title', 'text', 'description', 'fullName', 'displayName', 'bio'].some((f) => typeof d[f] === 'string' && d[f].includes('�'));
+const gone = (d) => !d || garbled(d) || ['deleted', 'removed', 'hidden', 'banned', 'rejected', 'pending'].includes(str(d.status)) || d.deleted === true || !!d.deletedAt;
+
+const isVideo = (u, type) => (type && String(type).startsWith('video')) || /\.(mp4|webm|mov|m4v)(\?|$)/i.test(u || '') || /\/video\/upload\//.test(u || '');
+
+/** A Cloudinary picture cut to the card's shape; other hosts pass through. */
+function picture(u, w, h, origin) {
+  let url = str(u).trim();
+  if (!url) return '';
+  if (url.startsWith('//')) url = `https:${url}`;
+  else if (url.startsWith('/')) url = origin + url;
+  if (!/^https?:\/\//i.test(url)) return '';
+  const crop = `c_fill,g_auto,w_${w},h_${h},q_auto,f_jpg`;
+  if (/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(url) && !/\/image\/upload\/[^/]*(w_|c_)/.test(url)) {
+    return url.replace('/image/upload/', `/image/upload/${crop}/`);
+  }
+  if (/res\.cloudinary\.com\/[^/]+\/video\/upload\//.test(url)) {
+    return url.replace('/video/upload/', `/video/upload/so_0,${crop}/`).replace(/\.(mp4|webm|mov|m4v|mkv)(\?.*)?$/i, '.jpg');
+  }
+  return url;
+}
+
+const large = (u, origin) => (u ? { image: picture(u, 1200, 630, origin), width: 1200, height: 630, card: 'summary_large_image' } : null);
+const square = (u, origin) => (u ? { image: picture(u, 600, 600, origin), width: 600, height: 600, card: 'summary' } : null);
+
+// Written out by hand: the Workers runtime may not carry Georgian locale data.
+const KA_MONTHS = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
+const TBILISI_MS = 4 * 3600000;
+/** Event times: timestamps as they are; "2026-06-01T08:00" (no zone) and "2026-06-01" are Tbilisi time, as the app reads them. */
+function toMs(v) {
+  if (typeof v === 'number') return v;
+  if (typeof v !== 'string' || !v) return 0;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return (Date.parse(`${v}T00:00:00Z`) - TBILISI_MS) || 0;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(v)) return (Date.parse(`${v}Z`) - TBILISI_MS) || 0;
+  return Date.parse(v) || 0;
+}
+
+/** "5 ნოემბერი, 20:00" in Tbilisi time (UTC+4 all year); no time for midnight. */
+function eventWhen(ms) {
+  if (!ms) return '';
+  const d = new Date(ms + TBILISI_MS);
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${d.getUTCDate()} ${KA_MONTHS[d.getUTCMonth()]}${hh === '00' && mm === '00' ? '' : `, ${hh}:${mm}`}`;
+}
+
+async function loadMeta({ kind, id }, env, origin) {
+  if (kind === 'post') {
+    const d = await getDocument(env, `posts/${id}`);
+    if (gone(d) || (d.status && d.status !== 'active')) return null;
+    const author = clean(first(d.authorName, d.userName, d.businessName)) || SITE;
+    const text = clean(d.text || d.caption) || clean(d.poll && d.poll.question);
+    const media = arr(d.mediaUrls).filter(Boolean).length ? arr(d.mediaUrls).filter(Boolean)
+      : [first(d.mediaUrl, d.imageUrl, d.photoUrl, d.image)].filter(Boolean).concat(arr(d.images).filter((x) => typeof x === 'string'));
+    const pic = media.find((u) => !isVideo(u, d.mediaType)) || media[0] || '';
+    const look = large(pic, origin) || square(first(d.authorAvatar, d.userPhoto, d.userPhotoURL, d.avatar, d.logoUrl), origin);
+    return {
+      title: author,
+      docTitle: text ? `${author}: ${cut(text, 60)}` : author,
+      description: text ? cut(text, 220) : (d.sharedPostId ? 'გააზიარა პოსტი GeoHub-ზე' : 'პოსტი GeoHub-ზე'),
+      type: 'article',
+      ...look,
+    };
+  }
+  if (kind === 'user') {
+    let d = await getDocument(env, `users/${id}`);
+    if (!d) {
+      const handle = await getDocument(env, `usernames/${id.toLowerCase()}`);
+      const viaGeoId = !handle && /^\d{5}$/.test(id) ? await getDocument(env, `geoIds/${id}`) : null;
+      const uid = str((handle || viaGeoId || {}).uid);
+      if (uid) d = await getDocument(env, `users/${uid}`);
+    }
+    if (gone(d) || d.suspended) return null;
+    const name = clean(first(d.fullName, d.displayName, d.name, d.username)) || SITE;
+    const username = clean(d.username);
+    const city = clean(d.city === 'all_georgia' ? '' : d.city);
+    return {
+      title: username ? `${name} (@${username})` : name,
+      docTitle: name,
+      description: cut(d.bio, 220) || (city ? `${name} · ${city} · GeoHub` : `${name} GeoHub-ზე`),
+      type: 'profile',
+      ...(square(first(d.avatar, d.photoURL, d.avatarUrl, d.photoUrl), origin) || large(first(d.coverImage, d.coverUrl, d.cover), origin) || {}),
+    };
+  }
+  if (kind === 'place') {
+    const d = await getDocument(env, `places/${id}`);
+    if (gone(d)) return null;
+    const name = clean(first(d.name, d.title)) || SITE;
+    const where = [clean(d.category), clean(first(d.city, d.region))].filter(Boolean).join(' · ');
+    const photos = arr(d.photos).filter((x) => typeof x === 'string');
+    return {
+      title: name,
+      docTitle: name,
+      description: cut(first(d.description, d.shortDescription), 220) || where || 'ადგილი GeoHub-ზე',
+      type: 'place',
+      ...(large(first(d.coverImage, d.imageUrl, d.photoUrl, d.image, photos[0]), origin) || {}),
+    };
+  }
+  if (kind === 'business') {
+    const d = await getDocument(env, `businesses/${id}`);
+    if (gone(d)) return null;
+    const name = clean(first(d.title, d.name)) || SITE;
+    const where = [clean(d.category), clean(d.city)].filter(Boolean).join(' · ');
+    const rating = num(d.ratingAverage || d.rating);
+    const reviews = num(d.reviewCount ?? d.ratingCount);
+    const stars = rating && reviews ? `★ ${rating.toFixed(1)} (${reviews}) · ` : '';
+    return {
+      title: name,
+      docTitle: name,
+      description: `${stars}${cut(first(d.description, d.desc), 200) || where || 'ბიზნესი GeoHub-ზე'}`,
+      type: 'business.business',
+      ...(large(first(d.coverUrl, d.coverImageUrl, d.coverImage, d.imageUrl, d.image), origin) || square(first(d.logoUrl, d.logo), origin) || {}),
+    };
+  }
+  if (kind === 'event') {
+    const d = await getDocument(env, `events/${id}`);
+    if (gone(d)) return null;
+    const title = clean(first(d.title, d.name)) || SITE;
+    const when = eventWhen(toMs(d.date || d.startsAt || d.startDate));
+    const where = clean(first(d.venue, d.location, d.address, d.city));
+    const head = [when, where].filter(Boolean).join(' · ');
+    const desc = cut(d.description, 180);
+    return {
+      title,
+      docTitle: title,
+      description: [head, desc].filter(Boolean).join(' — ') || 'ღონისძიება GeoHub-ზე',
+      type: 'website',
+      ...(large(first(d.imageUrl, d.image, d.coverUrl), origin) || {}),
+    };
+  }
+  if (kind === 'group') {
+    const d = await getDocument(env, `groups/${id}`);
+    if (gone(d)) return null;
+    const name = clean(first(d.name, d.title)) || SITE;
+    const members = num(d.memberCount ?? d.membersCount);
+    return {
+      title: name,
+      docTitle: name,
+      description: cut(first(d.description, d.desc), 220) || (members ? `ჯგუფი · ${members} წევრი` : 'ჯგუფი GeoHub-ზე'),
+      type: 'website',
+      ...(large(first(d.coverUrl, d.coverImage, d.imageUrl, d.image), origin) || square(first(d.avatar, d.logo), origin) || {}),
+    };
+  }
+  if (kind === 'item') {
+    const d = await getDocument(env, `marketplace/${id}`);
+    if (gone(d)) return null;
+    const title = clean(d.title) || SITE;
+    const price = num(d.price);
+    const currency = str(d.currency || 'GEL') === 'GEL' ? '₾' : str(d.currency);
+    const head = [price ? `${price} ${currency}` : '', clean(d.city)].filter(Boolean).join(' · ');
+    const images = arr(d.images).filter(Boolean);
+    return {
+      title: price ? `${title} — ${price} ${currency}` : title,
+      docTitle: title,
+      description: [head, cut(d.description, 180)].filter(Boolean).join(' — ') || 'განცხადება GeoHub-ზე',
+      type: 'product',
+      ...(large(images[0] || first(d.imageUrl, d.image), origin) || {}),
+    };
+  }
+  if (kind === 'video') {
+    const d = await getDocument(env, `videos/${id}`);
+    if (gone(d)) return null;
+    const title = clean(d.title) || SITE;
+    const yt = str(d.youtubeId) || (str(d.youtubeUrl || d.url).match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/) || [])[1] || '';
+    const thumb = first(d.thumbnail, d.thumbnailUrl, yt && `https://i.ytimg.com/vi/${yt}/hqdefault.jpg`, d.videoUrl, d.mediaUrl);
+    return {
+      title,
+      docTitle: title,
+      description: cut(d.description, 220) || clean(first(d.channelName, d.authorName)) || 'ვიდეო GeoHub-ზე',
+      type: 'video.other',
+      ...(large(thumb, origin) || {}),
+    };
+  }
+  if (kind === 'channel') {
+    const d = await getDocument(env, `channels/${id}`);
+    if (gone(d)) return null;
+    const name = clean(d.name) || SITE;
+    const subs = num(d.subscriberCount);
+    return {
+      title: name,
+      docTitle: name,
+      description: cut(d.description, 220) || (subs ? `არხი · ${subs} გამომწერი` : 'ვიდეო არხი GeoHub-ზე'),
+      type: 'website',
+      ...(large(d.banner, origin) || square(d.avatar, origin) || {}),
+    };
+  }
+  return null;
+}
+
+/* ── <head> rewrite ─────────────────────────────────────────────────────── */
+
+const esc = (v) => str(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function rewrite(res, meta, url) {
+  const origin = url.origin;
+  const pageUrl = `${origin}${url.pathname}`;
+  const canonicalOrigin = /\.geohub-main\.pages\.dev$/.test(url.hostname) ? PROD_ORIGIN : origin;
+  const m = meta || {};
+  const title = m.title || 'GeoHub — აღმოაჩინე საქართველო';
+  const docTitle = m.docTitle ? `${m.docTitle} · ${SITE}` : title;
+  const description = m.description || 'ადამიანები, ადგილები, ღონისძიებები, ბიზნესები და ვიდეოები ერთ სივრცეში.';
+  const image = m.image || `${origin}/icons/og-image.png`;
+  const width = m.image ? m.width : 1200;
+  const height = m.image ? m.height : 630;
+  const card = m.image ? m.card : 'summary_large_image';
+  const set = (value) => ({ element(el) { el.setAttribute('content', value); } });
+  const extra = [
+    `<meta property="og:url" content="${esc(pageUrl)}">`,
+    `<meta property="og:image:alt" content="${esc(m.title || SITE)}">`,
+    `<meta name="twitter:title" content="${esc(title)}">`,
+    `<meta name="twitter:description" content="${esc(description)}">`,
+    `<meta name="twitter:image" content="${esc(image)}">`,
+    `<link rel="canonical" href="${esc(canonicalOrigin + url.pathname)}">`,
+  ].filter(Boolean).join('\n  ');
+  return new HTMLRewriter()
+    .on('title', { element(el) { el.setInnerContent(docTitle); } })
+    .on('meta[name="description"]', set(description))
+    .on('meta[property="og:title"]', set(title))
+    .on('meta[property="og:description"]', set(description))
+    .on('meta[property="og:image"]', set(image))
+    .on('meta[property="og:image:width"]', set(String(width)))
+    .on('meta[property="og:image:height"]', set(String(height)))
+    .on('meta[property="og:type"]', set(m.type || 'website'))
+    .on('meta[name="twitter:card"]', set(card))
+    .on('head', { element(el) { el.append(`\n  ${extra}\n`, { html: true }); } })
+    .transform(res);
+}

@@ -16,7 +16,7 @@
     "test:e2e": "node web/tools/e2e-flows.mjs && node web/tools/e2e-call.mjs && node web/tools/sweep.mjs --as=nino",
     "test:rules": "firebase emulators:exec --only auth,firestore --project demo-geohub \"node web/tools/rules-check.mjs\"",
     "test:e2e:ci": "firebase emulators:exec --only auth,firestore --project demo-geohub \"node web/tools/e2e-ci.mjs\"",
-    "lint": "eslint web/src"
+    "lint": "eslint web/src web/worker"
   },
   "dependencies": {
     "@fontsource/firago": "^5.3.0",

@@ -1,4 +1,20 @@
 import globals from 'globals';
+
+const RULES = {
+  'no-undef': 'error',
+  'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]', args: 'none', ignoreRestSiblings: true }],
+  'no-dupe-keys': 'error',
+  'no-unreachable': 'error',
+  'no-const-assign': 'error',
+  'no-self-assign': 'error',
+  'no-cond-assign': 'error',
+  'use-isnan': 'error',
+  'valid-typeof': 'error',
+  'no-duplicate-case': 'error',
+  'no-fallthrough': 'error',
+  'eqeqeq': ['warn', 'smart'],
+};
+
 export default [
   // ── The app (web/) ────────────────────────────────────────────────
   {
@@ -9,20 +25,17 @@ export default [
       parserOptions: { ecmaFeatures: { jsx: true } },
       globals: { ...globals.browser },
     },
-    rules: {
-      'no-undef': 'error',
-      'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]', args: 'none', ignoreRestSiblings: true }],
-      'no-dupe-keys': 'error',
-      'no-unreachable': 'error',
-      'no-const-assign': 'error',
-      'no-self-assign': 'error',
-      'no-cond-assign': 'error',
-      'use-isnan': 'error',
-      'valid-typeof': 'error',
-      'no-duplicate-case': 'error',
-      'no-fallthrough': 'error',
-      'eqeqeq': ['warn', 'smart'],
+    rules: RULES,
+  },
+  // ── Cloudflare Pages worker (share cards) ─────────────────────────
+  {
+    files: ['web/worker/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: 'module',
+      globals: { ...globals.serviceworker, HTMLRewriter: 'readonly' },
     },
+    rules: RULES,
   },
   {
     files: ['web/public/**/*.js'],
