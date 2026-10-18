@@ -1,14 +1,9 @@
-// MapLibre helpers: lazy loading, Carto basemaps that follow the theme,
-// labels in the interface language, and a clustered places layer.
+// MapLibre helpers: shared geometry, localized labels and places.
 
-import { theme } from './theme.js';
 import { lang } from './i18n.js';
 import { ICONS } from '../ui/icons.js';
 
-const STYLES = {
-  light: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-};
+const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 // Carto's glyph server only has Georgian letters in Noto Sans.
 export const LABEL_FONT = ['Noto Sans Regular'];
 
@@ -47,18 +42,22 @@ export function loadMapLibre() {
   return loading;
 }
 
-export const styleUrl = () => STYLES[theme.value === 'dark' ? 'dark' : 'light'];
+export const styleUrl = () => BASEMAP_STYLE;
 
 /**
- * Carto styles label cities in English below zoom 13. Show local (Georgian)
- * names for a Georgian interface and English names otherwise. Country
- * labels stay in English: their local names would be in several scripts.
+ * Preserve source spelling and Georgian Mkhedruli. CARTO's uppercase transform
+ * can produce Mtavruli glyphs that are missing from its Noto Sans glyph stack.
+ * Country labels retain their original field because local scripts vary.
  */
 export function localizeLabels(map) {
   const local = lang.value === 'ka';
-  const field = local ? ['coalesce', ['get', 'name'], ['get', 'name_en']] : ['coalesce', ['get', 'name_en'], ['get', 'name']];
+  const field = local
+    ? ['coalesce', ['get', 'name:ka'], ['get', 'name'], ['get', 'name_en']]
+    : ['coalesce', ['get', 'name_en'], ['get', 'name']];
   for (const layer of map.getStyle().layers || []) {
     if (layer.type !== 'symbol' || !layer.layout?.['text-field']) continue;
+    map.setLayoutProperty(layer.id, 'text-font', LABEL_FONT);
+    map.setLayoutProperty(layer.id, 'text-transform', 'none');
     if (/country|continent|housenumber|^gh-/.test(layer.id)) continue;
     const tf = JSON.stringify(layer.layout['text-field']);
     if (!tf.includes('name')) continue;
@@ -67,17 +66,17 @@ export function localizeLabels(map) {
 }
 
 /** Adds (or re-adds after a style switch) the clustered places layers. */
-export function addPlaceLayers(map, data, dark) {
+export function addPlaceLayers(map, data) {
   if (!map.getSource('gh-places')) {
     map.addSource('gh-places', { type: 'geojson', data, cluster: true, clusterRadius: 44, clusterMaxZoom: 13, promoteId: 'id' });
   }
-  const brand = dark ? '#3b82f6' : '#2563eb';
-  const halo = dark ? '#0d0f13' : '#ffffff';
+  const brand = '#2563eb';
+  const halo = '#fffef9';
   const hasIcons = addMarkerIcons(map);
   map.addLayer({
     id: 'gh-clusters', type: 'circle', source: 'gh-places', filter: ['has', 'point_count'],
     paint: {
-      'circle-color': brand, 'circle-opacity': 0.92, 'circle-stroke-width': 4, 'circle-stroke-color': dark ? 'rgba(59,130,246,0.35)' : 'rgba(37,99,235,0.25)',
+      'circle-color': brand, 'circle-opacity': 0.96, 'circle-stroke-width': 3.5, 'circle-stroke-color': halo,
       'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26],
     },
   });
@@ -89,16 +88,18 @@ export function addPlaceLayers(map, data, dark) {
   map.addLayer({
     id: 'gh-point-halos', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-color': ['get', 'tone'],
+      'circle-color': '#24443a',
       'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 26 : 17, hasIcons ? 21 : 12],
-      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.24, 0.12],
-      'circle-blur': 0.15,
+      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 0.2],
+      'circle-blur': 0.6, 'circle-translate': [0, 2],
     },
   });
   map.addLayer({
     id: 'gh-points', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
     paint: {
       'circle-color': ['get', 'tone'],
+      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
+      'circle-stroke-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
       'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 20 : 11, hasIcons ? 17 : 8],
       'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3.5, 2.5],
       'circle-stroke-color': halo,
@@ -111,16 +112,30 @@ export function addPlaceLayers(map, data, dark) {
         'icon-image': ['concat', 'gh-icon-', ['coalesce', ['get', 'icon'], 'map-pin']],
         'icon-size': 1, 'icon-allow-overlap': true, 'icon-ignore-placement': true,
       },
+      paint: { 'icon-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1] },
     });
   }
   map.addLayer({
     id: 'gh-labels', type: 'symbol', source: 'gh-places', filter: ['!', ['has', 'point_count']], minzoom: 9,
     layout: {
       'text-field': ['get', 'name'], 'text-font': LABEL_FONT, 'text-size': 12, 'text-offset': [0, hasIcons ? 1.85 : 1.1], 'text-anchor': 'top',
-      'text-max-width': 9, 'text-optional': true, 'text-padding': 4,
+      'text-max-width': 9, 'text-optional': true, 'text-padding': 4, 'text-transform': 'none',
     },
-    paint: { 'text-color': dark ? '#f3ecea' : '#2a2224', 'text-halo-color': halo, 'text-halo-width': 1.6 },
+    paint: {
+      'text-color': '#2c4438', 'text-halo-color': halo, 'text-halo-width': 1.8, 'text-halo-blur': 0.3,
+      'text-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
+    },
   });
+}
+
+/** Recolor place overlays without replacing their source or selected state. */
+export function applyPlaceTheme(map, mode = 'light') {
+  const dark = mode === 'dark';
+  if (map.getLayer('gh-labels')) {
+    map.setPaintProperty('gh-labels', 'text-color', dark ? '#e5eee7' : '#2c4438');
+    map.setPaintProperty('gh-labels', 'text-halo-color', dark ? '#152126' : '#fffef9');
+  }
+  if (map.getLayer('gh-point-halos')) map.setPaintProperty('gh-point-halos', 'circle-color', dark ? '#000e18' : '#24443a');
 }
 
 /** GeoJSON features for places that have coordinates. */

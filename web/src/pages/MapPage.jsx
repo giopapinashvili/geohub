@@ -5,12 +5,14 @@ import { Spinner, Empty } from '../ui/misc.jsx';
 import { SearchInput } from '../ui/Field.jsx';
 import { t, tn, lang } from '../lib/i18n.js';
 import { useTitle, isDesktop } from '../lib/hooks.js';
-import { theme } from '../lib/theme.js';
 import { query, setQuery, navigate } from '../lib/router.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { GEORGIA_CENTER, getPosition, distanceKm } from '../lib/geo.js';
-import { loadMapLibre, styleUrl, localizeLabels, addPlaceLayers, placesToGeoJSON } from '../lib/map.js';
+import { loadMapLibre, styleUrl, localizeLabels, addPlaceLayers, applyPlaceTheme, placesToGeoJSON } from '../lib/map.js';
+import { applyMapAppearance } from '../lib/mapAppearance.js';
+import { theme } from '../lib/theme.js';
+import { ICONS } from '../ui/icons.js';
 import { getPlace, listPlaces } from '../data/places.js';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
 import { MapPlacePreview } from '../features/places/MapPlacePreview.jsx';
@@ -19,6 +21,14 @@ import { MapSidebarHandle, useMapSidebar } from '../features/places/MapSidebar.j
 import { useCategories, categoryOf } from '../features/places/categories.js';
 import { CheckinDialog } from '../features/places/CheckinDialog.jsx';
 import { AddPlaceDialog } from '../features/places/AddPlaceDialog.jsx';
+
+const MAP_THEME_KEY = 'gh_map_theme';
+function savedMapTheme() {
+  try {
+    const value = localStorage.getItem(MAP_THEME_KEY);
+    return value === 'light' || value === 'dark' ? value : null;
+  } catch { return null; }
+}
 
 /** Places on a map with category filters, search, check-in and add-place. */
 export default function MapPage() {
@@ -33,6 +43,16 @@ export default function MapPage() {
   const meMarker = useRef(null);
   const [places, setPlaces] = useState(null);
   const [ready, setReady] = useState(false);
+  const [perspective, setPerspective] = useState(false);
+  const [mapThemeChoice, setMapThemeChoice] = useState(savedMapTheme);
+  const mapTheme = mapThemeChoice || theme.value;
+  const mapThemeRef = useRef(mapTheme);
+  mapThemeRef.current = mapTheme;
+  useEffect(() => {
+    const syncTheme = (event) => { if (event.key === MAP_THEME_KEY || event.key === null) setMapThemeChoice(savedMapTheme()); };
+    window.addEventListener('storage', syncTheme);
+    return () => window.removeEventListener('storage', syncTheme);
+  }, []);
   const [failed, setFailed] = useState(false);
   const [bounds, setBounds] = useState(null);
   const [cat, setCat] = useState('all');
@@ -89,10 +109,10 @@ export default function MapPage() {
       if (!alive || !box.current) return;
       map = new maplibregl.Map({
         container: box.current, style: styleUrl(), center: [GEORGIA_CENTER.lng, GEORGIA_CENTER.lat], zoom: GEORGIA_CENTER.zoom,
-        minZoom: 4, maxZoom: 18, attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false, cooperativeGestures: false,
+        canvasContextAttributes: { antialias: true },
+        minZoom: 4, maxZoom: 20, pitch: 0, maxPitch: 65, attributionControl: { compact: true }, dragRotate: true, pitchWithRotate: true, touchPitch: true, cooperativeGestures: false,
       });
-      map.touchZoomRotate.disableRotation();
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+      map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
       if (isDesktop()) {
         const geo = new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false, showAccuracyCircle: true });
         map.addControl(geo, 'top-right');
@@ -103,14 +123,29 @@ export default function MapPage() {
       resizeObserver = new ResizeObserver(() => map.resize());
       resizeObserver.observe(box.current);
       libRef.current = maplibregl;
+      const updatePerspective = () => {
+        const tilted = map.getPitch() > 1;
+        setPerspective(tilted);
+        const visibility = tilted ? 'visible' : 'none';
+        if (map.getLayer('gh-buildings-3d') && map.getLayoutProperty('gh-buildings-3d', 'visibility') !== visibility) {
+          map.setLayoutProperty('gh-buildings-3d', 'visibility', visibility);
+        }
+      };
       const onStyle = () => {
+        // Later theme/camera updates can briefly report an unready style.
+        // The initial-load timeout must stop once the basemap has arrived.
+        clearTimeout(timer);
+        applyMapAppearance(map, mapThemeRef.current);
+        updatePerspective();
         localizeLabels(map);
-        addPlaceLayers(map, geoRef.current, theme.value === 'dark');
+        addPlaceLayers(map, geoRef.current);
+        applyPlaceTheme(map, mapThemeRef.current);
         if (selectedRef.current) map.setFeatureState({ source: 'gh-places', id: selectedRef.current }, { selected: true });
         setReady(true);
         setFailed(false);
       };
       map.on('style.load', onStyle);
+      map.on('pitch', updatePerspective);
       map.on('moveend', () => setBounds(map.getBounds()));
       map.on('load', () => setBounds(map.getBounds()));
       map.on('error', (e) => console.warn('[map]', e?.error?.message || e));
@@ -131,16 +166,22 @@ export default function MapPage() {
     }).catch(() => setFailed(true));
     // A basemap that never arrives (offline, blocked) shouldn't spin forever.
     const timer = setTimeout(() => { if (alive && !mapRef.current?.isStyleLoaded()) setFailed(true); }, 20000);
-    return () => { alive = false; clearTimeout(timer); resizeObserver?.disconnect(); map?.remove(); mapRef.current = null; };
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      resizeObserver?.disconnect();
+      map?.remove();
+      mapRef.current = null;
+    };
   }, []);
 
-  // Theme or language switch: new basemap, layers re-added on style.load.
+  // Follow the shell until the user chooses a separate, remembered map theme.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    setReady(false);
-    map.setStyle(styleUrl(), { diff: false });
-  }, [theme.value]);
+    applyMapAppearance(map, mapTheme);
+    applyPlaceTheme(map, mapTheme);
+  }, [mapTheme, ready]);
   useEffect(() => { const map = mapRef.current; if (map && ready) localizeLabels(map); }, [lang.value]);
 
   // Data changes.
@@ -168,18 +209,22 @@ export default function MapPage() {
     const map = mapRef.current;
     const lib = libRef.current;
     if (!ready || !map || !lib || selected?.lat == null || selected?.lng == null) return undefined;
-    const marker = new lib.Marker({ color: '#2563eb', scale: 1.05 })
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.className = 'map-selected-pin';
+    const icon = ICONS[categoryOf(selected).icon] || ICONS['map-pin'];
+    // Only bundled, static icon paths go into this SVG.
+    element.innerHTML = `<svg width="23" height="23" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${icon}</svg>`;
+    const label = document.createElement('span');
+    label.className = 'map-selected-pin-label';
+    label.textContent = selected.name;
+    label.setAttribute('aria-hidden', 'true');
+    element.appendChild(label);
+    const marker = new lib.Marker({ element, anchor: 'center' })
       .setLngLat([selected.lng, selected.lat]).addTo(map);
-    const element = marker.getElement();
-    element.classList.add('map-selected-pin');
-    element.setAttribute('role', 'button');
     element.setAttribute('aria-label', `${selected.name} — ${t('map.details')}`);
-    element.tabIndex = 0;
     const open = (event) => { event?.stopPropagation(); showSidebar.current(); setQuery({ details: '1' }); };
     element.addEventListener('click', open);
-    element.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(event); }
-    });
     return () => marker.remove();
   }, [selected?.id, selected?.lat, selected?.lng, ready, lang.value]);
 
@@ -204,6 +249,20 @@ export default function MapPage() {
   const startCheckin = (place = null) => { if (requireLogin('checkin')) setCheckin({ place }); };
   const startAdd = () => { if (requireLogin('place')) { setCheckin(null); setAdding(true); } };
   const locate = () => getPosition().then((p) => { setMe(p); mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: 12 }); }).catch((e) => toast.error(t(e.message === 'denied' ? 'map.locationDenied' : 'map.locationFailed')));
+  const togglePerspective = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({ pitch: map.getPitch() > 1 ? 0 : 55, duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650 });
+  };
+  const toggleMapTheme = () => {
+    const next = mapTheme === 'dark' ? 'light' : 'dark';
+    const choice = next === theme.value ? null : next;
+    setMapThemeChoice(choice);
+    try {
+      if (choice) localStorage.setItem(MAP_THEME_KEY, choice);
+      else localStorage.removeItem(MAP_THEME_KEY);
+    } catch { /* private mode */ }
+  };
 
   const chips = (
     <div class="map-chips" role="toolbar" aria-label={t('place.category')}>
@@ -222,7 +281,7 @@ export default function MapPage() {
   ) : <Empty compact icon="map-trifold" title={t('map.nothingHere')} text={t('map.nothingHereText')} />;
 
   return (
-    <div ref={pageRef} class={`map-page${desktop ? ' is-split' : ''}${selected && expanded ? ' has-place-details' : ''}${desktop && sidebar.collapsed ? ' is-sidebar-collapsed' : ''}${desktop && sidebar.resizing ? ' is-sidebar-resizing' : ''}`}
+    <div ref={pageRef} data-map-theme={mapTheme} class={`map-page${desktop ? ' is-split' : ''}${selected && expanded ? ' has-place-details' : ''}${desktop && sidebar.collapsed ? ' is-sidebar-collapsed' : ''}${desktop && sidebar.resizing ? ' is-sidebar-resizing' : ''}`}
       style={desktop ? { '--map-sidebar-width': `${sidebar.width}px`, '--map-sidebar-visible': `${sidebar.collapsed ? 0 : sidebar.width}px` } : undefined}>
       {desktop && <div id="map-sidebar-content" class="map-sidebar-shell" inert={sidebar.collapsed || undefined} aria-hidden={sidebar.collapsed ? 'true' : undefined}>
         <div class="map-sidebar-content">
@@ -245,6 +304,17 @@ export default function MapPage() {
       </div>}
       <div class="map-stage">
         <div ref={box} class="map-canvas" aria-label={t('nav.map')} role="region" />
+        {ready && <div class="map-view-controls">
+          <button type="button" class="map-view-toggle" onClick={togglePerspective}
+            aria-label={t('map.perspective')} title={t('map.perspective')} aria-pressed={perspective}>
+            {perspective ? '2D' : '3D'}
+          </button>
+          <button type="button" class="map-theme-toggle" onClick={toggleMapTheme}
+            aria-label={t(mapTheme === 'dark' ? 'map.lightMode' : 'map.darkMode')}
+            title={t(mapTheme === 'dark' ? 'map.lightMode' : 'map.darkMode')}>
+            <Icon name={mapTheme === 'dark' ? 'sun' : 'moon'} size={20} />
+          </button>
+        </div>}
         {!ready && !failed && <div class="map-loading"><Spinner size={28} /></div>}
         {failed && <div class="map-loading"><Empty icon="map-trifold" title={t('map.failed')} action={<Button variant="secondary" onClick={() => location.reload()}>{t('common.reload')}</Button>} /></div>}
         {!desktop && (

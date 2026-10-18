@@ -142,7 +142,7 @@
 .map-search .search-input-field { height: 44px; background: var(--surface); box-shadow: var(--shadow-2); }
 .map-fab { width: 44px !important; height: 44px !important; background: var(--surface) !important; box-shadow: var(--shadow-2); flex: none; }
 .map-float-top .map-chips .chip { box-shadow: var(--shadow-1); background: var(--surface); }
-.map-float-top .map-chips .chip.is-active { background: var(--text); }
+.map-float-top .map-chips .chip.is-active { background: var(--gradient-brand); color: #fff; }
 .is-mobile .maplibregl-ctrl-top-right { top: 108px; }
 .maplibregl-ctrl-group { border-radius: var(--r-md) !important; box-shadow: var(--shadow-2) !important; }
 [data-theme='dark'] .maplibregl-ctrl-group { background: var(--surface); }
@@ -172,6 +172,10 @@
 .map-sheet-body { overflow-y: auto; padding: 0 8px 12px; min-height: 0; }
 .map-sheet-actions { display: flex; gap: 8px; padding: 0 12px 12px; }
 .map-sheet-actions .btn { flex: 1; }
+@media (max-width: 380px) {
+  .map-sheet-actions .btn { min-width: 0; padding-inline: 10px; }
+  .map-sheet-actions .btn-label { white-space: normal; }
+}
 
 /* ── Check-in & add place ──────────────────────────────── */
 .checkin-list { display: flex; flex-direction: column; max-height: min(52vh, 460px); overflow-y: auto; margin: 0 -8px; }

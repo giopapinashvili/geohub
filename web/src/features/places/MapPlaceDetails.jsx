@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { Avatar } from '../../ui/Avatar.jsx';
 import { Button, IconButton } from '../../ui/Button.jsx';
 import { Icon } from '../../ui/Icon.jsx';
@@ -113,7 +113,7 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
     return () => { active = false; };
   }, [place.id, viewerId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const onKey = (event) => {
       // Nested viewers and the shared auth/check-in/creator dialog own Escape.
       if (event.key === 'Escape' && !event.defaultPrevented && !lightbox && !storyView && !document.querySelector('.modal-layer, .story-viewer, .lightbox')) {

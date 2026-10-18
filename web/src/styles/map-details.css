@@ -54,6 +54,8 @@
 .map-detail-tabs > button.is-active { color: var(--brand-text); }
 .map-detail-tabs > button.is-active::after { content: ''; position: absolute; bottom: 0; left: 7px; right: 7px; height: 3px; border-radius: 3px 3px 0 0; background: var(--gradient-brand); }
 .map-detail-section { padding: 18px 16px; border-bottom: 1px solid var(--divider); scroll-margin-top: 46px; }
+/* Keep every tab reachable while later activity sections are still loading. */
+.map-detail-section[data-map-section="stories"] { min-height: calc(100% - 46px); }
 .map-detail-section > h3 { margin: 0 0 12px; font-size: var(--fs-md); font-weight: 700; }
 .map-detail-description { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--fs-sm); line-height: var(--lh); }
 .map-detail-info-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 13px; color: var(--text-2); font-size: var(--fs-sm); }

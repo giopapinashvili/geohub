@@ -110,5 +110,106 @@
 .map-list .place-row { border: 1px solid var(--border); border-radius: var(--r-lg); padding: 10px; margin-bottom: 9px; background: var(--surface); }
 .map-list .place-row.is-active { border-color: var(--brand); background: var(--brand-soft); }
 .map-list .place-row-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--text-2); font-size: var(--fs-xs); line-height: var(--lh); }
-.map-selected-pin { cursor: pointer; z-index: 1; filter: drop-shadow(0 3px 5px rgb(0 0 0 / 0.25)); }
+.map-selected-pin {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--gradient-brand);
+  box-shadow: 0 0 0 5px rgb(37 99 235 / 0.18), 0 4px 12px rgb(35 65 47 / 0.25);
+  cursor: pointer;
+  z-index: 1;
+}
 .map-selected-pin:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: 50%; }
+.map-selected-pin-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border: 1px solid var(--map-control-border);
+  border-radius: 9px;
+  color: var(--map-control-text);
+  background: var(--map-control-surface);
+  box-shadow: 0 3px 10px rgb(33 59 40 / 0.15);
+  font: 700 0.75rem / 1.4 var(--font);
+}
+
+/* The map palette can be chosen independently of the surrounding shell. */
+.map-page {
+  --map-control-size: 38px;
+  --map-control-surface: #fffef9;
+  --map-control-text: #294538;
+  --map-control-border: rgb(76 99 74 / 0.2);
+  --map-control-divider: #e1e5d8;
+  --map-control-hover: #edf2e4;
+  --map-control-shadow: rgb(38 62 43 / 0.13);
+  --map-canvas-background: #eef0e4;
+}
+.map-page[data-map-theme="dark"] {
+  --map-control-surface: #182930;
+  --map-control-text: #e1ede7;
+  --map-control-border: #3d555b;
+  --map-control-divider: #30484e;
+  --map-control-hover: #273f46;
+  --map-control-shadow: rgb(0 10 17 / 0.4);
+  --map-canvas-background: #152126;
+}
+.map-page .map-stage > .map-canvas { background: var(--map-canvas-background); }
+.map-page .maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid var(--map-control-border);
+  border-radius: 13px !important;
+  background: var(--map-control-surface);
+  box-shadow: 0 3px 12px var(--map-control-shadow) !important;
+}
+.map-page .maplibregl-ctrl-group button { width: var(--map-control-size); height: var(--map-control-size); }
+.map-page .maplibregl-ctrl-group button + button { border-top-color: var(--map-control-divider); }
+.map-page .maplibregl-ctrl-group button:hover { background: var(--map-control-hover); }
+.map-page .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: none; opacity: 0.8; }
+.map-page[data-map-theme="dark"] .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1); }
+.map-page .maplibregl-ctrl-group button:focus-visible { outline: 2px solid #2563eb; outline-offset: -3px; }
+.map-page .maplibregl-ctrl-attrib { background: var(--map-control-surface); color: var(--map-control-text); }
+.map-page .maplibregl-ctrl-attrib a { color: var(--map-control-text); }
+.map-page .maplibregl-ctrl-attrib-button { opacity: 0.85; }
+.map-view-controls {
+  position: absolute;
+  top: calc(34px + 4 * var(--map-control-size));
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.map-view-controls > button {
+  display: grid;
+  place-items: center;
+  width: calc(var(--map-control-size) + 2px);
+  height: calc(var(--map-control-size) + 2px);
+  padding: 0;
+  border: 1px solid var(--map-control-border);
+  border-radius: 13px;
+  color: var(--map-control-text);
+  background: var(--map-control-surface);
+  box-shadow: 0 3px 12px var(--map-control-shadow);
+  font: 700 0.75rem / 1 var(--font);
+  cursor: pointer;
+}
+.map-view-controls > button:hover { background: var(--map-control-hover); }
+.map-view-toggle[aria-pressed="true"] { color: #fff; background: #2563eb; border-color: #2563eb; }
+.map-view-controls > button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }
+.is-mobile .map-view-controls { top: calc(132px + 3 * var(--map-control-size)); }
+/* Keep map credits reachable above the mobile results and place sheets. */
+.is-mobile .map-page .maplibregl-ctrl-bottom-right { top: calc(158px + 5 * var(--map-control-size)); bottom: auto; }
+@media (pointer: coarse) {
+  .map-page { --map-control-size: 44px; }
+}
