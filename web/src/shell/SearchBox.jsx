@@ -5,6 +5,9 @@ import { t } from '../lib/i18n.js';
 import { useDebounced, useClickOutside, useEscape } from '../lib/hooks.js';
 import { quickSearch, recentSearches, rememberSearch, clearSearches } from '../data/search.js';
 import { navigate } from '../lib/router.js';
+import { addressHref } from '../lib/catalogDiscovery.js';
+import { formatCommercePrice } from '../lib/commerce.js';
+import { categoryOf } from '../features/places/categories.js';
 
 /** Header search with typeahead results and recent searches. */
 export function SearchBox() {
@@ -22,17 +25,20 @@ export function SearchBox() {
 
   useEffect(() => {
     let alive = true;
-    if (term.length < 2) { setResults(null); setLoading(false); return undefined; }
+    if (term.length < 2 || !open) { setResults(null); setLoading(false); return undefined; }
     setLoading(true);
+    setResults(null);
     quickSearch(term).then((r) => { if (alive) { setResults(r); setLoading(false); } }).catch(() => alive && setLoading(false));
     return () => { alive = false; };
-  }, [term]);
+  }, [term, open]);
 
   const items = [];
   if (results) {
     results.users.forEach((u) => items.push({ href: `/u/${u.id}`, title: u.name, sub: u.username ? `@${u.username}` : t('search.person'), avatar: u.avatar, name: u.name }));
-    results.businesses.forEach((b) => items.push({ href: `/business/${b.id}`, title: b.name, sub: b.category || t('search.business'), avatar: b.logo, name: b.name, square: true }));
-    results.places.forEach((p) => items.push({ href: `/place/${p.id}`, title: p.name, sub: p.city || t('search.place'), icon: 'map-pin-fill' }));
+    results.businesses.forEach((b) => items.push({ href: `/business/${b.id}`, title: b.name, sub: categoryOf(b).label || t('search.business'), avatar: b.logo, name: b.name, square: true, similar: b.searchMatch === 'fuzzy' }));
+    results.places.forEach((p) => items.push({ href: `/place/${p.id}`, title: p.name, sub: p.address || p.city || t('search.place'), icon: 'map-pin-fill', similar: p.searchMatch === 'fuzzy' }));
+    (results.addresses || []).forEach((a) => items.push({ href: addressHref(a), title: a.name, sub: 'მისამართი · რუკაზე ჩვენება', icon: 'map-trifold', similar: a.searchMatch === 'fuzzy' }));
+    (results.catalog || []).forEach((item) => items.push({ href: item.canonicalBusinessHref, title: item.matchedItemTitle, sub: [item.businessName, item.branchName !== item.businessName && item.branchName, formatCommercePrice(item.priceMinor, item.currency)].filter(Boolean).join(' · '), icon: item.matchedItemType === 'dish' ? 'fork-knife' : 'storefront', similar: item.searchMatch === 'fuzzy' }));
     results.groups.forEach((g) => items.push({ href: `/groups/${g.id}`, title: g.name, sub: t('search.group'), avatar: g.cover || g.avatar, name: g.name, square: true }));
   }
   const submitHref = value.trim() ? `/search?q=${encodeURIComponent(value.trim())}` : null;
@@ -47,6 +53,7 @@ export function SearchBox() {
   };
 
   const onKey = (e) => {
+    if (e.isComposing) return;
     const total = items.length + (submitHref ? 1 : 0);
     if (e.key === 'ArrowDown') { e.preventDefault(); setCursor((c) => Math.min(total - 1, c + 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setCursor((c) => Math.max(-1, c - 1)); }
@@ -75,6 +82,7 @@ export function SearchBox() {
           aria-expanded={open ? 'true' : 'false'}
           aria-controls="searchbox-list"
           aria-autocomplete="list"
+          aria-activedescendant={open && cursor >= 0 && cursor <= items.length ? `searchbox-option-${cursor}` : undefined}
         />
       </div>
       {open && (
@@ -98,7 +106,7 @@ export function SearchBox() {
           {value.trim() && (
             <>
               {items.map((it, i) => (
-                <a key={it.href} href={it.href} role="option" aria-selected={cursor === i ? 'true' : 'false'}
+                <a key={it.href} id={`searchbox-option-${i}`} href={it.href} role="option" aria-selected={cursor === i ? 'true' : 'false'}
                   class={`searchbox-item${cursor === i ? ' is-active' : ''}`}
                   onClick={(e) => { e.preventDefault(); go(it.href); }}>
                   {it.icon
@@ -106,13 +114,14 @@ export function SearchBox() {
                     : <Avatar src={it.avatar} name={it.name} size={36} square={it.square} />}
                   <span class="searchbox-text">
                     <span class="searchbox-title">{it.title}</span>
-                    <span class="searchbox-sub">{it.sub}</span>
+                    <span class="searchbox-sub">{it.sub}{it.similar ? ' · მსგავსი შედეგი' : ''}</span>
                   </span>
                 </a>
               ))}
               {loading && !items.length && <p class="searchbox-hint">{t('common.loading')}</p>}
               {!loading && results && !items.length && <p class="searchbox-hint">{t('search.noQuick')}</p>}
-              <a href={submitHref} role="option" aria-selected={cursor === items.length ? 'true' : 'false'}
+              {!loading && results?.coverage?.unavailable && <p class="searchbox-hint" role="status">ზოგი წყარო დროებით მიუწვდომელია.</p>}
+              <a href={submitHref} id={`searchbox-option-${items.length}`} role="option" aria-selected={cursor === items.length ? 'true' : 'false'}
                 class={`searchbox-item searchbox-all${cursor === items.length ? ' is-active' : ''}`}
                 onClick={(e) => { e.preventDefault(); go(submitHref); }}>
                 <span class="searchbox-ico is-brand"><Icon name="magnifying-glass" size={18} /></span>

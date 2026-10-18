@@ -1,12 +1,19 @@
-// Search without a search service: Firestore prefix queries on name fields
-// (as typed, lower-case and capitalised), plus a recent-content scan for
-// post text. Garbled demo documents are skipped.
+// Public discovery combines the static city index, bounded Firestore lists,
+// and real published catalogs. Legacy social search retains its privacy rules.
 
-import { collection, query, where, limit, getDocs, orderBy, setDoc } from 'firebase/firestore';
+import { collection, query, where, limit, getDocs, orderBy, setDoc, documentId, startAfter } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
-import { normBiz, normPlace, normGroup, normEvent, normVideo, normItem, normPost, isCorruptSeed } from './normalize.js';
+import { normBiz, normGroup, normEvent, normVideo, normItem, normPost, isCorruptSeed } from './normalize.js';
 import { searchUsers } from './users.js';
 import { uid as myUid, account, accountRef } from '../lib/auth.js';
+import { cachedList } from './cache.js';
+import { listMapPlaces } from './places.js';
+import { mergeImportedPlaces } from './importedPlaces.js';
+import { rankRecords } from '../lib/discoverySearch.js';
+import { searchImported } from '../lib/discoveryClient.js';
+import { publicCatalogBusiness } from '../lib/catalogDiscovery.js';
+import { searchCatalog } from './catalogSearch.js';
+export { searchCatalogPlaces } from './catalogSearch.js';
 
 function variants(term) {
   const t = term.trim();
@@ -34,8 +41,44 @@ async function prefixSearch(col, fields, term, norm, n = 10) {
   return out.slice(0, n);
 }
 
-export const searchPlaces = (t, n) => prefixSearch('places', ['name', 'title'], t, normPlace, n);
-export const searchBusinesses = async (t, n) => (await prefixSearch('businesses', ['name', 'title'], t, normBiz, n)).filter((b) => !b.deleted);
+async function searchDiscovery(term, n = 20, channel = 'global') {
+  const coverage = { unavailable: false, truncated: false };
+  if (term.trim().length < 2) return { places: [], addresses: [], coverage };
+  const [native, imported] = await Promise.allSettled([
+    listMapPlaces(), searchImported(term, { channel, limit: Math.max(60, n * 3) }),
+  ]);
+  coverage.unavailable = native.status === 'rejected' || imported.status === 'rejected';
+  coverage.truncated = native.status === 'fulfilled' && native.value.truncated;
+  const rows = imported.status === 'fulfilled' ? imported.value : [];
+  const places = mergeImportedPlaces(native.status === 'fulfilled' ? native.value.places : [], rows.filter((row) => row.kind === 'place'));
+  return {
+    places: rankRecords(places, term, { limit: n }),
+    addresses: rows.filter((row) => row.kind === 'address').slice(0, n), coverage,
+  };
+}
+
+// Composer uses its own cancellation channel and receives places, not addresses.
+export const searchPlaces = async (term, n = 10) => (await searchDiscovery(term, n, 'composer')).places;
+
+const businessIndex = () => cachedList('businesses:search', 1, 5 * 60000, async () => {
+  const records = [];
+  let cursor;
+  while (records.length <= 1000) {
+    const size = Math.min(200, 1001 - records.length);
+    const snapshot = await getDocs(query(collection(db, 'businesses'), orderBy(documentId()), ...(cursor ? [startAfter(cursor)] : []), limit(size)));
+    records.push(...snapshot.docs.map((entry) => normBiz(entry.id, entry.data())));
+    if (snapshot.docs.length < size || records.length > 1000) break;
+    cursor = snapshot.docs.at(-1);
+  }
+  return [{ records: records.slice(0, 1000).filter((record) => !isCorruptSeed(record.raw) && publicCatalogBusiness(record)), truncated: records.length > 1000 }];
+}).then(([result]) => result);
+
+export async function searchBusinesses(term, n = 20) {
+  const index = await businessIndex();
+  const rows = rankRecords(index.records, term, { limit: n });
+  rows.coverage = { truncated: index.truncated };
+  return rows;
+}
 export const searchGroups = (t, n) => prefixSearch('groups', ['name', 'title'], t, normGroup, n);
 export const searchEvents = (t, n) => prefixSearch('events', ['title', 'name'], t, normEvent, n);
 export const searchVideos = async (t, n) => (await prefixSearch('videos', ['title'], t, normVideo, n)).filter((v) => v.status === 'active');
@@ -61,20 +104,26 @@ export async function searchPosts(term, n = 20) {
 /** Header typeahead: a few results of each kind. */
 export async function quickSearch(term) {
   const t = term.trim();
-  if (t.length < 2) return { users: [], places: [], businesses: [], groups: [] };
-  const [users, places, businesses, groups] = await Promise.all([
-    searchUsers(t, 4), searchPlaces(t, 3), searchBusinesses(t, 3), searchGroups(t, 3),
+  if (t.length < 2) return { users: [], places: [], addresses: [], catalog: [], businesses: [], groups: [] };
+  const results = await Promise.allSettled([
+    searchUsers(t, 3), searchDiscovery(t, 3, 'header'), searchBusinesses(t, 3), searchGroups(t, 2), searchCatalog(t, 3),
   ]);
-  return { users, places, businesses, groups };
+  const [users, discovery, businesses, groups, catalog] = results.map((result, i) => result.status === 'fulfilled' ? result.value : i === 1 ? { places: [], addresses: [], coverage: { unavailable: true } } : []);
+  return { users, ...discovery, businesses, groups, catalog,
+    coverage: { unavailable: results.some((result) => result.status === 'rejected') || discovery.coverage.unavailable || catalog.coverage?.unavailable,
+      truncated: discovery.coverage.truncated || businesses.coverage?.truncated || catalog.coverage?.truncated } };
 }
 
 export async function searchAll(term) {
   const t = term.trim();
-  const [people, places, businesses, groups, events, videos, items, posts] = await Promise.all([
-    searchUsers(t, 20), searchPlaces(t, 20), searchBusinesses(t, 20), searchGroups(t, 20),
-    searchEvents(t, 20), searchVideos(t, 20), searchItems(t, 20), searchPosts(t, 20),
+  const results = await Promise.allSettled([
+    searchUsers(t, 20), searchDiscovery(t, 20, 'global'), searchBusinesses(t, 20), searchGroups(t, 20),
+    searchEvents(t, 20), searchVideos(t, 20), searchItems(t, 20), searchPosts(t, 20), searchCatalog(t, 20),
   ]);
-  return { people, places, businesses, groups, events, videos, items, posts };
+  const [people, discovery, businesses, groups, events, videos, items, posts, catalog] = results.map((result, i) => result.status === 'fulfilled' ? result.value : i === 1 ? { places: [], addresses: [], coverage: { unavailable: true } } : []);
+  return { people, ...discovery, businesses, groups, events, videos, items, posts, catalog,
+    coverage: { unavailable: results.some((result) => result.status === 'rejected') || discovery.coverage.unavailable || catalog.coverage?.unavailable,
+      truncated: discovery.coverage.truncated || businesses.coverage?.truncated || catalog.coverage?.truncated } };
 }
 
 /* ── Recent searches (users/{uid}/private/account.searchHistory) ─── */

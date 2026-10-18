@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState, useRef } from 'preact/hooks';
 import { Avatar } from '../ui/Avatar.jsx';
 import { IconButton } from '../ui/Button.jsx';
 import { Menu } from '../ui/Menu.jsx';
@@ -8,9 +8,9 @@ import { Empty, Spinner } from '../ui/misc.jsx';
 import { t } from '../lib/i18n.js';
 import { useTitle, useDebounced, bp } from '../lib/hooks.js';
 import { navigate, query, back } from '../lib/router.js';
-import { conversations } from '../lib/store.js';
+import { conversations, inboxScope } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
-import { openDirect, openBusinessConversation, hideConversation, listenConversations } from '../data/messages.js';
+import { openDirect, openBusinessConversation, hideConversation } from '../data/messages.js';
 import { actor, actorId } from '../lib/actor.js';
 import { searchUsers } from '../data/users.js';
 import { getBusiness } from '../data/business.js';
@@ -21,6 +21,7 @@ import { Thread, PeerStatus } from '../features/messages/Thread.jsx';
 import { messageError } from '../features/messages/errors.js';
 
 function NewMessage({ onClose }) {
+  const scope = inboxScope.value;
   const [q, setQ] = useState('');
   const [list, setList] = useState([]);
   const term = useDebounced(q, 250);
@@ -31,8 +32,9 @@ function NewMessage({ onClose }) {
     return () => { alive = false; };
   }, [term]);
   const start = async (u) => {
-    try { const cid = await openDirect(u.id); onClose(); navigate(`/messages/${cid}`); }
-    catch (e) { toast.error(messageError(e)); }
+    if (actor.value || inboxScope.peek() !== scope) return;
+    try { const cid = await openDirect(u.id); if (inboxScope.peek() !== scope) return; onClose(); navigate(`/messages/${cid}`); }
+    catch (e) { if (inboxScope.peek() === scope) toast.error(messageError(e)); }
   };
   return (
     <Modal open onClose={onClose} title={t('messages.new')} size="sm">
@@ -66,7 +68,7 @@ function ThreadHeader({ conv, onBack, actorId: asPage }) {
       )}
       <Menu label={t('common.more')} width={260} items={[
         { icon: 'user-circle', label: t('messages.viewProfile'), href: peer.href, hidden: !peer.href },
-        { icon: 'archive', label: t('messages.hide'), onClick: () => hideConversation(conv.id).then(() => { toast(t('messages.hidden')); navigate('/messages'); }).catch(() => toast.error(t('common.error'))) },
+        { icon: 'archive', label: t('messages.hide'), onClick: () => hideConversation(conv.id, asPage).then(() => { toast(t('messages.hidden')); navigate('/messages'); }).catch(() => toast.error(t('common.error'))) },
         { icon: 'prohibit', label: t('messages.block'), danger: true, hidden: !peer.user,
           onClick: () => blockUser(peer.user.id).then(() => toast(t('safety.blocked'))).catch(() => toast.error(t('common.error'))) },
       ]} trigger={(p) => <IconButton {...p} icon="dots-three" label={t('common.more')} size={40} />} />
@@ -84,21 +86,33 @@ export default function Messages({ params }) {
   const withUser = query.value.get('with');
   const withBiz = query.value.get('business');
   const desktop = bp.value === 'lg' || bp.value === 'xl';
+  const asPage = actorId();
+  const scope = inboxScope.value;
 
   // ?with=UID / ?business=ID open (or create) the conversation.
   useEffect(() => {
-    if (!withUser && !withBiz) return;
+    if (!withUser && !withBiz) { setOpening(false); return; }
+    // These links start a personal/customer conversation. A page must switch
+    // back explicitly; opening a URL must not silently create a personal DM.
+    if (asPage) { setOpening(false); toast(t('messages.switchIdentity')); navigate('/messages', { replace: true }); return; }
+    let active = true;
+    const current = () => active && inboxScope.peek() === scope;
     setOpening(true);
-    const job = withUser ? openDirect(withUser) : getBusiness(withBiz).then((b) => openBusinessConversation(withBiz, b?.ownerId));
-    job.then((id) => navigate(`/messages/${id}`, { replace: true }))
-      .catch((e) => { toast.error(messageError(e)); navigate('/messages', { replace: true }); })
-      .finally(() => setOpening(false));
-  }, [withUser, withBiz]);
+    const job = withUser ? openDirect(withUser) : getBusiness(withBiz).then((b) => current() ? openBusinessConversation(withBiz, b?.ownerId) : null);
+    job.then((id) => { if (current() && id) navigate(`/messages/${id}`, { replace: true }); })
+      .catch((e) => { if (current()) { toast.error(messageError(e)); navigate('/messages', { replace: true }); } })
+      .finally(() => { if (current()) setOpening(false); });
+    return () => { active = false; };
+  }, [withUser, withBiz, asPage, scope]);
 
-  const asPage = actorId();
-  const [pageConvs, setPageConvs] = useState([]);
-  useEffect(() => (asPage ? listenConversations(setPageConvs, asPage) : undefined), [asPage]);
-  const list = asPage ? pageConvs : conversations.value;
+  const previousScope = useRef(scope);
+  const switching = previousScope.current !== scope;
+  useEffect(() => {
+    if (previousScope.current !== scope) {
+      previousScope.current = scope; setCompose(false); setQ(''); navigate('/messages', { replace: true });
+    }
+  }, [scope]);
+  const list = conversations.value;
   // Desktop opens the most recent conversation, like Messenger.
   useEffect(() => {
     if (desktop && !cid && !withUser && !withBiz && list.length) navigate(`/messages/${list[0].id}`, { replace: true });
@@ -114,7 +128,7 @@ export default function Messages({ params }) {
         <aside class="messenger-list">
           <div class="messenger-list-head">
             <h1>{asPage ? actor.value.name : t('messages.title')}</h1>
-            <IconButton icon="note-pencil" label={t('messages.new')} variant="soft" size={38} onClick={() => setCompose(true)} />
+            {!asPage && <IconButton icon="note-pencil" label={t('messages.new')} variant="soft" size={38} onClick={() => setCompose(true)} />}
           </div>
           <div class="messenger-search"><SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('messages.search')} /></div>
           <div class="messenger-rows">
@@ -128,8 +142,8 @@ export default function Messages({ params }) {
       {showThread && (
         <section class={`messenger-thread${!desktop ? ' is-overlay' : ''}`}>
           {opening && <div class="center-pad"><Spinner /></div>}
-          {!opening && cid && (
-            <Thread key={cid} cid={cid} actorId={asPage} header={<ThreadHeader conv={conv || { id: cid, participants: [] }} actorId={asPage} onBack={desktop ? null : () => back('/messages')} />} />
+          {!opening && cid && !switching && (
+            <Thread key={`${scope}:${cid}`} cid={cid} actorId={asPage} header={<ThreadHeader conv={conv || { id: cid, participants: [] }} actorId={asPage} onBack={desktop ? null : () => back('/messages')} />} />
           )}
           {!opening && !cid && <Empty icon="chat-circle-dots" title={t('messages.selectTitle')} text={t('messages.selectText')} />}
         </section>

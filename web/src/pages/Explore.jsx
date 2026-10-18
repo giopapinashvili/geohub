@@ -9,7 +9,9 @@ import { query, setQuery, navigate } from '../lib/router.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { cityOptions, cityLabel, getPosition, distanceKm } from '../lib/geo.js';
-import { listPlaces } from '../data/places.js';
+import { listMapPlaces } from '../data/places.js';
+import { loadImportedPlaces, mergeImportedPlaces } from '../data/importedPlaces.js';
+import { matchesPlaceCategory } from '../lib/placeTaxonomy.js';
 import { upcomingEvents } from '../data/events.js';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
 import { useCategories } from '../features/places/categories.js';
@@ -27,6 +29,7 @@ export default function Explore() {
   const city = query.value.get('city') || '';
   const [q, setQ] = useState('');
   const [places, setPlaces] = useState(null);
+  const [partial, setPartial] = useState(false);
   const [shown, setShown] = useState(PAGE);
   const [me, setMe] = useState(null);
   const [locating, setLocating] = useState(false);
@@ -34,14 +37,24 @@ export default function Explore() {
   const [adding, setAdding] = useState(false);
   const events = useAsync(() => upcomingEvents(6), []);
 
-  useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); }, []);
+  useEffect(() => {
+    let active = true;
+    Promise.allSettled([listMapPlaces(), loadImportedPlaces(null, { zoom: 10 })]).then(([native, imported]) => {
+      if (!active) return;
+      const original = native.status === 'fulfilled' ? native.value.places : [];
+      const overview = imported.status === 'fulfilled' ? imported.value.places : [];
+      setPlaces(mergeImportedPlaces(original, overview));
+      setPartial(native.status === 'rejected' || imported.status === 'rejected' || native.value?.truncated === true);
+    });
+    return () => { active = false; };
+  }, []);
   useEffect(() => { setShown(PAGE); }, [cat, city, me]);
 
   const list = useMemo(() => {
     if (!places) return [];
-    const l = places.filter((p) => (cat === 'all' || p.category === cat) && (!city || cityLabel(p.city) === cityLabel(city)));
+    const l = places.filter((p) => matchesPlaceCategory(p, cat) && (!city || cityLabel(p.city) === cityLabel(city)));
     return l.map((p) => ({ p, d: me ? distanceKm(me, p) : Infinity }))
-      .sort((a, b) => (me ? a.d - b.d : (b.p.checkinCount + b.p.rating * 10) - (a.p.checkinCount + a.p.rating * 10)));
+      .sort((a, b) => (me ? a.d - b.d : (b.p.checkinCount + b.p.rating * 10) - (a.p.checkinCount + a.p.rating * 10)) || Number(!!b.p.image) - Number(!!a.p.image));
   }, [places, cat, city, me]);
 
   const cityChoices = useMemo(() => {
@@ -91,6 +104,7 @@ export default function Explore() {
 
       <section class="explore-section">
         <h2 class="section-title">{me ? t('explore.nearest') : t('explore.popular')}</h2>
+        <p class="muted small">{partial ? 'ზოგი მონაცემი ვერ ჩაიტვირთა. ' : ''}აქ ნაჩვენებია შერჩეული ადგილები. სრული ცნობარი და დამატებითი კატეგორიები <a class="link" href="/map">რუკაზე ნახე</a>; ძებნა ახალ ადგილებსაც მოიცავს.</p>
         {!places ? (
           <div class="place-grid">{Array.from({ length: 6 }).map((_, i) => <div key={i} class="card place-card"><Skeleton h="auto" style={{ aspectRatio: '4/3' }} r={0} /><div class="place-card-body"><Skeleton w="70%" h={16} /><Skeleton w="45%" h={12} /></div></div>)}</div>
         ) : list.length ? (

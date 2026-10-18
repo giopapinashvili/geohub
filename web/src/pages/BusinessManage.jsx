@@ -25,6 +25,8 @@ import { ConversationRow } from '../features/messages/ConversationRow.jsx';
 import { Thread } from '../features/messages/Thread.jsx';
 import { useUser } from '../features/user/useUser.js';
 import { findCouponForMe, markCouponUsed } from '../data/rewards.js';
+import { CommerceManage } from '../features/commerce/CommerceManage.jsx';
+import { BusinessBranches } from '../features/commerce/BusinessBranches.jsx';
 
 function FollowerRow({ f }) {
   const u = useUser(f.userId);
@@ -393,6 +395,9 @@ export default function BusinessManage({ params }) {
         { value: 'inbox', label: t('biz.inbox'), icon: 'chat-circle-dots' },
         { value: 'edit', label: t('biz.editPage'), icon: 'pencil-simple' },
         { value: 'services', label: t('biz.services'), icon: 'list-checks' },
+        { value: 'catalog', label: t('commerce.catalog'), icon: 'shopping-bag' },
+        { value: 'branches', label: t('commerce.branches'), icon: 'map-pin' },
+        { value: 'discounts', label: t('nav.discounts'), icon: 'seal-percent' },
         { value: 'photos', label: t('biz.photos'), icon: 'images' },
         { value: 'offers', label: t('biz.offers'), icon: 'seal-percent' },
         { value: 'reviews', label: t('place.reviewsTab'), icon: 'star' },
@@ -403,6 +408,9 @@ export default function BusinessManage({ params }) {
         {tab === 'inbox' && <Inbox biz={biz} />}
         {tab === 'edit' && <><Edit biz={biz} /><Danger biz={biz} /></>}
         {tab === 'services' && <Services biz={biz} />}
+        {tab === 'catalog' && <CommerceManage key="catalog" biz={biz} />}
+        {tab === 'branches' && <BusinessBranches biz={biz} manage />}
+        {tab === 'discounts' && <CommerceManage key="discounts" biz={biz} offers />}
         {tab === 'photos' && <Photos biz={biz} />}
         {tab === 'offers' && <><Offers biz={biz} /><CouponCheck /></>}
         {tab === 'reviews' && <Reviews biz={biz} />}

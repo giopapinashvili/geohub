@@ -21,8 +21,8 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-const ICON = '/icons/icon-192.png';
-const BADGE = '/icons/icon-96.png';
+const ICON = '/icons/geohub-g-192.png';
+const BADGE = '/icons/geohub-g-96.png';
 
 function targetUrl(data) {
   if (data && data.url) return data.url;

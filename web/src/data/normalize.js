@@ -6,6 +6,9 @@
 // legacy field names so older readers and the security rules stay happy.
 
 import { tsToMillis } from '../lib/format.js';
+import { readCoordinates } from '../lib/coordinates.js';
+import { youtubeIdFrom, validYouTubeId } from '../lib/videoSource.js';
+export { youtubeIdFrom } from '../lib/videoSource.js';
 
 const s = (v) => (typeof v === 'string' ? v : v == null ? '' : String(v));
 const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
@@ -140,6 +143,10 @@ export function normStory(id, d = {}) {
     mediaType: s(d.mediaType),
     bg: d.bg || null,
     authorId: s(first(d.authorId, d.userId)),
+    userId: s(first(d.userId, d.authorId)),
+    authorType: d.authorType === 'business' && d.businessId ? 'business' : 'user',
+    businessId: s(d.businessId),
+    actorId: d.authorType === 'business' && d.businessId ? `business_${d.businessId}` : `user_${first(d.authorId, d.userId)}`,
     authorName: s(d.authorName) || 'GeoHub',
     authorAvatar: s(d.authorAvatar),
     viewedBy: arr(d.viewedBy),
@@ -193,6 +200,7 @@ export function normBiz(id, d = {}) {
 
 export function normPlace(id, d = {}) {
   const photos = arr(d.photos).filter((x) => typeof x === 'string');
+  const coords = readCoordinates(d);
   return {
     id,
     name: s(first(d.name, d.title)) || '—',
@@ -203,8 +211,8 @@ export function normPlace(id, d = {}) {
     city: s(d.city),
     address: s(d.address),
     region: s(d.region),
-    lat: Number(d.lat) || null,
-    lng: Number(d.lng) || null,
+    lat: coords?.lat ?? null,
+    lng: coords?.lng ?? null,
     image: s(first(d.coverImage, d.imageUrl, d.photoUrl, d.image, photos[0])),
     photos,
     rating: n(d.rating),
@@ -266,13 +274,8 @@ export function normEvent(id, d = {}) {
   };
 }
 
-export function youtubeIdFrom(url) {
-  const m = String(url || '').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
-  return m ? m[1] : '';
-}
-
 export function normVideo(id, d = {}) {
-  const yt = s(d.youtubeId) || youtubeIdFrom(d.youtubeUrl || d.url);
+  const yt = validYouTubeId(d.youtubeId) ? d.youtubeId : youtubeIdFrom(d.youtubeUrl || d.url);
   return {
     id,
     kind: 'video',
@@ -349,6 +352,8 @@ export function normNotification(id, d = {}) {
     body: s(d.body || d.message),
     href: s(d.href || d.link || d.url),
     fromUserId: s(d.fromUserId || d.fromUid),
+    fromActorType: s(d.fromActorType || 'user'),
+    fromActorId: s(d.fromActorId || d.fromUserId || d.fromUid),
     fromName: s(d.fromName),
     fromAvatar: s(d.fromAvatar),
     read: !!(d.read || d.seen),

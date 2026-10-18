@@ -21,6 +21,7 @@ function requireMe() {
 }
 
 export const directId = (a, b) => [a, b].sort().join('_');
+const canonicalActorId = (value) => String(value || '').replace(/^(user|business):/, '$1_');
 
 function normConv(id, d, viewer) {
   const participants = Array.isArray(d.participants) ? d.participants : [];
@@ -41,15 +42,15 @@ function normConv(id, d, viewer) {
     lastSenderId: d.lastSenderId || '',
     updatedAt: tsToMillis(d.updatedAt || d.lastMessageAt || d.createdAt),
     unread: !!unread && d.lastSenderId !== viewer,
-    typing: d.typingActors || {},
+    typing: Object.fromEntries(Object.entries(d.typingActors || {}).map(([key, value]) => [canonicalActorId(key), value])),
     readBy: d.readBy || {},
     nicknames: d.nicknames || {},
     theme: d.theme || '',
-    inboxActorIds: Array.isArray(d.inboxActorIds) && d.inboxActorIds.length ? d.inboxActorIds
+    inboxActorIds: Array.isArray(d.inboxActorIds) && d.inboxActorIds.length ? d.inboxActorIds.map(canonicalActorId)
       : isBiz ? [`user_${d.customerUid || viewer}`, `business_${d.businessId}`] : participants.map((p) => `user_${p}`),
-    hiddenForActors: d.hiddenForActors || [],
-    deletedForActors: d.deletedForActors || [],
-    raw: d,
+    hiddenForActors: (d.hiddenForActors || []).map(canonicalActorId),
+    deletedForActors: (d.deletedForActors || []).map(canonicalActorId),
+    raw: { ...d, lastMessageSenderActorId: canonicalActorId(d.lastMessageSenderActorId) },
   };
 }
 
@@ -71,22 +72,27 @@ export function listenConversations(onData, actorId) {
         && !c.hiddenForActors.includes(actor) && !c.hiddenForActors.includes(legacyActor)
         && !c.deletedForActors.includes(actor))
       .map((c) => (actor.startsWith('business_')
-        ? { ...c, unread: (c.raw.unreadActors || []).includes(actor) && c.lastSenderId !== viewer, otherId: c.customerUid || c.otherId }
+        ? { ...c, unread: (c.raw.unreadActors || []).some((id) => id === actor || id === legacyActor) && (c.raw.lastMessageSenderActorId ? c.raw.lastMessageSenderActorId !== actor : c.lastSenderId !== viewer), otherId: c.customerUid || c.otherId }
         : c))
       .sort((a, b) => b.updatedAt - a.updatedAt);
     onData(list);
   };
-  const handle = (snap) => {
+  let active = true;
+  const pools = [new Map(), new Map()];
+  const handle = (index) => (snap) => {
+    if (!active) return;
+    const source = pools[index];
     snap.docChanges().forEach((ch) => {
-      if (ch.type === 'removed') pool.delete(ch.doc.id);
-      else pool.set(ch.doc.id, { id: ch.doc.id, ...ch.doc.data() });
+      if (ch.type === 'removed') source.delete(ch.doc.id);
+      else source.set(ch.doc.id, { id: ch.doc.id, ...ch.doc.data() });
     });
+    pool.clear(); pools.forEach((entries) => entries.forEach((value, key) => pool.set(key, value)));
     flush();
   };
   const col = collection(db, 'conversations');
-  const u1 = onSnapshot(query(col, where('memberUids', 'array-contains', viewer), limit(80)), handle, (e) => console.warn('[conv]', e.code));
-  const u2 = onSnapshot(query(col, where('participants', 'array-contains', viewer), limit(80)), handle, (e) => console.warn('[conv]', e.code));
-  return () => { u1(); u2(); };
+  const u1 = onSnapshot(query(col, where('memberUids', 'array-contains', viewer), limit(80)), handle(0), (e) => console.warn('[conv]', e.code));
+  const u2 = onSnapshot(query(col, where('participants', 'array-contains', viewer), limit(80)), handle(1), (e) => console.warn('[conv]', e.code));
+  return () => { active = false; u1(); u2(); };
 }
 
 export function listenConversation(id, onData, onError) {
@@ -164,7 +170,7 @@ export function listenMessages(cid, onData, n = 80) {
       return {
         id: d.id,
         senderId: x.senderId,
-        senderActorId: x.senderActorId || `user_${x.senderId}`,
+        senderActorId: canonicalActorId(x.senderActorId || `user_${x.senderId}`),
         senderName: x.senderName || x.senderDisplayName || '',
         senderAvatar: x.senderAvatar || '',
         text: x.text || x.body || x.message || '',
@@ -245,9 +251,9 @@ export async function sendMessage(cid, { text = '', attachments = [], replyTo = 
 
   const participants = conv.participants || [];
   const otherId = participants.find((p) => p !== m.uid) || '';
-  const inboxActors = Array.isArray(conv.inboxActorIds) && conv.inboxActorIds.length ? conv.inboxActorIds : [actorId];
+  const inboxActors = Array.isArray(conv.inboxActorIds) && conv.inboxActorIds.length ? conv.inboxActorIds.map(canonicalActorId) : [actorId];
   const restoreKeys = inboxActors.flatMap((a) => [a, a.startsWith('business_') ? `business:${a.slice(9)}` : `user:${a.slice(5)}`]);
-  const unreadActors = [...new Set([...(conv.unreadActors || []).filter((a) => a !== actorId), ...inboxActors.filter((a) => a !== actorId)])];
+  const unreadActors = [...new Set([...(conv.unreadActors || []).map(canonicalActorId).filter((a) => a !== actorId), ...inboxActors.filter((a) => a !== actorId)])];
   const isBiz = conv.forBusiness && conv.businessId;
   const unreadTarget = isBiz ? (actorType === 'business' ? conv.customerUid : conv.ownerUid || otherId) : otherId;
   const patch = {
@@ -263,7 +269,7 @@ export async function sendMessage(cid, { text = '', attachments = [], replyTo = 
     [`typingUsers.${m.uid}`]: deleteField(),
     archivedForActors: arrayRemove(...inboxActors),
     hiddenForActors: arrayRemove(...restoreKeys),
-    deletedForActors: arrayRemove(...inboxActors),
+    deletedForActors: arrayRemove(...restoreKeys),
     unreadActors,
   };
   if (unreadTarget && unreadTarget !== m.uid) patch.unreadFor = arrayUnion(unreadTarget);
@@ -273,7 +279,8 @@ export async function sendMessage(cid, { text = '', attachments = [], replyTo = 
     notifyBusiness(conv.businessId, { type: 'message', title: `${m.name} მისწერა შენს გვერდს`, body: preview.slice(0, 120), href: `messages.html?business=${conv.businessId}&cid=${cid}`, extra: { conversationId: cid, ownerUid: conv.ownerUid || '' } });
   } else if (unreadTarget && unreadTarget !== m.uid) {
     const href = isBiz ? `messages.html?withBusiness=${conv.businessId}&cid=${cid}` : `messages.html?with=${m.uid}`;
-    notify(unreadTarget, { type: 'message', title: `${senderName} მოგწერა`, body: preview.slice(0, 120), href, extra: { conversationId: cid } });
+    notify(unreadTarget, { type: 'message', title: `${senderName} მოგწერა`, body: preview.slice(0, 120), href, extra: { conversationId: cid },
+      sender: { uid: m.uid, authorType: actorType, businessId: asBusiness || null, name: senderName, avatar: senderAvatar } });
   }
 }
 

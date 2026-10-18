@@ -15,4 +15,7 @@ export * as users from '../data/users.js';
 export * as auth from './auth.js';
 export * as calls from '../data/calls.js';
 export * as actor from './actor.js';
+export * as store from './store.js';
+export * as router from './router.js';
+export * as i18n from './i18n.js';
 export * as support from '../data/support.js';

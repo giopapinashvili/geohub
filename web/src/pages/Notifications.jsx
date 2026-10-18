@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { Card, Empty } from '../ui/misc.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Segmented } from '../ui/Field.jsx';
 import { t } from '../lib/i18n.js';
 import { useTitle } from '../lib/hooks.js';
 import { notifications, incomingRequests } from '../lib/store.js';
-import { markAllRead, listenBusinessNotifications } from '../data/notify.js';
+import { markAllRead } from '../data/notify.js';
 import { actor } from '../lib/actor.js';
 import { NotificationItem } from '../features/notifications/NotificationItem.jsx';
 import { PushPrompt } from '../features/notifications/PushPrompt.jsx';
@@ -14,9 +14,7 @@ export default function Notifications() {
   useTitle(t('notif.title'));
   const [filter, setFilter] = useState('all');
   const page = actor.value;
-  const [pageNotifs, setPageNotifs] = useState([]);
-  useEffect(() => (page ? listenBusinessNotifications(page.id, setPageNotifs) : undefined), [page?.id]);
-  const all = (page ? pageNotifs : notifications.value).filter((n) => n.type !== 'message');
+  const all = notifications.value.filter((n) => n.type !== 'message');
   const list = filter === 'unread' ? all.filter((n) => !n.read) : all;
   const dayAgo = Date.now() - 86400000;
   const fresh = list.filter((n) => n.createdAt >= dayAgo);
@@ -29,7 +27,7 @@ export default function Notifications() {
       </div>
       <Segmented value={filter} onChange={setFilter} label={t('notif.title')} options={[{ value: 'all', label: t('notif.tabAll') }, { value: 'unread', label: t('notif.tabUnread') }]} />
       <PushPrompt />
-      {incomingRequests.value.length > 0 && filter === 'all' && (
+      {!page && incomingRequests.value.length > 0 && filter === 'all' && (
         <a href="/friends" class="notif-requests">
           <span class="notif-requests-icon">{incomingRequests.value.length}</span>
           <span><strong>{t('friends.requests')}</strong><span class="muted small"> · {t('notif.reviewRequests')}</span></span>

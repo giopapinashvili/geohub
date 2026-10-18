@@ -28,6 +28,9 @@ import { Stars, StarInput } from '../features/places/Stars.jsx';
 import { PostCard } from '../features/post/PostCard.jsx';
 import { Lightbox } from '../features/post/Lightbox.jsx';
 import { copyLink } from '../features/post/ShareDialog.jsx';
+import { BusinessCatalog } from '../features/commerce/BusinessCatalog.jsx';
+import { BusinessBranches } from '../features/commerce/BusinessBranches.jsx';
+import { PersonalActionNotice } from '../features/auth/PersonalActionNotice.jsx';
 
 const ext = (url) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
 const igUrl = (v) => (/^https?:/i.test(v) ? v : `https://instagram.com/${v.replace(/^@/, '')}`);
@@ -53,6 +56,7 @@ function QuoteDialog({ biz, services, onClose }) {
     <Modal open onClose={onClose} title={t('biz.requestQuote')} size="md"
       footer={<><Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button><Button variant="primary" icon="paper-plane-right" disabled={!valid} loading={busy} onClick={send}>{t('common.send')}</Button></>}>
       <div class="stack">
+        <PersonalActionNotice>მოთხოვნა და საკონტაქტო მონაცემები პირად მომხმარებელს ეკუთვნის.</PersonalActionNotice>
         <p class="muted small">{t('biz.quoteHint', { name: biz.name })}</p>
         <div class="form-2">
           <TextField label={t('biz.yourName')} value={name} onInput={(e) => setName(e.currentTarget.value)} maxLength={80} />
@@ -140,6 +144,7 @@ function Reviews({ biz, manage, compact }) {
       </div>
       {!compact && !mine && !own && (
         <div class="review-form biz-review-form">
+          <PersonalActionNotice>შეფასება შენი პირადი გამოცდილების სახელით გამოქვეყნდება.</PersonalActionNotice>
           <strong>{t('biz.rateUs', { name: biz.name })}</strong>
           <StarInput value={rating} onChange={setRating} />
           {rating > 0 && (
@@ -205,7 +210,7 @@ function Posts({ biz, manage }) {
         <Card class="composer-card">
           <div class="composer-card-top">
             <Avatar src={biz.logo} name={biz.name} size={40} square />
-            <button type="button" class="composer-card-input" onClick={() => openComposer({ asBusiness: { id: biz.id, name: biz.name, logo: biz.logo } })}>{t('biz.postAsPage', { name: biz.name })}</button>
+            <button type="button" class="composer-card-input" onClick={() => openComposer({ asBusiness: biz })}>{t('biz.postAsPage', { name: biz.name })}</button>
           </div>
         </Card>
       )}
@@ -301,6 +306,9 @@ export default function BusinessPage({ params }) {
           <Tabs value={tab} onChange={(v) => setQuery({ tab: v === 'home' ? null : v })} label={biz.name} items={[
             { value: 'home', label: t('biz.tabHome') },
             { value: 'posts', label: t('biz.tabPosts') },
+            { value: 'menu', label: t('commerce.menu'), hidden: !/food|cafe|restaurant|bar|bakery|catering/.test(biz.category) && !biz.raw?.menuPhotos?.length },
+            { value: 'catalog', label: t('commerce.catalog') },
+            { value: 'branches', label: t('commerce.branches') },
             { value: 'services', label: t('biz.services'), hidden: !services.length && !manage },
             { value: 'reviews', label: t('place.reviewsTab') },
             { value: 'photos', label: t('biz.photos'), hidden: !photos.length && !manage },
@@ -340,6 +348,9 @@ export default function BusinessPage({ params }) {
         </div>
       )}
       {tab === 'posts' && <Posts biz={biz} manage={manage} />}
+      {tab === 'catalog' && <BusinessCatalog key={`${biz.id}-catalog`} biz={biz} />}
+      {tab === 'branches' && <BusinessBranches biz={biz} />}
+      {tab === 'menu' && <BusinessCatalog key={`${biz.id}-menu`} biz={biz} menu />}
       {tab === 'services' && <Services services={services} onQuote={() => { if (requireLogin('quote')) setQuote(true); }} />}
       {tab === 'reviews' && <Reviews biz={biz} manage={manage} />}
       {tab === 'photos' && <Photos photos={photos} onOpen={setLightbox} />}

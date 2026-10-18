@@ -4,7 +4,8 @@ import { Icon } from '../../ui/Icon.jsx';
 import { IconButton } from '../../ui/Button.jsx';
 import { Img, Skeleton } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
-import { profile, signedIn, uid } from '../../lib/auth.js';
+import { signedIn, uid } from '../../lib/auth.js';
+import { actingIdentity } from '../../lib/actor.js';
 import { storyCreator, requireLogin } from '../../lib/store.js';
 import { listenStoryTray } from '../../data/stories.js';
 import { safeBackground } from '../post/backgrounds.js';
@@ -20,8 +21,8 @@ function StoryCard({ group, onOpen }) {
         ? <Img src={latest.mediaUrl} width={120} class="story-card-img" alt="" />
         : <span class="story-card-text" style={{ background: (bg || safeBackground('pomegranate')).css }}>{latest.text.slice(0, 40)}</span>}
       <span class="story-card-shade" aria-hidden="true" />
-      <span class="story-card-avatar"><Avatar src={group.avatar} name={group.name} size={40} ring={group.seen ? 'seen' : 'story'} /></span>
-      <span class="story-card-name">{group.authorId === uid.value ? t('stories.yours') : group.name}</span>
+      <span class="story-card-avatar"><Avatar src={group.avatar} name={group.name} square={group.authorType === 'business'} size={40} ring={group.seen ? 'seen' : 'story'} /></span>
+      <span class="story-card-name">{group.actorId === actingIdentity.value?.actorId ? t('stories.yours') : group.name}</span>
     </button>
   );
 }
@@ -32,7 +33,12 @@ export function StoryTray() {
   const [open, setOpen] = useState(null);
   const scroller = useRef(null);
   const [edges, setEdges] = useState({ left: false, right: false });
-  useEffect(() => listenStoryTray(setGroups), [uid.value]);
+  useEffect(() => {
+    let active = true;
+    setGroups(null); setOpen(null);
+    const stop = listenStoryTray((list) => { if (active) setGroups(list); });
+    return () => { active = false; stop(); };
+  }, [uid.value, actingIdentity.value?.actorId]);
 
   // Deep link: /?story=ID opens the viewer on that story.
   const deep = queryParams.value.get('story');
@@ -50,19 +56,19 @@ export function StoryTray() {
   useEffect(updateEdges, [groups]);
   const scrollBy = (dir) => scroller.current?.scrollBy({ left: dir * scroller.current.clientWidth * 0.8, behavior: 'smooth' });
 
-  const p = profile.value;
+  const p = actingIdentity.value;
   return (
     <section class="stories" aria-label={t('stories.title')}>
       <div class="stories-scroll" ref={scroller} onScroll={updateEdges}>
         {(signedIn.value || !groups?.length) && (
           <button type="button" class="story-card story-create" onClick={() => { if (requireLogin('story')) storyCreator.value = true; }}>
-            <span class="story-create-top">{p?.avatar ? <Img src={p.avatar} width={120} alt="" /> : <span class="story-create-ph"><Icon name="user" size={40} /></span>}</span>
+            <span class="story-create-top">{p?.avatar ? <Img src={p.avatar} width={120} alt={p.name} /> : <span class="story-create-ph" role="img" aria-label={p?.name || ''}><Icon name={p?.authorType === 'business' ? 'storefront' : 'user'} size={40} /></span>}</span>
             <span class="story-create-plus"><Icon name="plus" size={22} /></span>
             <span class="story-create-label">{t('stories.create')}</span>
           </button>
         )}
         {groups === null && [0, 1, 2, 3].map((i) => <Skeleton key={i} w={112} h={196} r={14} class="story-skel" />)}
-        {groups?.map((g, i) => <StoryCard key={g.authorId} group={g} onOpen={() => setOpen({ group: i, story: g.authorId === uid.value || g.seen ? 0 : Math.max(0, g.stories.findIndex((s) => !s.viewedBy.includes(uid.value))) })} />)}
+        {groups?.map((g, i) => <StoryCard key={g.actorId} group={g} onOpen={() => setOpen({ group: i, story: g.actorId === p?.actorId || g.seen ? 0 : Math.max(0, g.stories.findIndex((s) => !s.viewedBy.includes(uid.value))) })} />)}
       </div>
       {edges.left && <IconButton icon="caret-left" label={t('common.back')} class="stories-nav is-left" variant="soft" size={40} onClick={() => scrollBy(-1)} />}
       {edges.right && <IconButton icon="caret-right" label={t('common.next')} class="stories-nav is-right" variant="soft" size={40} onClick={() => scrollBy(1)} />}

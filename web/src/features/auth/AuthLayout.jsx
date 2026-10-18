@@ -1,6 +1,7 @@
 import { Logo, LogoMark } from '../../shell/Logo.jsx';
 import { Icon } from '../../ui/Icon.jsx';
 import { t, lang, setLang, LANGS } from '../../lib/i18n.js';
+import { authPersistence } from '../../lib/auth.js';
 
 const FEATURES = [
   { icon: 'users-three', key: 'auth.feat.people' },
@@ -31,7 +32,10 @@ export function AuthLayout({ children }) {
             {LANGS.map((l) => <button key={l.code} type="button" class={lang.value === l.code ? 'is-active' : ''} onClick={() => setLang(l.code)}>{l.code.toUpperCase()}</button>)}
           </div>
         </div>
-        <div class="auth-card">{children}</div>
+        <div class="auth-card">
+          {authPersistence.value === 'memory' && <p class="auth-error" role="status">{t('auth.temporarySession')}</p>}
+          {children}
+        </div>
         <footer class="auth-foot">
           <a href="/about">{t('nav.about')}</a> · <a href="/support">{t('nav.support')}</a> · <a href="/privacy">{t('nav.privacy')}</a> · <a href="/terms">{t('nav.terms')}</a> · <a href="/">{t('auth.browse')}</a>
         </footer>

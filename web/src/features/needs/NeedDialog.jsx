@@ -8,6 +8,7 @@ import { toast } from '../../lib/toast.js';
 import { cityOptions } from '../../lib/geo.js';
 import { profile } from '../../lib/auth.js';
 import { createNeed, NEED_CATS, WHEN } from '../../data/needs.js';
+import { PersonalActionNotice } from '../auth/PersonalActionNotice.jsx';
 
 /** Post what you need; matching businesses are told and answer with offers. */
 export function NeedDialog({ onClose, onCreated, initialCategory = '' }) {
@@ -26,6 +27,7 @@ export function NeedDialog({ onClose, onCreated, initialCategory = '' }) {
     <Modal open onClose={onClose} title={t('needs.dialogTitle')} size="md"
       footer={<><Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button><Button variant="primary" icon="megaphone" loading={busy} disabled={text.trim().length < 8 || !category} onClick={submit}>{t('needs.post')}</Button></>}>
       <div class="stack">
+        <PersonalActionNotice>ეს მოთხოვნა პირადი პროფილის სახელით გამოქვეყნდება.</PersonalActionNotice>
         <TextArea label={t('needs.what')} value={text} onInput={(e) => setText(e.currentTarget.value)} maxLength={600} minRows={3} placeholder={t('needs.whatPh')} autoFocus />
         <div class="field">
           <span class="field-label">{t('place.category')}</span>

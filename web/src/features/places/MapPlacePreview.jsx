@@ -3,7 +3,11 @@ import { Icon } from '../../ui/Icon.jsx';
 import { Img } from '../../ui/misc.jsx';
 import { t, formatCount } from '../../lib/i18n.js';
 import { cityLabel } from '../../lib/geo.js';
+import { readCoordinates } from '../../lib/coordinates.js';
 import { categoryOf } from './categories.js';
+import { PlaceCoordinates } from './PlaceCoordinates.jsx';
+import { placePageHref } from '../../lib/placeLinks.js';
+import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
 import '../../styles/map-preview.css';
 
 /** A selected map pin opens this preview; expanding it keeps the map mounted. */
@@ -11,9 +15,8 @@ export function MapPlacePreview({ place, onExpand, onClose, onCheckin }) {
   const cat = categoryOf(place);
   const rating = Number(place.rating);
   const description = String(place.description || '').trim().replace(/\s+/g, ' ');
-  const hasCoordinates = place.lat != null && place.lng != null
-    && Number.isFinite(Number(place.lat)) && Number.isFinite(Number(place.lng));
-  const pageHref = `/place/${encodeURIComponent(place.id)}`;
+  const coords = readCoordinates(place);
+  const pageHref = placePageHref(place);
 
   return (
     <section class="map-place-preview" aria-label={place.name}>
@@ -39,13 +42,17 @@ export function MapPlacePreview({ place, onExpand, onClose, onCheckin }) {
             </span>
           )}
           <span class={`map-place-preview-description${description ? '' : ' is-empty'}`}>{description || t('map.shortDescriptionFallback')}</span>
+          <MatchedCatalogItem place={place} />
         </span>
       </button>
+
+      {place.address && <p class="map-place-preview-address"><Icon name="map-pin" size={14} /><span>{place.address}</span></p>}
+      <PlaceCoordinates key={place.id} place={place} compact />
 
       <div class="map-place-preview-actions">
         <Button variant="primary" size="sm" iconRight="caret-up" class="map-place-preview-expand" onClick={onExpand}>{t('map.details')}</Button>
         {onCheckin && <IconButton icon="map-pin" label={t('checkin.short')} size={44} variant="soft" onClick={onCheckin} />}
-        {hasCoordinates && <IconButton icon="navigation-arrow" label={t('place.directions')} size={44} variant="soft" href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`} target="_blank" rel="noopener noreferrer" />}
+        {coords && <IconButton icon="navigation-arrow" label={t('place.directions')} size={44} variant="soft" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer" />}
         <a data-testid="map-place-page" class="map-place-preview-page" href={pageHref} target="_blank" rel="noopener noreferrer">{t('map.openPage')}<Icon name="arrow-up-right" size={14} /></a>
       </div>
 

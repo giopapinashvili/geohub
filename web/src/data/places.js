@@ -1,5 +1,5 @@
 import {
-  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit, onSnapshot,
+  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit, onSnapshot, documentId, startAfter,
   serverTimestamp, increment,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
@@ -7,6 +7,11 @@ import { cachedList, dropCached } from './cache.js';
 import { me } from '../lib/auth.js';
 import { normPlace, normPost, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
+import { coordinatesForWrite } from '../lib/coordinates.js';
+import { isImportedPlaceId, getImportedPlace } from './importedPlaces.js';
+import { normalizeReviewTags } from '../lib/reviewTags.js';
+import { isCatalogLocationId } from '../lib/placeLinks.js';
+import { getCatalogMapPlace } from './catalogMapPlaces.js';
 
 const cache = new Map();
 
@@ -18,12 +23,52 @@ export function listPlaces(n = 250) {
   }, n);
 }
 
+/** Map-only paginated catalogue. The cap is explicit, never silently complete. */
+export async function listMapPlaces() {
+  const [result] = await cachedList('places:map', 1, 10 * 60000, async () => {
+    const places = [];
+    const pageSize = 250;
+    const cap = 5000;
+    let cursor = null;
+    let scannedCount = 0;
+    let truncated = false;
+    while (scannedCount < cap) {
+      const take = Math.min(pageSize, cap - scannedCount);
+      const constraints = [orderBy(documentId()), ...(cursor ? [startAfter(cursor)] : []), limit(take)];
+      const page = await getDocs(query(collection(db, 'places'), ...constraints));
+      scannedCount += page.size;
+      for (const record of page.docs) {
+        const data = record.data();
+        if (isCorruptSeed(data)) continue;
+        const place = normPlace(record.id, data);
+        if (place.status !== 'inactive' && place.status !== 'deleted') places.push(place);
+      }
+      if (page.size < take) break;
+      cursor = page.docs.at(-1);
+      if (scannedCount === cap) {
+        // One-document probe distinguishes exactly cap records from truncation.
+        const next = await getDocs(query(collection(db, 'places'), orderBy(documentId()), startAfter(cursor), limit(1)));
+        truncated = !next.empty;
+      }
+    }
+    return [{ places, scannedCount, cap, truncated }];
+  });
+  return { ...result, places: [...result.places] };
+}
+
 export function getPlace(id) {
+  if (isImportedPlaceId(id)) return getImportedPlace(id);
+  if (isCatalogLocationId(id)) return getCatalogMapPlace(id);
   if (!cache.has(id)) cache.set(id, getDoc(doc(db, 'places', id)).then((s) => (s.exists() ? normPlace(s.id, s.data()) : null)).catch(() => null));
   return cache.get(id);
 }
 
 export function listenPlace(id, onData, onError) {
+  if (isImportedPlaceId(id) || isCatalogLocationId(id)) {
+    let active = true;
+    getPlace(id).then((place) => { if (active) onData(place); }).catch((error) => { if (active) onError?.(error); });
+    return () => { active = false; };
+  }
   return onSnapshot(doc(db, 'places', id), (s) => onData(s.exists() ? normPlace(s.id, s.data()) : null), onError);
 }
 
@@ -33,10 +78,11 @@ export async function placeCategories() {
 }
 
 export async function createPlace({ name, description = '', category = 'other', address = '', city = '', lat = null, lng = null, photoUrl = '' }) {
+  const coords = coordinatesForWrite({ lat, lng });
   const m = me();
   const ref = await addDoc(collection(db, 'places'), {
     name: name.trim(), title: name.trim(), description: description.trim(), category, categoryId: category, address, city,
-    lat, lng, photoUrl, imageUrl: photoUrl || null, tags: [], creatorId: m.uid, userId: m.uid, createdBy: m.uid, ownerId: m.uid,
+    ...coords, photoUrl, imageUrl: photoUrl || null, tags: [], creatorId: m.uid, userId: m.uid, createdBy: m.uid, ownerId: m.uid,
     creatorName: m.name, rating: 0, reviewCount: 0, saveCount: 0, status: 'active', dataSource: 'manual', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
   dropCached('places');
@@ -49,14 +95,19 @@ export function listenPlaceReviews(placeId, onData, onError) {
   }, (error) => { if (onError) onError(error); else onData([]); });
 }
 
-export async function addPlaceReview(placeId, rating, comment) {
+export async function addPlaceReview(placeId, rating, comment, experienceTags = []) {
+  const stars = Number(rating);
+  const text = String(comment || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,200}$/.test(placeId) || !Number.isInteger(stars) || stars < 1 || stars > 5 || text.length > 1000) throw new Error('შეამოწმე შეფასება და კომენტარი.');
+  const tags = normalizeReviewTags(experienceTags);
   const m = me();
   await addDoc(collection(db, 'placeReviews'), {
-    placeId, userId: m.uid, userName: m.name, userPhoto: m.avatar, rating: Number(rating), comment: comment.trim(), createdAt: serverTimestamp(),
+    placeId, userId: m.uid, userName: m.name, userPhoto: m.avatar, rating: stars, comment: text, experienceTags: tags, createdAt: serverTimestamp(),
   });
+  dropCached('review-tags:');
 }
 
-export async function deletePlaceReview(id) { await deleteDoc(doc(db, 'placeReviews', id)); }
+export async function deletePlaceReview(id) { await deleteDoc(doc(db, 'placeReviews', id)); dropCached('review-tags:'); }
 
 /** Average and per-star counts from review documents. */
 export function reviewStats(reviews, place) {
@@ -69,14 +120,20 @@ export function reviewStats(reviews, place) {
 
 export async function deletePlace(id) { await deleteDoc(doc(db, 'places', id)); dropCached('places'); }
 
-/** Owner/admin edits to the descriptive fields. */
+/** Owner/admin edits, including an explicit latitude/longitude pair. */
 export async function updatePlace(id, patch) {
   const allowed = {};
   for (const k of ['name', 'description', 'category', 'address', 'city']) if (patch[k] !== undefined) allowed[k] = String(patch[k]).trim();
   if (allowed.name) allowed.title = allowed.name;
   if (allowed.category) allowed.categoryId = allowed.category;
   if (patch.photoUrl) { allowed.photoUrl = patch.photoUrl; allowed.imageUrl = patch.photoUrl; allowed.coverImage = patch.photoUrl; }
+  if ('lat' in patch || 'lng' in patch) {
+    if (!('lat' in patch) || !('lng' in patch)) throw Object.assign(new Error('Both coordinates are required'), { code: 'invalid-coordinates' });
+    Object.assign(allowed, coordinatesForWrite(patch));
+  }
   await updateDoc(doc(db, 'places', id), { ...allowed, updatedAt: serverTimestamp() });
+  cache.delete(id);
+  dropCached('places');
 }
 
 /** Check in: a checkins record, the place's aggregate counter and a feed post. */

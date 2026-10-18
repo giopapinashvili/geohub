@@ -76,7 +76,7 @@ export function AccountMenu() {
             <Avatar src={p?.avatar || u?.photoURL} name={name} size={48} />
             <span class="acct-card-text">
               <strong>{name}</strong>
-              <span>{t('nav.viewProfile')}</span>
+              <span>{actor.value ? 'პირადი პროფილის ნახვა' : t('nav.viewProfile')}</span>
             </span>
           </a>
           <Switcher close={close} />

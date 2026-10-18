@@ -10,9 +10,12 @@ import { toast } from '../../lib/toast.js';
 import { upload } from '../../lib/media.js';
 import { createStory } from '../../data/stories.js';
 import { BACKGROUNDS } from '../post/backgrounds.js';
+import { actingIdentity } from '../../lib/actor.js';
+import { Avatar } from '../../ui/Avatar.jsx';
 
 /** Create a photo, video or text story. */
 export default function StoryCreator() {
+  const identity = actingIdentity.value;
   const [placeContext] = useState(() => {
     const context = storyCreator.value;
     if (!context || typeof context !== 'object' || typeof context.placeId !== 'string' || !context.placeId.trim()) return null;
@@ -37,6 +40,7 @@ export default function StoryCreator() {
   };
 
   const publish = async () => {
+    const publishingIdentity = identity;
     setBusy(true);
     try {
       let mediaUrl = null;
@@ -46,11 +50,12 @@ export default function StoryCreator() {
         mediaType = file.type.startsWith('video') ? 'video' : 'image';
       }
       await createStory({
+        identity: publishingIdentity,
         text: text.trim(),
         mediaUrl,
         mediaType,
         bg: mode === 'text' ? bg.key : null,
-        closeFriends: audience === 'friends',
+        closeFriends: publishingIdentity.authorType !== 'business' && audience === 'friends',
         closeFriendsList: audience === 'friends' ? [...friendIds.value] : [],
         placeId: placeContext?.placeId || '',
         locationName: placeContext?.placeName || '',
@@ -65,13 +70,14 @@ export default function StoryCreator() {
 
   const isVideo = file?.type.startsWith('video');
   return (
-    <Modal open onClose={close} title={t('stories.create')} size="md"
+    <Modal open onClose={busy ? undefined : close} title={t('stories.create')} size="md"
       footer={mode ? (
         <>
-          <Button variant="secondary" onClick={() => { setMode(null); setFile(null); setText(''); }}>{t('common.back')}</Button>
+          <Button variant="secondary" disabled={busy} onClick={() => { setMode(null); setFile(null); setText(''); }}>{t('common.back')}</Button>
           <Button variant="primary" onClick={publish} loading={busy} disabled={mode === 'text' && !text.trim()}>{busy && mode === 'media' ? `${progress}%` : t('stories.share')}</Button>
         </>
       ) : null}>
+      <div class="row gap-8 story-publishing-identity"><Avatar src={identity?.avatar} name={identity?.name || ''} size={36} square={identity?.authorType === 'business'} /><strong>{identity?.name}</strong></div>
       {placeContext?.placeName && <p class="row gap-8 muted small"><Icon name="map-pin" size={16} />{t('map.storyAt', { name: placeContext.placeName })}</p>}
       {!mode && (
         <div class="story-new-choices">
@@ -103,9 +109,9 @@ export default function StoryCreator() {
             )}
             <div class="field">
               <span class="field-label">{t('stories.whoSees')}</span>
-              <Segmented value={audience} onChange={setAudience} label={t('stories.whoSees')} options={[
+              <Segmented value={identity?.authorType === 'business' ? 'public' : audience} onChange={setAudience} label={t('stories.whoSees')} options={[
                 { value: 'public', label: t('audience.public'), icon: 'globe-hemisphere-east' },
-                { value: 'friends', label: t('audience.friends'), icon: 'users' },
+                ...(identity?.authorType === 'business' ? [] : [{ value: 'friends', label: t('audience.friends'), icon: 'users' }]),
               ]} />
             </div>
             <p class="muted small"><Icon name="clock" size={14} /> {t('stories.expires')}</p>

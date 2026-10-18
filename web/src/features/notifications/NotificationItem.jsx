@@ -38,6 +38,7 @@ function fallbackHref(n) {
   if (n.postId) return `/post/${n.postId}${n.commentId ? `?comment=${n.commentId}` : ''}`;
   if (n.storyId) return `/?story=${n.storyId}`;
   if (n.conversationId) return `/messages/${n.conversationId}`;
+  if (n.fromActorType === 'business' && n.fromActorId) return `/business/${n.fromActorId}`;
   if (n.fromUserId) return `/u/${n.fromUserId}`;
   return '/notifications';
 }

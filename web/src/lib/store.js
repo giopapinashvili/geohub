@@ -8,7 +8,7 @@ import { collection, query, where, limit, onSnapshot } from 'firebase/firestore'
 import { db } from './firebase.js';
 import { uid, account } from './auth.js';
 import { pageTitle } from './hooks.js';
-import { listenNotifications } from '../data/notify.js';
+import { listenNotifications, listenBusinessNotifications } from '../data/notify.js';
 import { listenConversations } from '../data/messages.js';
 import { listenFriendIds, listenSafety, listenIncomingRequests } from '../data/social.js';
 import { listenSaved } from '../data/posts.js';
@@ -45,8 +45,13 @@ export function toggleChat(cid) {
 }
 
 /* ── Session data ──────────────────────────────────────────── */
-export const notifications = signal([]);
-export const conversations = signal([]);
+export const inboxActor = computed(() => !uid.value ? '' : actor.value ? `business_${actor.value.id}` : `user_${uid.value}`);
+export const inboxScope = computed(() => `${uid.value || ''}:${inboxActor.value}`);
+const notificationState = signal({ scope: '', list: [] });
+const conversationState = signal({ scope: '', list: [] });
+// Hide the previous identity synchronously, even before effect cleanup runs.
+export const notifications = computed(() => notificationState.value.scope === inboxScope.value ? notificationState.value.list : []);
+export const conversations = computed(() => conversationState.value.scope === inboxScope.value ? conversationState.value.list : []);
 export const friendIds = signal(new Set());
 export const followingIds = signal(new Set());
 export const incomingRequests = signal([]);
@@ -70,33 +75,53 @@ export const viewerCtx = computed(() => ({
   hidden: safety.value.hidden,
 }));
 
-let stop = null;
+let previousScope;
 effect(() => {
   const id = uid.value;
-  if (stop) { stop(); stop = null; }
-  if (!id) {
-    notifications.value = [];
-    conversations.value = [];
+  const pageId = actor.value?.id;
+  const scope = inboxScope.value;
+  const actorKey = inboxActor.value;
+  let active = true;
+  notificationState.value = { scope, list: [] };
+  conversationState.value = { scope, list: [] };
+  if (previousScope !== undefined && previousScope !== scope) {
+    chatPopups.value = [];
+    composer.value = null;
+    storyCreator.value = false;
+    createMenu.value = false;
+  }
+  previousScope = scope;
+  if (!id) return;
+  const valid = () => active && inboxScope.peek() === scope;
+  const onNotifications = (list) => { if (valid()) notificationState.value = { scope, list }; };
+  const stops = [
+    pageId ? listenBusinessNotifications(pageId, onNotifications) : listenNotifications(id, onNotifications),
+    listenConversations((list) => { if (valid()) conversationState.value = { scope, list }; }, actorKey),
+  ];
+  return () => { active = false; stops.forEach((stop) => stop()); };
+});
+
+effect(() => {
+  const id = uid.value;
+  let active = true;
+  const valid = () => active && uid.peek() === id;
     friendIds.value = new Set();
     followingIds.value = new Set();
     incomingRequests.value = [];
     savedPostIds.value = new Set();
     safety.value = { hidden: new Set(), blocked: new Set(), muted: new Set() };
-    return;
-  }
+  if (!id) return;
   const unsubs = [
-    listenNotifications(id, (list) => { notifications.value = list; }),
-    listenConversations((list) => { conversations.value = list; }),
-    listenFriendIds(id, (ids) => { friendIds.value = new Set(ids); }),
-    listenIncomingRequests((list) => { incomingRequests.value = list; }),
-    listenSaved((items) => { savedPostIds.value = new Set(items.filter((x) => x.type === 'post').map((x) => x.itemId)); }),
-    listenSafety((s) => { safety.value = { hidden: new Set(s.hiddenPostIds), blocked: new Set(s.blockedUserIds), muted: new Set(s.mutedUserIds) }; }),
+    listenFriendIds(id, (ids) => { if (valid()) friendIds.value = new Set(ids); }),
+    listenIncomingRequests((list) => { if (valid()) incomingRequests.value = list; }),
+    listenSaved((items) => { if (valid()) savedPostIds.value = new Set(items.filter((x) => x.type === 'post').map((x) => x.itemId)); }),
+    listenSafety((s) => { if (valid()) safety.value = { hidden: new Set(s.hiddenPostIds), blocked: new Set(s.blockedUserIds), muted: new Set(s.mutedUserIds) }; }),
     onSnapshot(query(collection(db, 'follows'), where('followerId', '==', id), limit(500)),
-      (s) => { followingIds.value = new Set(s.docs.map((d) => d.data().followingId)); }, () => {}),
+      (s) => { if (valid()) followingIds.value = new Set(s.docs.map((d) => d.data().followingId)); }, () => {}),
   ];
-  stop = () => unsubs.forEach((u) => u && u());
   // Wait for the profile snapshot before invite bookkeeping.
-  setTimeout(() => { claimPendingInvite(); ensureMyCode(); }, 4000);
+  const timer = setTimeout(() => { if (valid()) { claimPendingInvite(); ensureMyCode(); } }, 4000);
+  return () => { active = false; clearTimeout(timer); unsubs.forEach((stop) => stop?.()); };
 });
 
 /* Document title with an unread badge: "(3) შეტყობინებები · GeoHub". */

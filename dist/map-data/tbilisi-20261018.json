@@ -1,0 +1,57 @@
+{
+  "name": "GeoHub Tbilisi buildings and address labels",
+  "source": "OpenStreetMap / Protomaps",
+  "dataAsOf": "2026-10-18T04:00:00Z",
+  "sourceArchive": "https://build.protomaps.com/20261018.pmtiles",
+  "schemaVersion": "4.15.2",
+  "bbox": [
+    44.6,
+    41.58,
+    45.05,
+    41.91
+  ],
+  "minzoom": 11,
+  "maxzoom": 15,
+  "bytes": 19975438,
+  "sha256": "aa336014f2d2cab2a89490db8f46895ed7a8631def8246a9645391679f162000",
+  "license": "ODbL Produced Work; OpenStreetMap attribution required",
+  "attribution": "© OpenStreetMap contributors",
+  "copyrightUrl": "https://www.openstreetmap.org/copyright",
+  "documentation": "https://docs.protomaps.com/basemaps/downloads",
+  "scope": [
+    "building footprints",
+    "available building heights",
+    "house numbers",
+    "road names"
+  ],
+  "limitations": [
+    "Snapshot, not live updates.",
+    "OpenStreetMap may omit buildings and addresses.",
+    "Heights are source values and may be derived from levels or quantized; unknown heights stay flat.",
+    "Road geometry, land cover and outside-region geometry currently remain the CARTO basemap."
+  ],
+  "vectorLayers": [
+    "boundaries",
+    "buildings",
+    "earth",
+    "landcover",
+    "landuse",
+    "places",
+    "pois",
+    "roads",
+    "water"
+  ],
+  "archiveFile": "tbilisi-20261018.pmtiles",
+  "delivery": {
+    "format": "XYZ vector tiles",
+    "template": "/map-tiles/tbilisi-20261018-v1/{z}/{x}/{y}.mvt",
+    "layers": [
+      "buildings",
+      "roads"
+    ],
+    "tileCount": 2368,
+    "totalBytes": 17220089,
+    "largestBytes": 136326,
+    "sourceSha256": "aa336014f2d2cab2a89490db8f46895ed7a8631def8246a9645391679f162000"
+  }
+}

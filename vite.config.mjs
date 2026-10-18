@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { cpSync, existsSync, createReadStream, readFileSync, writeFileSync } from 'node:fs';
 import { join, normalize } from 'node:path';
 import { createHash } from 'node:crypto';
+import { advisorPlugin } from './web/tools/advisor-plugin.mjs';
 
 const root = fileURLToPath(new URL('./web', import.meta.url));
 const fixtures = join(root, 'e2e/fixtures');
@@ -68,7 +69,7 @@ function pagesWorker() {
 export default defineConfig(({ mode }) => ({
   root,
   publicDir: 'public',
-  plugins: [preact(), pagesWorker(), mode === 'emulator' && fixturesPlugin()].filter(Boolean),
+  plugins: [preact(), pagesWorker(), mode === 'emulator' && fixturesPlugin(), mode === 'advisor' && advisorPlugin()].filter(Boolean),
   build: {
     outDir: fileURLToPath(new URL(mode === 'emulator' ? './.dist-emulator' : './dist', import.meta.url)),
     emptyOutDir: true,

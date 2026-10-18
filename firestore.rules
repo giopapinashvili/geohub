@@ -167,6 +167,24 @@ service cloud.firestore {
              .hasOnly(['viewedBy', 'viewCount', 'updatedAt']);
     }
 
+    // Displaying a page identity never replaces the authenticated creator UID.
+    function validContentIdentity(data) {
+      return signedIn()
+        && data.get('authorId', uid()) == uid()
+        && data.get('userId', uid()) == uid()
+        && (data.get('authorType', 'user') == 'user'
+          || (data.get('authorType', '') == 'business'
+            && data.get('businessId', '') is string
+            && data.get('businessId', '') != ''
+            && canManageBiz(data.businessId)));
+    }
+    function contentIdentityUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'authorId', 'userId', 'authorType', 'businessId', 'createdByUid',
+        'authorName', 'authorAvatar', 'createdAt'
+      ]);
+    }
+
     // Fields a post owner/business owner may edit after creation.
     function onlyPostManagementFields() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -206,14 +224,15 @@ service cloud.firestore {
     function onlyChannelCountersChanged() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
         'subscriberCount', 'videoCount'
-      ]);
+      ]) && counterDelta('subscriberCount') && counterDelta('videoCount');
     }
 
     // Returns true when the requesting user owns the business at bizId.
-    // Uses exists() on businessAdmins rather than a get() to keep cost low.
+    // Bind the grant's contents to its ID. Otherwise a manager of business A
+    // could create an A grant using B_uid as the document ID and manage B.
     function isBizOwner(bizId) {
-      return signedIn()
-        && exists(/databases/$(database)/documents/businessAdmins/$(bizId + '_' + request.auth.uid));
+      let grant = get(/databases/$(database)/documents/businessAdmins/$(bizId + '_' + request.auth.uid)).data;
+      return signedIn() && grant != null && grant.get('businessId', '') == bizId && grant.get('userId', '') == uid();
     }
 
     // New per-page admin roles live under businesses/{businessId}/admins/{uid}.
@@ -225,12 +244,13 @@ service cloud.firestore {
     // Some older business documents only store ownerId on /businesses/{id}.
     function isBizDocOwner(bizId) {
       return signedIn()
-        && exists(/databases/$(database)/documents/businesses/$(bizId))
         && get(/databases/$(database)/documents/businesses/$(bizId)).data.get('ownerId', '') == uid();
     }
 
     function canManageBiz(bizId) {
-      return isAdmin() || isBizOwner(bizId) || isBizPageAdmin(bizId) || isBizDocOwner(bizId);
+      // Keep the common owner/admin paths short, leaving access-call budget
+      // for item and branch validation in a single commerce write.
+      return isAdmin() || isBizDocOwner(bizId) || isBizPageAdmin(bizId) || isBizOwner(bizId);
     }
 
     function isGroupMember(groupId) {
@@ -357,6 +377,41 @@ service cloud.firestore {
             || (convData.get('forBusiness', false) == true
                 && (convData.get('ownerUid', '') == uid()
                     || convData.get('customerUid', '') == uid())));
+    }
+
+    function validNewBusinessConversation(data) {
+      let business = get(/databases/$(database)/documents/businesses/$(data.get('businessId', ''))).data;
+      let customer = data.get('customerUid', '');
+      let owner = data.get('ownerUid', '');
+      return business != null && customer == uid() && owner != customer
+        && owner == business.get('ownerId', business.get('createdBy', business.get('userId', '')))
+        && data.get('participants', []).size() == 2
+        && data.participants.hasAll([customer, owner])
+        && data.get('memberUids', []).size() == 2
+        && data.memberUids.hasAll([customer, owner])
+        && data.get('inboxActorIds', []).size() == 2
+        && data.inboxActorIds.hasAll(['user_' + customer, 'business_' + data.businessId]);
+    }
+    function conversationIdentityUnchanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'participants', 'memberUids', 'forBusiness', 'businessId', 'ownerUid', 'customerUid',
+        'inboxActorIds', 'inboxKeys', 'customerActorId', 'pageActorId', 'type'
+      ]);
+    }
+    function validMessageIdentity(conversationId, data) {
+      let conversation = get(/databases/$(database)/documents/conversations/$(conversationId)).data;
+      let actorId = data.get('senderActorId', 'user_' + uid());
+      let type = data.get('senderActorType', actorId.matches('^business[_:].*') ? 'business' : 'user');
+      return data.get('senderId', '') == uid()
+        && data.get('authorId', uid()) == uid() && data.get('performedByUid', uid()) == uid()
+        && ((type == 'user'
+            && actorId in ['user_' + uid(), 'user:' + uid()]
+            && data.get('senderActorKey', 'user:' + uid()) == 'user:' + uid())
+          || (type == 'business' && conversation.get('forBusiness', false) == true
+            && conversation.get('businessId', '') is string
+            && actorId in ['business_' + conversation.businessId, 'business:' + conversation.businessId]
+            && data.get('senderActorKey', 'business:' + conversation.businessId) == 'business:' + conversation.businessId
+            && canManageBiz(conversation.businessId)));
     }
 
     // ── USERS ─────────────────────────────────────────────────────────────────
@@ -518,6 +573,7 @@ service cloud.firestore {
       // Require either text or a media URL so an empty document cannot be used
       // as a fake engagement anchor.
       allow create: if newOwnerMatches()
+        && validContentIdentity(request.resource.data)
         && request.resource.data.get('text', '') is string
         && (request.resource.data.get('text', '') != ''
             || request.resource.data.get('mediaUrl', '') != ''
@@ -550,13 +606,14 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read: if canReadPostId(postId);
         allow create: if newOwnerMatches()
+          && validContentIdentity(request.resource.data)
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
         // Authors may edit text or soft-delete their own comments; counters are updated by reactions/replies.
-        allow update: if isAdmin()
+        allow update: if contentIdentityUnchanged() && (isAdmin()
           || onlyCommentCountersChanged()
           || (existingOwnerMatches() && (onlyCommentTextChanged() || onlyCommentSoftDeleteChanged()))
-          || isBizOwnerOfPost(postId);
+          || isBizOwnerOfPost(postId));
         allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
 
         match /reactions/{rxUserId} {
@@ -569,9 +626,11 @@ service cloud.firestore {
         match /replies/{replyId} {
           allow read: if canReadPostId(postId);
           allow create: if newOwnerMatches()
+            && validContentIdentity(request.resource.data)
             && request.resource.data.get('text', '') is string
             && request.resource.data.get('text', '').size() > 0;
-          allow update, delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
+          allow update: if contentIdentityUnchanged() && (isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId));
+          allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
         }
       }
 
@@ -609,9 +668,14 @@ service cloud.firestore {
                 || resource.data.get('userId', '') == uid()
                 || uid() in resource.data.get('closeFriendsList', [])
                 || isAdmin()));
-      allow create: if newOwnerMatches();
-      allow update: if isAdmin() || existingOwnerMatches() || onlyStoryViewFields();
-      allow delete: if isAdmin() || existingOwnerMatches();
+      allow create: if newOwnerMatches() && validContentIdentity(request.resource.data)
+        && (request.resource.data.get('authorType', 'user') != 'business' || request.resource.data.get('closeFriends', true) == false);
+      allow update: if contentIdentityUnchanged() && (
+        isAdmin() || existingOwnerMatches() || onlyStoryViewFields()
+        || (resource.data.get('authorType', '') == 'business' && canManageBiz(resource.data.get('businessId', ''))))
+        && (request.resource.data.get('authorType', 'user') != 'business' || request.resource.data.get('closeFriends', true) == false);
+      allow delete: if isAdmin() || existingOwnerMatches()
+        || (resource.data.get('authorType', '') == 'business' && canManageBiz(resource.data.get('businessId', '')));
 
       match /reactions/{rxUserId} {
         allow read: if true;
@@ -622,6 +686,7 @@ service cloud.firestore {
       match /replies/{replyId} {
         allow read: if signedIn();
         allow create: if newOwnerMatches()
+          && validContentIdentity(request.resource.data)
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
         allow delete: if isAdmin() || existingOwnerMatches();
@@ -643,7 +708,19 @@ service cloud.firestore {
       allow delete: if isAdmin() || existingOwnerMatches();
     }
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /places/{placeId}     { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    function validCoordinatePair(data) {
+      return (data.get('lat', null) == null && data.get('lng', null) == null)
+        || (data.get('lat', null) is number && data.get('lng', null) is number
+            && data.lat >= -90 && data.lat <= 90 && data.lng >= -180 && data.lng <= 180);
+    }
+    match /places/{placeId} {
+      allow read: if true;
+      allow create: if newOwnerMatches() && validCoordinatePair(request.resource.data);
+      allow update: if (isAdmin() || existingOwnerMatches())
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lat', 'lng'])
+            || validCoordinatePair(request.resource.data));
+      allow delete: if isAdmin() || existingOwnerMatches();
+    }
     match /placeCategories/{catId} { allow read: if true; allow create, update, delete: if isAdmin(); }
 
     // Username reservation — each doc ID is the username (lowercase).
@@ -691,11 +768,38 @@ service cloud.firestore {
 
     // ── BUSINESSES ────────────────────────────────────────────────────────────
 
+    function validMenuPhoto(photo) {
+      // The displayed URL is validated here. Optional media/source metadata is
+      // normalized by the editor, keeping twenty photos below the rule budget.
+      return photo.url is string && photo.url.size() <= 2048 && photo.url.matches('^https://[^ ]+$');
+    }
+    function menuPhotoAt(data, index) {
+      return data.menuPhotos.size() <= index || validMenuPhoto(data.menuPhotos[index]);
+    }
+    function validMenuPhotos(data) {
+      return !data.keys().hasAny(['menuPhotos'])
+        || (data.menuPhotos is list && data.menuPhotos.size() <= 20
+            && menuPhotoAt(data, 0) && menuPhotoAt(data, 1) && menuPhotoAt(data, 2) && menuPhotoAt(data, 3)
+            && menuPhotoAt(data, 4) && menuPhotoAt(data, 5) && menuPhotoAt(data, 6) && menuPhotoAt(data, 7)
+            && menuPhotoAt(data, 8) && menuPhotoAt(data, 9) && menuPhotoAt(data, 10) && menuPhotoAt(data, 11)
+            && menuPhotoAt(data, 12) && menuPhotoAt(data, 13) && menuPhotoAt(data, 14) && menuPhotoAt(data, 15)
+            && menuPhotoAt(data, 16) && menuPhotoAt(data, 17) && menuPhotoAt(data, 18) && menuPhotoAt(data, 19));
+    }
+
     match /businesses/{businessId} {
       allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update: if canManageBiz(businessId) || existingOwnerMatches() || onlyBusinessCountersChanged();
+      allow create: if newOwnerMatches() && validMenuPhotos(request.resource.data);
+      allow update: if (canManageBiz(businessId) || existingOwnerMatches() || onlyBusinessCountersChanged())
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['menuPhotos']) || validMenuPhotos(request.resource.data));
       allow delete: if canManageBiz(businessId) || existingOwnerMatches();
+
+      match /storyArchive/{storyId} {
+        allow read, delete: if canManageBiz(businessId);
+        allow create: if canManageBiz(businessId)
+          && validContentIdentity(request.resource.data)
+          && request.resource.data.get('authorType', '') == 'business'
+          && request.resource.data.get('businessId', '') == businessId;
+      }
 
       // ── Services, products, and price list: owner/page-admin CRUD, public read ──
       match /services/{serviceId} {
@@ -831,6 +935,7 @@ service cloud.firestore {
             && request.resource.data.get('userId', '') == uid()
             && request.resource.data.get('businessId', '') is string
             && request.resource.data.get('businessId', '') != ''
+            && adminId == request.resource.data.businessId + '_' + uid()
             && get(/databases/$(database)/documents/businesses/$(request.resource.data.get('businessId',''))).data.get('ownerId','') == uid());
       allow update: if isAdmin();
       allow delete: if isAdmin() || resource.data.get('userId', '') == uid()
@@ -855,13 +960,166 @@ service cloud.firestore {
     }
     match /businessOffers/{offerId} {
       allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
+      allow create: if signedIn() && newOwnerMatches()
+        && canManageBiz(request.resource.data.get('businessId', ''));
+      allow update: if canManageBiz(resource.data.get('businessId', ''))
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['businessId', 'createdBy', 'ownerId', 'createdAt']);
+      allow delete: if canManageBiz(resource.data.get('businessId', ''));
     }
     match /businessAnalytics/{analyticsId} {
       allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
       allow create, update: if signedIn() && request.resource.data.get('ownerId', '') == uid();
       allow delete: if isAdmin();
+    }
+
+    // ── STRUCTURED COMMERCE ───────────────────────────────────────────────────
+    // New collections preserve legacy services/products/offers. Drafts are
+    // private; public queries must explicitly constrain status == published.
+    function commerceText(value, maximum) {
+      return value is string && value.size() <= maximum;
+    }
+    function commerceId(value) {
+      return value is string && value.matches('^[A-Za-z0-9_-]{1,150}$');
+    }
+    function commerceMoney(value) {
+      return value is int && value >= 0 && value <= 100000000;
+    }
+    function commerceUrl(value) {
+      return commerceText(value, 2048) && (value == '' || value.matches('^https://[^ ]+$'));
+    }
+    function commerceMeta(data) {
+      return commerceId(data.businessId)
+        && data.status in ['draft', 'published', 'archived']
+        && commerceText(data.title, 160) && data.title.size() > 0
+        && data.isDemo is bool && data.datasetVersion == 1
+        && ((data.isDemo == false && data.demoBatchId == '')
+            || (data.isDemo == true && commerceId(data.demoBatchId)))
+        && data.createdAt is timestamp && data.updatedAt == request.time;
+    }
+    function commerceImmutable() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'businessId', 'createdBy', 'createdAt', 'isDemo', 'demoBatchId', 'datasetVersion'
+      ]);
+    }
+    function commerceCreate(data) {
+      return signedIn() && data.createdBy == uid() && data.createdAt == request.time
+        && canManageBiz(data.businessId)
+        && exists(/databases/$(database)/documents/businesses/$(data.businessId))
+        && (data.isDemo == false || isAdmin());
+    }
+    function commerceArchiveOnly() {
+      return request.resource.data.status == 'archived'
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+    }
+    function commerceBranchAt(data, index) {
+      return data.branchIds.size() <= index
+        || (commerceId(data.branchIds[index])
+            && commerceBranchMatches(get(/databases/$(database)/documents/businessBranches/$(data.branchIds[index])).data, data));
+    }
+    function commerceBranchMatches(branch, data) {
+      return branch.businessId == data.businessId && branch.status == 'published'
+        && branch.isDemo == data.isDemo && branch.demoBatchId == data.demoBatchId;
+    }
+    function commerceBranches(data) {
+      return data.allBranches is bool && data.branchIds is list && data.branchIds.size() <= 5
+        && data.branchIds.toSet().size() == data.branchIds.size()
+        && ((data.allBranches == true && data.branchIds.size() == 0)
+            || (data.allBranches == false && data.branchIds.size() > 0
+                && commerceBranchAt(data, 0) && commerceBranchAt(data, 1) && commerceBranchAt(data, 2)
+                && commerceBranchAt(data, 3) && commerceBranchAt(data, 4)));
+    }
+    function commerceComponentAt(data, itemId, index) {
+      return data.bundleItemIds.size() <= index
+        || (commerceId(data.bundleItemIds[index]) && data.bundleItemIds[index] != itemId
+            && commerceComponentMatches(get(/databases/$(database)/documents/commerceItems/$(data.bundleItemIds[index])).data, data));
+    }
+    function commerceComponentMatches(item, data) {
+      return item.businessId == data.businessId && item.type != 'bundle'
+        && item.isDemo == data.isDemo && item.demoBatchId == data.demoBatchId;
+    }
+    function commerceItem(data, itemId) {
+      return data.keys().hasOnly([
+          'businessId', 'type', 'title', 'description', 'categoryId', 'imageUrl', 'imageAssetId', 'sourceUrl',
+          'priceMinor', 'currency', 'status', 'available', 'allBranches', 'branchIds', 'dietaryTags',
+          'preparationMinutes', 'bundleItemIds', 'isDemo', 'demoBatchId', 'datasetVersion', 'createdBy', 'createdAt', 'updatedAt'
+        ]) && commerceMeta(data) && commerceBranches(data)
+        && data.type in ['product', 'dish', 'service', 'bundle']
+        && commerceText(data.description, 4000) && commerceText(data.categoryId, 100)
+        && commerceUrl(data.imageUrl) && commerceUrl(data.sourceUrl) && commerceText(data.imageAssetId, 300)
+        && (data.priceMinor == null || commerceMoney(data.priceMinor))
+        && data.currency in ['GEL', 'USD', 'EUR'] && data.available is bool
+        && data.dietaryTags is list && data.dietaryTags.size() <= 5
+        && data.dietaryTags.toSet().size() == data.dietaryTags.size()
+        && data.dietaryTags.hasOnly(['vegetarian', 'vegan', 'halal', 'gluten-free', 'dairy-free'])
+        && (data.preparationMinutes == null || (data.preparationMinutes is int && data.preparationMinutes >= 1 && data.preparationMinutes <= 1440))
+        && (data.type == 'dish' || (data.dietaryTags.size() == 0 && data.preparationMinutes == null))
+        && data.bundleItemIds is list && data.bundleItemIds.size() <= 5
+        && data.bundleItemIds.size() + data.branchIds.size() <= 5
+        && data.bundleItemIds.toSet().size() == data.bundleItemIds.size()
+        && ((data.type != 'bundle' && data.bundleItemIds.size() == 0)
+            || (data.type == 'bundle' && data.bundleItemIds.size() > 0
+                && commerceComponentAt(data, itemId, 0) && commerceComponentAt(data, itemId, 1) && commerceComponentAt(data, itemId, 2)
+                && commerceComponentAt(data, itemId, 3) && commerceComponentAt(data, itemId, 4)));
+    }
+    function commerceOffer(data) {
+      return data.keys().hasOnly([
+          'businessId', 'itemId', 'type', 'categoryId', 'title', 'description', 'conditions', 'imageUrl',
+          'originalPriceMinor', 'priceMinor', 'currency', 'startsAtMs', 'endsAtMs', 'status',
+          'allBranches', 'branchIds', 'isDemo', 'demoBatchId', 'datasetVersion', 'createdBy', 'createdAt', 'updatedAt'
+        ]) && commerceMeta(data) && commerceBranches(data)
+        && commerceId(data.itemId) && data.type in ['product', 'dish', 'service', 'bundle']
+        && commerceText(data.description, 4000) && commerceText(data.conditions, 2000)
+        && commerceText(data.categoryId, 100) && commerceUrl(data.imageUrl)
+        && commerceMoney(data.originalPriceMinor) && commerceMoney(data.priceMinor)
+        && data.originalPriceMinor > data.priceMinor && data.currency in ['GEL', 'USD', 'EUR']
+        && data.startsAtMs is int && data.startsAtMs >= 0
+        && data.endsAtMs is int && data.endsAtMs > data.startsAtMs && data.endsAtMs <= 4102444800000;
+    }
+    function commerceOfferItem(data) {
+      let item = get(/databases/$(database)/documents/commerceItems/$(data.itemId)).data;
+      return item.businessId == data.businessId && item.status == 'published' && item.available == true
+        && item.type == data.type && item.currency == data.currency && item.categoryId == data.categoryId
+        && item.priceMinor == data.originalPriceMinor
+        && item.isDemo == data.isDemo && item.demoBatchId == data.demoBatchId
+        && (item.allBranches == true || (data.allBranches == false && item.branchIds.hasAll(data.branchIds)));
+    }
+    match /commerceItems/{itemId} {
+      allow read: if resource.data.status == 'published' || canManageBiz(resource.data.businessId);
+      allow create: if commerceItem(request.resource.data, itemId) && commerceCreate(request.resource.data);
+      allow update: if canManageBiz(resource.data.businessId) && commerceImmutable()
+        && (commerceArchiveOnly() || commerceItem(request.resource.data, itemId));
+      // A live item is archived so linked offers/history keep their identity.
+      allow delete: if isAdmin() && resource.data.isDemo == true;
+    }
+    match /commerceOffers/{offerId} {
+      allow read: if resource.data.status == 'published' || canManageBiz(resource.data.businessId);
+      allow create: if commerceOffer(request.resource.data) && commerceOfferItem(request.resource.data) && commerceCreate(request.resource.data);
+      allow update: if canManageBiz(resource.data.businessId) && commerceImmutable()
+        && request.resource.data.itemId == resource.data.itemId
+        && (commerceArchiveOnly() || (commerceOffer(request.resource.data) && commerceOfferItem(request.resource.data)));
+      allow delete: if isAdmin() && resource.data.isDemo == true;
+    }
+    match /businessBranches/{branchId} {
+      function validBranch(data) {
+        return data.keys().hasOnly([
+            'businessId', 'placeId', 'parentMallId', 'title', 'address', 'city', 'lat', 'lng', 'status',
+            'isDemo', 'demoBatchId', 'datasetVersion', 'createdBy', 'createdAt', 'updatedAt'
+          ]) && commerceMeta(data) && validCoordinatePair(data)
+          && (data.placeId == '' || (commerceId(data.placeId) && exists(/databases/$(database)/documents/places/$(data.placeId))))
+          && (data.get('parentMallId', '') == '' || (commerceId(data.parentMallId) && exists(/databases/$(database)/documents/places/$(data.parentMallId))))
+          && commerceText(data.address, 300) && commerceText(data.city, 100);
+      }
+      allow read: if resource.data.status == 'published' || canManageBiz(resource.data.businessId);
+      allow create: if validBranch(request.resource.data) && commerceCreate(request.resource.data);
+      allow update: if canManageBiz(resource.data.businessId) && commerceImmutable()
+        && (commerceArchiveOnly() || validBranch(request.resource.data));
+      allow delete: if isAdmin() && resource.data.isDemo == true;
+    }
+    // Cleanup manifests are administrator-only and must never contain business
+    // or place deletes. The deletion tool revalidates each targeted document.
+    match /commerceDemoBatches/{batchId} {
+      allow read, create, update, delete: if isAdmin();
     }
 
     // ── SOCIAL GRAPH ──────────────────────────────────────────────────────────
@@ -1169,21 +1427,21 @@ service cloud.firestore {
         || (request.resource.data.get('forBusiness', false) == true
             && (request.resource.data.get('ownerUid', '') == uid()
                 || request.resource.data.get('customerUid', '') == uid()))
-      );
-      allow read, update, delete: if isAdmin()
+      ) && (request.resource.data.get('forBusiness', false) != true || validNewBusinessConversation(request.resource.data));
+      allow read, delete: if isAdmin()
         || (signedIn() && uid() in resource.data.get('participants', []))
         || (signedIn() && uid() in resource.data.get('memberUids', []))
         || (signedIn()
             && resource.data.get('forBusiness', false) == true
             && (resource.data.get('ownerUid', '') == uid()
                 || resource.data.get('customerUid', '') == uid()));
+      allow update: if conversationIdentityUnchanged() && (isAdmin() || isConversationParticipant(conversationId));
 
       match /messages/{messageId} {
         allow read: if isAdmin() || isConversationParticipant(conversationId);
         // Only a participant may create a message and only as themselves.
-        allow create: if isAdmin()
-          || (isConversationParticipant(conversationId)
-              && request.resource.data.senderId == uid());
+        allow create: if signedIn() && (isAdmin() || isConversationParticipant(conversationId))
+          && validMessageIdentity(conversationId, request.resource.data);
         // Sender may edit their own message; any participant may mark it
         // deleted/liked (narrow field allowlist).
         allow update: if isAdmin()
@@ -1281,6 +1539,13 @@ service cloud.firestore {
 
     // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
 
+    function validNotificationSender(data) {
+      return !data.keys().hasAny(['fromActorType', 'fromActorId'])
+        || (data.get('fromActorType', '') == 'user' && data.get('fromActorId', '') == uid())
+        || (data.get('fromActorType', '') == 'business'
+          && data.get('fromActorId', '') is string && data.fromActorId != ''
+          && canManageBiz(data.fromActorId));
+    }
     match /userNotifications/{notificationId} {
       allow read: if signedIn()
         && (resource.data.get('userId',   '') == uid()
@@ -1294,7 +1559,8 @@ service cloud.firestore {
         || (signedIn()
             // fromUserId must match the caller (prevents spoofing).
             // Self-notifications (badge, reward) are allowed: userId == toUserId == uid().
-            && request.resource.data.get('fromUserId', '') == uid());
+            && request.resource.data.get('fromUserId', '') == uid()
+            && validNotificationSender(request.resource.data));
       // Recipients may only mark a notification read/seen, nothing else.
       allow update: if isAdmin()
         || (signedIn()
@@ -1311,6 +1577,17 @@ service cloud.firestore {
 
     // ── REVIEWS ───────────────────────────────────────────────────────────────
 
+    function validPlaceReview(data) {
+      let tags = data.get('experienceTags', []);
+      return data.get('placeId', '') is string
+        && data.placeId.matches('^[A-Za-z0-9_-]{1,150}$')
+        && data.get('rating', 0) is int && data.rating >= 1 && data.rating <= 5
+        && data.get('comment', '') is string && data.get('comment', '').size() <= 1000
+        && tags is list && tags.size() <= 6 && tags.toSet().size() == tags.size()
+        && tags.hasOnly(['tasty', 'good-service', 'cozy', 'quiet', 'lively', 'good-value',
+          'family-friendly', 'fast-service', 'clean', 'easy-parking', 'accessible', 'good-for-work']);
+    }
+
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if newOwnerMatches();
@@ -1318,8 +1595,12 @@ service cloud.firestore {
     }
     match /placeReviews/{reviewId} {
       allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin()
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid()
+        && validPlaceReview(request.resource.data);
+      allow update: if (isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()))
+        && validPlaceReview(request.resource.data)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'placeId', 'createdAt']);
+      allow delete: if isAdmin()
         || (signedIn() && resource.data.get('userId', '') == uid());
     }
 
@@ -1684,6 +1965,14 @@ service cloud.firestore {
         && request.resource.data.get('status', '') in ['active', 'hidden', 'removed'];
     }
 
+    function validVideoChannel(data) {
+      let channelId = data.get('channelId', null);
+      return channelId == null || channelId == ''
+        || (channelId is string && channelId.matches('^[A-Za-z0-9_-]{1,150}$')
+          && exists(/databases/$(database)/documents/channels/$(channelId))
+          && get(/databases/$(database)/documents/channels/$(channelId)).data.get('ownerId', '') == uid());
+    }
+
     match /videos/{videoId} {
       // Public read: watch page needs to load hidden/removed docs to show
       // the "unavailable" message; client-side code filters the feed.
@@ -1692,7 +1981,8 @@ service cloud.firestore {
       // Create: must claim own authorId; status must start 'active'.
       allow create: if signedIn()
         && request.resource.data.get('authorId', '') == uid()
-        && request.resource.data.get('status', 'active') == 'active';
+        && request.resource.data.get('status', 'active') == 'active'
+        && validVideoChannel(request.resource.data);
 
       // Update: counters (any signed-in), safe edits (creator), status (mod), all (admin).
       allow update: if isAdmin()
@@ -1715,10 +2005,11 @@ service cloud.firestore {
         allow read: if true;
         allow create: if signedIn()
           && request.resource.data.get('authorId', '') == uid()
+          && validContentIdentity(request.resource.data)
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
         allow update: if isAdmin()
-          || (existingOwnerMatches() && onlyCommentTextChanged())
+          || (existingOwnerMatches() && contentIdentityUnchanged() && onlyCommentTextChanged())
           || onlyCommentCountersChanged();
         // Comment author OR video owner OR admin.
         allow delete: if isAdmin()
@@ -1785,8 +2076,14 @@ service cloud.firestore {
       allow read:   if true;
       allow create: if signedIn()
         && request.resource.data.get('ownerId', '') == uid()
-        && request.resource.data.get('name', '').size() > 0;
-      allow update: if isOwner(resource.data.get('ownerId', ''))
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() > 0
+        && request.resource.data.get('name', '').size() <= 80;
+      allow update: if (isOwner(resource.data.get('ownerId', ''))
+          && request.resource.data.get('ownerId', '') == resource.data.get('ownerId', '')
+          && request.resource.data.get('name', '') is string
+          && request.resource.data.get('name', '').size() > 0
+          && request.resource.data.get('name', '').size() <= 80)
         || isAdmin()
         || (signedIn() && onlyChannelCountersChanged());
       allow delete: if isOwner(resource.data.get('ownerId', '')) || isAdmin();

@@ -61,10 +61,10 @@ export function Verified({ size = 16 }) {
  * rendered CSS width, used to request a right-sized Cloudinary variant.
  */
 export function Img({ src, alt = '', width = 600, class: cls = '', fallback, ratio, style, eager, ...rest }) {
-  const [failed, setFailed] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [failedUrl, setFailedUrl] = useState(null);
+  const [loadedUrl, setLoadedUrl] = useState(null);
   const url = optimise(src, width);
-  if (!url || failed) {
+  if (!url || url === failedUrl) {
     return fallback !== undefined ? fallback : <span class={`img-fallback ${cls}`} style={{ aspectRatio: ratio, ...style }} aria-hidden="true"><Icon name="image" size={28} /></span>;
   }
   return (
@@ -73,10 +73,10 @@ export function Img({ src, alt = '', width = 600, class: cls = '', fallback, rat
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
-      class={`img${loaded ? ' is-loaded' : ''} ${cls}`}
+        class={`img${loadedUrl === url ? ' is-loaded' : ''} ${cls}`}
       style={{ aspectRatio: ratio, ...style }}
-      onLoad={() => setLoaded(true)}
-      onError={() => setFailed(true)}
+        onLoad={() => setLoadedUrl(url)}
+        onError={() => setFailedUrl(url)}
       referrerpolicy="no-referrer"
       {...rest}
     />

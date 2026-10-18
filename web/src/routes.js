@@ -1,4 +1,5 @@
 import { lazy } from 'preact/compat';
+import { DEMO_ENABLED } from './lib/commerceDemoConfig.js';
 
 // A deploy replaces every hashed chunk; a tab opened before the deploy then
 // fails to load the next page. Reload once to pick up the new build.
@@ -23,6 +24,7 @@ function page(loader) {
  * auth: true — signed-out visitors are sent to /login
  */
 export const ROUTES = [
+  ...(import.meta.env.DEV && import.meta.env.MODE === 'advisor' ? [{ path: '/advisor', component: page(() => import('./pages/Advisor.jsx')), layout: 'full' }] : []),
   { path: '/', component: page(() => import('./pages/Home.jsx')), layout: 'feed', nav: 'home' },
   { path: '/post/:id', component: page(() => import('./pages/PostPage.jsx')), layout: 'feed', nav: 'home' },
   { path: '/reels/:id?', component: page(() => import('./pages/Reels.jsx')), layout: 'full', nav: 'reels', immersive: true },
@@ -33,6 +35,8 @@ export const ROUTES = [
   { path: '/explore', component: page(() => import('./pages/Explore.jsx')), layout: 'page', nav: 'explore' },
   { path: '/search', component: page(() => import('./pages/Search.jsx')), layout: 'page', nav: 'explore' },
   { path: '/map', component: page(() => import('./pages/MapPage.jsx')), layout: 'full', nav: 'map' },
+  { path: '/discounts', component: page(() => import('./pages/Discounts.jsx')), layout: 'page', nav: 'discounts' },
+  ...(DEMO_ENABLED ? [{ path: '/discounts/demo/:id', component: page(() => import('./pages/DemoMerchant.jsx')), layout: 'page', nav: 'discounts' }] : []),
   { path: '/place/:id', component: page(() => import('./pages/Place.jsx')), layout: 'page', nav: 'explore' },
   { path: '/u/:id', component: page(() => import('./pages/Profile.jsx')), layout: 'page', nav: 'profile' },
   { path: '/messages/:id?', component: page(() => import('./pages/Messages.jsx')), layout: 'full', nav: 'messages', auth: true },

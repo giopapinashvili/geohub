@@ -7,7 +7,9 @@ import { Menu } from '../../ui/Menu.jsx';
 import { SearchInput } from '../../ui/Field.jsx';
 import { Spinner } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
-import { profile } from '../../lib/auth.js';
+import { profile, uid } from '../../lib/auth.js';
+import { postDraftKey } from '../../lib/contentIdentity.js';
+import { PersonalActionNotice } from '../auth/PersonalActionNotice.jsx';
 import { composer, friendIds, closeFriendIds } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import { upload } from '../../lib/media.js';
@@ -19,7 +21,6 @@ import { BACKGROUNDS } from './backgrounds.js';
 import { AUDIENCE } from './PostCard.jsx';
 
 const FEELINGS = ['😊 ბედნიერი', '🥰 შეყვარებული', '😂 მხიარული', '🤩 აღფრთოვანებული', '😌 მშვიდი', '🙏 მადლიერი', '💪 მოტივირებული', '🎉 ზეიმობს', '😎 მაგარი', '🤔 ფიქრობს', '😴 დაღლილი', '😢 მოწყენილი', '🏖️ მოგზაურობს', '🍷 ქეიფობს', '⚽ გულშემატკივრობს', '🎂 იუბილარი'];
-const DRAFT_KEY = 'gh_draft';
 
 function Picker({ title, onBack, children }) {
   return (
@@ -133,7 +134,8 @@ function PlacePicker({ onPick, onBack }) {
 export default function Composer() {
   const opts = composer.value || {};
   const p = profile.value;
-  const [text, setText] = useState(() => { try { return opts.sharedPost ? '' : localStorage.getItem(DRAFT_KEY) || ''; } catch { return ''; } });
+  const draftKey = useRef(postDraftKey(uid.value, { businessId: opts.asBusiness?.id, groupId: opts.groupId })).current;
+  const [text, setText] = useState(() => { try { return opts.sharedPost || !draftKey ? '' : localStorage.getItem(draftKey) || ''; } catch { return ''; } });
   const [media, setMedia] = useState([]); // [{ id, url?, preview, progress, type, error }]
   const [audience, setAudience] = useState('public');
   const [bg, setBg] = useState(null);
@@ -148,7 +150,11 @@ export default function Composer() {
   const close = () => { composer.value = null; };
 
   useEffect(() => { if (opts.pick === 'media') setTimeout(() => fileRef.current?.click(), 250); }, []);
-  useEffect(() => { try { if (!opts.sharedPost) localStorage.setItem(DRAFT_KEY, text); } catch { /* ignore */ } }, [text]);
+  const changeText = value => {
+    setText(value);
+    // Persist the input before close/switch can unmount the composer.
+    try { if (!opts.sharedPost && draftKey) localStorage.setItem(draftKey, value); } catch { /* storage unavailable */ }
+  };
 
   const addFiles = (files) => {
     const list = Array.from(files || []).slice(0, 10 - media.length);
@@ -197,7 +203,7 @@ export default function Composer() {
         closeFriendIds: audience === 'close_friends' ? [...closeFriendIds.value] : undefined,
         friendIds: audience === 'friends' ? [...friendIds.value] : undefined,
       });
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      try { if (draftKey) localStorage.removeItem(draftKey); } catch { /* ignore */ }
       toast.success(t(opts.needsApproval ? 'composer.pendingApproval' : 'composer.published'));
       opts.onCreated?.(created);
       window.dispatchEvent(new CustomEvent('gh:post-created', { detail: created }));
@@ -229,6 +235,7 @@ export default function Composer() {
       )}
       {view === 'main' && (
         <div class="composer">
+          {opts.groupId && <PersonalActionNotice>ჯგუფში წევრობა და პოსტის გამოქვეყნება პირად პროფილს ეკუთვნის.</PersonalActionNotice>}
           <div class="composer-author">
             <Avatar src={authorAvatar} name={authorName} size={44} square={!!opts.asBusiness} />
             <div class="composer-author-text">
@@ -255,7 +262,7 @@ export default function Composer() {
             <textarea
               class={`composer-input${bigText || bg ? ' is-big' : ''}`}
               value={text}
-              onInput={(e) => setText(e.currentTarget.value)}
+              onInput={(e) => changeText(e.currentTarget.value)}
               placeholder={opts.groupId ? t('composer.placeholderGroup') : t('composer.placeholder', { name: (p?.name || '').split(' ')[0] })}
               aria-label={t('composer.title')}
               maxLength={5000}

@@ -6,6 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vite",
+    "dev:advisor": "vite --mode advisor --host 127.0.0.1 --port 5174",
+    "test:advisor": "node --test web/tools/advisor-*.test.mjs",
     "dev:emulator": "vite --mode emulator",
     "build": "vite build",
     "build:emulator": "vite build --mode emulator",

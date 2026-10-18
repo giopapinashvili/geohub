@@ -1,3 +1,5 @@
+import { applyTbilisiBasemap } from './tbilisiBasemap.js';
+
 // Both palettes share geometry and layers, so changing mode preserves the camera.
 const DEM_SOURCE = 'gh-relief';
 const HILLS = 'gh-hillshade';
@@ -194,5 +196,6 @@ export function applyMapAppearance(map, mode = 'light') {
   }
   map.setPaintProperty('gh-buildings-3d', 'fill-extrusion-color', colors.extrusion);
   map.setLayoutProperty('gh-buildings-3d', 'visibility', map.getPitch() > 1 ? 'visible' : 'none');
+  applyTbilisiBasemap(map, colors);
   map.setLight({ anchor: 'viewport', color: colors.lightColor, intensity: colors.lightIntensity, position: [1.5, 210, 40] });
 }

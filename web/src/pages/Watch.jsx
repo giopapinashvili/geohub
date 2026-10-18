@@ -24,7 +24,11 @@ import { copyLink } from '../features/post/ShareDialog.jsx';
 
 export function SubscribeButton({ channel, onChange }) {
   const [on, setOn] = useState(false);
-  useEffect(() => { isSubscribed(channel.id).then(setOn); }, [channel.id, uid.value]);
+  useEffect(() => {
+    let active = true; setOn(false);
+    isSubscribed(channel.id).then(value => { if (active) setOn(value); });
+    return () => { active = false; };
+  }, [channel.id, uid.value]);
   if (channel.ownerId === uid.value) return <Button variant="secondary" href={`/video/channel/${channel.id}`}>{t('video.yourChannel')}</Button>;
   return (
     <Button variant={on ? 'secondary' : 'primary'} icon={on ? 'bell-ringing' : 'bell'} onClick={async () => {
@@ -48,7 +52,14 @@ export default function Watch({ params }) {
   const [confirmDel, setConfirmDel] = useState(false);
   useTitle(video?.title || t('nav.video'));
   useEffect(() => { if (video) { countVideoView(video.id); setLikes(video.likeCount); } }, [video?.id]);
-  useEffect(() => { if (video && uid.value) { isVideoLiked(video.id).then(setLiked); isSaved('video', video.id).then(setSavedState); } }, [video?.id, uid.value]);
+  useEffect(() => {
+    let active = true; setLiked(false); setSavedState(false);
+    if (video && uid.value) {
+      isVideoLiked(video.id).then(value => { if (active) setLiked(value); });
+      isSaved('video', video.id).then(value => { if (active) setSavedState(value); });
+    }
+    return () => { active = false; };
+  }, [video?.id, uid.value]);
 
   if (loading) return <PageSpinner />;
   if (!video || video.status !== 'active') return <Card><Empty icon="monitor-play" title={t('video.unavailable')} action={<Button variant="primary" href="/video">{t('nav.video')}</Button>} /></Card>;
@@ -71,7 +82,9 @@ export default function Watch({ params }) {
   return (
     <div class="watch">
       <div class="watch-main">
+        <div class="watch-back"><Button variant="ghost" icon="arrow-left" href="/video">{t('video.backToFeed')}</Button></div>
         <div class="watch-player"><VideoPlayer video={video} autoplay /></div>
+        {video.youtubeId && <div class="watch-source"><span>{t('video.externalPlayerHint')}</span><a href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noopener noreferrer">{t('video.openYoutube')} ↗</a></div>}
         <h1 class="watch-title">{video.title}</h1>
         <div class="watch-bar">
           <div class="watch-channel">

@@ -11,6 +11,7 @@ import { img } from '../../lib/media.js';
 import { useBodyLock } from '../../lib/hooks.js';
 import { isTopmostModal, useModalFocus } from '../../lib/modalFocus.js';
 import { uid } from '../../lib/auth.js';
+import { actingIdentity } from '../../lib/actor.js';
 import { requireLogin } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import { markStoryViewed, reactToStory, replyToStory, deleteStory } from '../../data/stories.js';
@@ -60,7 +61,7 @@ export function StoryViewer({ groups, start, onClose }) {
   const group = groups[gi];
   const story = group?.stories[si];
   useModalFocus(viewerRef, closeRef, !!story);
-  const own = story && story.authorId === uid.value;
+  const own = story && (story.authorId === uid.value || story.actorId === actingIdentity.value?.actorId);
   const isVideo = story && (story.mediaType?.startsWith('video') || /\/video\/upload\/|\.(mp4|webm|mov)(\?|$)/i.test(story.mediaUrl || ''));
 
   const next = () => {
@@ -162,8 +163,8 @@ export function StoryViewer({ groups, start, onClose }) {
               ))}
             </div>
             <div class="story-head">
-              <a href={`/u/${group.authorId}`} class="story-author" onClick={onClose}>
-                <Avatar src={group.avatar} name={group.name} size={36} />
+              <a href={story.authorType === 'business' && story.businessId ? `/business/${story.businessId}` : `/u/${group.authorId}`} class="story-author" onClick={onClose}>
+                <Avatar src={group.avatar} name={group.name} square={story.authorType === 'business'} size={36} />
                 <strong>{group.name}</strong>
                 <span>{timeAgo(story.createdAt)}</span>
               </a>

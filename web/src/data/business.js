@@ -40,6 +40,20 @@ export function listBusinesses(n = 120) {
   }, n);
 }
 
+/** Explicit linkage only; a similarly named business may be a different branch. */
+export async function getBusinessForPlace(place) {
+  if (place?.raw?.businessId) {
+    const business = await getBusiness(place.raw.businessId);
+    return live(business) ? business : null;
+  }
+  if (!place?.id) return null;
+  const result = await getDocs(query(collection(db, 'businesses'), where('placeId', '==', place.id), limit(1)));
+  const match = result.docs[0];
+  if (!match) return null;
+  const business = normBiz(match.id, match.data());
+  return live(business) ? business : null;
+}
+
 /** Pages the signed-in user owns or administers. */
 export async function myBusinesses() {
   const u = myUid.value;
@@ -98,9 +112,10 @@ export async function createBusiness(f) {
   return ref.id;
 }
 
-const EDITABLE = ['title', 'description', 'category', 'tags', 'city', 'address', 'mapsLink', 'phone', 'email', 'website', 'coverUrl', 'logoUrl', 'priceRange', 'workingHours', 'businessType', 'lat', 'lng'];
+const EDITABLE = ['title', 'description', 'category', 'tags', 'city', 'address', 'mapsLink', 'phone', 'email', 'website', 'coverUrl', 'logoUrl', 'priceRange', 'workingHours', 'businessType', 'lat', 'lng', 'menuPhotos'];
 
 export async function updateBusiness(id, patch) {
+  if (patch.menuPhotos !== undefined && (!Array.isArray(patch.menuPhotos) || patch.menuPhotos.length > 20 || patch.menuPhotos.some((p) => typeof p?.url !== 'string' || !/^https:\/\//i.test(p.url) || p.url.length > 2048))) throw new Error('Invalid menu photos');
   const data = {};
   for (const k of EDITABLE) if (patch[k] !== undefined) data[k] = typeof patch[k] === 'string' ? patch[k].trim() : patch[k];
   if (data.title) data.name = data.title;

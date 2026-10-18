@@ -11,18 +11,19 @@ import { db } from '../lib/firebase.js';
 import { me } from '../lib/auth.js';
 import { normNotification } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
+import { notificationSender, contentRecipient } from '../lib/contentIdentity.js';
 
-export function notify(toUserId, { type, title, body = '', href = 'feed.html', extra = {}, dedupKey } = {}) {
+export function notify(toUserId, { type, title, body = '', href = 'feed.html', extra = {}, dedupKey, sender = null } = {}) {
   const m = me();
-  if (!m || !toUserId || toUserId === m.uid) return Promise.resolve();
+  const identity = notificationSender(m, sender);
+  if (!identity || !toUserId || (toUserId === m.uid && identity.fromActorType === 'user')) return Promise.resolve();
   const payload = {
+    ...extra,
     userId: toUserId,
     toUserId,
     targetActorType: 'user',
     targetActorId: toUserId,
-    fromUserId: m.uid,
-    fromName: m.name,
-    fromAvatar: m.avatar || '',
+    ...identity,
     type: type || 'notification',
     title: title || 'GeoHub',
     body,
@@ -31,38 +32,47 @@ export function notify(toUserId, { type, title, body = '', href = 'feed.html', e
     read: false,
     seen: false,
     createdAt: serverTimestamp(),
-    ...extra,
   };
   const p = dedupKey ? setDoc(doc(db, 'userNotifications', dedupKey), payload) : addDoc(collection(db, 'userNotifications'), payload);
   return p.catch((e) => console.warn('[notify]', e.code));
 }
 
 /** Notification addressed to a business page (its admins read it). */
-export function notifyBusiness(businessId, { type, title, body = '', href = 'feed.html', extra = {} } = {}) {
+export function notifyBusiness(businessId, { type, title, body = '', href = 'feed.html', extra = {}, sender = null, dedupKey } = {}) {
   const m = me();
-  if (!m || !businessId) return Promise.resolve();
-  return addDoc(collection(db, 'userNotifications'), {
+  const identity = notificationSender(m, sender);
+  if (!identity || !businessId || (identity.fromActorType === 'business' && identity.fromActorId === businessId)) return Promise.resolve();
+  const payload = {
+    ...extra,
     userId: '',
     toUserId: '',
     businessId,
     targetActorType: 'business',
     targetActorId: businessId,
-    fromUserId: m.uid,
-    fromName: m.name,
-    fromAvatar: m.avatar || '',
+    ...identity,
     type, title, body, message: body, href,
     read: false, seen: false,
     createdAt: serverTimestamp(),
-    ...extra,
-  }).catch((e) => console.warn('[notifyBusiness]', e.code));
+  };
+  const operation = dedupKey ? setDoc(doc(db, 'userNotifications', dedupKey), payload) : addDoc(collection(db, 'userNotifications'), payload);
+  return operation.catch((e) => console.warn('[notifyBusiness]', e.code));
+}
+
+/** Route public content activity to the publishing page, not its administrator. */
+export function notifyAuthor(content, notification) {
+  const target = contentRecipient(content);
+  if (!target) return Promise.resolve();
+  return target.type === 'business' ? notifyBusiness(target.id, notification) : notify(target.id, notification);
 }
 
 /** Own notifications, newest first (two queries: current and legacy shape). */
 export function listenNotifications(userId, onData, n = 60) {
-  const byId = new Map();
+  const pools = { a: new Map(), b: new Map() };
   const ready = { a: false, b: false };
+  let active = true;
   const emit = () => {
-    if (!ready.a || !ready.b) return;
+    if (!active || !ready.a || !ready.b) return;
+    const byId = new Map([...pools.a, ...pools.b]);
     const list = [...byId.values()]
       .filter((x) => x.raw.targetActorType !== 'business')
       .sort((a, b) => b.createdAt - a.createdAt)
@@ -70,9 +80,10 @@ export function listenNotifications(userId, onData, n = 60) {
     onData(list);
   };
   const handle = (slot) => (snap) => {
+    if (!active) return;
     snap.docChanges().forEach((ch) => {
-      if (ch.type === 'removed') byId.delete(ch.doc.id);
-      else byId.set(ch.doc.id, normNotification(ch.doc.id, ch.doc.data()));
+      if (ch.type === 'removed') pools[slot].delete(ch.doc.id);
+      else pools[slot].set(ch.doc.id, normNotification(ch.doc.id, ch.doc.data()));
     });
     ready[slot] = true;
     emit();
@@ -81,7 +92,7 @@ export function listenNotifications(userId, onData, n = 60) {
   const col = collection(db, 'userNotifications');
   const u1 = onSnapshot(query(col, where('userId', '==', userId), limit(n)), handle('a'), fail('a'));
   const u2 = onSnapshot(query(col, where('targetActorType', '==', 'user'), where('targetActorId', '==', userId), limit(n)), handle('b'), fail('b'));
-  return () => { u1(); u2(); };
+  return () => { active = false; u1(); u2(); };
 }
 
 export function listenBusinessNotifications(businessId, onData) {

@@ -1,0 +1,10 @@
+{
+  "sourceSha256": "aa336014f2d2cab2a89490db8f46895ed7a8631def8246a9645391679f162000",
+  "layers": [
+    "buildings",
+    "roads"
+  ],
+  "count": 2368,
+  "totalBytes": 17220089,
+  "largestBytes": 136326
+}

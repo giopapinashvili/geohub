@@ -8,8 +8,10 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { me, uid as myUid } from '../lib/auth.js';
-import { normVideo, normChannel, youtubeIdFrom } from './normalize.js';
+import { normVideo, normChannel } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
+import { actingIdentity } from '../lib/actor.js';
+import { normalizeVideoSource, videoText, publicMediaUrl } from '../lib/videoSource.js';
 
 const active = (v) => v.status === 'active' && (v.youtubeId || v.videoUrl);
 
@@ -70,16 +72,22 @@ export async function myChannels() {
 
 export async function createChannel({ name, description = '', avatar = '', banner = '' }) {
   const id = myUid.value;
+  if (!id) throw new Error('არხის შესაქმნელად შედი ანგარიშში.');
   const ref = await addDoc(collection(db, 'channels'), {
-    name: name.trim(), description, avatar, banner, ownerId: id, subscriberCount: 0, videoCount: 0, youtubeUrl: '', createdAt: serverTimestamp(),
+    name: videoText(name, 80, 'არხის სახელი', true), description: videoText(description, 5000, 'აღწერა'),
+    avatar: publicMediaUrl(avatar, 'არხის ფოტო'), banner: publicMediaUrl(banner, 'არხის გარეკანი'),
+    ownerId: id, subscriberCount: 0, videoCount: 0, youtubeUrl: '', createdAt: serverTimestamp(),
   });
   return ref.id;
 }
 
 /** Owner edits: name, description, avatar, banner. */
 export async function updateChannel(id, patch) {
+  if (!myUid.value) throw new Error('არხის შესაცვლელად შედი ანგარიშში.');
   const allowed = {};
-  for (const k of ['name', 'description', 'avatar', 'banner']) if (patch[k] !== undefined) allowed[k] = typeof patch[k] === 'string' ? patch[k].trim() : patch[k];
+  if (patch.name !== undefined) allowed.name = videoText(patch.name, 80, 'არხის სახელი', true);
+  if (patch.description !== undefined) allowed.description = videoText(patch.description, 5000, 'აღწერა');
+  for (const k of ['avatar', 'banner']) if (patch[k] !== undefined) allowed[k] = publicMediaUrl(patch[k], 'არხის ფოტო');
   await updateDoc(doc(db, 'channels', id), allowed);
 }
 
@@ -89,27 +97,30 @@ export async function updateChannel(id, patch) {
  */
 export async function createVideo({ title, description = '', youtubeUrl = '', videoUrl = '', thumbnail = '', isShort = false, channel = null, category = '', city = '', placeId = null, placeName = null }) {
   const m = me();
-  const yt = youtubeIdFrom(youtubeUrl);
+  if (!m?.uid) throw new Error('ვიდეოს გამოსაქვეყნებლად შედი ანგარიშში.');
+  const source = normalizeVideoSource({ youtubeUrl, videoUrl, isShort });
+  let ownChannel = null;
+  if (channel?.id) {
+    ownChannel = await getChannel(channel.id);
+    if (!ownChannel || ownChannel.ownerId !== m.uid) throw new Error('ვიდეოს დამატება მხოლოდ საკუთარ არხზე შეგიძლია.');
+  }
   const data = {
-    title: title.trim(),
-    description,
+    title: videoText(title, 200, 'სათაური', true),
+    description: videoText(description, 5000, 'აღწერა'),
     authorId: m.uid,
     authorName: m.name,
     authorAvatar: m.avatar,
-    youtubeId: yt || null,
-    youtubeUrl: yt ? youtubeUrl : null,
-    videoUrl: videoUrl || null,
-    thumbnail: thumbnail || (yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : ''),
-    isShort: !!isShort || /\/shorts\//.test(youtubeUrl),
-    channelId: channel?.id || null,
-    channelName: channel?.name || null,
-    channelAvatar: channel?.avatar || null,
+    ...source,
+    thumbnail: publicMediaUrl(thumbnail, 'ვიდეოს ფოტო') || (source.youtubeId ? `https://i.ytimg.com/vi/${source.youtubeId}/hqdefault.jpg` : ''),
+    channelId: ownChannel?.id || null,
+    channelName: ownChannel?.name || null,
+    channelAvatar: ownChannel?.avatar || null,
     category, city, tags: [], placeId, placeName, businessId: null, businessName: null,
     status: 'active', likeCount: 0, viewCount: 0, commentCount: 0,
     createdAt: serverTimestamp(),
   };
   const ref = await addDoc(collection(db, 'videos'), data);
-  if (channel?.id) updateDoc(doc(db, 'channels', channel.id), { videoCount: increment(1) }).catch(() => {});
+  if (ownChannel?.id) updateDoc(doc(db, 'channels', ownChannel.id), { videoCount: increment(1) }).catch(() => {});
   return ref.id;
 }
 
@@ -144,8 +155,12 @@ export function listenVideoComments(id, onData) {
 
 export async function addVideoComment(id, text) {
   const m = me();
+  if (!m?.uid) throw new Error('კომენტარის დასამატებლად შედი ანგარიშში.');
+  const identity = actingIdentity.value;
   await addDoc(collection(db, 'videos', id, 'comments'), {
-    text: text.trim(), authorId: m.uid, authorName: m.name, authorAvatar: m.avatar, createdAt: serverTimestamp(),
+    text: videoText(text, 5000, 'კომენტარი', true), authorId: m.uid, userId: m.uid,
+    authorType: identity.authorType, businessId: identity.businessId,
+    authorName: identity.name, authorAvatar: identity.avatar, createdAt: serverTimestamp(),
   });
   updateDoc(doc(db, 'videos', id), { commentCount: increment(1) }).catch(() => {});
 }

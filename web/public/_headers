@@ -16,8 +16,49 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Versioned map directories and content-hashed place datasets only. Never use
+# this rule for HTML, account data, Firestore responses or mutable manifests.
+/map-tiles/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-data/places-*
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-data/overview-*
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-data/lookup-*
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-data/search-index-*
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-data/manifest.json
+  Cache-Control: no-cache
+
+/place-media/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/place-media/credits.json
+  Cache-Control: no-cache
+
+/demo-media/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/demo-media/credits.json
+  Cache-Control: no-cache
+
+/map-data/*
+  Cache-Control: public, max-age=86400
+
+/map-brands/*
+  Cache-Control: public, max-age=86400
+
 /icons/*
   Cache-Control: public, max-age=604800
+
+/manifest.webmanifest
+  Cache-Control: no-cache
 
 /index.html
   Cache-Control: no-cache

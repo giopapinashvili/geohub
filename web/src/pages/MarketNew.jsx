@@ -10,6 +10,7 @@ import { toast } from '../lib/toast.js';
 import { upload } from '../lib/media.js';
 import { cityOptions } from '../lib/geo.js';
 import { createItem, MARKET_CATS } from '../data/market.js';
+import { PersonalActionNotice } from '../features/auth/PersonalActionNotice.jsx';
 
 /** New listing: photos, title, price, category, condition, city, description. */
 export default function MarketNew() {
@@ -37,6 +38,7 @@ export default function MarketNew() {
       <div class="page-head"><h1 class="page-title">{t('market.new')}</h1></div>
       <Card>
         <div class="stack">
+          <PersonalActionNotice>ეს განცხადება პირადი გამყიდველის სახელით გამოქვეყნდება. ბიზნესის პროდუქტები მის კატალოგში დაამატე.</PersonalActionNotice>
           <div class="market-photos">
             {images.map((src, i) => (
               <div key={src} class="manage-photo"><Img src={src} width={240} alt="" /><IconButton icon="x" label={t('common.remove')} size={30} variant="soft" onClick={() => setImages((l) => l.filter((_, j) => j !== i))} /></div>

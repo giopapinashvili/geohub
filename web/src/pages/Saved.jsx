@@ -9,6 +9,7 @@ import { useTitle } from '../lib/hooks.js';
 import { timeAgo, truncate } from '../lib/format.js';
 import { toast } from '../lib/toast.js';
 import { listenSaved, setSaved } from '../data/posts.js';
+import { getPlace } from '../data/places.js';
 import { normPost, normPlace, normBiz, normVideo, normEvent, normItem, normGroup } from '../data/normalize.js';
 
 const TYPES = {
@@ -23,6 +24,10 @@ const TYPES = {
 
 async function resolve(entry) {
   const def = TYPES[entry.type] || TYPES.post;
+  if (entry.type === 'place') {
+    const place = await getPlace(entry.itemId).catch(() => null);
+    if (place) return { ...entry, view: def.view(place) };
+  }
   const s = await getDoc(doc(db, def.col, entry.itemId)).catch(() => null);
   if (!s?.exists()) return { ...entry, gone: true, view: { title: t('saved.gone'), sub: '', image: '', href: null } };
   return { ...entry, view: def.view(def.norm(s.id, s.data())) };

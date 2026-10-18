@@ -12,6 +12,7 @@ import { uid } from '../lib/auth.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { listGroups, myGroups, createGroup } from '../data/groups.js';
+import { PersonalActionNotice } from '../features/auth/PersonalActionNotice.jsx';
 
 export const GROUP_CATS = ['general', 'travel', 'food', 'sports', 'tech', 'music', 'art', 'education', 'business', 'family', 'pets', 'local', 'games', 'health'];
 export const groupCatLabel = (c) => (GROUP_CATS.includes(c) ? t(`groups.cat.${c}`) : c);
@@ -44,6 +45,7 @@ function CreateGroup({ onClose }) {
     <Modal open onClose={onClose} title={t('groups.create')} size="md"
       footer={<><Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button><Button variant="primary" loading={busy} disabled={name.trim().length < 3} onClick={submit}>{t('common.create')}</Button></>}>
       <div class="stack">
+        <PersonalActionNotice>ჯგუფის შექმნა და მისი მართვა პირად ანგარიშს დაუკავშირდება.</PersonalActionNotice>
         <TextField label={t('groups.name')} value={name} onInput={(e) => setName(e.currentTarget.value)} maxLength={80} />
         <Select label={t('place.category')} value={category} onChange={(e) => setCategory(e.currentTarget.value)} options={GROUP_CATS.map((c) => ({ value: c, label: groupCatLabel(c) }))} />
         <div class="field"><span class="field-label">{t('groups.privacy')}</span>

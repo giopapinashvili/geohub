@@ -8,6 +8,7 @@ import { Spinner, Empty } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
 import { formatDate, formatTime, timeAgo } from '../../lib/format.js';
 import { uid } from '../../lib/auth.js';
+import { actor } from '../../lib/actor.js';
 import { toast } from '../../lib/toast.js';
 import { upload, img } from '../../lib/media.js';
 import {
@@ -104,17 +105,30 @@ export function Thread({ cid, actorId, compact, header }) {
   const myActor = actorId || `user_${me}`;
   const asBusiness = actorId?.startsWith('business_') ? actorId.slice(9) : null;
   const peer = useConversationPeer(conv, actorId);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const currentIdentity = () => alive.current && uid.value === me && (actor.value?.id || null) === asBusiness;
+  const allowed = !!conv && conv.inboxActorIds?.includes(myActor);
 
-  useEffect(() => listenConversation(cid, setConv, () => setConv(null)), [cid]);
-  useEffect(() => { setMsgs(null); return listenMessages(cid, setMsgs); }, [cid]);
+  useEffect(() => {
+    let active = true; setConv(undefined);
+    const stop = listenConversation(cid, (value) => { if (active) setConv(value); }, () => { if (active) setConv(null); });
+    return () => { active = false; stop(); };
+  }, [cid, myActor]);
+  useEffect(() => {
+    let active = true; setMsgs(null);
+    if (!allowed) return;
+    const stop = listenMessages(cid, (value) => { if (active) setMsgs(value); });
+    return () => { active = false; stop(); };
+  }, [cid, myActor, allowed]);
 
   // Read receipts for what is on screen.
   useEffect(() => {
-    if (!msgs || !me) return;
+    if (!msgs || !me || !allowed) return;
     markConversationRead(cid, myActor);
     const unseen = msgs.filter((m) => m.senderActorId !== myActor && !m.seenBy.includes(me)).map((m) => m.id);
     if (unseen.length) markMessagesSeen(cid, unseen, myActor);
-  }, [msgs?.length, cid]);
+  }, [msgs?.length, cid, myActor, allowed]);
 
   useLayoutEffect(() => {
     const el = list.current;
@@ -135,7 +149,7 @@ export function Thread({ cid, actorId, compact, header }) {
   // once); on failure the text, reply or edit comes back.
   const send = async (override) => {
     const value = (override ?? text).trim();
-    if (!value) return;
+    if (!value || !allowed || !currentIdentity()) return;
     const wasEditing = editing;
     const wasReply = replyTo;
     if (override === undefined) setText('');
@@ -157,10 +171,11 @@ export function Thread({ cid, actorId, compact, header }) {
 
   const attach = async (files) => {
     const f = files?.[0];
-    if (!f) return;
+    if (!f || !allowed || !currentIdentity()) return;
     setUploading(true);
     try {
       const url = await upload(f, { folder: 'messages' });
+      if (!currentIdentity()) return;
       const type = f.type.startsWith('image') ? 'image' : f.type.startsWith('audio') ? 'audio' : 'file';
       await sendMessage(cid, { text: text.trim(), attachments: [{ type, url, name: f.name, size: f.size, mime: f.type }], asBusiness });
       setText('');
@@ -170,6 +185,7 @@ export function Thread({ cid, actorId, compact, header }) {
   };
 
   const startVoice = async () => {
+    if (!allowed || !currentIdentity()) return;
     if (!canRecordVoice()) { toast.error(t('messages.micUnsupported')); return; }
     try { await voice.start(); setTyping(cid, false, myActor); }
     catch (e) { toast.error(t(e?.name === 'NotAllowedError' || e?.name === 'SecurityError' ? 'messages.micDenied' : 'messages.micUnsupported')); }
@@ -184,6 +200,7 @@ export function Thread({ cid, actorId, compact, header }) {
       const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
       const file = new File([res.blob], `voice-${Date.now()}.${ext}`, { type: mime });
       const url = await upload(file, { folder: 'messages', kind: 'video' });
+      if (!currentIdentity()) return;
       await sendMessage(cid, {
         attachments: [{ type: 'audio', url, name: t('messages.voice'), size: file.size, mime, duration: Math.round(res.duration) }],
         replyTo: replyTo ? { id: replyTo.id, text: quoteText(replyTo), senderId: replyTo.senderId } : null,
@@ -198,6 +215,8 @@ export function Thread({ cid, actorId, compact, header }) {
   useEffect(() => { if (voice.recording && voice.seconds >= VOICE_MAX_SECONDS) sendVoice(); }, [voice.seconds]);
 
   if (conv === null) return <Empty icon="chat-circle-dots" title={t('messages.notFound')} text={t('messages.notFoundText')} />;
+  if (conv === undefined) return <div class="center-pad"><Spinner /></div>;
+  if (!allowed) return <Empty icon="chat-circle-dots" title={t('messages.notForIdentity')} text={t('messages.switchIdentity')} />;
   const typingNames = Object.entries(conv?.typing || {}).filter(([k, v]) => k !== myActor && v && (!v.at || Date.now() - (v.at?.toMillis?.() || 0) < 15000)).map(([, v]) => v.name);
   const lastMine = msgs ? [...msgs].reverse().find((m) => m.senderActorId === myActor) : null;
   const seen = lastMine && lastMine.seenBy.some((x) => x !== me);

@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "demoBatchId": "geohub-commerce-demo-v1",
+  "illustrative": true,
+  "photos": [
+    {
+      "key": "coffee",
+      "url": "/demo-media/coffee-5dea2bffd254.jpg",
+      "caption": "ყავა და კრუასანი — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:Coffee and croissant at Espresso House in Turku.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coffee_and_croissant_at_Espresso_House_in_Turku.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Coffee_and_croissant_at_Espresso_House_in_Turku.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "JIP",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2019-05-26",
+      "rawDateTaken": "2019-05-26",
+      "uploadTimestamp": "2021-01-17T17:15:22Z",
+      "downloadedAt": "2026-10-18T23:30:35.925Z",
+      "bytes": 116451,
+      "sha256": "5dea2bffd25448786746bb82562dac8bed7e576b9c40055d4f5e951705d4803f",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    },
+    {
+      "key": "console",
+      "url": "/demo-media/console-4c15aaa7619b.jpg",
+      "caption": "სათამაშო კონსოლი — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:PlayStation 5 and DualSense (2).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:PlayStation_5_and_DualSense_(2).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f4/PlayStation_5_and_DualSense_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "Osh33m",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2020-12-03",
+      "rawDateTaken": "2020-12-03 18:05",
+      "uploadTimestamp": "2020-12-07T02:18:56Z",
+      "downloadedAt": "2026-10-18T23:30:36.200Z",
+      "bytes": 230548,
+      "sha256": "4c15aaa7619bb275725c5943f60f317fcf469c7796479afca9ea1e8666f7047a",
+      "preview": {
+        "width": 960,
+        "height": 1280
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    },
+    {
+      "key": "meal",
+      "url": "/demo-media/meal-f4e8a3699d83.jpg",
+      "caption": "ხაჭაპური — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:Georgian Khachapuri cheese bread.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Georgian_Khachapuri_cheese_bread.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Georgian_Khachapuri_cheese_bread.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "Jon Gudorf Photography",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "dateTaken": "2017-07-29",
+      "rawDateTaken": "2017-07-29 09:30:06",
+      "uploadTimestamp": "2021-06-13T11:17:52Z",
+      "downloadedAt": "2026-10-18T23:30:36.766Z",
+      "bytes": 201703,
+      "sha256": "f4e8a3699d8308c9c1cd05c753b1aea88dc0391774d641f7bb158f58f5889cd1",
+      "preview": {
+        "width": 960,
+        "height": 964
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    },
+    {
+      "key": "lesson",
+      "url": "/demo-media/lesson-a6e26928a896.jpg",
+      "caption": "საკლასო ოთახი — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:Empty class room.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Empty_class_room.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/22/Empty_class_room.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "Saral Shots",
+      "license": "CC0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "dateTaken": "2019-01-18",
+      "rawDateTaken": "2019-01-18 08:38:55",
+      "uploadTimestamp": "2025-02-13T04:58:43Z",
+      "downloadedAt": "2026-10-18T23:30:37.000Z",
+      "bytes": 144950,
+      "sha256": "a6e26928a896f8f2b888108485d0d7a55c8d3cdd90746102bb5a2b20fd96b337",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    },
+    {
+      "key": "auto",
+      "url": "/demo-media/auto-bdfb0d31e8ea.jpg",
+      "caption": "ავტომობილის საბურავები — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:Car tire stack 20170516.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Car_tire_stack_20170516.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Car_tire_stack_20170516.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "Santeri Viinamäki",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2017-05-16",
+      "rawDateTaken": "2017-05-16 15:04:16",
+      "uploadTimestamp": "2017-05-16T14:32:24Z",
+      "downloadedAt": "2026-10-18T23:30:37.278Z",
+      "bytes": 250174,
+      "sha256": "bdfb0d31e8eac2451f42a424ef4f1b7d8b718876dec10632e2a1c423d4670bcc",
+      "preview": {
+        "width": 960,
+        "height": 1279
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    },
+    {
+      "key": "flowers",
+      "url": "/demo-media/flowers-a2d7a1afe04a.jpg",
+      "caption": "ყვავილების თაიგული — საილუსტრაციო ფოტო",
+      "illustrative": true,
+      "sourceTitle": "File:Rose Flower Bouquet 052.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rose_Flower_Bouquet_052.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Rose_Flower_Bouquet_052.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "author": "Suyash Dwivedi",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2019-03-02",
+      "rawDateTaken": "2019-03-02 19:12:30",
+      "uploadTimestamp": "2019-04-15T13:35:56Z",
+      "downloadedAt": "2026-10-18T23:30:37.630Z",
+      "bytes": 179482,
+      "sha256": "a2d7a1afe04a9edcf12e02ed6d0d44653ffe2a4b7fe8f70f8110a230b47031c3",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit. Illustrative demo use only; not a depiction of the fictional merchant or confirmed inventory."
+    }
+  ]
+}

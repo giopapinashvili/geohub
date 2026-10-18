@@ -57,7 +57,7 @@ export class UploadError extends Error {
  * Upload an image, video, audio clip or document to Cloudinary.
  * Resolves to the secure URL. `onProgress` receives 0–100.
  */
-export async function upload(file, { folder = 'uploads', onProgress, kind } = {}) {
+export async function upload(file, { folder = 'uploads', onProgress, kind, returnMetadata = false } = {}) {
   if (!file) throw new UploadError('no-file');
   const type = kind || (/^image\//.test(file.type) ? 'image' : /^(video|audio)\//.test(file.type) ? 'video' : 'raw');
   if (type === 'image') {
@@ -90,7 +90,7 @@ export async function upload(file, { folder = 'uploads', onProgress, kind } = {}
         xhr.onload = () => {
           let body = {};
           try { body = JSON.parse(xhr.responseText); } catch { /* ignore */ }
-          if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) resolve(body.secure_url);
+          if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) resolve(returnMetadata ? { url: body.secure_url, publicId: body.public_id || '', resourceType: body.resource_type || type } : body.secure_url);
           else reject(new UploadError(body.error?.message || `http-${xhr.status}`));
         };
         xhr.onerror = () => reject(new UploadError('network'));

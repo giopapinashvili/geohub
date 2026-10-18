@@ -10,7 +10,8 @@
 // - Only the routes listed in _routes.json reach this worker; every other file
 //   is served by Pages directly.
 // - People get the normal app shell untouched (no extra reads, no delay).
-// - Data comes from Firestore's public REST API without credentials, so the
+// - Imported place cards read the published directory assets and photo credits.
+// - Other data comes from Firestore's public REST API without credentials, so the
 //   security rules decide: an only-me / friends post, a private profile field,
 //   anything the rules refuse simply falls back to the generic card.
 // - Any error serves the app exactly as before — this worker must never take
@@ -19,7 +20,7 @@
 //   headers (copied from _headers at build time) are attached here.
 
 const SECURITY_HEADERS = {"X-Content-Type-Options":"nosniff","X-Frame-Options":"SAMEORIGIN","Referrer-Policy":"strict-origin-when-cross-origin","Permissions-Policy":"camera=(self), microphone=(self), geolocation=(self), payment=(self)","Content-Security-Policy":"default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' blob: https://res.cloudinary.com https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://api.cloudinary.com https://res.cloudinary.com https://geohub-payments.gio-papinashvili20-bd3.workers.dev https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://tiles.mapterhorn.com; worker-src 'self' blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://geohub-main.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"};
-const WORKER_VERSION = "f635d53739";
+const WORKER_VERSION = "a738d37b7e";
 
 const PROJECT = 'geohub-main';
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
@@ -173,6 +174,47 @@ function picture(u, w, h, origin) {
 const large = (u, origin) => (u ? { image: picture(u, 1200, 630, origin), width: 1200, height: 630, card: 'summary_large_image' } : null);
 const square = (u, origin) => (u ? { image: picture(u, 600, 600, origin), width: 600, height: 600, card: 'summary' } : null);
 
+// Imported directory pages live in public, versioned assets rather than in
+// Firestore. Read only the exact shard for this ID, and only for link previews.
+async function directoryJson(env, origin, path) {
+  const response = await env.ASSETS.fetch(new Request(new URL(path, origin)));
+  if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) return null;
+  const length = Number(response.headers.get('content-length'));
+  if (length > 8 * 1024 * 1024) return null;
+  return response.json();
+}
+
+export async function loadImportedPlaceMeta(id, env, origin) {
+  if (!/^osm_(node|way|relation)_\d+$/.test(id)) return null;
+  const manifest = await directoryJson(env, origin, '/place-data/manifest.json');
+  const assetName = value => typeof value === 'string' && /^(lookup|places)-[a-zA-Z0-9_-]+\.json$/.test(value);
+  const lookupFile = typeof manifest?.lookup === 'string' ? manifest.lookup : manifest?.lookup?.file;
+  if (manifest?.version !== 1 || !assetName(lookupFile) || !Array.isArray(manifest.shards)) return null;
+  const lookup = await directoryJson(env, origin, `/place-data/${lookupFile}`);
+  const key = lookup && Object.hasOwn(lookup, id) ? lookup[id] : null;
+  if (!key) return null;
+  const shard = manifest.shards.find(entry => entry.key === key);
+  if (!assetName(shard?.file)) return null;
+  const rows = await directoryJson(env, origin, `/place-data/${shard.file}`);
+  const place = Array.isArray(rows) ? rows.find(row => row?.id === id) : null;
+  if (gone(place)) return null;
+  const credits = await directoryJson(env, origin, '/place-media/credits.json').catch(() => null);
+  const photo = arr(credits?.photos).find(entry => entry.placeId === id && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
+  const name = clean(place.name) || SITE;
+  const details = [clean(place.address), clean(place.city)].filter(Boolean).join(' · ');
+  const photoSize = photo?.preview;
+  const look = photo ? {
+    image: picture(photo.url, 1200, 630, origin), card: 'summary_large_image',
+    width: Number.isInteger(photoSize?.width) && photoSize.width > 0 ? photoSize.width : null,
+    height: Number.isInteger(photoSize?.height) && photoSize.height > 0 ? photoSize.height : null,
+  } : large(place.image, origin);
+  return {
+    title: name, docTitle: name, type: 'place',
+    description: cut(place.description, 220) || cut(details, 220) || `${name} · ადგილების ცნობარი GeoHub-ზე`,
+    ...(look || {}),
+  };
+}
+
 // Written out by hand: the Workers runtime may not carry Georgian locale data.
 const KA_MONTHS = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
 const TBILISI_MS = 4 * 3600000;
@@ -233,6 +275,7 @@ async function loadMeta({ kind, id }, env, origin) {
     };
   }
   if (kind === 'place') {
+    if (/^osm_(node|way|relation)_\d+$/.test(id)) return loadImportedPlaceMeta(id, env, origin);
     const d = await getDocument(env, `places/${id}`);
     if (gone(d)) return null;
     const name = clean(first(d.name, d.title)) || SITE;
@@ -349,11 +392,12 @@ function rewrite(res, meta, url) {
   const title = m.title || 'GeoHub — აღმოაჩინე საქართველო';
   const docTitle = m.docTitle ? `${m.docTitle} · ${SITE}` : title;
   const description = m.description || 'ადამიანები, ადგილები, ღონისძიებები, ბიზნესები და ვიდეოები ერთ სივრცეში.';
-  const image = m.image || `${origin}/icons/og-image.png`;
+  const image = m.image || `${origin}/icons/geohub-g-og.png`;
   const width = m.image ? m.width : 1200;
   const height = m.image ? m.height : 630;
   const card = m.image ? m.card : 'summary_large_image';
   const set = (value) => ({ element(el) { el.setAttribute('content', value); } });
+  const dimension = value => ({ element(el) { if (Number.isInteger(value) && value > 0) el.setAttribute('content', String(value)); else el.remove(); } });
   const extra = [
     `<meta property="og:url" content="${esc(pageUrl)}">`,
     `<meta property="og:image:alt" content="${esc(m.title || SITE)}">`,
@@ -368,8 +412,8 @@ function rewrite(res, meta, url) {
     .on('meta[property="og:title"]', set(title))
     .on('meta[property="og:description"]', set(description))
     .on('meta[property="og:image"]', set(image))
-    .on('meta[property="og:image:width"]', set(String(width)))
-    .on('meta[property="og:image:height"]', set(String(height)))
+    .on('meta[property="og:image:width"]', dimension(width))
+    .on('meta[property="og:image:height"]', dimension(height))
     .on('meta[property="og:type"]', set(m.type || 'website'))
     .on('meta[name="twitter:card"]', set(card))
     .on('head', { element(el) { el.append(`\n  ${extra}\n`, { html: true }); } })

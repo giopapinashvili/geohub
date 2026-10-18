@@ -9,6 +9,7 @@ const OPTIONS = [
   { key: 'post', icon: 'note-pencil', tone: '#2563eb', title: 'create.post', sub: 'create.postSub', run: () => openComposer({}) },
   { key: 'photo', icon: 'images', tone: '#16803c', title: 'create.photo', sub: 'create.photoSub', run: () => openComposer({ pick: 'media' }) },
   { key: 'story', icon: 'plus-circle', tone: '#b3207a', title: 'create.story', sub: 'create.storySub', run: () => { storyCreator.value = true; } },
+  { key: 'video', icon: 'monitor-play', tone: '#ef4444', title: 'video.add', sub: 'video.linkFirstHint', run: () => navigate('/video?upload=1') },
   { key: 'reel', icon: 'film-strip', tone: '#c2410c', title: 'create.reel', sub: 'create.reelSub', run: () => navigate('/reels?upload=1') },
   { key: 'checkin', icon: 'map-pin', tone: '#0e7490', title: 'create.checkin', sub: 'create.checkinSub', run: () => navigate('/map?checkin=1') },
   { key: 'listing', icon: 'tag', tone: '#2563a8', title: 'create.listing', sub: 'create.listingSub', run: () => navigate('/marketplace/new') },

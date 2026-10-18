@@ -126,7 +126,9 @@ const LEGACY_PARAMS = {
   events: ['id', 'event'],
   groups: ['id', 'group'],
   marketplace: ['id', 'item'],
-  messages: ['cid', 'conv', 'business', 'withBusiness'],
+  // /messages?business=ID is the modern customer conversation link. Only the
+  // .html version uses that key to open the business owner's management inbox.
+  messages: ['cid', 'conv', 'withBusiness'],
   settings: ['tab', 'section'],
   admin: ['tab'],
   invite: ['code', 'ref'],

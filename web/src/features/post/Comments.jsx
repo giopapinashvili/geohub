@@ -6,7 +6,8 @@ import { IconButton } from '../../ui/Button.jsx';
 import { Spinner } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
 import { timeAgo } from '../../lib/format.js';
-import { profile, uid, isAdmin } from '../../lib/auth.js';
+import { uid, isAdmin } from '../../lib/auth.js';
+import { actingIdentity } from '../../lib/actor.js';
 import { requireLogin } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import {
@@ -21,7 +22,7 @@ export function CommentInput({ onSubmit, placeholder, autoFocus, initial = '', o
   const [text, setText] = useState(initial);
   const [busy, setBusy] = useState(false);
   const ref = useRef(null);
-  const p = profile.value;
+  const p = actingIdentity.value;
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -39,7 +40,7 @@ export function CommentInput({ onSubmit, placeholder, autoFocus, initial = '', o
   };
   return (
     <div class={`cmt-input${compact ? ' is-compact' : ''}`}>
-      {!onCancel && <Avatar src={p?.avatar} name={p?.name || ''} size={compact ? 28 : 34} />}
+      {(!onCancel || !initial) && <Avatar src={p?.avatar} name={p?.name || ''} square={p?.authorType === 'business'} size={compact ? 28 : 34} />}
       <div class="cmt-input-box">
         <textarea
           ref={ref}

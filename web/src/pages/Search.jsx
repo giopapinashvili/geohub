@@ -15,17 +15,25 @@ import { PostCard } from '../features/post/PostCard.jsx';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
 import { EventCard } from '../features/events/EventCard.jsx';
 import { VideoCard } from '../features/video/VideoCard.jsx';
+import { addressHref } from '../lib/catalogDiscovery.js';
+import { formatCommercePrice } from '../lib/commerce.js';
+import { categoryOf } from '../features/places/categories.js';
+import '../styles/discovery-search.css';
 
 const KINDS = [
   { key: 'people', icon: 'users' },
   { key: 'posts', icon: 'note-pencil' },
   { key: 'places', icon: 'map-pin' },
+  { key: 'addresses', icon: 'map-trifold', label: 'ქუჩები და მისამართები' },
+  { key: 'catalog', icon: 'storefront', label: 'კერძები, პროდუქტები და სერვისები' },
   { key: 'businesses', icon: 'storefront' },
   { key: 'groups', icon: 'users-three' },
   { key: 'events', icon: 'calendar-blank' },
   { key: 'videos', icon: 'monitor-play' },
   { key: 'items', icon: 'tag' },
 ];
+const kindLabel = (kind) => kind.label || t(`search.${kind.key}`);
+const similar = (item) => item.searchMatch === 'fuzzy' ? 'მსგავსი შედეგი' : '';
 
 function Row({ href, img, name, sub, square, verified, icon }) {
   return (
@@ -53,13 +61,29 @@ function ItemRow({ item }) {
   );
 }
 
+function CatalogRow({ item }) {
+  const type = { dish: 'კერძი', product: 'პროდუქტი', service: 'სერვისი', bundle: 'პაკეტი' }[item.matchedItemType];
+  return <a href={item.canonicalBusinessHref} class="result-row catalog-search-row">
+    <span class="result-row-thumb"><Img src={item.itemImage} width={120} alt="" fallback={<span class="result-row-ico"><Icon name={item.matchedItemType === 'dish' ? 'fork-knife' : item.matchedItemType === 'service' ? 'wrench' : 'tag'} size={22} /></span>} /></span>
+    <span class="result-row-text">
+      <strong>{item.matchedItemTitle}</strong>
+      <span class="small muted">{[item.businessName, item.branchName !== item.businessName && item.branchName, item.address].filter(Boolean).join(' · ')}</span>
+      <span class="small"><b class="tone-brand">{formatCommercePrice(item.priceMinor, item.currency)}</b>{item.preparationMinutes != null && <span class="muted"> · მომზადება: {item.preparationMinutes} წთ</span>}</span>
+      <span class="small muted">{[type, similar(item)].filter(Boolean).join(' · ')}</span>
+    </span>
+    <Icon name="caret-right" size={18} class="muted" />
+  </a>;
+}
+
 function Results({ kind, list, limit }) {
   const l = limit ? list.slice(0, limit) : list;
   switch (kind) {
     case 'people': return <div class="result-list">{l.map((u) => <Row key={u.id} href={`/u/${u.username || u.id}`} img={u.avatar} name={u.name} verified={u.verified} sub={[u.username && `@${u.username}`, cityLabel(u.city)].filter(Boolean).join(' · ')} />)}</div>;
     case 'posts': return <div class="feed">{l.map((p) => <PostCard key={p.id} post={p} />)}</div>;
-    case 'places': return <div class="place-grid">{l.map((p) => <PlaceCard key={p.id} place={p} />)}</div>;
-    case 'businesses': return <div class="result-list">{l.map((b) => <Row key={b.id} href={`/business/${b.id}`} img={b.logo} square name={b.name} verified={b.verified} sub={[b.category, cityLabel(b.city)].filter(Boolean).join(' · ')} />)}</div>;
+    case 'places': return <div class="place-grid">{l.map((p) => <div class="discovery-place-result" key={p.id}><PlaceCard place={p} />{similar(p) && <span class="discovery-similar">{similar(p)}</span>}</div>)}</div>;
+    case 'addresses': return <div class="result-list">{l.map((a) => <Row key={a.id} href={addressHref(a)} name={a.name} icon="map-pin" sub={[a.address !== a.name && a.address, 'რუკაზე ჩვენება', a.coordinateAccuracy === 'approximate-center' && 'მიახლოებითი მდებარეობა', similar(a)].filter(Boolean).join(' · ')} />)}</div>;
+    case 'catalog': return <div class="result-list">{l.map((item) => <CatalogRow key={item.resultId} item={item} />)}</div>;
+    case 'businesses': return <div class="result-list">{l.map((b) => <Row key={b.id} href={`/business/${b.id}`} img={b.logo} square name={b.name} verified={b.verified} sub={[categoryOf(b).label, cityLabel(b.city), similar(b)].filter(Boolean).join(' · ')} />)}</div>;
     case 'groups': return <div class="result-list">{l.map((g) => <Row key={g.id} href={`/groups/${g.id}`} img={g.avatar || g.cover} square name={g.name} sub={[t(g.privacy === 'private' ? 'groups.private' : 'groups.public'), tn('groups.members', g.memberCount)].join(' · ')} />)}</div>;
     case 'events': return <div class="place-grid">{l.map((e) => <EventCard key={e.id} event={e} />)}</div>;
     case 'videos': return <div class="video-grid">{l.map((v) => <VideoCard key={v.id} video={v} />)}</div>;
@@ -106,15 +130,16 @@ export default function Search() {
   const tab = query.value.get('tab') || 'all';
   const [value, setValue] = useState(q);
   const [res, setRes] = useState(null);
+  const [retry, setRetry] = useState(0);
   useTitle(q ? `${q} — ${t('common.search')}` : t('common.search'));
   useEffect(() => { setValue(q); }, [q]);
   useEffect(() => {
     if (!q) { setRes(null); return undefined; }
     let alive = true;
     setRes(null);
-    searchAll(q).then((r) => alive && setRes(r)).catch(() => alive && setRes({}));
+    searchAll(q).then((r) => alive && setRes(r)).catch(() => alive && setRes({ coverage: { unavailable: true } }));
     return () => { alive = false; };
-  }, [q]);
+  }, [q, retry]);
 
   const submit = (v) => {
     const term = String(v || '').trim();
@@ -134,15 +159,17 @@ export default function Search() {
         <>
           <Tabs variant="pill" value={tab} onChange={(v) => setQuery({ tab: v === 'all' ? null : v })} label={t('common.search')} items={[
             { value: 'all', label: t('common.all') },
-            ...KINDS.map((k) => ({ value: k.key, label: `${t(`search.${k.key}`)}${res?.[k.key]?.length ? ` · ${formatCount(res[k.key].length)}` : ''}`, icon: k.icon, hidden: res && !res[k.key]?.length && tab !== k.key })),
+            ...KINDS.map((k) => ({ value: k.key, label: `${kindLabel(k)}${res?.[k.key]?.length ? ` · ${formatCount(res[k.key].length)}` : ''}`, icon: k.icon, hidden: res && !res[k.key]?.length && tab !== k.key })),
           ]} />
+          {res?.coverage?.unavailable && <p class="discovery-search-notice" role="status"><Icon name="info" size={18} />ზოგი წყარო ახლა მიუწვდომელია. ხელმისაწვდომი შედეგები ნაჩვენებია; სრული ძიებისთვის სცადე ხელახლა.<button type="button" class="link" onClick={() => setRetry((value) => value + 1)}>ხელახლა ცდა</button></p>}
+          {res?.coverage?.truncated && <p class="discovery-search-notice">ძიება მოიცავს ჩატვირთულ ჩანაწერებს. დიდი კატალოგების ყველა ფილიალი შეიძლება ჯერ არ ჩანდეს.</p>}
           <div class="search-body">
             {!res ? <div class="center-pad"><Spinner size={28} /></div>
               : !total ? <Card><Empty icon="magnifying-glass" title={t('search.nothingFor', { q })} text={t('search.nothingText')} /></Card>
               : tab === 'all' ? KINDS.filter((k) => res[k.key]?.length).map((k) => (
                 <section key={k.key} class="search-section">
                   <div class="section-head">
-                    <h2 class="section-title"><Icon name={k.icon} size={20} class="tone-brand" />{t(`search.${k.key}`)}</h2>
+                    <h2 class="section-title"><Icon name={k.icon} size={20} class="tone-brand" />{kindLabel(k)}</h2>
                     {res[k.key].length > (k.key === 'posts' ? 2 : 4) && <button type="button" class="link" onClick={() => setQuery({ tab: k.key })}>{t('common.seeAll')}</button>}
                   </div>
                   <Results kind={k.key} list={res[k.key]} limit={k.key === 'posts' ? 2 : k.key === 'people' || k.key === 'businesses' || k.key === 'groups' || k.key === 'items' ? 4 : 3} />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Modal } from '../../ui/Modal.jsx';
 import { Button } from '../../ui/Button.jsx';
 import { Icon } from '../../ui/Icon.jsx';
@@ -8,9 +8,14 @@ import { t } from '../../lib/i18n.js';
 import { toast } from '../../lib/toast.js';
 import { upload } from '../../lib/media.js';
 import { getPosition, distanceKm, cityLabel } from '../../lib/geo.js';
-import { listPlaces, checkIn } from '../../data/places.js';
+import { listMapPlaces, getPlace, checkIn } from '../../data/places.js';
+import { mergeImportedPlaces, isImportedPlaceId } from '../../data/importedPlaces.js';
+import { searchImported } from '../../lib/discoveryClient.js';
+import { rankRecords } from '../../lib/discoverySearch.js';
+import { readCoordinates } from '../../lib/coordinates.js';
 import { PlaceCard } from './PlaceCard.jsx';
 import { categoryOf } from './categories.js';
+import { PersonalActionNotice } from '../auth/PersonalActionNotice.jsx';
 
 /** Location only counts as verified when the user is really near the place. */
 const NEAR_KM = 2;
@@ -19,23 +24,72 @@ function PickPlace({ onPick, onAdd }) {
   const [places, setPlaces] = useState(null);
   const [pos, setPos] = useState(null);
   const [q, setQ] = useState('');
-  useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); getPosition({ timeout: 8000 }).then(setPos).catch(() => {}); }, []);
+  const [localError, setLocalError] = useState(false);
+  const [truncated, setTruncated] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [remote, setRemote] = useState({ query: '', rows: [], loading: false, error: false });
+  const [picking, setPicking] = useState('');
+  const [pickError, setPickError] = useState(false);
+  const selection = useRef(0);
+  const term = q.trim();
+  const remoteState = remote.query === term ? remote : { rows: [], loading: term.length >= 2, error: false };
+  useEffect(() => {
+    let active = true;
+    setLocalError(false);
+    listMapPlaces().then(result => { if (active) { setPlaces(result.places); setTruncated(result.truncated); } }).catch(() => { if (active) { setPlaces([]); setLocalError(true); } });
+    return () => { active = false; };
+  }, [retry]);
+  useEffect(() => {
+    let active = true;
+    getPosition({ timeout: 8000 }).then(value => { if (active) setPos(value); }).catch(() => {});
+    return () => { active = false; selection.current++; };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    if (term.length < 2) { setRemote({ query: term, rows: [], loading: false, error: false }); return undefined; }
+    setRemote({ query: term, rows: [], loading: true, error: false });
+    const timer = setTimeout(() => {
+      searchImported(term, { channel: 'checkin', kinds: ['place'], limit: 40 }).then(rows => {
+        if (active) setRemote({ query: term, rows: rows.filter(row => row.kind === 'place'), loading: false, error: false });
+      }).catch(() => { if (active) setRemote({ query: term, rows: [], loading: false, error: true }); });
+    }, 250);
+    return () => { active = false; clearTimeout(timer); };
+  }, [term, retry]);
   const list = useMemo(() => {
-    if (!places) return [];
-    const needle = q.trim().toLowerCase();
-    const withD = places.map((p) => ({ p, d: pos ? distanceKm(pos, p) : Infinity }));
-    const filtered = needle ? withD.filter(({ p }) => `${p.name} ${p.city}`.toLowerCase().includes(needle)) : withD;
-    return filtered.sort((a, b) => (a.d - b.d) || (b.p.checkinCount - a.p.checkinCount)).slice(0, 40);
-  }, [places, pos, q]);
+    const rows = term ? rankRecords(mergeImportedPlaces(places || [], remoteState.rows), term, { limit: 40 }) : places || [];
+    const withDistance = rows.map(p => ({ p, d: pos && readCoordinates(p) ? distanceKm(pos, p) : Infinity }));
+    return term ? withDistance : withDistance.sort((a, b) => (a.d - b.d) || ((b.p.checkinCount || 0) - (a.p.checkinCount || 0))).slice(0, 40);
+  }, [places, pos, term, remoteState.rows]);
+  const pick = async place => {
+    if (picking) return;
+    const request = ++selection.current;
+    setPicking(place.id); setPickError(false);
+    try {
+      const full = isImportedPlaceId(place.id) ? await getPlace(place.id) : place;
+      if (request !== selection.current) return;
+      if (!full || ['inactive', 'deleted'].includes(full.status)) throw new Error('Place unavailable');
+      onPick(full);
+    } catch { if (request === selection.current) setPickError(true); }
+    finally { if (request === selection.current) setPicking(''); }
+  };
+  const searching = !places || remoteState.loading;
   return (
     <div class="stack">
-      <SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('checkin.searchPlace')} autoFocus />
+      <SearchInput value={q} onInput={(e) => { selection.current++; setPicking(''); setPickError(false); setQ(e.currentTarget.value.slice(0, 200)); }} placeholder={t('checkin.searchPlace')} autoFocus />
       {pos && <p class="muted small row gap-6"><Icon name="navigation-arrow-fill" size={14} class="tone-brand" />{t('checkin.nearYou')}</p>}
-      {!places ? <div class="center-pad"><Spinner /></div> : list.length ? (
-        <div class="checkin-list">
-          {list.map(({ p, d }) => <PlaceCard key={p.id} place={p} distance={d} compact href="#" onClick={(e) => { e.preventDefault(); onPick(p); }} />)}
+      {!term && <p class="muted small">სხვა ადგილების მოსაძებნად ჩაწერე სახელი — ქართულად ან ლათინური ასოებით.</p>}
+      {term.length === 1 && <p class="muted small">სრული ცნობარის ძიებისთვის ჩაწერე მინიმუმ 2 ასო.</p>}
+      {(localError || remoteState.error) && <p class="small" role="alert">ადგილების ნაწილი ვერ ჩაიტვირთა. <Button size="sm" variant="ghost" onClick={() => setRetry(value => value + 1)}>{t('common.retry')}</Button></p>}
+      {truncated && <p class="muted small">საიტის ადგილების სია შეზღუდულია; ღია ცნობარში ძიება ცალკეც მუშაობს.</p>}
+      {searching && <p class="row gap-8 small" role="status"><Spinner size={16}/>ადგილებს ვეძებთ…</p>}
+      {list.some(({ p }) => p.searchMatch === 'fuzzy') && <p class="muted small">მიახლოებული სახელებიც ნაჩვენებია.</p>}
+      {picking && <p class="row gap-8 small" role="status"><Spinner size={16}/>ადგილის სრულ ინფორმაციას ვტვირთავთ…</p>}
+      {pickError && <p class="small" role="alert">ადგილი ვერ ჩაიტვირთა. სცადე ხელახლა არჩევა.</p>}
+      {list.length ? (
+        <div class="checkin-list" aria-busy={picking ? 'true' : undefined}>
+          {list.map(({ p, d }) => <PlaceCard key={p.id} place={p} distance={d} compact onClick={(e) => { e.preventDefault(); pick(p); }} />)}
         </div>
-      ) : <Empty compact icon="map-pin" title={t('place.noneFound')} action={onAdd && <Button variant="secondary" icon="map-pin-plus" onClick={onAdd}>{t('place.add')}</Button>} />}
+      ) : !searching && <Empty compact icon="map-pin" title={t('place.noneFound')} text="სცადე სახელის ნაწილი ან სხვა დაწერილობა." action={onAdd && <Button variant="secondary" icon="map-pin-plus" onClick={onAdd}>{t('place.add')}</Button>} />}
     </div>
   );
 }
@@ -70,6 +124,7 @@ export function CheckinDialog({ place: initial, onClose, onAddPlace, onDone }) {
   if (!place) {
     return (
       <Modal open onClose={onClose} title={t('checkin.title')} size="md">
+        <PersonalActionNotice>ჩექინი და მისი პოსტი შენს პირად პროფილს დაუკავშირდება.</PersonalActionNotice>
         <PickPlace onPick={setPlace} onAdd={onAddPlace} />
       </Modal>
     );
@@ -79,6 +134,7 @@ export function CheckinDialog({ place: initial, onClose, onAddPlace, onDone }) {
     <Modal open onClose={onClose} title={t('checkin.title')} size="md"
       footer={<>{!initial && <Button variant="secondary" onClick={() => setPlace(null)}>{t('common.back')}</Button>}<Button variant="primary" icon="map-pin" onClick={submit} loading={busy}>{t('checkin.submit')}</Button></>}>
       <div class="stack">
+        <PersonalActionNotice>ჩექინი და მისი პოსტი შენს პირად პროფილს დაუკავშირდება.</PersonalActionNotice>
         <div class="checkin-place">
           <span class="checkin-place-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={22} /></span>
           <div class="grow">

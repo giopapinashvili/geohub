@@ -1,0 +1,9 @@
+.place-photo-credits { font-size: 11px; color: var(--text-3); border-top: 1px solid var(--border); }
+.place-photo-credits summary { cursor: pointer; padding: 11px 16px; min-height: 44px; line-height: 1.7; }
+.place-photo-credits summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -3px; }
+.place-photo-credits > div { padding: 0 16px 14px; line-height: 1.7; }
+.place-photo-credits p { margin: 0 0 8px; }
+.place-photo-credits ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.place-photo-credits li { display: grid; gap: 3px; overflow-wrap: anywhere; }
+.place-photo-credits a { color: var(--brand-text); text-decoration: underline; text-underline-offset: 2px; }
+.place-photo-credits li > a { font-weight: 600; }

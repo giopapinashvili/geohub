@@ -11,6 +11,8 @@ import { openComposer, friendIds } from '../../lib/store.js';
 import { sendMessage, openDirect } from '../../data/messages.js';
 import { getUsers, searchUsers } from '../../data/users.js';
 import { useDebounced } from '../../lib/hooks.js';
+import { actor, actingIdentity } from '../../lib/actor.js';
+import { PersonalActionNotice } from '../auth/PersonalActionNotice.jsx';
 
 export function postUrl(id) { return `${location.origin}/post/${id}`; }
 
@@ -40,6 +42,7 @@ function SendList({ url, onDone }) {
   };
   return (
     <div class="share-send">
+      <PersonalActionNotice>მეგობართან ბმულის გაგზავნა პირადი ჩატიდან ხდება.</PersonalActionNotice>
       <SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('messages.findPeople')} />
       <div class="share-people">
         {people.map((u) => (
@@ -61,10 +64,11 @@ function SendList({ url, onDone }) {
 export function ShareDialog({ post, onClose }) {
   const [mode, setMode] = useState('menu');
   const [busy, setBusy] = useState(false);
+  const identity = actingIdentity.value;
   const url = postUrl(post.id);
   const shareNow = async () => {
     setBusy(true);
-    try { await createPost({ sharedPostId: post.id, text: '' }); toast.success(t('share.done')); onClose(); }
+    try { await createPost({ sharedPostId: post.id, text: '', asBusiness: actor.value }); toast.success(t('share.done')); onClose(); }
     catch { toast.error(t('common.error')); }
     setBusy(false);
   };
@@ -75,6 +79,7 @@ export function ShareDialog({ post, onClose }) {
     <Modal open onClose={onClose} title={mode === 'send' ? t('share.sendTitle') : t('share.title')} size="sm">
       {mode === 'menu' ? (
         <div class="share-menu">
+          {identity && <div class="row gap-8 small" style={{ padding: '10px 12px' }}><Avatar src={identity.avatar} name={identity.name} square={identity.authorType === 'business'} size={32} /><span>გაზიარება სახელით: <strong>{identity.name}</strong></span></div>}
           <button type="button" class="menu-item" disabled={busy} onClick={shareNow}>
             <span class="menu-icon"><Icon name="share-fat" size={20} /></span>
             <span class="menu-text"><span class="menu-label">{t('share.now')}</span><span class="menu-sub">{t('share.nowSub')}</span></span>
@@ -85,7 +90,7 @@ export function ShareDialog({ post, onClose }) {
           </button>
           <button type="button" class="menu-item" onClick={() => setMode('send')}>
             <span class="menu-icon"><Icon name="paper-plane-tilt" size={20} /></span>
-            <span class="menu-text"><span class="menu-label">{t('share.send')}</span></span>
+            <span class="menu-text"><span class="menu-label">{actor.value ? 'პირადი ჩატით გაგზავნა' : t('share.send')}</span></span>
           </button>
           <button type="button" class="menu-item" onClick={() => { copyLink(url); trackShare(post.id); onClose(); }}>
             <span class="menu-icon"><Icon name="link" size={20} /></span>

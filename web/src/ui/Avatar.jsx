@@ -20,15 +20,15 @@ function usable(src) {
  * status: 'online' shows a presence dot.
  */
 export function Avatar({ src, name = '', size = 40, ring, status, href, class: cls = '', square }) {
-  const [broken, setBroken] = useState(false);
-  const show = usable(src) && !broken;
+  const [brokenSrc, setBrokenSrc] = useState(null);
+  const show = usable(src) && src !== brokenSrc;
   const face = (
     <span
       class={`avatar${square ? ' avatar-square' : ''}${ring ? ` avatar-ring avatar-ring-${ring}` : ''} ${cls}`}
       style={{ width: size, height: size, '--av-tone': toneFor(name), fontSize: Math.max(11, Math.round(size * 0.38)) }}
     >
       {show
-        ? <img src={img(src, size)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onError={() => setBroken(true)} />
+        ? <img src={img(src, size)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onError={() => setBrokenSrc(src)} />
         : <span class="avatar-initials" aria-hidden="true">{initials(name)}</span>}
       {status === 'online' && <span class="avatar-status" aria-hidden="true" />}
     </span>

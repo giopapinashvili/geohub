@@ -6,6 +6,7 @@ import { markAllRead } from '../data/notify.js';
 import { NotificationItem } from '../features/notifications/NotificationItem.jsx';
 import { ConversationRow } from '../features/messages/ConversationRow.jsx';
 import { navigate } from '../lib/router.js';
+import { actorId } from '../lib/actor.js';
 
 export function NotificationsPopover({ trigger }) {
   return (
@@ -42,7 +43,7 @@ export function MessagesPopover({ trigger }) {
             </div>
             {list.length ? (
               <div class="pop-list">
-                {list.map((c) => <ConversationRow key={c.id} conv={c} onClick={(conv) => { close(); openChat(conv.id); }} />)}
+                {list.map((c) => <ConversationRow key={c.id} conv={c} actorId={actorId()} onClick={(conv) => { close(); openChat(conv.id); }} />)}
               </div>
             ) : <Empty compact icon="chat-circle-dots" title={t('messages.emptyTitle')} text={t('messages.emptyText')} />}
             <button type="button" class="pop-foot" onClick={() => { close(); navigate('/messages'); }}>{t('messages.seeAllInMessenger')}</button>

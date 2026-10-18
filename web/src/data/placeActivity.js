@@ -67,10 +67,11 @@ export function buildPlaceActivity(place, checkinRecords = [], storyRecords = []
 
   const groups = new Map();
   for (const story of stories) {
-    if (!groups.has(story.authorId)) groups.set(story.authorId, {
-      authorId: story.authorId, name: story.authorName, avatar: story.authorAvatar, stories: [], latest: story.createdAt,
+    const actorId = story.actorId || `user_${story.authorId}`;
+    if (!groups.has(actorId)) groups.set(actorId, {
+      authorId: story.authorId, actorId, businessId: story.businessId || '', name: story.authorName, avatar: story.authorAvatar, stories: [], latest: story.createdAt,
     });
-    groups.get(story.authorId).stories.push(story);
+    groups.get(actorId).stories.push(story);
   }
   const viewer = uid.value;
   const storyGroups = [...groups.values()].map((group) => ({

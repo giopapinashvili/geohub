@@ -74,7 +74,7 @@ function EditDialog({ post, onClose }) {
     <Modal open onClose={() => onClose(false)} title={t('post.edit')} size="md"
       footer={<><button type="button" class="btn btn-secondary btn-md" onClick={() => onClose(false)}>{t('common.cancel')}</button><button type="button" class="btn btn-primary btn-md" disabled={busy || (!text.trim() && !post.media.length)} onClick={save}>{t('common.save')}</button></>}>
       <TextArea value={text} onInput={(e) => setText(e.currentTarget.value)} maxLength={5000} minRows={4} label={t('post.text')} />
-      <div class="field">
+      {post.authorType !== 'business' && <div class="field">
         <span class="field-label">{t('audience.title')}</span>
         <Segmented value={aud} onChange={setAud} label={t('audience.title')} options={[
           { value: 'public', label: t('audience.public'), icon: 'globe-hemisphere-east' },
@@ -83,7 +83,7 @@ function EditDialog({ post, onClose }) {
           ...(closeFriendIds.value.length || post.visibility === 'close_friends' ? [{ value: 'close_friends', label: t('audience.closeFriends'), icon: 'star' }] : []),
           { value: 'onlyme', label: t('audience.onlyMe'), icon: 'lock' },
         ]} />
-      </div>
+      </div>}
     </Modal>
   );
 }

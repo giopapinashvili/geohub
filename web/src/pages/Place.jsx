@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { PlaceCommerce } from '../features/commerce/PlaceCommerce.jsx';
 import { Avatar } from '../ui/Avatar.jsx';
 import { Button, IconButton } from '../ui/Button.jsx';
 import { Icon } from '../ui/Icon.jsx';
@@ -15,13 +16,22 @@ import { uid, isAdmin } from '../lib/auth.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { cityLabel } from '../lib/geo.js';
+import { readCoordinates, isMapCoordinate } from '../lib/coordinates.js';
 import {
   listenPlace, listenPlaceReviews, addPlaceReview, deletePlaceReview, reviewStats, placeCheckins, placePosts, deletePlace,
 } from '../data/places.js';
-import { isSaved, setSaved } from '../data/posts.js';
+import { usePlaceSaved } from '../features/places/usePlaceSaved.js';
+import { PersonalActionNotice } from '../features/auth/PersonalActionNotice.jsx';
 import { categoryOf } from '../features/places/categories.js';
 import { Stars, StarInput } from '../features/places/Stars.jsx';
+import { ReviewTagInput, ReviewTags, ReviewTagSummary } from '../features/places/ReviewTags.jsx';
 import { CheckinDialog } from '../features/places/CheckinDialog.jsx';
+import { PlaceCoordinates } from '../features/places/PlaceCoordinates.jsx';
+import { PlacePhotoCredits } from '../features/places/PlacePhotoCredits.jsx';
+import { PlaceLocationDialog } from '../features/places/PlaceLocationDialog.jsx';
+import { ImportedPlaceInfo } from '../features/places/ImportedPlaceInfo.jsx';
+import { ImportedPlacePosts } from '../features/places/ImportedPlacePosts.jsx';
+import { importedPlaceEntries } from '../lib/importedPlacePosts.js';
 import { PostCard } from '../features/post/PostCard.jsx';
 import { Lightbox } from '../features/post/Lightbox.jsx';
 import { copyLink } from '../features/post/ShareDialog.jsx';
@@ -29,22 +39,25 @@ import { copyLink } from '../features/post/ShareDialog.jsx';
 function ReviewForm({ placeId, onDone }) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
+  const [experienceTags, setExperienceTags] = useState([]);
   const [busy, setBusy] = useState(false);
   const submit = async () => {
     if (!requireLogin('review') || !rating) return;
     setBusy(true);
-    try { await addPlaceReview(placeId, rating, text); toast.success(t('place.reviewThanks')); setRating(0); setText(''); onDone?.(); }
+    try { await addPlaceReview(placeId, rating, text, experienceTags); toast.success(t('place.reviewThanks')); setRating(0); setText(''); setExperienceTags([]); onDone?.(); }
     catch { toast.error(t('common.error')); }
     setBusy(false);
   };
   return (
     <div class="review-form">
+      <PersonalActionNotice>ადგილზე შეფასება შენი პირადი გამოცდილების სახელით გამოქვეყნდება.</PersonalActionNotice>
       <strong>{t('place.writeReview')}</strong>
       <StarInput value={rating} onChange={setRating} />
       {rating > 0 && (
         <>
           <TextArea label={t('place.reviewText')} optional={t('common.optional')} value={text} onInput={(e) => setText(e.currentTarget.value)} maxLength={1000} minRows={2} placeholder={t('place.reviewHint')} />
-          <div class="row gap-8"><Button variant="primary" onClick={submit} loading={busy}>{t('common.publish')}</Button><Button variant="ghost" onClick={() => setRating(0)}>{t('common.cancel')}</Button></div>
+          <ReviewTagInput value={experienceTags} onChange={setExperienceTags} disabled={busy}/>
+          <div class="row gap-8"><Button variant="primary" onClick={submit} loading={busy}>{t('common.publish')}</Button><Button variant="ghost" disabled={busy} onClick={() => { setRating(0); setExperienceTags([]); }}>{t('common.cancel')}</Button></div>
         </>
       )}
     </div>
@@ -76,7 +89,8 @@ function Reviews({ place, reviews }) {
           })}
         </div>
       </Card>
-      {!mine && <Card><ReviewForm placeId={place.id} /></Card>}
+      <ReviewTagSummary reviews={reviews || []}/>
+      {!mine && <Card><ReviewForm key={`${place.id}:${uid.value || ''}`} placeId={place.id} /></Card>}
       {!reviews ? <div class="center-pad"><Spinner /></div> : reviews.length ? (
         <Card class="review-list">
           {reviews.map((r) => (
@@ -89,6 +103,7 @@ function Reviews({ place, reviews }) {
                   <span class="muted xs">{timeAgo(r.createdAt)}</span>
                 </div>
                 {r.comment && <p class="review-text">{r.comment}</p>}
+                <ReviewTags review={r}/>
               </div>
               {(r.userId === uid.value || isAdmin.value) && (
                 <IconButton icon="trash" label={t('common.delete')} size={32} onClick={() => deletePlaceReview(r.id).then(() => toast(t('place.reviewDeleted'))).catch(() => toast.error(t('common.error')))} />
@@ -122,24 +137,23 @@ function Visitors({ placeId }) {
   );
 }
 
-function Posts({ placeId }) {
-  const { data } = useAsync(() => placePosts(placeId, 30), [placeId]);
-  if (!data) return <div class="center-pad"><Spinner /></div>;
-  if (!data.length) return <Card><Empty compact icon="note-pencil" title={t('place.noPosts')} /></Card>;
-  return <div class="feed">{data.map((p) => <PostCard key={p.id} post={p} />)}</div>;
+function Posts({ place }) {
+  const { data, loading, error, reload } = useAsync(() => placePosts(place.id, 30), [place.id]);
+  const imported = place.raw?.source === 'openstreetmap';
+  return <div class="feed"><ImportedPlacePosts key={place.id} place={place}/>{imported && <h2 class="imported-community-heading">მომხმარებლებისა და ბიზნესების პოსტები</h2>}{error ? <Card><Empty compact icon="warning" title="პოსტები ვერ ჩაიტვირთა" action={<Button onClick={reload}>{t('common.reload')}</Button>}/></Card> : loading ? <div class="center-pad"><Spinner /></div> : data?.length ? data.map((p) => <PostCard key={p.id} post={p} />) : <Card><Empty compact icon="note-pencil" title={imported ? 'ამ ადგილზე საზოგადოებას პოსტი ჯერ არ დაუმატებია' : t('place.noPosts')} /></Card>}</div>;
 }
 
 /** Place page: gallery, rating, check-in, save, reviews, visitors and posts. */
 export default function Place({ params }) {
   const { data: place, loading } = useLive((ok, err) => listenPlace(params.id, ok, err), [params.id]);
   const [reviews, setReviews] = useState(null);
-  const [saved, setSavedState] = useState(false);
+  const { saved, loading: savedLoading, busy: savedBusy, toggleSave } = usePlaceSaved(params.id, place);
   const [checkin, setCheckin] = useState(false);
   const [lightbox, setLightbox] = useState(-1);
   const [confirmDel, setConfirmDel] = useState(false);
+  const [editLocation, setEditLocation] = useState(false);
   useTitle(place?.name || t('nav.explore'));
   useEffect(() => listenPlaceReviews(params.id, setReviews), [params.id]);
-  useEffect(() => { if (uid.value) isSaved('place', params.id).then(setSavedState); }, [params.id, uid.value]);
   const tab = query.value.get('tab') || 'about';
 
   if (loading) return <PageSpinner />;
@@ -148,14 +162,12 @@ export default function Place({ params }) {
   }
 
   const cat = categoryOf(place);
+  const directory = importedPlaceEntries(place);
+  const coords = readCoordinates(place);
   const stats = reviewStats(reviews || [], place);
   const photos = [place.image, ...place.photos].filter((x, i, a) => x && a.indexOf(x) === i);
   const own = place.creatorId === uid.value;
-  const toggleSave = async () => {
-    if (!requireLogin('save')) return;
-    try { await setSaved('place', place.id, !saved, { title: place.name, image: place.image }); setSavedState(!saved); toast(t(saved ? 'saved.removed' : 'saved.added')); }
-    catch { toast.error(t('common.error')); }
-  };
+  const editable = place.raw?.source !== 'openstreetmap' && (own || isAdmin.value);
 
   return (
     <div class="place-page">
@@ -163,11 +175,12 @@ export default function Place({ params }) {
         <div class={`place-gallery n${Math.min(photos.length, 3)}`}>
           {photos.length ? photos.slice(0, 3).map((src, i) => (
             <button key={src} type="button" class="place-gallery-item" onClick={() => setLightbox(i)} aria-label={t('place.photo', { n: i + 1 })}>
-              <Img src={src} width={i === 0 ? 1200 : 600} alt="" eager={i === 0} />
+              <Img src={src} width={i === 0 ? 1200 : 600} alt="" eager={i === 0} fetchpriority={i === 0 ? 'high' : undefined} />
               {i === 2 && photos.length > 3 && <span class="place-gallery-more">+{photos.length - 3}</span>}
             </button>
-          )) : <span class="place-gallery-empty" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={56} /></span>}
+          )) : <span class="place-gallery-empty" style={{ '--tone': cat.tone }}><span class="place-empty-category-icon"><Icon name={cat.icon} size={38} /></span><strong>{cat.label}</strong><small>ფოტო ჯერ არ არის დამატებული</small></span>}
         </div>
+        <PlacePhotoCredits place={place}/>
         <div class="place-head">
           <span class="place-cat-chip" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={14} />{cat.label}</span>
           <h1 class="place-name">{place.name}{place.verified && <Icon name="seal-check-fill" size={22} class="tone-brand" label={t('common.verified')} />}</h1>
@@ -176,20 +189,23 @@ export default function Place({ params }) {
             {stats.avg > 0 && <span class="place-rating"><Icon name="star-fill" size={15} />{stats.avg.toFixed(1).replace('.', ',')} <span class="muted">({tn('place.reviews', stats.count)})</span></span>}
             {place.checkinCount > 0 && <span class="muted">{tn('place.checkins', place.checkinCount)}</span>}
           </p>
+          <PlaceCoordinates key={place.id} place={place} showMissing />
           <div class="place-actions">
             <Button variant="primary" icon="map-pin" onClick={() => { if (requireLogin('checkin')) setCheckin(true); }}>{t('checkin.short')}</Button>
-            <Button variant={saved ? 'soft' : 'secondary'} icon={saved ? 'bookmark-simple-fill' : 'bookmark-simple'} onClick={toggleSave}>{t(saved ? 'common.saved' : 'post.save')}</Button>
-            {place.lat != null && <Button variant="secondary" icon="navigation-arrow" href={`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`} target="_blank" rel="noopener">{t('place.directions')}</Button>}
-            {place.lat != null && <Button variant="secondary" icon="map-trifold" href={`/map?place=${place.id}`}>{t('place.onMap')}</Button>}
+            <Button variant={saved ? 'soft' : 'secondary'} icon={saved ? 'bookmark-simple-fill' : 'bookmark-simple'} loading={savedLoading || savedBusy} onClick={toggleSave}>{t(saved ? 'common.saved' : 'post.save')}</Button>
+            {coords && <Button variant="secondary" icon="navigation-arrow" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{t('place.directions')}</Button>}
+            {isMapCoordinate(place) && <Button variant="secondary" icon="map-trifold" href={`/map?place=${place.id}`}>{t('place.onMap')}</Button>}
             <Menu label={t('common.more')} width={240} items={[
               { icon: 'share-fat', label: t('common.copyLink'), onClick: () => copyLink(`${location.origin}/place/${place.id}`) },
-              { icon: 'trash', label: t('common.delete'), danger: true, hidden: !own && !isAdmin.value, onClick: () => setConfirmDel(true) },
+              { icon: 'crosshair', label: t('place.editLocation'), hidden: !editable, onClick: () => setEditLocation(true) },
+              { icon: 'trash', label: t('common.delete'), danger: true, hidden: !editable, onClick: () => setConfirmDel(true) },
             ]} trigger={(p) => <IconButton {...p} icon="dots-three" label={t('common.more')} variant="soft" size={40} />} />
           </div>
         </div>
         <div class="place-tabs">
           <Tabs value={tab} onChange={(v) => setQuery({ tab: v === 'about' ? null : v })} label={place.name} items={[
             { value: 'about', label: t('place.about') },
+            { value: 'catalog', label: t('commerce.menuCatalog') },
             { value: 'reviews', label: `${t('place.reviewsTab')}${stats.count ? ` · ${formatCount(stats.count)}` : ''}` },
             { value: 'visitors', label: t('place.visitors') },
             { value: 'posts', label: t('place.posts') },
@@ -202,7 +218,9 @@ export default function Place({ params }) {
           <>
             <Card>
               <h2 class="card-title">{t('place.about')}</h2>
-              <p class="place-desc">{place.description || t('place.noDescription')}</p>
+              <p class="place-desc">{place.description || directory?.summary || t('place.noDescription')}</p>
+              <ImportedPlaceInfo place={place}/>
+              {directory && <a class="imported-directory-preview" href={`/place/${place.id}?tab=posts`}><span class="imported-source-post-icon"><Icon name={directory.photos.length ? 'image' : 'note-pencil'} size={22}/></span><span><strong>{directory.photos.length ? 'ფოტოამბავი და სასარგებლო ინფორმაცია' : 'სასარგებლო ინფორმაცია ადგილზე წასვლამდე'}</strong><small>GeoHub-ის ცნობარი · წყაროებითა და თარიღებით{directory.photos.length ? ` · ${directory.photos.length} ფოტო` : ''}</small></span><Icon name="arrow-right" size={18}/></a>}
               {photos.length > 3 && (
                 <div class="place-photo-grid">
                   {photos.map((src, i) => <button key={src} type="button" onClick={() => setLightbox(i)} aria-label={t('place.photo', { n: i + 1 })}><Img src={src} width={320} alt="" /></button>)}
@@ -216,7 +234,7 @@ export default function Place({ params }) {
                   {reviews.slice(0, 2).map((r) => (
                     <article key={r.id} class="review">
                       <Avatar src={r.userPhoto} name={r.userName} size={36} />
-                      <div class="grow"><div class="row gap-8 wrap"><strong>{r.userName}</strong><Stars value={r.rating} size={13} /></div>{r.comment && <p class="review-text">{r.comment}</p>}</div>
+                      <div class="grow"><div class="row gap-8 wrap"><strong>{r.userName}</strong><Stars value={r.rating} size={13} /></div>{r.comment && <p class="review-text">{r.comment}</p>}<ReviewTags review={r}/></div>
                     </article>
                   ))}
                 </div>
@@ -224,12 +242,14 @@ export default function Place({ params }) {
             )}
           </>
         )}
+        {tab === 'catalog' && <PlaceCommerce place={place} />}
         {tab === 'reviews' && <Reviews place={place} reviews={reviews} />}
         {tab === 'visitors' && <Card><Visitors placeId={place.id} /></Card>}
-        {tab === 'posts' && <Posts placeId={place.id} />}
+        {tab === 'posts' && <Posts key={place.id} place={place} />}
       </div>
 
       {checkin && <CheckinDialog place={place} onClose={() => setCheckin(false)} />}
+      {editLocation && <PlaceLocationDialog key={place.id} place={place} onClose={() => setEditLocation(false)} />}
       {lightbox >= 0 && <Lightbox media={photos} index={lightbox} onClose={() => setLightbox(-1)} />}
       <Confirm open={confirmDel} danger title={t('place.deleteTitle')} confirmLabel={t('common.delete')} onClose={() => setConfirmDel(false)}
         onConfirm={() => deletePlace(place.id).then(() => { toast(t('place.deleted')); navigate('/explore'); }).catch(() => toast.error(t('common.error')))} />

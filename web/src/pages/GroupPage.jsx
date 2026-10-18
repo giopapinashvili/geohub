@@ -24,6 +24,7 @@ import { useUser } from '../features/user/useUser.js';
 import { PostCard } from '../features/post/PostCard.jsx';
 import { copyLink } from '../features/post/ShareDialog.jsx';
 import { groupCatLabel } from './Groups.jsx';
+import { PersonalActionNotice } from '../features/auth/PersonalActionNotice.jsx';
 
 function Posts({ group, member, manager }) {
   const [posts, setPosts] = useState(null);
@@ -196,6 +197,7 @@ export default function GroupPage({ params }) {
         <div class="place-head">
           <h1 class="place-name">{group.name}</h1>
           <p class="place-meta"><span><Icon name={group.privacy === 'private' ? 'lock' : 'globe-simple'} size={15} />{t(group.privacy === 'private' ? 'groups.private' : 'groups.public')}</span><span>{tn('groups.members', group.memberCount)}</span></p>
+          <PersonalActionNotice>ჯგუფში გაწევრიანება და პოსტების გამოქვეყნება პირადი პროფილით ხდება.</PersonalActionNotice>
           <div class="place-actions">
             {isMember ? (
               <>

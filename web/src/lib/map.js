@@ -1,38 +1,16 @@
 // MapLibre helpers: shared geometry, localized labels and places.
-
 import { lang } from './i18n.js';
 import { ICONS } from '../ui/icons.js';
+import { isMapCoordinate, readCoordinates } from './coordinates.js';
+import { markerPriority } from './mapMarkerPolicy.js';
+import { markerBadgeId, preparePlaceImages } from './mapMarkerImages.js';
 
 const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
-// Carto's glyph server only has Georgian letters in Noto Sans.
 export const LABEL_FONT = ['Noto Sans Regular'];
-
-const MARKER_ICONS = ['map-pin', 'mountains', 'castle-turret', 'bank', 'fork-knife', 'coffee', 'wine', 'umbrella', 'buildings', 'bed', 'shopping-bag', 'martini', 'soccer-ball'];
-const markerIcon = (name) => MARKER_ICONS.includes(name) && ICONS[name] ? name : 'map-pin';
-
-/** Rasterize the bundled Phosphor paths synchronously: no font or image fetch. */
-function addMarkerIcons(map) {
-  if (typeof document === 'undefined' || typeof Path2D === 'undefined') return false;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return false;
-  for (const name of MARKER_ICONS) {
-    if (!ICONS[name] || map.hasImage(`gh-icon-${name}`)) continue;
-    ctx.clearRect(0, 0, 64, 64);
-    ctx.save();
-    ctx.translate(12, 12);
-    ctx.scale(40 / 256, 40 / 256);
-    ctx.fillStyle = '#ffffff';
-    for (const [, path] of ICONS[name].matchAll(/<path\b[^>]*\bd="([^"]+)"/g)) ctx.fill(new Path2D(path));
-    ctx.restore();
-    map.addImage(`gh-icon-${name}`, ctx.getImageData(0, 0, 64, 64), { pixelRatio: 2 });
-  }
-  return true;
-}
+const markerIcon = (name) => Object.hasOwn(ICONS, name) ? name : 'map-pin';
 
 let loading = null;
-/** The maplibre-gl module and its stylesheet, loaded on first use. */
+/** MapLibre loads only when a map is needed. Regional tiles use ordinary HTTP. */
 export function loadMapLibre() {
   if (!loading) {
     loading = Promise.all([import('maplibre-gl'), import('maplibre-gl/dist/maplibre-gl.css')])
@@ -44,14 +22,9 @@ export function loadMapLibre() {
 
 export const styleUrl = () => BASEMAP_STYLE;
 
-/**
- * Preserve source spelling and Georgian Mkhedruli. CARTO's uppercase transform
- * can produce Mtavruli glyphs that are missing from its Noto Sans glyph stack.
- * Country labels retain their original field because local scripts vary.
- */
+/** Preserve original Georgian spelling; CARTO's uppercase glyph stack is incomplete. */
 export function localizeLabels(map) {
-  const local = lang.value === 'ka';
-  const field = local
+  const field = lang.value === 'ka'
     ? ['coalesce', ['get', 'name:ka'], ['get', 'name'], ['get', 'name_en']]
     : ['coalesce', ['get', 'name_en'], ['get', 'name']];
   for (const layer of map.getStyle().layers || []) {
@@ -59,93 +32,76 @@ export function localizeLabels(map) {
     map.setLayoutProperty(layer.id, 'text-font', LABEL_FONT);
     map.setLayoutProperty(layer.id, 'text-transform', 'none');
     if (/country|continent|housenumber|^gh-/.test(layer.id)) continue;
-    const tf = JSON.stringify(layer.layout['text-field']);
-    if (!tf.includes('name')) continue;
-    map.setLayoutProperty(layer.id, 'text-field', field);
+    if (JSON.stringify(layer.layout['text-field']).includes('name')) map.setLayoutProperty(layer.id, 'text-field', field);
   }
 }
 
-/** Adds (or re-adds after a style switch) the clustered places layers. */
+/** Single collision-managed symbol per place; no numbered cluster circles. */
 export function addPlaceLayers(map, data) {
-  if (!map.getSource('gh-places')) {
-    map.addSource('gh-places', { type: 'geojson', data, cluster: true, clusterRadius: 44, clusterMaxZoom: 13, promoteId: 'id' });
-  }
-  const brand = '#2563eb';
-  const halo = '#fffef9';
-  const hasIcons = addMarkerIcons(map);
-  map.addLayer({
-    id: 'gh-clusters', type: 'circle', source: 'gh-places', filter: ['has', 'point_count'],
-    paint: {
-      'circle-color': brand, 'circle-opacity': 0.96, 'circle-stroke-width': 3.5, 'circle-stroke-color': halo,
-      'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26],
-    },
+  if (!map.getSource('gh-places')) map.addSource('gh-places', {
+    type: 'geojson', data, cluster: false, promoteId: 'id', maxzoom: 18,
+    attribution: '<a href="/map-brands/ATTRIBUTION.md">Map symbols &amp; brands</a>',
   });
+  preparePlaceImages(map, data);
+  if (map.getLayer('gh-points')) return;
   map.addLayer({
-    id: 'gh-cluster-count', type: 'symbol', source: 'gh-places', filter: ['has', 'point_count'],
-    layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': LABEL_FONT, 'text-size': 13, 'text-allow-overlap': true },
-    paint: { 'text-color': '#ffffff' },
-  });
-  map.addLayer({
-    id: 'gh-point-halos', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
-    paint: {
-      'circle-color': '#24443a',
-      'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 26 : 17, hasIcons ? 21 : 12],
-      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 0.2],
-      'circle-blur': 0.6, 'circle-translate': [0, 2],
-    },
-  });
-  map.addLayer({
-    id: 'gh-points', type: 'circle', source: 'gh-places', filter: ['!', ['has', 'point_count']],
-    paint: {
-      'circle-color': ['get', 'tone'],
-      'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
-      'circle-stroke-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
-      'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], hasIcons ? 20 : 11, hasIcons ? 17 : 8],
-      'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3.5, 2.5],
-      'circle-stroke-color': halo,
-    },
-  });
-  if (hasIcons) {
-    map.addLayer({
-      id: 'gh-point-icons', type: 'symbol', source: 'gh-places', filter: ['!', ['has', 'point_count']],
-      layout: {
-        'icon-image': ['concat', 'gh-icon-', ['coalesce', ['get', 'icon'], 'map-pin']],
-        'icon-size': 1, 'icon-allow-overlap': true, 'icon-ignore-placement': true,
-      },
-      paint: { 'icon-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1] },
-    });
-  }
-  map.addLayer({
-    id: 'gh-labels', type: 'symbol', source: 'gh-places', filter: ['!', ['has', 'point_count']], minzoom: 9,
+    id: 'gh-points', type: 'symbol', source: 'gh-places', minzoom: 9,
+    filter: ['>=', ['zoom'], ['get', 'minZoom']],
     layout: {
-      'text-field': ['get', 'name'], 'text-font': LABEL_FONT, 'text-size': 12, 'text-offset': [0, hasIcons ? 1.85 : 1.1], 'text-anchor': 'top',
-      'text-max-width': 9, 'text-optional': true, 'text-padding': 4, 'text-transform': 'none',
+      'icon-image': ['step', ['zoom'],
+        ['case', ['get', 'brandAlways'], ['get', 'brandBadge'], ['get', 'badge']],
+        17, ['get', 'brandBadge']],
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 16, 0.95, 19, 1.05],
+      'icon-allow-overlap': false, 'icon-ignore-placement': false, 'icon-padding': 5,
+      'icon-pitch-alignment': 'viewport', 'icon-rotation-alignment': 'viewport',
+      'symbol-sort-key': ['get', 'rank'],
+      'text-field': ['step', ['zoom'], ['case', ['<=', ['get', 'minZoom'], 12], ['get', 'name'], ''], 14, ['get', 'name']],
+      'text-font': LABEL_FONT, 'text-size': ['interpolate', ['linear'], ['zoom'], 10, 11, 17, 12],
+      'text-offset': [0, 1.8], 'text-anchor': 'top', 'text-max-width': 9,
+      'text-optional': true, 'text-padding': 4, 'text-transform': 'none',
+      'text-pitch-alignment': 'viewport', 'text-rotation-alignment': 'viewport',
     },
     paint: {
-      'text-color': '#2c4438', 'text-halo-color': halo, 'text-halo-width': 1.8, 'text-halo-blur': 0.3,
+      'icon-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
       'text-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0, 1],
+      'text-color': '#2c4438', 'text-halo-color': '#fffef9', 'text-halo-width': 1.8, 'text-halo-blur': 0.3,
     },
   });
 }
 
-/** Recolor place overlays without replacing their source or selected state. */
-export function applyPlaceTheme(map, mode = 'light') {
-  const dark = mode === 'dark';
-  if (map.getLayer('gh-labels')) {
-    map.setPaintProperty('gh-labels', 'text-color', dark ? '#e5eee7' : '#2c4438');
-    map.setPaintProperty('gh-labels', 'text-halo-color', dark ? '#152126' : '#fffef9');
-  }
-  if (map.getLayer('gh-point-halos')) map.setPaintProperty('gh-point-halos', 'circle-color', dark ? '#000e18' : '#24443a');
+/** Register new category/brand badges before the source uses them. */
+export function setPlaceData(map, data) {
+  const source = map.getSource('gh-places');
+  if (!source) return;
+  preparePlaceImages(map, data);
+  source.setData(data);
 }
 
-/** GeoJSON features for places that have coordinates. */
+export function applyPlaceTheme(map, mode = 'light') {
+  if (!map.getLayer('gh-points')) return;
+  const dark = mode === 'dark';
+  map.setPaintProperty('gh-points', 'text-color', dark ? '#e5eee7' : '#2c4438');
+  map.setPaintProperty('gh-points', 'text-halo-color', dark ? '#152126' : '#fffef9');
+}
+
+/** Invalid and unprojectable coordinates never reach the renderer. */
 export function placesToGeoJSON(places, toneOf, iconOf = () => 'map-pin') {
   return {
     type: 'FeatureCollection',
-    features: places.filter((p) => p.lat != null && p.lng != null).map((p) => ({
-      type: 'Feature', id: p.id,
-      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-      properties: { id: p.id, name: p.name, tone: toneOf(p), icon: markerIcon(iconOf(p)) },
-    })),
+    features: places.filter(isMapCoordinate).map((place) => {
+      const { lat, lng } = readCoordinates(place);
+      const tone = toneOf(place);
+      const icon = markerIcon(iconOf(place));
+      const priority = markerPriority(place);
+      const badge = markerBadgeId(icon, tone);
+      return {
+        type: 'Feature', id: place.id,
+        geometry: { type: 'Point', coordinates: [lng, lat] },
+        properties: {
+          id: place.id, name: place.name || place.title || '', tone, icon, badge,
+          ...priority, brandBadge: priority.brand ? `gh-brand-${priority.brand}` : badge,
+        },
+      };
+    }),
   };
 }

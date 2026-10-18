@@ -4,8 +4,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { me, uid as myUid } from '../lib/auth.js';
+import { actingIdentity } from '../lib/actor.js';
 import { normStory } from './normalize.js';
-import { notify } from './notify.js';
+import { notifyAuthor } from './notify.js';
 
 const DURATIONS = { '24h': 86400000, '7d': 7 * 86400000, '30d': 30 * 86400000 };
 
@@ -17,6 +18,7 @@ export function listenStoryTray(onData) {
   // The rules only let close-friends stories reach the people on the list, so
   // the tray is three provable queries: public, shared with me, my own.
   const viewer = myUid.value;
+  const currentActorId = actingIdentity.value?.actorId;
   const stories = collection(db, 'stories');
   const qs = [query(stories, where('closeFriends', '==', false), orderBy('createdAt', 'desc'), limit(40))];
   if (viewer) {
@@ -37,8 +39,8 @@ export function listenStoryTray(onData) {
       if (!s.expiresAt && s.raw.duration !== 'forever' && s.createdAt && now - s.createdAt > DURATIONS['24h']) continue;
       if (s.closeFriends && s.authorId !== viewer && !s.closeFriendsList.includes(viewer)) continue;
       if (s.raw.groupId || s.raw.eventId) continue;
-      if (!groups.has(s.authorId)) groups.set(s.authorId, { authorId: s.authorId, name: s.authorName, avatar: s.authorAvatar, stories: [] });
-      groups.get(s.authorId).stories.push(s);
+      if (!groups.has(s.actorId)) groups.set(s.actorId, { actorId: s.actorId, authorId: s.authorId, authorType: s.authorType, businessId: s.businessId, name: s.authorName, avatar: s.authorAvatar, stories: [] });
+      groups.get(s.actorId).stories.push(s);
     }
     const list = [...groups.values()].map((g) => {
       g.stories.sort((a, b) => a.createdAt - b.createdAt);
@@ -46,22 +48,26 @@ export function listenStoryTray(onData) {
       g.latest = g.stories[g.stories.length - 1].createdAt;
       return g;
     });
-    list.sort((a, b) => (b.authorId === viewer) - (a.authorId === viewer) || (a.seen - b.seen) || (b.latest - a.latest));
+    list.sort((a, b) => (b.actorId === currentActorId) - (a.actorId === currentActorId) || (a.seen - b.seen) || (b.latest - a.latest));
     onData(list);
   }
   return () => unsubs.forEach((u) => u());
 }
 
-export async function createStory({ text = '', mediaUrl = null, mediaType = '', bg = null, textStyle = null, duration = '24h', closeFriends = false, closeFriendsList = [], link = null, locationName = '', placeId = '' }) {
+export async function createStory({ text = '', mediaUrl = null, mediaType = '', bg = null, textStyle = null, duration = '24h', closeFriends = false, closeFriendsList = [], link = null, locationName = '', placeId = '', identity = actingIdentity.value }) {
   const m = me();
   if (!m) throw Object.assign(new Error('auth'), { code: 'auth' });
+  if (!identity || identity.uid !== m.uid || identity.actorId !== actingIdentity.value?.actorId) throw Object.assign(new Error('identity-changed'), { code: 'identity-changed' });
+  const isBusiness = identity.authorType === 'business';
   const data = {
     text,
     mediaUrl,
     authorId: m.uid,
     userId: m.uid,
-    authorName: m.name,
-    authorAvatar: m.avatar,
+    authorName: identity.name,
+    authorAvatar: identity.avatar,
+    authorType: identity.authorType,
+    businessId: identity.businessId,
     createdAt: serverTimestamp(),
     duration,
   };
@@ -75,11 +81,12 @@ export async function createStory({ text = '', mediaUrl = null, mediaType = '', 
   // author's profile or business ownership never implies a place link.
   if (typeof placeId === 'string' && placeId.trim()) data.placeId = placeId.trim();
   // Always explicit: the public tray query asks for closeFriends == false.
-  data.closeFriends = !!closeFriends;
-  if (closeFriends) data.closeFriendsList = closeFriendsList;
+  data.closeFriends = !isBusiness && !!closeFriends;
+  if (data.closeFriends) data.closeFriendsList = closeFriendsList;
   const ref = await addDoc(collection(db, 'stories'), data);
   // Archive so highlights can reference the story after it expires.
-  setDoc(doc(db, 'users', m.uid, 'storyArchive', ref.id), { ...data, storyId: ref.id, archivedAt: serverTimestamp() }).catch(() => {});
+  const archive = isBusiness ? doc(db, 'businesses', identity.businessId, 'storyArchive', ref.id) : doc(db, 'users', m.uid, 'storyArchive', ref.id);
+  setDoc(archive, { ...data, storyId: ref.id, archivedAt: serverTimestamp() }).catch(() => {});
   return ref.id;
 }
 
@@ -87,8 +94,8 @@ export async function createStory({ text = '', mediaUrl = null, mediaType = '', 
 const viewedStories = new Set();
 export function markStoryViewed(story) {
   const id = myUid.value;
-  if (!id || story.authorId === id || story.viewedBy.includes(id) || viewedStories.has(story.id)) return;
-  viewedStories.add(story.id);
+  if (!id || story.authorId === id || story.actorId === actingIdentity.value?.actorId || story.viewedBy.includes(id) || viewedStories.has(`${id}:${story.id}`)) return;
+  viewedStories.add(`${id}:${story.id}`);
   updateDoc(doc(db, 'stories', story.id), { viewedBy: arrayUnion(id), viewCount: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
 }
 
@@ -96,17 +103,19 @@ export async function reactToStory(story, emoji) {
   const m = me();
   if (!m) return;
   await setDoc(doc(db, 'stories', story.id, 'reactions', m.uid), { userId: m.uid, reaction: emoji, createdAt: serverTimestamp() });
-  notify(story.authorId, { type: 'story_reaction', title: `${m.name} ${emoji} შენს სთორიზე`, href: `feed.html?story=${story.id}`, extra: { storyId: story.id, reaction: emoji }, dedupKey: `story_reaction_${m.uid}_${story.id}` });
+  notifyAuthor(story, { type: 'story_reaction', title: `${m.name} ${emoji} შენს სთორიზე`, href: `feed.html?story=${story.id}`, extra: { storyId: story.id, reaction: emoji }, dedupKey: `story_reaction_${m.uid}_${story.id}` });
 }
 
 export async function replyToStory(story, text) {
   const m = me();
   if (!m || !text.trim()) return;
+  const identity = actingIdentity.value;
   await addDoc(collection(db, 'stories', story.id, 'replies'), {
     storyId: story.id, ownerId: story.authorId, fromUserId: m.uid, authorId: m.uid,
-    authorName: m.name, authorAvatar: m.avatar, text: text.trim(), createdAt: serverTimestamp(),
+    authorType: identity.authorType, businessId: identity.businessId,
+    authorName: identity.name, authorAvatar: identity.avatar, text: text.trim(), createdAt: serverTimestamp(),
   });
-  notify(story.authorId, { type: 'story_reply', title: `${m.name} გიპასუხა სთორიზე`, body: text.trim().slice(0, 80), href: `feed.html?story=${story.id}`, extra: { storyId: story.id } });
+  notifyAuthor(story, { type: 'story_reply', title: `${identity.name} გიპასუხა სთორიზე`, body: text.trim().slice(0, 80), href: `feed.html?story=${story.id}`, extra: { storyId: story.id }, sender: identity });
 }
 
 export async function deleteStory(id) {

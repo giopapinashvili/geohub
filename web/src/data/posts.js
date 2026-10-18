@@ -9,11 +9,12 @@ import {
   orderBy, limit, limitToLast, startAfter, onSnapshot, serverTimestamp, increment, runTransaction,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
-import { actor } from '../lib/actor.js';
+import { actingIdentity } from '../lib/actor.js';
 import { me, uid as myUid } from '../lib/auth.js';
 import { normPost, normComment, isCorruptSeed } from './normalize.js';
-import { notify } from './notify.js';
+import { notify, notifyAuthor } from './notify.js';
 import { primeUser } from './users.js';
+import { isPersonalProfilePost } from '../lib/contentIdentity.js';
 
 function requireMe() {
   const m = me();
@@ -184,7 +185,7 @@ export function listenUserPosts(userId, onData, n = 40, rel = {}) {
     }
   }
   return listenMerged(qs, onData, (list) => uniqueById(list)
-    .filter((p) => p.status === 'active' && !(p.targetType === 'group' || p.groupId) && !isCorruptSeed(p.raw))
+    .filter((p) => p.status === 'active' && isPersonalProfilePost(p) && !isCorruptSeed(p.raw))
     .sort((a, b) => b.createdAt - a.createdAt));
 }
 
@@ -236,7 +237,7 @@ export async function createPost({
     authorName: isBiz ? asBusiness.name : m.name,
     authorAvatar: isBiz ? (asBusiness.logo || '') : m.avatar,
     authorType: isBiz ? 'business' : 'user',
-    authorVerified: !!m.verified,
+    authorVerified: isBiz ? !!asBusiness.verified : !!m.verified,
     businessId: businessId || null,
     likeCount: 0,
     commentCount: 0,
@@ -249,6 +250,7 @@ export async function createPost({
     groupId: groupId || null,
     bgGradient: bgGradient || null,
     location: location || null,
+    placeId: typeof location?.placeId === 'string' ? location.placeId : null,
     type: poll ? 'poll' : type,
     poll: poll ? { question: poll.question, options: poll.options.map((o, i) => ({ id: String(i), text: o, votes: 0 })), endsAt: poll.endsAt || null, totalVotes: 0 } : null,
     createdAt: serverTimestamp(),
@@ -262,7 +264,8 @@ export async function createPost({
   const ref = await addDoc(collection(db, 'posts'), data);
   if (sharedPostId) updateDoc(doc(db, 'posts', sharedPostId), { shareCount: increment(1) }).catch(() => {});
   for (const u of taggedUsers) {
-    notify(u.id, { type: 'tag', title: `${m.name} მოგნიშნა პოსტში`, body: clean.slice(0, 120), href: `feed.html?post=${ref.id}`, extra: { postId: ref.id } });
+    notify(u.id, { type: 'tag', title: `${data.authorName} მოგნიშნა პოსტში`, body: clean.slice(0, 120), href: `feed.html?post=${ref.id}`, extra: { postId: ref.id },
+      sender: { uid: m.uid, authorType: data.authorType, businessId: data.businessId, name: data.authorName, avatar: data.authorAvatar } });
   }
   return normPost(ref.id, { ...data, createdAt: Date.now() });
 }
@@ -340,8 +343,8 @@ export async function setReaction(post, type, previous) {
   await setDoc(rxRef, { userId: m.uid, type, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
   if (!previous) await updateDoc(postRef, { likeCount: increment(1), reactionCount: increment(1) }).catch(() => {});
   myReactionCache.set(key, Promise.resolve(type));
-  if (!previous && post.authorId && post.authorType !== 'business') {
-    notify(post.authorId, {
+  if (!previous && post.authorId) {
+    notifyAuthor(post, {
       type: 'like', title: `${m.name} ${REACTION_EMOJI[type] || '👍'} შენს პოსტზე`, body: (post.text || '').slice(0, 80),
       href: `feed.html?post=${post.id}`, extra: { postId: post.id, reaction: type }, dedupKey: `like_${m.uid}_${post.id}`,
     });
@@ -404,6 +407,7 @@ export function listenComments(postId, onData, n = 50) {
 
 export async function addComment(post, text, { voiceUrl = '' } = {}) {
   const m = requireMe();
+  const identity = actingIdentity.value;
   const clean = String(text || '').trim();
   if (!clean && !voiceUrl) return null;
   if (post.authorId && post.authorId !== m.uid) {
@@ -416,10 +420,10 @@ export async function addComment(post, text, { voiceUrl = '' } = {}) {
     authorId: m.uid,
     userId: m.uid,
     createdByUid: m.uid,
-    authorType: actor.value ? 'business' : 'user',
-    authorName: actor.value ? actor.value.name : m.name,
-    authorAvatar: actor.value ? actor.value.logo : m.avatar,
-    businessId: actor.value ? actor.value.id : null,
+    authorType: identity.authorType,
+    authorName: identity.name,
+    authorAvatar: identity.avatar,
+    businessId: identity.businessId,
     likes: 0,
     reactionCount: 0,
     replyCount: 0,
@@ -429,10 +433,10 @@ export async function addComment(post, text, { voiceUrl = '' } = {}) {
   };
   const ref = await addDoc(collection(db, 'posts', post.id, 'comments'), data);
   updateDoc(doc(db, 'posts', post.id), { commentCount: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
-  if (post.authorId && post.authorType !== 'business') {
-    notify(post.authorId, {
-      type: 'comment', title: `${m.name} დააკომენტარა შენს პოსტზე`, body: clean.slice(0, 120),
-      href: `feed.html?post=${post.id}&comment=${ref.id}`, extra: { postId: post.id, commentId: ref.id },
+  if (post.authorId) {
+    notifyAuthor(post, {
+      type: 'comment', title: `${identity.name} დააკომენტარა შენს პოსტზე`, body: clean.slice(0, 120),
+      href: `feed.html?post=${post.id}&comment=${ref.id}`, extra: { postId: post.id, commentId: ref.id }, sender: identity,
     });
   }
   return ref.id;
@@ -473,9 +477,7 @@ export async function setCommentReaction(postId, comment, type, previous) {
   await setDoc(ref, { userId: m.uid, type, createdAt: serverTimestamp() }, { merge: true });
   if (!previous) {
     updateDoc(cRef, { reactionCount: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
-    if (comment.userId && comment.userId !== m.uid) {
-      notify(comment.userId, { type: 'comment_like', title: `${m.name} ${REACTION_EMOJI[type]} შენს კომენტარზე`, body: comment.text.slice(0, 80), href: `feed.html?post=${postId}&comment=${comment.id}`, extra: { postId, commentId: comment.id }, dedupKey: `clike_${m.uid}_${comment.id}` });
-    }
+    notifyAuthor(comment, { type: 'comment_like', title: `${m.name} ${REACTION_EMOJI[type]} შენს კომენტარზე`, body: comment.text.slice(0, 80), href: `feed.html?post=${postId}&comment=${comment.id}`, extra: { postId, commentId: comment.id }, dedupKey: `clike_${m.uid}_${comment.id}` });
   }
 }
 
@@ -487,6 +489,7 @@ export function listenReplies(postId, commentId, onData) {
 
 export async function addReply(postId, comment, text) {
   const m = requireMe();
+  const identity = actingIdentity.value;
   const clean = String(text || '').trim();
   if (!clean) return;
   await addDoc(collection(db, 'posts', postId, 'comments', comment.id, 'replies'), {
@@ -496,18 +499,16 @@ export async function addReply(postId, comment, text) {
     authorId: m.uid,
     userId: m.uid,
     createdByUid: m.uid,
-    authorType: actor.value ? 'business' : 'user',
-    authorName: actor.value ? actor.value.name : m.name,
-    authorAvatar: actor.value ? actor.value.logo : m.avatar,
-    businessId: actor.value ? actor.value.id : null,
+    authorType: identity.authorType,
+    authorName: identity.name,
+    authorAvatar: identity.avatar,
+    businessId: identity.businessId,
     likeCount: 0,
     status: 'active',
     createdAt: serverTimestamp(),
   });
   updateDoc(doc(db, 'posts', postId, 'comments', comment.id), { replyCount: increment(1) }).catch(() => {});
-  if (comment.userId && comment.userId !== m.uid) {
-    notify(comment.userId, { type: 'reply', title: `${m.name} გიპასუხა კომენტარზე`, body: clean.slice(0, 120), href: `feed.html?post=${postId}&comment=${comment.id}`, extra: { postId, commentId: comment.id } });
-  }
+  notifyAuthor(comment, { type: 'reply', title: `${identity.name} გიპასუხა კომენტარზე`, body: clean.slice(0, 120), href: `feed.html?post=${postId}&comment=${comment.id}`, extra: { postId, commentId: comment.id }, sender: identity });
 }
 
 export async function deleteReply(postId, commentId, replyId) {

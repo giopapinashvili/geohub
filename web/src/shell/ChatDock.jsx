@@ -1,14 +1,16 @@
 import { Avatar } from '../ui/Avatar.jsx';
 import { IconButton } from '../ui/Button.jsx';
 import { t } from '../lib/i18n.js';
-import { chatPopups, closeChat, toggleChat, conversations } from '../lib/store.js';
+import { chatPopups, closeChat, toggleChat, conversations, inboxScope } from '../lib/store.js';
+import { actorId } from '../lib/actor.js';
 import { Thread, PeerStatus } from '../features/messages/Thread.jsx';
 import { useConversationPeer } from '../features/messages/ConversationRow.jsx';
 import { navigate } from '../lib/router.js';
 
 function Popup({ cid, minimized }) {
   const conv = conversations.value.find((c) => c.id === cid) || { id: cid, participants: [] };
-  const peer = useConversationPeer(conv);
+  const asPage = actorId();
+  const peer = useConversationPeer(conv, asPage);
   const head = (
     <header class="chatpop-head">
       <button type="button" class="chatpop-peer" onClick={() => toggleChat(cid)} aria-expanded={minimized ? 'false' : 'true'}>
@@ -24,7 +26,7 @@ function Popup({ cid, minimized }) {
   return (
     <div class={`chatpop${minimized ? ' is-min' : ''}`} role="dialog" aria-label={peer.name}>
       {head}
-      {!minimized && <div class="chatpop-body"><Thread cid={cid} compact /></div>}
+      {!minimized && <div class="chatpop-body"><Thread cid={cid} actorId={asPage} compact /></div>}
     </div>
   );
 }
@@ -33,7 +35,7 @@ function Popup({ cid, minimized }) {
 export default function ChatDock() {
   return (
     <div class="chatdock">
-      {chatPopups.value.map((c) => <Popup key={c.cid} cid={c.cid} minimized={c.minimized} />)}
+      {chatPopups.value.map((c) => <Popup key={`${inboxScope.value}:${c.cid}`} cid={c.cid} minimized={c.minimized} />)}
     </div>
   );
 }

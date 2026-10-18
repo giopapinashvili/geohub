@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Avatar } from '../ui/Avatar.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Tabs } from '../ui/Tabs.jsx';
@@ -68,11 +68,12 @@ export default function Channel({ params }) {
   const vids = useAsync(() => channelVideos(params.id, 80), [params.id]);
   const [editing, setEditing] = useState(false);
   const [adding, setAdding] = useState(false);
+  useEffect(() => { setEditing(false); setAdding(false); }, [uid.value, params.id]);
   const channel = ch.data;
   useTitle(channel?.name || t('video.channel'));
   const tab = query.value.get('tab') || 'videos';
 
-  if (ch.loading && !channel) return <PageSpinner />;
+  if (ch.loading) return <PageSpinner />;
   if (!channel) return <Card><Empty icon="television-simple" title={t('video.channelNotFound')} action={<Button variant="primary" href="/video?tab=channels">{t('video.channels')}</Button>} /></Card>;
 
   const own = channel.ownerId === uid.value;
@@ -114,10 +115,10 @@ export default function Channel({ params }) {
           </Card>
         ) : vids.loading ? <div class="center-pad"><Spinner /></div> : list.length ? (
           <div class="video-grid">{list.map((v) => <VideoCard key={v.id} video={v} />)}</div>
-        ) : <Card><Empty icon="monitor-play" title={t('video.noVideosYet')} /></Card>}
+        ) : <Card><Empty icon="monitor-play" title={t('video.noVideosYet')} action={own ? <Button variant="primary" icon="link" onClick={() => setAdding(true)}>{t('video.add')}</Button> : undefined} /></Card>}
       </div>
       {editing && <EditChannel channel={channel} onClose={() => setEditing(false)} onSaved={(c) => { ch.setData(c); setEditing(false); }} />}
-      {adding && <VideoUploadDialog onClose={() => setAdding(false)} />}
+      {adding && <VideoUploadDialog initialChannel={channel} onClose={() => setAdding(false)} />}
     </div>
   );
 }

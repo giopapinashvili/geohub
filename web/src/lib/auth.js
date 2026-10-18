@@ -10,7 +10,7 @@ import {
   sendEmailVerification,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, deleteField } from 'firebase/firestore';
-import { auth, db, EMULATOR } from './firebase.js';
+import { auth, db, EMULATOR, authPersistenceReady } from './firebase.js';
 import { normUser } from '../data/normalize.js';
 
 /** Firebase user object, `null` when signed out, `undefined` until known. */
@@ -18,6 +18,12 @@ export const authUser = signal(undefined);
 /** Normalised users/{uid} document of the signed-in user. */
 export const profile = signal(null);
 export const isAdmin = signal(false);
+/** pending | indexeddb | local | memory | unavailable */
+export const authPersistence = signal('pending');
+authPersistenceReady.then((mode) => { authPersistence.value = mode; }).catch((error) => {
+  authPersistence.value = 'unavailable';
+  console.warn('[auth] persistence unavailable', error.code);
+});
 /**
  * The signed-in user's private account data — users/{uid}/private/account
  * (email, phone, birthday, recent searches). Only the owner and admins can
@@ -154,9 +160,18 @@ let accountUnsub = null;
 // While sign-up or a verification resend runs, Firebase briefly signs in an
 // unverified user; the guard below must not race those flows.
 let flowInProgress = false;
+let identityRevision = 0;
 onAuthStateChanged(auth, async (u) => {
+  const revision = ++identityRevision;
+  // Wait for restored sessions to move to durable storage before the UI
+  // decides whether a protected route needs the sign-in screen.
+  try { await authPersistenceReady; } catch { /* keep an already restored user */ }
+  if (revision !== identityRevision) return;
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   if (accountUnsub) { accountUnsub(); accountUnsub = null; }
+  profile.value = null;
+  account.value = null;
+  isAdmin.value = false;
   if (!u) {
     authUser.value = null;
     profile.value = null;
@@ -167,16 +182,18 @@ onAuthStateChanged(auth, async (u) => {
   // Email/password accounts must be verified, as on the old site.
   const isPassword = u.providerData.some((p) => p.providerId === 'password') && u.providerData.length === 1;
   if (isPassword && !u.emailVerified) {
+    authUser.value = null;
     if (!flowInProgress) await fbSignOut(auth).catch(() => {});
     return;
   }
   authUser.value = u;
+  const current = () => revision === identityRevision && authUser.value?.uid === u.uid;
   profileUnsub = onSnapshot(doc(db, 'users', u.uid),
-    (snap) => { profile.value = snap.exists() ? normUser(snap.id, snap.data()) : normUser(u.uid, newUserDoc(u)); },
-    () => { profile.value = normUser(u.uid, newUserDoc(u)); });
-  accountUnsub = onSnapshot(accountRef(u.uid), (snap) => { account.value = snap.exists() ? snap.data() : {}; }, () => { account.value = {}; });
+    (snap) => { if (current()) profile.value = snap.exists() ? normUser(snap.id, snap.data()) : normUser(u.uid, newUserDoc(u)); },
+    () => { if (current()) profile.value = normUser(u.uid, newUserDoc(u)); });
+  accountUnsub = onSnapshot(accountRef(u.uid), (snap) => { if (current()) account.value = snap.exists() ? snap.data() : {}; }, () => { if (current()) account.value = {}; });
   ensureProfile(u);
-  getDoc(doc(db, 'admins', u.uid)).then((s) => { isAdmin.value = s.exists(); }).catch(() => { isAdmin.value = false; });
+  getDoc(doc(db, 'admins', u.uid)).then((s) => { if (current()) isAdmin.value = s.exists(); }).catch(() => { if (current()) isAdmin.value = false; });
 });
 
 getRedirectResult(auth).catch((e) => console.warn('[auth] redirect result', e.code));
@@ -188,6 +205,7 @@ export class AuthError extends Error {
 }
 
 export async function signIn(email, password) {
+  await authPersistenceReady;
   const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
   if (!cred.user.emailVerified) {
     await fbSignOut(auth);
@@ -225,6 +243,7 @@ export async function signUp({ email, password, fullName, username, city, accoun
 }
 
 async function createAccount({ email, password, fullName, uname, city, accountType, interests, next }) {
+  await authPersistenceReady;
   const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
   const u = cred.user;
   if (fullName) await updateProfile(u, { displayName: fullName });
@@ -248,6 +267,7 @@ async function createAccount({ email, password, fullName, uname, city, accountTy
 }
 
 async function socialLogin(provider) {
+  await authPersistenceReady;
   try {
     const cred = await signInWithPopup(auth, provider);
     return cred.user;
@@ -274,6 +294,7 @@ export function signInWithFacebook() {
 }
 
 export async function resendVerification(email, password, next) {
+  await authPersistenceReady;
   flowInProgress = true;
   try {
     const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -291,7 +312,9 @@ export function resetPassword(email) {
 
 export async function signOut() {
   const u = authUser.value;
-  if (u) await updateDoc(doc(db, 'users', u.uid), { online: false, lastSeen: serverTimestamp() }).catch(() => {});
+  // Presence is best-effort. Firestore queues writes offline, so awaiting this
+  // write would prevent the explicit sign-out from ever clearing the session.
+  if (u) void updateDoc(doc(db, 'users', u.uid), { online: false, lastSeen: serverTimestamp() }).catch(() => {});
   await fbSignOut(auth);
 }
 
@@ -318,4 +341,4 @@ export function authErrorKey(e) {
 }
 
 // Test hook for the local emulator build only (never in production).
-if (EMULATOR) window.__gh = { signIn, signOut, authUser, profile, api: () => import('./testapi.js') };
+if (EMULATOR) window.__gh = { signIn, signOut, authUser, profile, authPersistence, emulator: true, api: () => import('./testapi.js') };

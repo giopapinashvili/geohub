@@ -4,7 +4,8 @@ import { Button } from '../ui/Button.jsx';
 import { Card } from '../ui/misc.jsx';
 import { t } from '../lib/i18n.js';
 import { useTitle } from '../lib/hooks.js';
-import { profile, signedIn, isAdmin, signOut } from '../lib/auth.js';
+import { signedIn, isAdmin, signOut } from '../lib/auth.js';
+import { actingIdentity } from '../lib/actor.js';
 import { navigate } from '../lib/router.js';
 import { SECTIONS, FOOTER_LINKS } from '../shell/nav.js';
 import { ThemeLangControls, Switcher } from '../shell/AccountMenu.jsx';
@@ -12,14 +13,14 @@ import { ThemeLangControls, Switcher } from '../shell/AccountMenu.jsx';
 /** Mobile "Menu" tab: every section, account and preferences. */
 export default function MenuPage() {
   useTitle(t('nav.menu'));
-  const p = profile.value;
+  const p = actingIdentity.value;
   const items = SECTIONS.filter((s) => !s.auth || signedIn.value);
   return (
     <div class="menu-page page-pad">
       <h1 class="page-title">{t('nav.menu')}</h1>
       {signedIn.value && p ? (
-        <a href="/u/me" class="card menu-profile">
-          <Avatar src={p.avatar} name={p.name} size={52} />
+        <a href={p.businessId ? `/business/${p.businessId}` : '/u/me'} class="card menu-profile">
+          <Avatar src={p.avatar} name={p.name} size={52} square={p.authorType === 'business'} />
           <span class="menu-profile-text"><strong>{p.name}</strong><span class="muted small">{t('nav.viewProfile')}</span></span>
           <Icon name="caret-right" size={20} />
         </a>

@@ -52,7 +52,7 @@ export function App() {
   const { path } = loc.value;
   const { route, params } = resolve(path);
   const Page = route.component;
-  useEffect(() => { sessionStorage.removeItem('gh_chunk_reload'); }, [path]);
+  useEffect(() => { try { sessionStorage.removeItem('gh_chunk_reload'); } catch { /* browser storage blocked */ } }, [path]);
   return (
     <>
       <Shell layout={route.layout} nav={route.nav} immersive={route.immersive}>

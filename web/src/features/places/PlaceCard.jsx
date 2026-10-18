@@ -3,6 +3,7 @@ import { Icon } from '../../ui/Icon.jsx';
 import { tn, formatCount } from '../../lib/i18n.js';
 import { cityLabel, formatDistance } from '../../lib/geo.js';
 import { categoryOf } from './categories.js';
+import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
 
 function Rating({ place }) {
   if (!place.rating) return null;
@@ -25,6 +26,7 @@ export function PlaceCard({ place, distance, compact, showDescription, active, o
           <strong class="ellipsis">{place.name}</strong>
           <span class="muted small ellipsis">{cat.label}{meta ? ` · ${meta}` : ''}</span>
           {showDescription && place.description && <span class="place-row-description">{place.description}</span>}
+          <MatchedCatalogItem place={place} />
           <span class="row gap-8 small"><Rating place={place} />{place.checkinCount > 0 && <span class="muted">{tn('place.checkins', place.checkinCount)}</span>}</span>
         </span>
       </a>

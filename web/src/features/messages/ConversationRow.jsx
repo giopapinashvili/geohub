@@ -17,8 +17,9 @@ export function useConversationPeer(conv, actorId) {
 
 export function ConversationRow({ conv, active, onClick, href, actorId }) {
   const peer = useConversationPeer(conv, actorId);
-  const mine = conv.lastSenderId === uid.value;
-  const typing = Object.keys(conv.typing || {}).some((k) => k !== `user_${uid.value}` && conv.typing[k]);
+  const mineActor = actorId || `user_${uid.value}`;
+  const mine = conv.raw?.lastMessageSenderActorId ? conv.raw.lastMessageSenderActorId === mineActor : conv.lastSenderId === uid.value;
+  const typing = Object.keys(conv.typing || {}).some((k) => k !== mineActor && conv.typing[k]);
   return (
     <a href={href || `/messages/${conv.id}`} class={`conv-row${conv.unread ? ' is-unread' : ''}${active ? ' is-active' : ''}`}
       onClick={onClick ? (e) => { e.preventDefault(); onClick(conv); } : undefined}>
