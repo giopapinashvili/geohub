@@ -37,7 +37,7 @@ export function ImportedPlacePosts({ place, includePhotos = true }) {
       <DirectoryHeader entry={entry}/>
       <h3><a href={entry.placeHref}>{entry.name} — სასარგებლო ინფორმაცია</a></h3>
       {entry.description && <p>{entry.description}</p>}
-      <dl class="imported-source-fact-list">{entry.facts.map(fact => <div key={fact.label}><dt><Icon name={fact.icon} size={18}/>{fact.label}</dt><dd>{fact.href ? <a href={fact.href} target={fact.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">{fact.value}</a> : fact.value}</dd></div>)}</dl>
+      <dl class="imported-source-fact-list">{entry.facts.map((fact,index) => <div key={`${fact.label}:${index}`}><dt><Icon name={fact.icon} size={18}/>{fact.label}</dt><dd>{fact.href ? <a href={fact.href} target={fact.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">{fact.value}</a> : fact.value}</dd></div>)}</dl>
       {entry.amenities.length > 0 && <ul class="imported-place-facets" aria-label="წყაროში მითითებული მახასიათებლები">{entry.amenities.map(label => <li key={label}>{label}</li>)}</ul>}
       <p class="imported-source-disclosure">GeoHub-ის ცნობარის ინფორმაცია წყაროს მონაცემებს ეყრდნობა. საათები და სხვა დეტალები ადგილზე შეიძლება შეცვლილი იყოს.</p>
       <div class="imported-source-actions"><Button variant="soft" icon="map-trifold" href={entry.mapHref}>რუკაზე ნახვა</Button>{entry.sourceUrl && <a class="imported-source-post-link" href={entry.sourceUrl} target="_blank" rel="noopener noreferrer">წყაროს ჩანაწერი<Icon name="arrow-up-right" size={15}/></a>}</div>

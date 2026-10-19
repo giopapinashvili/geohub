@@ -16,6 +16,21 @@ export function retryAfterMilliseconds(value, now = Date.now()) {
   if(/^\d+(?:\.\d+)?$/.test(text)){const seconds=Number(text);return Number.isFinite(seconds)?seconds*1000:0;}
   const date=Date.parse(text);return Number.isFinite(date)?Math.max(0,date-now):0;
 }
+export function sameCatalogRoot(prior, next) {
+  return Boolean(prior?.sourceResponseSha256 && prior.sourceResponseSha256===next.sourceResponseSha256 && prior.sourceRootFetchedAt===next.sourceRootFetchedAt);
+}
+export function categoryPageMatches(page, categoryId) {
+  return page?.category?.id===categoryId && Array.isArray(page.categories) && (page.categories.some(category=>category.id===categoryId) || page.categories.length===0 && Array.isArray(page.items) && page.items.length===0 && page.metadata?.next_page_token===null);
+}
+/** A failed refresh must not erase the last complete evidence or mix source generations. */
+export function retainPriorCatalogReason(prior, next, phase) {
+  if(!Array.isArray(prior?.items) || !prior.items.length || next.status!=='partial')return '';
+  if(phase==='roots')return 'root-only-run-preserves-expanded-catalog';
+  if(!sameCatalogRoot(prior,next))return 'incomplete-refreshed-assortment';
+  const nextIds=new Set(next.items.map(item=>item.id));
+  if(prior.items.some(item=>!nextIds.has(item.id)))return 'partial-refresh-would-drop-items';
+  return '';
+}
 export function catalogTokens(value) { return [...new Set(`${normalizeSearch(value)} ${normalizeCatalogQuery(value)}`.split(' ').filter(t => t.length >= 2 && !/^\d/.test(t) && !['da','and','with','the','for','of'].includes(t)))]; }
 export function flattenCategories(categories, parentId = '') {
   return (categories || []).flatMap(c => c && typeof c.id === 'string' ? [{ id:c.id, name:String(c.name || ''), slug:String(c.slug || ''), parentId, itemIds:Array.isArray(c.item_ids) ? c.item_ids.filter(x => typeof x === 'string') : [], leaf:!c.subcategories?.length }, ...flattenCategories(c.subcategories, c.id)] : []);

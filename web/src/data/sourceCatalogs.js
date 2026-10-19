@@ -9,6 +9,16 @@ const MAX_CACHE_BYTES = 12 * 1024 * 1024;
 let retainedBytes = 0;
 const safeFile = value => typeof value === 'string' && /^[a-zA-Z0-9_/-]+(?:\.[a-f0-9]+)?\.json$/.test(value) && !value.includes('..') && !value.startsWith('/');
 const immutableFile = file => /-[a-f0-9]{12}\.json$/.test(file);
+export class OutdatedSourceCatalogError extends Error {
+  constructor(file, status) {
+    super('The public catalog asset is no longer available');
+    this.name = 'OutdatedSourceCatalogError';
+    this.code = 'SOURCE_CATALOG_OUTDATED_ASSET';
+    this.file = file;
+    this.status = status;
+  }
+}
+export const isOutdatedSourceCatalogError = error => error instanceof OutdatedSourceCatalogError;
 export function sourceHttpsUrl(value) {
   try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : ''; }
   catch { return ''; }
@@ -22,9 +32,14 @@ export async function readSourceCatalogFile(file) {
   if (pending.has(file)) return pending.get(file);
   const promise = (async () => {
     const response = await fetch(`/catalog-data/${file}`, { credentials: 'omit', cache: immutableFile(file) ? 'force-cache' : 'no-cache', signal: AbortSignal.timeout(20000) });
-    if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) throw new Error('Catalog unavailable');
+    if (response.status === 404 && immutableFile(file)) throw new OutdatedSourceCatalogError(file, response.status);
+    if (!response.ok) throw new Error('Catalog unavailable');
+    const contentType = response.headers.get('content-type')?.toLowerCase() || '';
+    if (immutableFile(file) && /(?:text\/html|application\/xhtml\+xml)/.test(contentType)) throw new OutdatedSourceCatalogError(file, response.status);
     const content = await response.text();
     if (content.length > 24 * 1024 * 1024) throw new Error('Catalog too large');
+    if (immutableFile(file) && /^\s*(?:<!doctype\s+html\b|<html\b)/i.test(content)) throw new OutdatedSourceCatalogError(file, response.status);
+    if (!contentType.includes('application/json')) throw new Error('Catalog unavailable');
     const value = JSON.parse(content);
     if (content.length <= MAX_CACHE_BYTES) {
       if (files.has(file)) { retainedBytes -= files.get(file).bytes; files.delete(file); }
@@ -38,6 +53,15 @@ export async function readSourceCatalogFile(file) {
   })();
   pending.set(file, promise);
   try { return await promise; } finally { pending.delete(file); }
+}
+
+/** Refresh only the public index; account caches and valid immutable assets are untouched. */
+export function refreshSourceCatalogIndex(staleIndex) {
+  const current = files.get('index.json');
+  // Another search may already have recovered from the same old snapshot.
+  if (current && current.value !== staleIndex && current.until > Date.now()) return Promise.resolve(current.value);
+  if (current) { retainedBytes -= current.bytes; files.delete('index.json'); }
+  return readSourceCatalogFile('index.json');
 }
 
 export function normalizeSourceCatalog(catalog, expectedPlaceId) {

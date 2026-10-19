@@ -37,6 +37,15 @@ test('visitor facts do not infer dietary suitability or accessibility from free 
   assert.equal(entry.facts.find(f => f.icon === 'clock').value, 'Mo-Fr 09:00-18:00');
 });
 
+test('directory facts preserve every published contact and safely normalize Tbilisi landlines', () => {
+  const entry = importedPlaceEntries({ ...place, city: 'თბილისი', raw: { ...place.raw, phone: '2193011; 2502021; 2193011 extension 42' } });
+  const contacts = entry.facts.filter(fact => fact.icon === 'phone');
+  assert.deepEqual(contacts.map(fact => fact.value), ['2193011', '2502021', '2193011 extension 42']);
+  assert.deepEqual(contacts.map(fact => fact.href), ['tel:+995322193011', 'tel:+995322502021', undefined]);
+  const unknownCity = importedPlaceEntries({ ...place, raw: { ...place.raw, phone: '2193011' } });
+  assert.equal(unknownCity.facts.find(fact => fact.icon === 'phone').href, undefined);
+});
+
 test('every published imported ID resolves through the actual direct-page loader to its own canonical record', async () => {
   const folder = new URL('../public/place-data/', import.meta.url);
   const manifest = JSON.parse(await readFile(new URL('manifest.json', folder), 'utf8'));

@@ -2,6 +2,7 @@ import { formatCoordinates } from './coordinates.js';
 import { taxonomyCategory } from './placeTaxonomy.js';
 import { photoDateLabel } from './photoDate.js';
 import { placeVisitGuide } from './placeVisitGuide.js';
+import { phoneContacts } from './phoneContacts.js';
 
 const DIETS = { vegan: 'ვეგანური არჩევანი', vegetarian: 'ვეგეტარიანული არჩევანი', halal: 'ჰალალის არჩევანი', kosher: 'კოშერის არჩევანი', 'gluten-free': 'უგლუტენო არჩევანი', 'lactose-free': 'ლაქტოზის გარეშე' };
 const ACCESS = { private: 'კერძო ტერიტორია', no: 'საჯარო შესვლა აკრძალულია', customers: 'მხოლოდ მომხმარებლებისთვის', permit: 'საჭიროა ნებართვა', members: 'მხოლოდ წევრებისთვის' };
@@ -28,8 +29,7 @@ export function importedPlaceEntries(place) {
   add('map-pin', 'მისამართი', text(place.address));
   add('crosshair', raw.coordinateAccuracy === 'approximate-center' ? 'ობიექტის სავარაუდო ცენტრი' : 'კოორდინატები', formatCoordinates(place));
   add('clock', 'სამუშაო საათები წყაროს მიხედვით', text(raw.openingHours));
-  const phone = text(raw.phone).split(';')[0].trim(), telephone = phone.replace(/[^\d+]/g, '');
-  if (telephone) add('phone', 'ტელეფონი წყაროს მიხედვით', phone, `tel:${telephone}`);
+  for (const phone of phoneContacts(raw.phone,place)) add('phone', 'ტელეფონი წყაროს მიხედვით', phone.text, phone.href);
   const website = sourceHttpUrl(raw.website);
   add('globe-simple', 'საიტი წყაროს მიხედვით', website ? new URL(website).hostname : '', website);
   add('buildings', 'სართული წყაროს მიხედვით', text(facets.level));

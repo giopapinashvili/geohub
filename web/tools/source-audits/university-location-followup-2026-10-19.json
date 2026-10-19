@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-19T16:21:12.494Z",
+  "scope": "Two previously unresolved university locations only; no broad source inventory",
+  "baselinePlaceCount": 49533,
+  "currentRelatedInstitutions": [
+    {
+      "id": "directory_east_west_university_gorgasali",
+      "name": "აღმოსავლეთ-დასავლეთ უნივერსიტეტი — გორგასლის კამპუსი",
+      "address": "ვახტანგ გორგასლის ქუჩა 9",
+      "lat": 41.687924697270674,
+      "lng": 44.81418869537401,
+      "website": "https://eastwest.edu.ge/"
+    }
+  ],
+  "addedPlaces": 0,
+  "changedPlaceIds": [],
+  "outcomes": [
+    {
+      "key": "international-university-tbilisi-ksani35",
+      "name": "თბილისის საერთაშორისო უნივერსიტეტი",
+      "status": "still-unresolved-exact-building",
+      "alreadyCovered": false,
+      "officialAddress": "ქსნის ქუჩა 35, თბილისი",
+      "officialSource": {
+        "url": "https://iut.edu.ge/",
+        "status": 200,
+        "sha256": "5ba31f2fc4257ffc6d479da024fb614393ab9a04d722457b4db4ade9e5ed390e"
+      },
+      "registrySourceUrl": "https://reestri.eqe.ge/en/inner/77",
+      "mapEvidence": [
+        "https://maps.google.com/maps?q=%E1%83%A5%E1%83%A1%E1%83%9C%E1%83%98%E1%83%A1%20%E1%83%A5%E1%83%A3%E1%83%A9%E1%83%90%2035&#038;t=m&#038;z=13&#038;output=embed&#038;iwloc=near"
+      ],
+      "osmCandidateBuildings": [
+        {
+          "id": "osm_way_490268149",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.768727600000005,
+          "lng": 44.78640985,
+          "bounds": [
+            44.7861199,
+            41.7685675,
+            44.7866998,
+            41.7688877
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_way_1221390851",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.76885205000001,
+          "lng": 44.78719675000001,
+          "bounds": [
+            44.7868591,
+            41.7684512,
+            44.787534400000006,
+            41.769252900000005
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_way_1221390852",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.76966590000001,
+          "lng": 44.7862481,
+          "bounds": [
+            44.7857544,
+            41.7692296,
+            44.7867418,
+            41.770102200000004
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_way_1221390853",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.769873200000006,
+          "lng": 44.78571050000001,
+          "bounds": [
+            44.78532010000001,
+            41.769472500000006,
+            44.7861009,
+            41.77027390000001
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_way_1221390854",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.76909055,
+          "lng": 44.78582060000001,
+          "bounds": [
+            44.785697400000004,
+            41.768972600000005,
+            44.785943800000005,
+            41.769208500000005
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_way_1221390855",
+          "address": "ქსანის ქუჩა 35",
+          "name": "",
+          "type": "way",
+          "lat": 41.769100300000005,
+          "lng": 44.78522340000001,
+          "bounds": [
+            44.784949100000006,
+            41.768909900000004,
+            44.7854977,
+            41.769290700000006
+          ],
+          "building": "commercial",
+          "use": ""
+        }
+      ],
+      "reason": "The official university site confirms 35 Ksani but embeds a text address query, not an institution-specific coordinate marker. Six OSM buildings share the exact 35 Ksani address; none has a university identity tag. Choosing one or averaging their centres would invent an institution coordinate.",
+      "additionalCheck": {
+        "url": "https://iut.edu.ge/abiturientebisatvis/potogalerea/",
+        "outcome": "Public research fetch returned a verification loader; no bypass attempted and no location evidence taken from it."
+      }
+    },
+    {
+      "key": "east-west-university-uznadze68b",
+      "name": "აღმოსავლეთ-დასავლეთ უნივერსიტეტი — უზნაძის კამპუსი",
+      "status": "still-unresolved-exact-building",
+      "alreadyCovered": false,
+      "officialAddress": "დიმიტრი უზნაძის ქუჩა 68ბ, თბილისი",
+      "officialSource": {
+        "url": "https://eastwest.edu.ge/%E1%83%99%E1%83%9D%E1%83%9C%E1%83%A2%E1%83%90%E1%83%A5%E1%83%A2%E1%83%98/",
+        "status": 200,
+        "sha256": "824cdf1edc0e5144c6bcc2fc80aa1e619ce0ffb34830c977869ec4218d5e3b15"
+      },
+      "mapEvidence": [
+        "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1023.4271664534378!2d44.81418869537401!3d41.687924697270674!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40440dd2ee79250f%3A0x2c13208396d2153!2sEAST%20WEST%20UNIVERSITY!5e0!3m2!1sen!2sus!4v1739587022042!5m2!1sen!2sus"
+      ],
+      "additionalOfficialCampusPage": {
+        "url": "https://eastwest.edu.ge/%e1%83%a9%e1%83%95%e1%83%94%e1%83%9c-%e1%83%a8%e1%83%94%e1%83%a1%e1%83%90%e1%83%ae%e1%83%94%e1%83%91/%e1%83%99%e1%83%90%e1%83%9b%e1%83%9e%e1%83%a3%e1%83%a1%e1%83%98-%e1%83%93%e1%83%90-%e1%83%98%e1%83%9c%e1%83%a4%e1%83%a0%e1%83%90%e1%83%a1%e1%83%a2%e1%83%a0%e1%83%a3%e1%83%a5%e1%83%a2%e1%83%a3%e1%83%a0/",
+        "status": 200,
+        "sha256": "42c936a9d01ec023ae57db167e5071d35e6ce3a105df9ed3ff1302c7911a5cc1",
+        "maps": [],
+        "coordinateSnippets": []
+      },
+      "osmNearbyAddressCandidates": [
+        {
+          "id": "osm_node_11771075413",
+          "address": "დიმიტრი უზნაძის ქუჩა 68",
+          "name": "სოხუმის სახელმწიფო დრამატული თეატრი",
+          "type": "node",
+          "lat": 41.711537400000005,
+          "lng": 44.792509700000004,
+          "building": "",
+          "use": "theatre"
+        },
+        {
+          "id": "osm_way_1350937391",
+          "address": "დიმიტრი უზნაძის ქუჩა 68",
+          "name": "",
+          "type": "way",
+          "lat": 41.711644250000006,
+          "lng": 44.79063115,
+          "bounds": [
+            44.7903687,
+            41.711379900000004,
+            44.790893600000004,
+            41.7119086
+          ],
+          "building": "yes",
+          "use": ""
+        },
+        {
+          "id": "osm_relation_18799903",
+          "address": "დიმიტრი უზნაძის ქუჩა 68",
+          "name": "",
+          "type": "relation",
+          "lat": 41.7115407,
+          "lng": 44.79218730000001,
+          "bounds": [
+            44.791778300000004,
+            41.711260800000005,
+            44.79259630000001,
+            41.7118206
+          ],
+          "building": "yes",
+          "use": ""
+        }
+      ],
+      "reason": "Current official contact identifies 68B Uznadze, but its only embedded map represents Gorgasali 9, which is already mapped. Campus page adds no Uznadze-specific marker. OSM 68-address buildings and the Sokhumi Theatre point do not establish the 68B campus; no theatre or building was relabelled as the university."
+    }
+  ],
+  "documentationOutcome": "PLACE-COVERAGE-AUDIT.md lines 203–206 remain accurate about these two unresolved location gaps. Source-directory-institutions.audit.json EQE 77 unresolved-coordinate status also remains accurate.",
+  "nextEvidenceNeeded": [
+    "University-provided pin or a published map identifying the specific 35 Ksani campus building.",
+    "Uznadze 68B campus-specific official pin or exact addressed building footprint; a Gorgasali map is not reusable."
+  ],
+  "unchanged": [
+    "No runtime/source aggregation/importer/catalog-data changes",
+    "Existing Gorgasali university identity and coordinates preserved",
+    "No guessed street-centre or averaged-building point published"
+  ]
+}

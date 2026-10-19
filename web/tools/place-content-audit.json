@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-19T15:31:43.315Z",
+  "generatedAt": "2026-10-19T16:36:47.980Z",
   "placeDatasetId": "tbilisi-osm-2026-10-17",
   "placeSourceDate": "2026-10-17",
-  "catalogGeneratedAt": "2026-10-19T15:30:56.094Z",
+  "catalogGeneratedAt": "2026-10-19T16:35:53.385Z",
   "serviceGeneratedAt": "2026-10-19T13:18:10.418Z",
   "scope": "Published public directory only. Native/private merchant catalogs are not inspected. Objects include branches, structures and street furniture; no city completeness percentage is implied.",
   "unknownMeaning": "No imported source catalog is known yet; this does not mean the business has no menu, products, services or an owner-entered catalog. Infrastructure is not expected to have commercial catalogs.",
@@ -15,24 +15,25 @@
     "sourceEditorial": 6541,
     "sourcePosts": 11690,
     "menuCatalogs": 1858,
-    "productCatalogs": 979,
+    "productCatalogs": 1066,
     "serviceCatalogs": 141,
-    "completeMarketplaceCatalogs": 2849,
-    "partialMarketplaceCatalogs": 701,
-    "withSourceCatalog": 2978,
-    "sourceCatalogNotYetKnown": 15458
+    "completeMarketplaceCatalogs": 2934,
+    "partialMarketplaceCatalogs": 616,
+    "withSourceCatalog": 3065,
+    "sourceCatalogNotYetKnown": 15371
   },
   "marketplace": {
     "acceptedSourceVenues": 3551,
     "processedVenues": 3551,
     "pendingVenues": 0,
     "statusCounts": {
-      "complete": 2849,
-      "partial": 701,
+      "complete": 2934,
+      "partial": 616,
       "unavailable": 1
-    }
+    },
+    "pausedReason": "request-budget"
   },
-  "marketplaceItems": 206670,
+  "marketplaceItems": 257785,
   "officialServiceItems": 245,
   "metro": {
     "stations": 23,
@@ -69,12 +70,12 @@
       "sourceEditorial": 847,
       "sourcePosts": 1251,
       "menuCatalogs": 0,
-      "productCatalogs": 220,
+      "productCatalogs": 228,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 221,
-      "partialMarketplaceCatalogs": 143,
-      "withSourceCatalog": 220,
-      "sourceCatalogNotYetKnown": 1697
+      "completeMarketplaceCatalogs": 229,
+      "partialMarketplaceCatalogs": 135,
+      "withSourceCatalog": 228,
+      "sourceCatalogNotYetKnown": 1689
     },
     "bench": {
       "label": "სკამი",
@@ -177,12 +178,12 @@
       "sourceEditorial": 222,
       "sourcePosts": 458,
       "menuCatalogs": 0,
-      "productCatalogs": 18,
+      "productCatalogs": 21,
       "serviceCatalogs": 1,
-      "completeMarketplaceCatalogs": 18,
-      "partialMarketplaceCatalogs": 22,
-      "withSourceCatalog": 19,
-      "sourceCatalogNotYetKnown": 908
+      "completeMarketplaceCatalogs": 21,
+      "partialMarketplaceCatalogs": 19,
+      "withSourceCatalog": 22,
+      "sourceCatalogNotYetKnown": 905
     },
     "atm": {
       "label": "ბანკომატი",
@@ -339,12 +340,12 @@
       "sourceEditorial": 513,
       "sourcePosts": 826,
       "menuCatalogs": 0,
-      "productCatalogs": 5,
+      "productCatalogs": 9,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 5,
-      "partialMarketplaceCatalogs": 200,
-      "withSourceCatalog": 5,
-      "sourceCatalogNotYetKnown": 759
+      "completeMarketplaceCatalogs": 9,
+      "partialMarketplaceCatalogs": 196,
+      "withSourceCatalog": 9,
+      "sourceCatalogNotYetKnown": 755
     },
     "park": {
       "label": "პარკი",
@@ -375,12 +376,12 @@
       "sourceEditorial": 6,
       "sourcePosts": 12,
       "menuCatalogs": 0,
-      "productCatalogs": 2,
+      "productCatalogs": 3,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 2,
-      "partialMarketplaceCatalogs": 1,
-      "withSourceCatalog": 2,
-      "sourceCatalogNotYetKnown": 377
+      "completeMarketplaceCatalogs": 3,
+      "partialMarketplaceCatalogs": 0,
+      "withSourceCatalog": 3,
+      "sourceCatalogNotYetKnown": 376
     },
     "commercial-building": {
       "label": "კომერციული შენობა",
@@ -555,12 +556,12 @@
       "sourceEditorial": 36,
       "sourcePosts": 72,
       "menuCatalogs": 0,
-      "productCatalogs": 29,
+      "productCatalogs": 31,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 29,
-      "partialMarketplaceCatalogs": 7,
-      "withSourceCatalog": 29,
-      "sourceCatalogNotYetKnown": 54
+      "completeMarketplaceCatalogs": 31,
+      "partialMarketplaceCatalogs": 5,
+      "withSourceCatalog": 31,
+      "sourceCatalogNotYetKnown": 52
     },
     "office": {
       "label": "ოფისი",
@@ -591,12 +592,12 @@
       "sourceEditorial": 203,
       "sourcePosts": 406,
       "menuCatalogs": 0,
-      "productCatalogs": 158,
+      "productCatalogs": 162,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 160,
-      "partialMarketplaceCatalogs": 41,
-      "withSourceCatalog": 158,
-      "sourceCatalogNotYetKnown": 212
+      "completeMarketplaceCatalogs": 164,
+      "partialMarketplaceCatalogs": 37,
+      "withSourceCatalog": 162,
+      "sourceCatalogNotYetKnown": 208
     },
     "traffic-signals": {
       "label": "შუქნიშანი",
@@ -645,12 +646,12 @@
       "sourceEditorial": 158,
       "sourcePosts": 316,
       "menuCatalogs": 0,
-      "productCatalogs": 62,
+      "productCatalogs": 94,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 62,
-      "partialMarketplaceCatalogs": 96,
-      "withSourceCatalog": 62,
-      "sourceCatalogNotYetKnown": 257
+      "completeMarketplaceCatalogs": 92,
+      "partialMarketplaceCatalogs": 66,
+      "withSourceCatalog": 94,
+      "sourceCatalogNotYetKnown": 225
     },
     "car-repair": {
       "label": "ავტოსერვისი",
@@ -789,12 +790,12 @@
       "sourceEditorial": 171,
       "sourcePosts": 342,
       "menuCatalogs": 0,
-      "productCatalogs": 166,
+      "productCatalogs": 169,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 167,
-      "partialMarketplaceCatalogs": 4,
-      "withSourceCatalog": 166,
-      "sourceCatalogNotYetKnown": 55
+      "completeMarketplaceCatalogs": 170,
+      "partialMarketplaceCatalogs": 1,
+      "withSourceCatalog": 169,
+      "sourceCatalogNotYetKnown": 52
     },
     "history": {
       "label": "ისტორიული ადგილი",
@@ -825,12 +826,12 @@
       "sourceEditorial": 6,
       "sourcePosts": 12,
       "menuCatalogs": 0,
-      "productCatalogs": 0,
+      "productCatalogs": 2,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 0,
-      "partialMarketplaceCatalogs": 4,
-      "withSourceCatalog": 0,
-      "sourceCatalogNotYetKnown": 134
+      "completeMarketplaceCatalogs": 2,
+      "partialMarketplaceCatalogs": 2,
+      "withSourceCatalog": 2,
+      "sourceCatalogNotYetKnown": 132
     },
     "hairdresser": {
       "label": "თმის სალონი",
@@ -951,12 +952,12 @@
       "sourceEditorial": 185,
       "sourcePosts": 388,
       "menuCatalogs": 0,
-      "productCatalogs": 102,
+      "productCatalogs": 105,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 103,
-      "partialMarketplaceCatalogs": 44,
-      "withSourceCatalog": 102,
-      "sourceCatalogNotYetKnown": 153
+      "completeMarketplaceCatalogs": 106,
+      "partialMarketplaceCatalogs": 41,
+      "withSourceCatalog": 105,
+      "sourceCatalogNotYetKnown": 150
     },
     "electronics": {
       "label": "ელექტრონიკა",
@@ -969,12 +970,12 @@
       "sourceEditorial": 139,
       "sourcePosts": 304,
       "menuCatalogs": 0,
-      "productCatalogs": 68,
+      "productCatalogs": 74,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 68,
-      "partialMarketplaceCatalogs": 41,
-      "withSourceCatalog": 68,
-      "sourceCatalogNotYetKnown": 148
+      "completeMarketplaceCatalogs": 74,
+      "partialMarketplaceCatalogs": 35,
+      "withSourceCatalog": 74,
+      "sourceCatalogNotYetKnown": 142
     },
     "car-wash": {
       "label": "ავტოსამრეცხაო",
@@ -1059,12 +1060,12 @@
       "sourceEditorial": 104,
       "sourcePosts": 216,
       "menuCatalogs": 0,
-      "productCatalogs": 56,
+      "productCatalogs": 68,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 57,
-      "partialMarketplaceCatalogs": 38,
-      "withSourceCatalog": 56,
-      "sourceCatalogNotYetKnown": 121
+      "completeMarketplaceCatalogs": 69,
+      "partialMarketplaceCatalogs": 26,
+      "withSourceCatalog": 68,
+      "sourceCatalogNotYetKnown": 109
     },
     "houseware": {
       "label": "სახლის ნივთები",
@@ -1077,12 +1078,12 @@
       "sourceEditorial": 75,
       "sourcePosts": 156,
       "menuCatalogs": 0,
-      "productCatalogs": 45,
+      "productCatalogs": 48,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 45,
-      "partialMarketplaceCatalogs": 18,
-      "withSourceCatalog": 45,
-      "sourceCatalogNotYetKnown": 78
+      "completeMarketplaceCatalogs": 48,
+      "partialMarketplaceCatalogs": 15,
+      "withSourceCatalog": 48,
+      "sourceCatalogNotYetKnown": 75
     },
     "clinic": {
       "label": "კლინიკა",
@@ -1311,12 +1312,12 @@
       "sourceEditorial": 9,
       "sourcePosts": 18,
       "menuCatalogs": 0,
-      "productCatalogs": 7,
+      "productCatalogs": 8,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 7,
-      "partialMarketplaceCatalogs": 1,
-      "withSourceCatalog": 7,
-      "sourceCatalogNotYetKnown": 54
+      "completeMarketplaceCatalogs": 8,
+      "partialMarketplaceCatalogs": 0,
+      "withSourceCatalog": 8,
+      "sourceCatalogNotYetKnown": 53
     },
     "furniture": {
       "label": "ავეჯი",
@@ -1329,12 +1330,12 @@
       "sourceEditorial": 21,
       "sourcePosts": 44,
       "menuCatalogs": 0,
-      "productCatalogs": 2,
+      "productCatalogs": 4,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 2,
-      "partialMarketplaceCatalogs": 3,
-      "withSourceCatalog": 2,
-      "sourceCatalogNotYetKnown": 104
+      "completeMarketplaceCatalogs": 4,
+      "partialMarketplaceCatalogs": 1,
+      "withSourceCatalog": 4,
+      "sourceCatalogNotYetKnown": 102
     },
     "attraction": {
       "label": "ღირსშესანიშნაობა",
@@ -1563,12 +1564,12 @@
       "sourceEditorial": 59,
       "sourcePosts": 119,
       "menuCatalogs": 0,
-      "productCatalogs": 11,
+      "productCatalogs": 12,
       "serviceCatalogs": 0,
-      "completeMarketplaceCatalogs": 11,
-      "partialMarketplaceCatalogs": 34,
-      "withSourceCatalog": 11,
-      "sourceCatalogNotYetKnown": 86
+      "completeMarketplaceCatalogs": 12,
+      "partialMarketplaceCatalogs": 33,
+      "withSourceCatalog": 12,
+      "sourceCatalogNotYetKnown": 85
     },
     "gym": {
       "label": "სპორტდარბაზი",

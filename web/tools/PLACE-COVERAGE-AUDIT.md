@@ -2,7 +2,7 @@
 
 ## Metro, service locations and professional directories
 
-The next source wave expands the 49,159-object publication to **49,533 mapped
+The latest source wave expands the 49,159-object publication to **49,533 mapped
 objects: 374 additions, zero removed IDs**. It accepts 106 official service/chain
 records (76 additions, 30 existing enrichments) and 310 public Yell business
 directory records (298 additions, 12 existing enrichments). The two ledgers retain
@@ -42,12 +42,31 @@ explicitly partial until every category page is fetched. Product/source prices
 are dated, expire, and are not asserted to be in-store prices or stock. Unknown
 prices remain unknown. Source dietary flags are retained only when explicit.
 
-The 3,551 accepted marketplace venues have all been attempted: 2,849 source
-catalogs are complete, 701 are partial, and one source returns HTTP 404. The
-snapshot contains 206,670 source items, 201,583 with source image URLs. Eleven
+The 3,551 accepted marketplace venues have all been attempted: 2,934 source
+catalogs are complete, 616 are partial, and one source returns HTTP 404. The
+snapshot contains 257,785 source items, 252,346 with source image URLs. Eleven
 full responses are empty; they are not fabricated menus. Official sources add
 245 service entries tied to 141 exact places. These are dated source snapshots,
 not assertions of current stock, in-store prices or all-city completeness.
+
+The second bounded catalog pass added 51,115 items and completed another 85
+catalogs. Source menus, products or services are now present at 3,065 distinct
+mapped places; 15,371 named commercial records still have no imported source
+catalog known to this audit. Thirty-five partial sources expose no category
+pages. Two shops were paused partway through pagination at the request budget;
+their successful pages remain available for continuation.
+
+Catalog navigation now preserves source category hierarchies and exact-item
+links reset stale filters. Search can recover once from a retired hash by
+refreshing the public index. Current plus two prior committed search generations
+are protected by a separate, hash-verified retention planner. Map/place shards
+are not pruned by that tool. Failed source refreshes retain prior dated evidence
+and their pending state across request-budget pauses and index rebuilds.
+
+Two university locations remain unresolved after an official-source follow-up:
+IUT at Ksani 35 has several buildings sharing its address, and East West at
+Uznadze 68B lacks a verified campus point. The already verified Gorgasali campus
+remains published. See `source-audits/university-location-followup-2026-10-19.json`.
 
 ## Earlier public-directory expansion
 

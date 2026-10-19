@@ -5,6 +5,7 @@ import { Img } from '../../ui/misc.jsx';
 import { rankRecords } from '../../lib/discoverySearch.js';
 import { normalizeCatalogQuery } from '../../lib/catalogSearchTerms.js';
 import { sourceCatalogPriceLabel } from '../../lib/sourceCatalogPresentation.js';
+import { buildSourceCategoryTree, sourceCategoryPath, sourceCatalogFocusItem } from '../../lib/sourceCatalogNavigation.js';
 import { formatCommercePrice } from '../../lib/commerce.js';
 import { query } from '../../lib/router.js';
 import { sourceHttpsUrl } from '../../data/sourceCatalogs.js';
@@ -41,14 +42,19 @@ export function SourcePlaceCatalog({ catalog, place }) {
   const [category, setCategory] = useState('');
   const [limit, setLimit] = useState(18);
   const container = useRef(null);
-  const focusItem = place.itemId || query.value.get('item') || '';
+  const focusItem = sourceCatalogFocusItem(catalog, place, query.value);
+  const categoryTree = useMemo(() => buildSourceCategoryTree(catalog.categories, catalog.items), [catalog.categories, catalog.items]);
+  const categoryPath = sourceCategoryPath(categoryTree, category);
+  const selectedCategory = categoryPath.at(-1);
+  const categoryBranch = selectedCategory?.children.length ? selectedCategory : categoryPath.at(-2);
+  const selectCategory = id => { setCategory(id); setLimit(18); };
   const heading = catalog.kind === 'menu' ? 'მენიუ' : catalog.kind === 'services' ? 'სერვისები' : 'პროდუქტები';
   const found = useMemo(() => {
-    const rows = catalog.items.filter(item => !category || item.categoryIds.includes(category));
+    const rows = catalog.items.filter(item => !selectedCategory || selectedCategory.itemIds.has(item.id));
     const matches = term.trim() ? rankRecords(rows.map(item=>({...item,aliases:[normalizeCatalogQuery(item.name)]})), normalizeCatalogQuery(term), { limit: rows.length }) : rows;
     return matches.slice().sort((a, b) => Number(b.id === focusItem) - Number(a.id === focusItem));
-  }, [catalog, term, category, focusItem]);
-  useEffect(() => { setTerm(''); setCategory(''); setLimit(18); }, [catalog.venueId, catalog.placeId]);
+  }, [catalog, term, selectedCategory, focusItem]);
+  useEffect(() => { setTerm(''); setCategory(''); setLimit(18); }, [catalog.venueId, catalog.placeId, focusItem]);
   useEffect(() => {
     if (!focusItem) return;
     const frame = requestAnimationFrame(() => {
@@ -65,7 +71,11 @@ export function SourcePlaceCatalog({ catalog, place }) {
     {catalog.status === 'partial' && <p class="directory-catalog-context">{catalog.items.length ? 'ჩატვირთულია კატალოგის ნაწილი.' : 'კატალოგი შევსების პროცესშია.'} სრული არჩევანი წყაროს ბმულზე ნახე.</p>}
     {catalog.freshnessUntilMs && catalog.freshnessUntilMs < Date.now() && <p class="directory-catalog-context">ფასები განახლებას ელოდება — მიმდინარე ფასი წყაროს ბმულზე გადაამოწმე.</p>}
     {catalog.items.length > 0 && <div class="directory-catalog-search"><Icon name="magnifying-glass" size={19}/><input type="search" aria-label={`${heading} — ძიება`} value={term} placeholder={catalog.kind === 'menu' ? 'მოძებნე კერძი…' : catalog.kind === 'services' ? 'მოძებნე სერვისი…' : 'მოძებნე პროდუქტი…'} onInput={event => { setTerm(event.currentTarget.value); setLimit(18); }}/></div>}
-    {catalog.categories.length > 1 && <div class="directory-catalog-categories" aria-label="კატალოგის კატეგორიები"><button type="button" aria-pressed={!category} onClick={() => {setCategory('');setLimit(18);}}>ყველა</button>{catalog.categories.map(entry => <button key={entry.id} type="button" aria-pressed={category === entry.id} onClick={() => {setCategory(entry.id);setLimit(18);}}>{entry.name}</button>)}</div>}
+    {categoryTree.roots.length > 0 && <nav class="directory-catalog-navigation" aria-label="კატალოგის კატეგორიები">
+      {categoryTree.roots.length > 12 ? <label class="directory-catalog-category-select">მთავარი კატეგორია<select value={categoryPath[0]?.id || ''} onChange={event => selectCategory(event.currentTarget.value)}><option value="">ყველა კატეგორია · {catalog.items.length}</option>{categoryTree.roots.map(entry => <option key={entry.id} value={entry.id}>{entry.name} · {entry.itemIds.size}</option>)}</select></label> : <div class="directory-catalog-categories"><button type="button" aria-pressed={!selectedCategory} onClick={() => selectCategory('')}>ყველა</button>{categoryTree.roots.map(entry => <button key={entry.id} type="button" aria-pressed={categoryPath[0]?.id === entry.id} onClick={() => selectCategory(entry.id)}>{entry.name}<span>{entry.itemIds.size}</span></button>)}</div>}
+      {selectedCategory && <ol class="directory-catalog-breadcrumb" aria-label="არჩეული კატეგორია"><li><button type="button" onClick={() => selectCategory('')}>ყველა</button></li>{categoryPath.map(entry => <li key={entry.id}>{entry.id === category ? <span aria-current="true">{entry.name}</span> : <button type="button" onClick={() => selectCategory(entry.id)}>{entry.name}</button>}</li>)}</ol>}
+      {categoryBranch?.children.length > 0 && <div class="directory-catalog-subcategories" aria-label={`${categoryBranch.name} — ქვეკატეგორიები`}><button type="button" aria-pressed={category === categoryBranch.id} onClick={() => selectCategory(categoryBranch.id)}>ყველა — {categoryBranch.name}</button>{categoryBranch.children.map(entry => <button key={entry.id} type="button" aria-pressed={category === entry.id} onClick={() => selectCategory(entry.id)}>{entry.name}<span>{entry.itemIds.size}</span></button>)}</div>}
+    </nav>}
     <p class="directory-catalog-count" role="status">{found.length} {catalog.kind === 'services' ? 'სერვისი' : 'ჩანაწერი'}{found.some(item => item.searchMatch === 'fuzzy') ? ' · ნაპოვნია მსგავსი სახელებიც' : ''}</p>
     <div class="directory-catalog-grid">{found.slice(0, limit).map(item => <CatalogItem key={item.id} item={item} catalog={catalog} focused={item.id === focusItem}/>)}</div>
     {!found.length && <div class="directory-catalog-empty"><p>{catalog.items.length ? 'ასეთი ჩანაწერი ამ კატალოგში ვერ მოიძებნა.' : 'ტექსტური კატალოგი ჯერ შევსებას ელოდება. არჩევანი წყაროს ბმულზე ნახე.'}</p>{catalog.items.length > 0 && <Button variant="ghost" onClick={() => {setTerm('');setCategory('');}}>ყველას ნახვა</Button>}</div>}

@@ -41,6 +41,32 @@ test('bounded importer resumes from successful files without re-fetching or hidi
       assert.equal(failedRefresh.venues[id].freshnessUntilMs,venue.freshnessUntilMs);
       assert.equal(failedRefresh.venues[id].refreshIssue,'http-403');
     }
+    // A request budget may expire while another already-complete catalog still needs a refresh.
+    // Old successful root responses remain cached, but cannot satisfy a pending refresh.
+    await run(process.execPath,argv,{cwd:root,timeout:30000,maxBuffer:1024*1024});
+    const budgetRefresh=JSON.parse(await fs.readFile(path.join(output,'index.json'))),budgetAudit=JSON.parse(await fs.readFile(path.join(output,'audit.json')));
+    assert.equal(budgetAudit.requestCount,1);assert.equal(budgetAudit.pausedReason,'request-budget');
+    for(const[id,venue]of Object.entries(failedRefresh.venues)){
+      assert.equal(budgetRefresh.venues[id].refreshPending,true,'budget exhaustion cannot make a pending complete snapshot look refreshed');
+      assert.equal(budgetRefresh.venues[id].refreshIssue,venue.refreshIssue);
+      assert.equal(budgetRefresh.venues[id].fetchedAt,venue.fetchedAt);
+    }
+    assert.ok(Object.entries(failedRefresh.venues).some(([id,venue])=>budgetRefresh.venues[id].lastRefreshAttemptAt===venue.lastRefreshAttemptAt),'the catalog blocked before its root request retains its prior attempt timestamp');
+    await run(process.execPath,[...argv,'--rebuild-only'],{cwd:root,timeout:30000,maxBuffer:1024*1024});
+    const rebuilt=JSON.parse(await fs.readFile(path.join(output,'index.json')));
+    for(const[id,venue]of Object.entries(budgetRefresh.venues)){
+      assert.equal(rebuilt.venues[id].refreshPending,true);
+      assert.equal(rebuilt.venues[id].lastRefreshAttemptAt,venue.lastRefreshAttemptAt,'an index rebuild is not a source refresh');
+    }
+    await fs.writeFile(preload,"globalThis.fetch=async()=>new Response(JSON.stringify({loading_strategy:'full',categories:[{id:'new',name:'New',slug:'new',item_ids:['new-item']}],items:[{id:'new-item',name:'New source item',price:1500}],options:[]}));");
+    await run(process.execPath,[...argv.filter(arg=>!arg.startsWith('--max-requests=')),'--max-requests=2'],{cwd:root,timeout:30000,maxBuffer:1024*1024});
+    const resumedRefresh=JSON.parse(await fs.readFile(path.join(output,'index.json'))),resumedAudit=JSON.parse(await fs.readFile(path.join(output,'audit.json')));
+    assert.equal(resumedAudit.requestCount,2,'ordinary resume must revisit both pending snapshots rather than skip either as complete');
+    for(const venue of Object.values(resumedRefresh.venues)){
+      assert.equal(venue.refreshPending,undefined);
+      const catalog=JSON.parse(await fs.readFile(path.join(output,venue.file)));
+      assert.deepEqual(catalog.items.map(item=>item.id),['new-item']);
+    }
     await fs.writeFile(preload,"globalThis.fetch=async()=>new Response(JSON.stringify({loading_strategy:'partial',categories:[],items:[],options:[]}),{status:200});");
     const partialArgv=argv.filter(arg=>!arg.startsWith('--output-dir=')&&!arg.startsWith('--phase=')&&!arg.startsWith('--limit='));
     await run(process.execPath,[...partialArgv,'--refresh','--phase=complete','--limit=1',`--output-dir=${output}-partial`],{cwd:root,timeout:30000,maxBuffer:1024*1024});

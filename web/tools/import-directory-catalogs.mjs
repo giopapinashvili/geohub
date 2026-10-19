@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
 import { SOURCE_DIRECTORY_FOOD } from './source-directory-food.mjs';
-import { CATALOG_VERSION, PRICE_CONTEXT, flattenCategories, normalizeCatalogItem, normalizeOptionGroups, buildCanonicalVenueMap, catalogTokens, collectCategoryPages, catalogCategoryMembership, retryAfterMilliseconds } from './directory-catalog-policy.mjs';
+import { CATALOG_VERSION, PRICE_CONTEXT, flattenCategories, normalizeCatalogItem, normalizeOptionGroups, buildCanonicalVenueMap, catalogTokens, collectCategoryPages, catalogCategoryMembership, retryAfterMilliseconds, sameCatalogRoot, categoryPageMatches, retainPriorCatalogReason } from './directory-catalog-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = new Set(process.argv.slice(2));
@@ -63,10 +63,26 @@ const index={version:CATALOG_VERSION,generatedAt:iso(),sourceName:'Wolt — ს�
 // A bounded continuation must not hide earlier successful snapshots it did not revisit.
 for(const def of definitions){const prior=existing?.venues?.[def.sourceRecordId];if(prior && canonical.get(def.sourceRecordId)?.id===prior.placeId && prior.sourceUrl===def.sourceUrl)index.venues[def.sourceRecordId]=prior;}
 const audit={generatedAt:iso(),acceptedSourceVenues:definitions.length,placeDatasetId:manifest.datasetId,sourceApi:'https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/{slug}/assortment',maxRequests,requestCount:0,cacheHits:0,statusCounts:{},errors:[],rejectedItems:0,notes:['ფასები მიწოდების პლატფორმის დათარიღებული მონაცემებია; ადგილზე ფასები და ხელმისაწვდომობა შესაძლოა განსხვავდებოდეს.','მიწოდების დრო მომზადების დროდ არ გამოიყენება.','აღწერების სარეკლამო ტექსტი, შეფასებები და მომხმარებელთა ინფორმაცია არ იმპორტირდება.']};
-let nextRequestAt=0,rateLimitedUntil=0,consecutiveRateLimits=0,sourcePaused=false;
-async function publicJson(url){
-  const file=path.join(cache,'responses',`${hash(url)}.json.gz`);
-  try {const value=JSON.parse(gunzipSync(await fs.readFile(file)));if(Date.now()-Date.parse(value.fetchedAt)<sourceCacheMs){audit.cacheHits++;return value;}}catch{}
+const sourceCooldown=await read(path.join(cache,'source-cooldown.json'));
+let nextRequestAt=0,rateLimitedUntil=Number.isFinite(sourceCooldown?.retryAfterUntilMs)?sourceCooldown.retryAfterUntilMs:0,consecutiveRateLimits=0,sourcePaused=false,completed=0,cooldownPromise=Promise.resolve();
+const activeVenues=new Map();let lastCheckpointAt=Date.now(),lastCheckpointRequests=0,checkpointPromise=Promise.resolve();
+async function checkpoint(force=false){
+  if(!force && Date.now()-lastCheckpointAt<60000 && audit.requestCount-lastCheckpointRequests<50)return;
+  lastCheckpointAt=Date.now();lastCheckpointRequests=audit.requestCount;
+  const progress={updatedAt:iso(),phase,completed,total:definitions.length,remaining:Math.max(0,definitions.length-completed),requests:audit.requestCount,maxRequests,cacheHits:audit.cacheHits,errors:audit.errors.length,activeVenues:[...activeVenues.values()].map(value=>({...value})),...(audit.pausedReason?{pausedReason:audit.pausedReason}:{})};
+  checkpointPromise=checkpointPromise.catch(()=>{}).then(async()=>{await save(path.join(cache,'progress.json'),progress);console.log(JSON.stringify(progress));});
+  await checkpointPromise;
+}
+const progressTimer=setInterval(()=>{void checkpoint().catch(error=>console.warn(`Progress checkpoint unavailable: ${error.code||error.message}`));},60000);progressTimer.unref();
+async function publicJson(url,{snapshotKey='',rootFetchedAt='',allowLegacyCache=false,validate=()=>true,validateCached=()=>true}={}){
+  const file=path.join(cache,'responses',`${hash(snapshotKey?`${snapshotKey}\0${url}`:url)}.json.gz`);
+  const candidates=[file,...(snapshotKey&&allowLegacyCache?[path.join(cache,'responses',`${hash(url)}.json.gz`)]:[])];
+  for(const candidate of candidates)try {
+    const value=JSON.parse(gunzipSync(await fs.readFile(candidate)));
+    if(Date.now()-Date.parse(value.fetchedAt)<sourceCacheMs && (!rootFetchedAt||value.fetchedAt>=rootFetchedAt) && validate(value.data) && validateCached(value)){
+      audit.cacheHits++;return value;
+    }
+  }catch{}
   for(let attempt=0;attempt<4;attempt++){
     if(sourcePaused)throw new Error(audit.pausedReason==='request-budget'?'request-budget-exhausted':'source-rate-limit-pause');
     if(audit.requestCount>=maxRequests){sourcePaused=true;audit.pausedReason='request-budget';throw new Error('request-budget-exhausted');}
@@ -75,44 +91,54 @@ async function publicJson(url){
     if(sourcePaused)throw new Error(audit.pausedReason==='request-budget'?'request-budget-exhausted':'source-rate-limit-pause');
     if(audit.requestCount>=maxRequests){sourcePaused=true;audit.pausedReason='request-budget';throw new Error('request-budget-exhausted');}
     audit.requestCount++;
+    await checkpoint();
     let response;
     try{response=await fetch(url,{headers:{'App-Language':'ka',Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(30000)});}catch(error){if(attempt<3){await sleep(1500*(attempt+1));continue;}throw new Error('network-unavailable');}
-    if(response.status===429){consecutiveRateLimits++;rateLimitedUntil=Date.now()+Math.max(120000,retryAfterMilliseconds(response.headers.get('retry-after')));console.log(JSON.stringify({sourceRateLimited:true,retryAfterSeconds:Math.round((rateLimitedUntil-Date.now())/1000)}));if(consecutiveRateLimits>=5){sourcePaused=true;audit.pausedReason='source-rate-limit';throw new Error('source-rate-limit-pause');}if(attempt<3)continue;}
+    if(response.status===429){consecutiveRateLimits++;rateLimitedUntil=Math.max(rateLimitedUntil,Date.now()+Math.max(120000,retryAfterMilliseconds(response.headers.get('retry-after'))));cooldownPromise=cooldownPromise.catch(()=>{}).then(()=>save(path.join(cache,'source-cooldown.json'),{source:'consumer-api.wolt.com',retryAfterUntilMs:rateLimitedUntil}));await cooldownPromise;console.log(JSON.stringify({sourceRateLimited:true,retryAfterSeconds:Math.round((rateLimitedUntil-Date.now())/1000)}));if(consecutiveRateLimits>=5){sourcePaused=true;audit.pausedReason='source-rate-limit';throw new Error('source-rate-limit-pause');}if(attempt<3)continue;}
     if(response.status>=500){if(attempt<3){await sleep(3000*(attempt+1));continue;}}
     if(!response.ok) throw new Error(`http-${response.status}`);
     consecutiveRateLimits=0;
     const value={fetchedAt:iso(),data:await response.json()};
-    await fs.writeFile(file,gzipSync(JSON.stringify(value)));
+    if(!validate(value.data))throw new Error('source-category-association');
+    const compressed=gzipSync(JSON.stringify(value));await fs.writeFile(`${file}.tmp`,compressed);await fs.rename(`${file}.tmp`,file);
     return value;
   }
   throw new Error('retry-exhausted');
 }
 const foodCategories=new Set(['restaurant','cafe','bar','pub','fast-food','bakery','ice-cream','food-court','coffee-shop','pizzeria','confectionery']);
 function metadata(def,place,kind,file,status,fetchedAt,items,categories,fileInfo={}){return {placeId:place.id,name:place.name,category:place.category,kind,status,file,sourceUrl:def.sourceUrl,fetchedAt,freshnessUntilMs:Date.parse(fetchedAt)+7*86400000,itemCount:items,categoryCount:categories,...fileInfo};}
-let completed=0;
+function pendingRefreshMetadata(entry){
+  if(!entry?.refreshPending)return {};
+  return Object.fromEntries(['refreshPending','refreshIssue','lastRefreshAttemptAt','attemptedRoot'].filter(key=>entry[key]!==undefined).map(key=>[key,entry[key]]));
+}
 async function processVenue(def){
   const venueId=def.sourceRecordId;
   const place=canonical.get(venueId);
   if(!place){audit.errors.push({venueId,issue:'missing-canonical-place'});return;}
+  activeVenues.set(venueId,{venueId,name:place.name,sourceUrl:def.sourceUrl,stage:'root'});
   const slug=new URL(def.sourceUrl).pathname.split('/').filter(Boolean).at(-1);
   const kind=foodCategories.has(def.category)?'menu':'products';
   const file=`venues/${venueId}.json`;
   const prior=await read(path.join(output,file));
-  if(prior?.status==='complete' && prior.schemaRevision===snapshotRevision && Date.now()-Date.parse(prior.fetchedAt)<sourceCacheMs){
-    prior.placeId=place.id;prior.freshnessUntilMs=Date.parse(prior.fetchedAt)+7*86400000;const info=await save(path.join(output,file),prior);index.venues[venueId]=metadata(def,place,prior.kind,file,prior.status,prior.fetchedAt,prior.items.length,prior.categories.length,info);completed++;return;
+  if(prior?.status==='complete' && !existing?.venues?.[venueId]?.refreshPending && prior.schemaRevision===snapshotRevision && Date.now()-Date.parse(prior.fetchedAt)<sourceCacheMs){
+    prior.placeId=place.id;prior.freshnessUntilMs=Date.parse(prior.fetchedAt)+7*86400000;const info=await save(path.join(output,file),prior);index.venues[venueId]=metadata(def,place,prior.kind,file,prior.status,prior.fetchedAt,prior.items.length,prior.categories.length,info);completed++;activeVenues.delete(venueId);return;
   }
   try{
     const api=`https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/${encodeURIComponent(slug)}/assortment`;
-    const first=await publicJson(api);const data=first.data;
+    const needsNewRoot=prior?.status==='complete' && existing?.venues?.[venueId]?.refreshPending;
+    const first=await publicJson(api,{validateCached:value=>!needsNewRoot || !sameCatalogRoot(prior,{sourceResponseSha256:hash(JSON.stringify(value.data)),sourceRootFetchedAt:value.fetchedAt})});const data=first.data;
     if(!['full','partial'].includes(data.loading_strategy) || !Array.isArray(data.items) || !Array.isArray(data.categories)) throw new Error('source-format');
     const categories=flattenCategories(data.categories);const byCategory=new Map(categories.map(c=>[c.id,c]));
+    const sourceRoot={sourceResponseSha256:hash(JSON.stringify(data)),sourceRootFetchedAt:first.fetchedAt};
+    const snapshotKey=hash(JSON.stringify({...sourceRoot,assortmentId:data.assortment_id||''}));
     const itemMap=new Map(data.items.map(i=>[i.id,i]));const optionMap=new Map((data.options||[]).map(o=>[o.id,o]));
     const issues=[];let pageCount=1,earliestFetchedAt=first.fetchedAt;
     if(data.loading_strategy==='partial' && phase==='complete'){
       if(!categories.some(c=>c.leaf && c.slug))issues.push({issue:'source-partial-without-category-pages'});
       for(const category of categories.filter(c=>c.leaf && !c.slug))issues.push({categoryId:category.id,issue:'source-category-without-slug'});
       for(const category of categories.filter(c=>c.leaf && c.slug)){
-        const result=await collectCategoryPages(category,async token=>{const url=new URL(`${api}/categories/slug/${encodeURIComponent(category.slug)}`);if(token)url.searchParams.set('page_token',token);const response=await publicJson(url.href);if(response.fetchedAt<earliestFetchedAt)earliestFetchedAt=response.fetchedAt;return response.data;});
+        Object.assign(activeVenues.get(venueId),{stage:'category',category:category.name,pageCount});
+        const result=await collectCategoryPages(category,async token=>{const url=new URL(`${api}/categories/slug/${encodeURIComponent(category.slug)}`);if(token)url.searchParams.set('page_token',token);const response=await publicJson(url.href,{snapshotKey,rootFetchedAt:first.fetchedAt,allowLegacyCache:sameCatalogRoot(prior,sourceRoot),validate:page=>categoryPageMatches(page,category.id)});if(response.fetchedAt<earliestFetchedAt)earliestFetchedAt=response.fetchedAt;return response.data;});
         pageCount+=result.pageCount;
         for(const item of result.items)itemMap.set(item.id,item);
         for(const option of result.options)optionMap.set(option.id,option);
@@ -127,28 +153,36 @@ async function processVenue(def){
     const categoryItems=new Map();for(const item of items)for(const id of item.categoryIds){if(!categoryItems.has(id))categoryItems.set(id,[]);categoryItems.get(id).push(item.id);}
     const cleanCategories=[...byCategory.values()].map(c=>({id:c.id,name:c.name,...(c.parentId?{parentId:c.parentId}:{}),itemIds:categoryItems.get(c.id)||[]}));
     const status=data.loading_strategy==='partial' && (phase!=='complete'||issues.length)?'partial':'complete';
-    const catalog={version:CATALOG_VERSION,schemaRevision:snapshotRevision,venueId,placeId:place.id,kind,status,currency:'GEL',sourceName:index.sourceName,sourceKind:'merchant-directory',sourceUrl:def.sourceUrl,fetchedAt:earliestFetchedAt,sourceRootFetchedAt:first.fetchedAt,freshnessUntilMs:Date.parse(earliestFetchedAt)+7*86400000,priceContext:PRICE_CONTEXT,categories:cleanCategories,items,optionGroups:normalizeOptionGroups([...optionMap.values()]),sourceLoadingStrategy:data.loading_strategy,sourceResponseSha256:hash(JSON.stringify(data)),pageCount,...(issues.length?{sourceIssues:issues}:{})};
-    const info=await save(path.join(output,file),catalog);index.venues[venueId]=metadata(def,place,kind,file,status,earliestFetchedAt,items.length,cleanCategories.length,info);
-    if(issues.length)audit.errors.push({venueId,issues});
+    const catalog={version:CATALOG_VERSION,schemaRevision:snapshotRevision,venueId,placeId:place.id,kind,status,currency:'GEL',sourceName:index.sourceName,sourceKind:'merchant-directory',sourceUrl:def.sourceUrl,fetchedAt:earliestFetchedAt,...sourceRoot,sourceAssortmentId:data.assortment_id||'',freshnessUntilMs:Date.parse(earliestFetchedAt)+7*86400000,priceContext:PRICE_CONTEXT,categories:cleanCategories,items,optionGroups:normalizeOptionGroups([...optionMap.values()]),sourceLoadingStrategy:data.loading_strategy,pageCount,...(issues.length?{sourceIssues:issues}:{})};
+    const retainedReason=retainPriorCatalogReason(prior,catalog,phase);
+    if(retainedReason){
+      prior.placeId=place.id;
+      const info=await save(path.join(output,file),prior);
+      index.venues[venueId]={...metadata(def,place,prior.kind,file,prior.status,prior.fetchedAt,prior.items.length,prior.categories.length,info),refreshPending:true,refreshIssue:retainedReason,lastRefreshAttemptAt:iso(),attemptedRoot:sourceRoot};
+      audit.errors.push({venueId,issue:retainedReason,retainedSnapshot:true,issues});
+    }else{
+      const info=await save(path.join(output,file),catalog);index.venues[venueId]=metadata(def,place,kind,file,status,earliestFetchedAt,items.length,cleanCategories.length,info);
+      if(issues.length)audit.errors.push({venueId,issues});
+    }
   }catch(error){
     const retainedSnapshot=Array.isArray(prior?.items) && Array.isArray(prior?.categories);
     if(retainedSnapshot){
       // A refresh failure cannot erase existing evidence or renew its original price expiry.
       prior.placeId=place.id;prior.freshnessUntilMs=Date.parse(prior.fetchedAt)+7*86400000;
       const info=await save(path.join(output,file),prior);
-      index.venues[venueId]=metadata(def,place,prior.kind,file,prior.status,prior.fetchedAt,prior.items.length,prior.categories.length,info);
-      if(error.message!=='request-budget-exhausted')Object.assign(index.venues[venueId],{refreshIssue:error.message,lastRefreshAttemptAt:iso()});
+      index.venues[venueId]={...metadata(def,place,prior.kind,file,prior.status,prior.fetchedAt,prior.items.length,prior.categories.length,info),...pendingRefreshMetadata(existing?.venues?.[venueId])};
+      if(error.message!=='request-budget-exhausted')Object.assign(index.venues[venueId],{refreshPending:true,refreshIssue:error.message,lastRefreshAttemptAt:iso()});
     }else index.venues[venueId]=metadata(def,place,kind,'',error.message==='request-budget-exhausted'?'pending':'unavailable',iso(),0,0);
     if(error.message!=='request-budget-exhausted')audit.errors.push({venueId,issue:error.message,...(retainedSnapshot?{retainedSnapshot:true}:{})});
   }
-  completed++;if(completed%50===0){const progress={updatedAt:iso(),phase,completed,total:definitions.length,requests:audit.requestCount,cacheHits:audit.cacheHits,errors:audit.errors.length};console.log(JSON.stringify(progress));await save(path.join(cache,'progress.json'),progress);}
+  completed++;activeVenues.delete(venueId);await checkpoint();
 }
 
 if(!args.has('--rebuild-only')){
   let cursor=0;
   await Promise.all(Array.from({length:concurrency},async()=>{while(cursor<definitions.length && !sourcePaused)await processVenue(definitions[cursor++]);}));
 }else{
-  for(const def of definitions){const place=canonical.get(def.sourceRecordId);if(!place)continue;const file=`venues/${def.sourceRecordId}.json`;const catalog=await read(path.join(output,file));if(!catalog)continue;catalog.placeId=place.id;catalog.freshnessUntilMs=Date.parse(catalog.fetchedAt)+7*86400000;const info=await save(path.join(output,file),catalog);index.venues[def.sourceRecordId]=metadata(def,place,catalog.kind,file,catalog.status,catalog.fetchedAt,catalog.items.length,catalog.categories.length,info);}
+  for(const def of definitions){const place=canonical.get(def.sourceRecordId);if(!place)continue;const file=`venues/${def.sourceRecordId}.json`;const catalog=await read(path.join(output,file));if(!catalog)continue;catalog.placeId=place.id;catalog.freshnessUntilMs=Date.parse(catalog.fetchedAt)+7*86400000;const info=await save(path.join(output,file),catalog);index.venues[def.sourceRecordId]={...metadata(def,place,catalog.kind,file,catalog.status,catalog.fetchedAt,catalog.items.length,catalog.categories.length,info),...pendingRefreshMetadata(existing?.venues?.[def.sourceRecordId])};}
 }
 for(const [id,venue]of Object.entries(index.venues)){
   (index.byPlaceId[venue.placeId]??=[]).push(id);audit.statusCounts[venue.status]=(audit.statusCounts[venue.status]||0)+1;
@@ -196,3 +230,4 @@ if(args.has('--prune-untracked-search')){
 audit.generatedAt=iso();audit.totalItems=itemCount;audit.itemCoverage=itemCoverage;audit.catalogVenues=Object.values(index.venues).filter(v=>v.itemCount).length;audit.emptyCatalogs=Object.values(index.venues).filter(v=>v.status==='complete'&&!v.itemCount).length;audit.uniquePlaces=Object.keys(index.byPlaceId).length;audit.searchTitles=grouped.size;audit.searchBuckets=buckets.size;audit.pendingVenues=index.coverage.pendingVenues;
 await save(path.join(output,'audit.json'),audit);
 console.log(JSON.stringify({...audit,errors:audit.errors.length}));
+clearInterval(progressTimer);await checkpoint(true);

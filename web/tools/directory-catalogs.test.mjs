@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeCatalogItem, normalizeOptionGroups, safeImageUrl, priceMinor, buildCanonicalVenueMap, flattenCategories, collectCategoryPages, catalogCategoryMembership, retryAfterMilliseconds } from './directory-catalog-policy.mjs';
+import { normalizeCatalogItem, normalizeOptionGroups, safeImageUrl, priceMinor, buildCanonicalVenueMap, flattenCategories, collectCategoryPages, catalogCategoryMembership, retryAfterMilliseconds, retainPriorCatalogReason, categoryPageMatches } from './directory-catalog-policy.mjs';
 import { createDirectoryCatalogSearch, rankDirectoryCatalogRows } from '../src/data/directoryCatalogSearch.js';
 
 test('prices retain integer minor units and unknowns never become free items',()=>{
@@ -24,6 +24,17 @@ test('source retry-after respects both seconds and an HTTP date',()=>{
   assert.equal(retryAfterMilliseconds('300',now),300000);
   assert.equal(retryAfterMilliseconds('Mon, 19 Oct 2026 12:10:00 GMT',now),600000);
   for(const invalid of [null,'','nonsense','Mon, 19 Oct 2026 11:00:00 GMT'])assert.equal(retryAfterMilliseconds(invalid,now),0);
+});
+test('partial refreshes preserve prior evidence while a same-root continuation can grow',()=>{
+  const prior={sourceRootFetchedAt:'2026-10-19T12:00:00Z',sourceResponseSha256:'old',items:[{id:'a'},{id:'b'}]};
+  const same={...prior,status:'partial',items:[{id:'a'},{id:'b'},{id:'c'}]};
+  assert.equal(retainPriorCatalogReason(prior,same,'complete'),'');
+  assert.equal(retainPriorCatalogReason(prior,{...same,items:[{id:'a'}]},'complete'),'partial-refresh-would-drop-items');
+  assert.equal(retainPriorCatalogReason(prior,{...same,sourceResponseSha256:'new'},'complete'),'incomplete-refreshed-assortment');
+  assert.equal(retainPriorCatalogReason(prior,same,'roots'),'root-only-run-preserves-expanded-catalog');
+  assert.equal(retainPriorCatalogReason(prior,{...same,status:'complete',items:[]},'complete'),'','a confirmed complete newer source may remove items');
+  assert.equal(categoryPageMatches({category:{id:'wrong'},categories:[{id:'a'}]},'a'),false);
+  assert.equal(categoryPageMatches({category:{id:'a'},categories:[],items:[],metadata:{next_page_token:null}},'a'),true,'source may finish pagination with an empty terminal page');
 });
 test('required options preserve source base-price meaning without inventing dietary or preparation claims',()=>{
   const item=normalizeCatalogItem({id:'b',name:'Combo',price:1500,fulfillment_lead_time:15,dietary_preferences:['vegan'],options:[{option_id:'size',name:'Choose size',multi_choice_config:{total_range:{min:1,max:1}}}]},'menu');

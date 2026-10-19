@@ -3,7 +3,7 @@ import { normalizeCatalogQuery } from '../lib/catalogSearchTerms.js';
 import { matchesPlaceFilters } from '../lib/discoveryFilters.js';
 import { matchesPlaceCategory } from '../lib/placeTaxonomy.js';
 import { getImportedPlace } from './importedPlaces.js';
-import { readSourceCatalogFile, normalizeSourceCatalog } from './sourceCatalogs.js';
+import { readSourceCatalogFile, normalizeSourceCatalog, refreshSourceCatalogIndex, isOutdatedSourceCatalogError } from './sourceCatalogs.js';
 
 const pause = () => new Promise(resolve => setTimeout(resolve, 0));
 const wordsFor = term => normalizeCatalogQuery(term).split(' ').filter(word => word.length >= 2 && !/^\d/.test(word) && !['da','and','with','the','for','of'].includes(word));
@@ -37,8 +37,10 @@ export async function rankDirectoryCatalogRows(rows, term, limit = 80, filters =
   return result;
 }
 
-export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, loadPlace = getImportedPlace} = {}) {
+export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, loadPlace = getImportedPlace, refreshIndex = refreshSourceCatalogIndex} = {}) {
   return async function searchDirectoryCatalog(term, n = 20, {filters = {}, category = 'all', signal} = {}) {
+    let retryIndex;
+    for (let attempt = 0; attempt < 2; attempt++) {
     const output = [];
     const coverage = {source:'public-merchant-catalog',scannedCount:0,truncated:false,unavailable:false};
     output.coverage = coverage;
@@ -46,10 +48,15 @@ export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, 
     // Preparation is unknown; dietary filters require explicit publisher declarations.
     if ((!words.length && !filters.diet) || !limit || Number(filters.preparationMax) > 0) return output;
     const cancelled = () => signal?.aborted;
+    if (cancelled()) return output;
+    let index = retryIndex;
+    let outdatedAsset;
     try {
-      const index = await readFile('index.json');
+      index ||= await readFile('index.json');
+      if (cancelled()) return output;
       if (index.version !== 1 || !index.venues || !index.search?.manifest) throw new Error('Invalid catalog index');
       const manifest = await readFile(index.search.manifest);
+      if (cancelled()) return output;
       if (manifest.version !== 1 || !manifest.buckets) throw new Error('Invalid catalog search index');
       const rows = [], loaded = new Set();let bytes = 0;
       async function readPrefixes(prefixes) {
@@ -60,7 +67,7 @@ export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, 
             if (bytes + (entry.bytes || 400000) > 8 * 1024 * 1024) {coverage.truncated=true;continue;}
             loaded.add(entry.file);bytes+=entry.bytes || 400000;
             try {const payload=await readFile(entry.file);if(payload.version!==1 || !Array.isArray(payload.rows))throw new Error('Invalid catalog search shard');rows.push(...payload.rows);}
-            catch {coverage.unavailable=true;}
+            catch (error) {if(isOutdatedSourceCatalogError(error))outdatedAsset=error;coverage.unavailable=true;}
           }
         }
       }
@@ -70,7 +77,7 @@ export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, 
       await readPrefixes(primary.slice(0,1));
       const rankingContext={venues:index.venues,category};
       let ranked = await rankDirectoryCatalogRows(rows,term,80,filters,rankingContext);
-      if (!ranked.length && words.length && !cancelled()) {
+      if (!ranked.length && words.length && !cancelled() && !outdatedAsset) {
         const corrections = new Map();
         const target=words.slice().sort((a,b)=>b.length-a.length)[0];
         const maxDistance=target.length>=7?2:1;
@@ -122,12 +129,23 @@ export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, 
               canonicalBusinessHref:pageHref,pageHref,searchMatch:match.match,searchScore:match.score,preparationMinutes:null,dietaryTags:item.dietaryTags||[],dietarySource:item.dietarySource,
               facets:{...place.facets,diets:item.dietaryTags||[]},
             };
-          }catch{coverage.unavailable=true;return null;}
+          }catch(error){if(isOutdatedSourceCatalogError(error))outdatedAsset=error;coverage.unavailable=true;return null;}
         }));
         output.push(...batch.filter(Boolean));
       }
-      output.splice(limit);return output;
-    }catch{coverage.unavailable=true;return output;}
+      output.splice(limit);
+      if(outdatedAsset)throw outdatedAsset;
+      return output;
+    }catch(error){
+      coverage.unavailable=true;
+      if(attempt===0 && isOutdatedSourceCatalogError(error) && !cancelled()){
+        try{retryIndex=await refreshIndex(index);}catch{return output;}
+        if(cancelled())return output;
+        continue;
+      }
+      return output;
+    }
+    }
   };
 }
 
