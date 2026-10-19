@@ -6,7 +6,7 @@ import { useDebounced, useClickOutside, useEscape } from '../lib/hooks.js';
 import { quickSearch, recentSearches, rememberSearch, clearSearches } from '../data/search.js';
 import { navigate } from '../lib/router.js';
 import { addressHref } from '../lib/catalogDiscovery.js';
-import { formatCommercePrice } from '../lib/commerce.js';
+import { sourceCatalogPriceLabel } from '../lib/sourceCatalogPresentation.js';
 import { categoryOf } from '../features/places/categories.js';
 
 /** Header search with typeahead results and recent searches. */
@@ -38,7 +38,7 @@ export function SearchBox() {
     results.businesses.forEach((b) => items.push({ href: `/business/${b.id}`, title: b.name, sub: categoryOf(b).label || t('search.business'), avatar: b.logo, name: b.name, square: true, similar: b.searchMatch === 'fuzzy' }));
     results.places.forEach((p) => items.push({ href: `/place/${p.id}`, title: p.name, sub: p.address || p.city || t('search.place'), icon: 'map-pin-fill', similar: p.searchMatch === 'fuzzy' }));
     (results.addresses || []).forEach((a) => items.push({ href: addressHref(a), title: a.name, sub: 'მისამართი · რუკაზე ჩვენება', icon: 'map-trifold', similar: a.searchMatch === 'fuzzy' }));
-    (results.catalog || []).forEach((item) => items.push({ href: item.canonicalBusinessHref, title: item.matchedItemTitle, sub: [item.businessName, item.branchName !== item.businessName && item.branchName, formatCommercePrice(item.priceMinor, item.currency)].filter(Boolean).join(' · '), icon: item.matchedItemType === 'dish' ? 'fork-knife' : 'storefront', similar: item.searchMatch === 'fuzzy' }));
+    (results.catalog || []).forEach((item) => items.push({ href: item.canonicalBusinessHref, title: item.matchedItemTitle, sub: [item.itemCategoryNames?.join(' · '), item.businessName, item.branchName !== item.businessName && item.branchName, sourceCatalogPriceLabel(item), item.priceContext === 'delivery-marketplace' && 'Wolt-ის ფასი'].filter(Boolean).join(' · '), icon: item.matchedItemType === 'dish' ? 'fork-knife' : 'storefront', similar: item.searchMatch === 'fuzzy' }));
     results.groups.forEach((g) => items.push({ href: `/groups/${g.id}`, title: g.name, sub: t('search.group'), avatar: g.cover || g.avatar, name: g.name, square: true }));
   }
   const submitHref = value.trim() ? `/search?q=${encodeURIComponent(value.trim())}` : null;

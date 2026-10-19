@@ -61,7 +61,7 @@ export async function loadImportedPlaces(bounds, { zoom=14 } = {}) {
     }
     loadedShards=selected.length;
   }
-  const places=records.filter(record=>contains(box,record)).map(record=>hydrate(record,manifest)).filter(Boolean);
+  const places=records.filter(record=>!record.raw?.mapHidden && contains(box,record)).map(record=>hydrate(record,manifest)).filter(Boolean);
   return {places,coverage:{source:'openstreetmap',sourceDate:manifest.source.sourceDate,datasetId:manifest.datasetId,totalPlaces:manifest.totalPlaces,
     loaded:places.length,loadedShards,mode:overview ? 'overview' : 'viewport',truncated,bounds:manifest.source.bbox,
     attribution:manifest.attribution,attributionUrl:manifest.attributionUrl,license:manifest.license}};
@@ -117,6 +117,8 @@ export async function loadImportedSearchIndex() {
 
 /** Preserve existing IDs/activity. Name-only matches never merge anonymous POIs. */
 export function mergeImportedPlaces(existing=[], imported=[]) {
+  existing=existing.filter(place=>!place.raw?.mapHidden);
+  imported=imported.filter(place=>!place.raw?.mapHidden);
   const result=existing.slice();
   const byId=new Map(result.map((place,index)=>[place.id,index]));
   const sourceIds=new Set(existing.flatMap(place=>{

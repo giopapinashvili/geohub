@@ -1,0 +1,3879 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-19",
+  "counts": {
+    "entriesChecked": 195,
+    "readableSourceEntries": 166,
+    "sharedChamberWebsiteEntries": 72,
+    "statuses": {
+      "conflicting-official-address-candidate-held": 3,
+      "official-exact-point-correction": 4,
+      "parked-hosting-website-removed": 1,
+      "readable-address-unconfirmed": 33,
+      "shared-chamber-website-not-office-verification": 72,
+      "unavailable-address-unconfirmed": 28,
+      "visible-official-address-corroborated": 54
+    },
+    "actualBuildingPhotos": 1,
+    "placesWithBuildingPhoto": 2
+  },
+  "notes": [
+    "This is a bounded follow-up to public directory facts, not a complete or continuous verification of trading status.",
+    "Website fetch success does not verify an address. Shared notary chamber homepages do not identify individual notary office locations.",
+    "Official exact marker corrections take precedence. Known conflicting candidates without exact current location evidence are held.",
+    "Failed requests do not establish that an office is closed. No tax identifiers, review text or full marketing descriptions copied into this ledger."
+  ],
+  "photoReview": {
+    "accepted": [
+      {
+        "asset": "/place-media/directory-professional-mozaika61.jpg",
+        "placeIds": [
+          "directory_yell_109551",
+          "directory_yell_159143"
+        ],
+        "sourceUrl": "https://fino.ge/kontaqti/",
+        "sha256": "c7959f32d2b26f8cb6480b86c837f2059d4ce0780140eaf0397c0d952ce5dbc0",
+        "scope": "shared-building-exterior"
+      }
+    ],
+    "held": [
+      {
+        "sourceUrl": "https://www.moore-georgia.ge/about-us/",
+        "reason": "Generic conference-room illustration did not establish actual Tbilisi office identity."
+      },
+      {
+        "sourceUrl": "https://www.moore-georgia.ge/moore-a-culture-of-care-for-success/",
+        "reason": "Company-person portraits are not venue photographs."
+      },
+      {
+        "sourceUrl": "https://hmg.ge/en/contact",
+        "reason": "Meeting-room photograph did not independently establish the exact office."
+      },
+      {
+        "sourceUrl": "https://www.grantthornton.ge/location/tbilisi/",
+        "reason": "Generic global building hero is not evidence of the current Tbilisi office."
+      }
+    ]
+  },
+  "records": [
+    {
+      "placeId": "directory_yell_66812",
+      "name": "სმედა",
+      "listedAddress": "ყიფშიძის ქუჩა 7",
+      "listedWebsite": "http://www.smeda.ge/",
+      "checkedAt": "2026-10-19T12:58:23.870Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ნიკოლოზ ყიფშიძის ქუჩა 7",
+      "pages": [
+        {
+          "url": "http://www.smeda.ge/1.html",
+          "status": 200,
+          "sha256": "15c1b90cb1357b35a606ab462e411429784118fc5531f3b2b75c8834109bb8b6"
+        },
+        {
+          "url": "http://www.smeda.ge/6.html",
+          "status": 200,
+          "sha256": "7eda1f0a6e191bbb2e8a98aad81d2986b94878310343a2808f3661bd5803047e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_66142",
+      "name": "შერგელაშვილი ხატია",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 116",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:58:24.928Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "5dadfe74289a95169eb6d0ac5e8f42019629b1be77f01462b57b70e586466e4e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_67024",
+      "name": "ააფ ინტეგრითი",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 41",
+      "listedWebsite": "http://www.aaf.ge/",
+      "checkedAt": "2026-10-19T12:58:24.952Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.aaf.ge/",
+          "status": 200,
+          "sha256": "907bfb43d296268dda9593be20ec5bfd9056b586976628387a8167d674c6bb82"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_66073",
+      "name": "ჩალაძე მაია",
+      "listedAddress": "გურამიშვილის გამზირი 36",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:58:24.960Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "682302b1eabc75e6705a3a35f4252d0f1703affdee32bc1713646f0be032827d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_67025",
+      "name": "აბადა",
+      "listedAddress": "ჭავჭავაძის გამზირი 19",
+      "listedWebsite": "http://www.abada.ge/",
+      "checkedAt": "2026-10-19T12:58:25.774Z",
+      "status": "official-exact-point-correction",
+      "accepted": true,
+      "correction": {
+        "sourceUrl": "https://www.abada.ge/index.php/en/contact",
+        "address": "გაგარინის ქუჩა 13ა, სართული 2",
+        "lat": 41.73366479341594,
+        "lng": 44.76937028028715,
+        "phone": "+995 599 50 83 75",
+        "openingHours": "",
+        "reason": "Official contact lists Office1 Gagarini13a with explicit marker data-options coordinates, replacing Yell Chavchavadze19. Its separate Office2 Aghmashenebeli68 is not folded into this point.",
+        "htmlSha256": "f7edcc31e11c52cf15df38d81343e117458334468dff9570cdb46f0f9a055c44"
+      },
+      "pages": [
+        {
+          "url": "http://www.abada.ge/",
+          "status": 200,
+          "sha256": "d73c31bb3f31fcc2c31c5c9df5b8765ea6a560feddf4ca055df2b37886a4f07d"
+        },
+        {
+          "url": "http://www.abada.ge/index.php/en/contact",
+          "status": 200,
+          "sha256": "f7edcc31e11c52cf15df38d81343e117458334468dff9570cdb46f0f9a055c44"
+        },
+        {
+          "url": "https://www.abada.ge/index.php/en/contact",
+          "status": 200,
+          "sha256": "f7edcc31e11c52cf15df38d81343e117458334468dff9570cdb46f0f9a055c44",
+          "review": "Exact public office marker and contact address"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_68011",
+      "name": "პაპიაშვილი კონსალტინგ გრუპ - კრესტონ ინტერნეიშენალის წარმომადგენლობა საქართველოში",
+      "listedAddress": "პეტრე ქავთარაძის I შესახვევი 10, სართ. 3, ოთ. 4",
+      "listedWebsite": "https://kreston.ge/",
+      "checkedAt": "2026-10-19T12:58:27.697Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "პეტრე ქავთარაძის პირველი შესახვევი 10",
+      "note": "Visible contact agrees with Kavtaradze first-turn10. Conflicting JSON-LD27Kavtaradze was not used to move the place.",
+      "pages": [
+        {
+          "url": "https://kreston.ge/",
+          "status": 200,
+          "sha256": "167d1f4340a3c2d2394ccba654d5c3764eaa075855794c40043792c3c0194ca1"
+        },
+        {
+          "url": "https://kreston.ge/%e1%83%a1%e1%83%90%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%9d-%e1%83%92%e1%83%95%e1%83%94%e1%83%a0%e1%83%93%e1%83%98/",
+          "status": 200,
+          "sha256": "f50f3a7625de0938131e0251cfd4a5f5f0d65c856bcbcecc8547626c06666c93"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_68357",
+      "name": "აუდიტ ენდ ქონსალთინგ გრუპ",
+      "listedAddress": "ბუდაპეშტის ქუჩა 36/38",
+      "listedWebsite": "http://www.auditcg.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_67091",
+      "name": "ბეიკერ ტილი ჯორჯია",
+      "listedAddress": "ბამბის რიგი 7",
+      "listedWebsite": "http://www.bakertillygeorgia.ge/",
+      "checkedAt": "2026-10-19T12:58:33.552Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ბამბის რიგი 7",
+      "pages": [
+        {
+          "url": "https://bakertilly.ge/",
+          "status": 200,
+          "sha256": "6e1060d4555d6f35410422dee1edb277a6049d4e2afbef05101cc4c1772a233d"
+        },
+        {
+          "url": "https://bakertilly.ge/contact-us/",
+          "status": 200,
+          "sha256": "0d653ac3a5783ba74aa6c4e6cb132fc6aefe6f8db956db54b321cb7f6374c67a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_68668",
+      "name": "გვანცელაძე ეკატერინე",
+      "listedAddress": "ჭავჭავაძის გამზირი 39დ",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:58:35.859Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "254bb601fcaaed56fc14a289834ee32405a6be596f4af7838b833e1f30e4f50d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_69147",
+      "name": "კკ ჯგუფი",
+      "listedAddress": "არჩილ ქურდიანის ქუჩა 11",
+      "listedWebsite": "http://www.tgs-kkgroup.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_69330",
+      "name": "ჩარგეიშვილის საადვოკატო დარბაზი",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 46",
+      "listedWebsite": "https://www.chargeishvili.com/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_69013",
+      "name": "გოგატიშვილი თამილა",
+      "listedAddress": "კოსტავას ქუჩა 67",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:58:40.173Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "7a1f762138a4342ba15e8cd4d70c96a8aedf6fc81dfa1415f8cb666914611bf6"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_66875",
+      "name": "სინერჯი ჯგუფი",
+      "listedAddress": "კოსტავას ქუჩა 68ბ",
+      "listedWebsite": "http://www.synergy.ge/",
+      "checkedAt": "2026-10-19T12:58:41.356Z",
+      "status": "official-exact-point-correction",
+      "accepted": true,
+      "correction": {
+        "sourceUrl": "https://synergy.ge/კონტაქტი/",
+        "address": "მერაბ ალექსიძის ქუჩა 13, სართული 9",
+        "lat": 41.7169807,
+        "lng": 44.7845915,
+        "phone": "+995 595 247 863",
+        "openingHours": "ორშაბათი–პარასკევი 10:00–19:00",
+        "reason": "Official contact address Aleksidze13 replaces Yell Kostava68b. Exact marker coordinates are in the official linked map URL !3d/!4d, not its camera centre.",
+        "htmlSha256": "4f84fe7cf33e378b1ea6a2ca1f705aad678d81c7bafc5f986d78b3b278c494c5"
+      },
+      "pages": [
+        {
+          "url": "https://synergy.ge/",
+          "status": 200,
+          "sha256": "13312a93b2d441ea16bdeda2d2bd1a8764d92b07ae79d01c47aee8b98edbc1b3"
+        },
+        {
+          "url": "https://synergy.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "4f84fe7cf33e378b1ea6a2ca1f705aad678d81c7bafc5f986d78b3b278c494c5"
+        },
+        {
+          "url": "https://synergy.ge/კონტაქტი/",
+          "status": 200,
+          "sha256": "4f84fe7cf33e378b1ea6a2ca1f705aad678d81c7bafc5f986d78b3b278c494c5",
+          "review": "Exact public office marker and contact address"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_69667",
+      "name": "ქართული იურიდიული საკონსულტაციო კომპანია - ჯიელსისი",
+      "listedAddress": "ცინცაძის ქუჩა 58",
+      "listedWebsite": "https://glcc.ge/",
+      "checkedAt": "2026-10-19T12:58:45.165Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "სულხან ცინცაძის ქუჩა 58",
+      "pages": [
+        {
+          "url": "https://glcc.ge/",
+          "status": 200,
+          "sha256": "73a39d67ef6cc86e878fd06c63d37b566360bb0003d59bfe3bf14cdfd492619b"
+        },
+        {
+          "url": "https://glcc.ge/contact-us/",
+          "status": 200,
+          "sha256": "7332f10d50ed6ac02260b3f83c436e7bca64528b9490af282f93915b2d7d499e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_69517",
+      "name": "პოლიტიკისა და მართვის კონსალტინგ ჯგუფი",
+      "listedAddress": "ტატიშვილის ქუჩა 1",
+      "listedWebsite": "http://www.pmcg-i.com/",
+      "checkedAt": "2026-10-19T12:58:46.035Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "თათიშვილის ქუჩა 1",
+      "pages": [
+        {
+          "url": "https://pmcg-i.com/",
+          "status": 200,
+          "sha256": "2c0a15fcc0fa3e4b82333ab6f39fa8bd8954e650f077b6f42f2f22ec325be60a"
+        },
+        {
+          "url": "https://pmcg-i.com/contact-us/",
+          "status": 200,
+          "sha256": "6833acc0847c0e850dfc44822bbdd8097519bb234243c2af0a7908c30b6ac52d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_69692",
+      "name": "ბიდიო ლეგალი",
+      "listedAddress": "თარხნიშვილის ქუჩა 2, ვერე ბიზნეს ცენტრი",
+      "listedWebsite": "https://www.bdo.ge/ka-ge/servisebi/bdo-legal",
+      "checkedAt": "2026-10-19T12:58:47.369Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "თარხნიშვილის ქუჩა 2",
+      "pages": [
+        {
+          "url": "https://www.bdo.ge/ka-ge/servisebi/bdo-legal",
+          "status": 200,
+          "sha256": "252061014692b2e34db13aa3a06e9e4a7c56651fbd5d4734f71799156cf192e2"
+        },
+        {
+          "url": "https://www.bdo.ge/ka-ge/contact",
+          "status": 200,
+          "sha256": "622871082869c26efde4da364611d53a84c126f9a567733cb6006824abc4f64b"
+        },
+        {
+          "url": "https://www.bdo.ge/ka-ge/contact",
+          "status": 200,
+          "sha256": "992d12b970db4aacaf834f18237ac30947a0e554fc6e3942bea06380a27a26ab",
+          "review": "Additional exact official contact source"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_70160",
+      "name": "თბილისის ბიზნეს მომსახურების ცენტრი",
+      "listedAddress": "რაფიელ ერისთავის ქუჩა 3",
+      "listedWebsite": "http://www.tbsc.ge/",
+      "checkedAt": "2026-10-19T12:58:49.623Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "რაფიელ ერისთავის ქუჩა 3",
+      "pages": [
+        {
+          "url": "https://tbsc.ge/",
+          "status": 200,
+          "sha256": "f4f0a3357dda6859beebef697321d3f75b9b9460e303394134017d064415f6e2"
+        },
+        {
+          "url": "https://tbsc.ge/contact-1/",
+          "status": 200,
+          "sha256": "6fdb505351ecccd6dbe28c50610616a2472e470f08b0e0b2805406f1264ed5c0"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_70266",
+      "name": "ბიდიო აუდიტი",
+      "listedAddress": "თარხნიშვილის ქუჩა 2, ვერე ბიზნეს ცენტრი",
+      "listedWebsite": "https://www.bdo.ge/",
+      "checkedAt": "2026-10-19T12:58:50.213Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "თარხნიშვილის ქუჩა 2",
+      "pages": [
+        {
+          "url": "https://www.bdo.ge/ka-ge/home-ge",
+          "status": 200,
+          "sha256": "6a8f8e45c0152787af9d58c62f6d98db7e9ec28175f246137e846b6f7ee26b60"
+        },
+        {
+          "url": "https://www.bdo.ge/ka-ge/contact",
+          "status": 200,
+          "sha256": "4f32e0bdfee0a7b6e7af580c376ba467f886bbb077b2a2f92ce5ebe31246e2b7"
+        },
+        {
+          "url": "https://www.bdo.ge/ka-ge/contact",
+          "status": 200,
+          "sha256": "992d12b970db4aacaf834f18237ac30947a0e554fc6e3942bea06380a27a26ab",
+          "review": "Additional exact official contact source"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_70371",
+      "name": "თბილისის მუნიციპალიტეტის მულტიფუნქციური ბიბლიოთეკების გაერთიანება (ყოფილი თბილისის მთავარი ბიბლიოთეკა)",
+      "listedAddress": "ტოვსტონოგოვის ქუჩა 2",
+      "listedWebsite": "https://www.facebook.com/Tbilisilibraries",
+      "checkedAt": "2026-10-19T12:58:51.617Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.facebook.com/Tbilisilibraries",
+          "status": 200,
+          "sha256": "9a6596b3f91e273984c8dd0180bc6465bfd51bfeb163963074c128e9beedbca0"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_71338",
+      "name": "გოჩელაშვილები და პარტნიორები",
+      "listedAddress": "შარტავას ქუჩა 30, სართ. 2, #5",
+      "listedWebsite": "http://www.lawservices.ge/",
+      "checkedAt": "2026-10-19T12:58:53.361Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ჟიული შარტავას ქუჩა 30",
+      "pages": [
+        {
+          "url": "http://www.lawservices.ge/",
+          "status": 200,
+          "sha256": "bab9699efaf8f10bf9b4480bbdf6be956ffd758bcd3cd5f5d8561e44d586e418"
+        },
+        {
+          "url": "http://www.lawservices.ge/contact",
+          "status": 200,
+          "sha256": "d1be4a27ef04b74c29d31dbd1cf2e264b03f54b5668d94b55a55ecaa53e7bfb8"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_71088",
+      "name": "ინოვა",
+      "listedAddress": "ი. აბაშიძის ქუჩა 79",
+      "listedWebsite": "https://www.innova.ge/",
+      "checkedAt": "2026-10-19T12:59:00.355Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ირაკლი აბაშიძის ქუჩა 79",
+      "pages": [
+        {
+          "url": "https://innova.ge/ka",
+          "status": 200,
+          "sha256": "9479a90c80208e953a2c5fbb1aa39557c9848455463e51d7e3cb69dc39c8c9d2"
+        },
+        {
+          "url": "https://innova.ge/ka/contact",
+          "status": 200,
+          "sha256": "8e30f74631c2fa386d81005647a2477efae242ecb50133f8b724179370cb4f7c"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_72505",
+      "name": "კონსალტი",
+      "listedAddress": "შავგულიძის ქუჩა 7/54",
+      "listedWebsite": "http://www.consult.ge/",
+      "checkedAt": "2026-10-19T12:59:00.559Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.consult.ge/",
+          "status": 200,
+          "sha256": "ed38629c1ee291ee6607ec4c8f61155834186ad9a0cb1a14eed04f16ddb05451"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_72015",
+      "name": "ფი ქეი ეფ ჯორჯია",
+      "listedAddress": "იაკობ ნიკოლაძის ქუჩა 3",
+      "listedWebsite": "https://pkf.ge/",
+      "checkedAt": "2026-10-19T12:59:00.681Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "იაკობ ნიკოლაძის ქუჩა 3",
+      "pages": [
+        {
+          "url": "https://pkf.ge/",
+          "status": 200,
+          "sha256": "b88f9f12546d02a7dd79bc6ec38c82a03a2871e600416e9abcd08f71c22d4e4e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_72493",
+      "name": "კანდელაკი ლალი",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 2ა, ბ. 13",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:01.059Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "c3b738f1eb59a4e4ec7baa09934d04fa16220f9cd0f156510c4f84cee33b562a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_72602",
+      "name": "ფინანსური გადაწყვეტილებების ჯგუფი",
+      "listedAddress": "ბიძინა კვერნაძის ქუჩა 7 / პავლე ასლანიდის ქუჩა 12",
+      "listedWebsite": "https://www.fsgroup.ge/",
+      "checkedAt": "2026-10-19T12:59:01.573Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "პავლე ასლანიდის ქუჩა 12 / ბიძინა კვერნაძის ქუჩა 7",
+      "pages": [
+        {
+          "url": "https://www.fsgroup.ge/",
+          "status": 200,
+          "sha256": "c10437965ba9774f58e8bb5ea57ffa12562a3c5da911b35eb73f3eb2233b2144"
+        },
+        {
+          "url": "https://www.fsgroup.ge/kontaqti/",
+          "status": 200,
+          "sha256": "1fb70b4d07a13f3d565da52598ddbcd52a93c39fa2fff0e5e404bd28b999885c"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_72654",
+      "name": "ფიფია რუსუდან",
+      "listedAddress": "ჭავჭავაძის გამზირი 10",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:02.093Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "28844d7f49703ab19d5065a4b8dbd71815e4cd0beed5e598f37ed2be8508393d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_73440",
+      "name": "ნანობაშვილი ირინე",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 97",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:02.318Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "4da3275d9f88d1e95f8b406662fa00a74b4b404d31be706dd84a90783d8390e9"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_74336",
+      "name": "ჯი დი სი აი",
+      "listedAddress": "ბურძგლას ქუჩა 74",
+      "listedWebsite": "http://www.gdci.ge/",
+      "checkedAt": "2026-10-19T12:59:02.352Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.gdci.ge/",
+          "status": 200,
+          "sha256": "ee4b2c8e7f88bf6b761bcd13a1e991b46c9b08b8367fa3c03770784743e6f869"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_73530",
+      "name": "ემ ქეი დი",
+      "listedAddress": "ე. ახვლედიანის აღმართი 9ა",
+      "listedWebsite": "http://www.mkdlaw.ge/",
+      "checkedAt": "2026-10-19T12:59:02.459Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.mkdlaw.ge/ka",
+          "status": 200,
+          "sha256": "5aaf67e948984a51083fca1bbae047cc335fc965d2f90dd1f762f525f0d5636a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_74959",
+      "name": "საკონსულტაციო ჯგუფი ჯი-ეს",
+      "listedAddress": "ბაქოს ქუჩა 2ა",
+      "listedWebsite": "http://www.gs-group.ge/",
+      "checkedAt": "2026-10-19T12:59:02.592Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ბაქოს ქუჩა 2ა",
+      "pages": [
+        {
+          "url": "http://www.gs-group.ge/",
+          "status": 200,
+          "sha256": "76a8ce62d20c958ece427a32b83f16cf931d066f0c628fced3ab98f6334f3f9d"
+        },
+        {
+          "url": "http://www.gs-group.ge/contact.html",
+          "status": 200,
+          "sha256": "0dd9713c3ff4edc18f07eb6253ce0d776f7c15002881dad86b8ec6789f4e5000"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_74586",
+      "name": "პარტნიორები-საქართველო",
+      "listedAddress": "ფალიაშვილის ქუჩა 11ბ",
+      "listedWebsite": "http://www.partners.ge/",
+      "checkedAt": "2026-10-19T12:59:02.601Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.partners.ge/",
+          "status": 200,
+          "sha256": "940a871b86efb1ebf8d931cf472212565a8d134aa47f86c689c3e01ace0a8548"
+        },
+        {
+          "url": "https://www.partners.ge/contact",
+          "status": 200,
+          "sha256": "fd0865c12eefc46a5191ae63a40161f0bfc5f2772c8104163a8131b1fb8f2d8f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_73944",
+      "name": "მამუკაშვილი ქეთევან",
+      "listedAddress": "წმ. ქეთევან დედოფლის გამზირი 25",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:03.570Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "181ebe1f617b23a2b95bd9ccfc57b5bf4ee8ddb921fca4305c3f42328c4b619f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_75402",
+      "name": "ოყროშიძე დავით",
+      "listedAddress": "ბოჭორმის ქუჩა 11ა, სართ. 2",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:04.219Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "4bf9d9e89af505bd802dfd94996000478b393158202740cd6de16b2ff5d17856"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_75602",
+      "name": "როინიშვილი ანნა",
+      "listedAddress": "კალოუბნის ქუჩა, კორპ. \"ა-ბ\", ბ. 31",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:05.524Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "ce54609e9c679b9b7be1d5cab00d5932f4cd93d110412dd1e1fcdfc3eaa3fb3b"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_75811",
+      "name": "საადვოკატო ოფისი დავით ლანჩავა",
+      "listedAddress": "ალექსიძის ქუჩა 12",
+      "listedWebsite": "http://www.lanchavalawoffice.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_75881",
+      "name": "ოდილავაძე ქეთევან",
+      "listedAddress": "შარტავას ქუჩა 14ა",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:07.173Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "3f3217c9b2b0286553ddbde33dea446f4af004ba675621f23c06994041a6bdd4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_75670",
+      "name": "ნოდია, ურუმაშვილი და პარტნიორები",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 71, ბლოკი IV, სართ. 4",
+      "listedWebsite": "http://www.nplaw.ge/",
+      "checkedAt": "2026-10-19T12:59:07.911Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ვაჟა-ფშაველას გამზირი 71, ბლოკი 4, ოფისი 28",
+      "note": "Official formatting denotes office28, block4, at71Vazha-Pshavela. The embedded map camera centre is not an exact office marker and was not used.",
+      "pages": [
+        {
+          "url": "https://nplaw.ge/",
+          "status": 200,
+          "sha256": "eaa30b9ddf2d30eb8ece98971ba26bc899c76b6d4fb86bf729818f956156bf43"
+        },
+        {
+          "url": "https://nplaw.ge/contact",
+          "status": 200,
+          "sha256": "5611e5601e69ba2551068758db47f8098a71b9cdff61decd5a41b2901801c325"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_75075",
+      "name": "მიქაძე, გეგეჭკორი, თაქთაქიშვილი",
+      "listedAddress": "კატო მიქელაძის ქუჩა 3",
+      "listedWebsite": "http://www.mikadze.ge/",
+      "checkedAt": "2026-10-19T12:59:08.967Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "კატო მიქელაძის ქუჩა 3",
+      "pages": [
+        {
+          "url": "https://mikadze.ge/home/",
+          "status": 200,
+          "sha256": "dc604a3c4c0f648b32af3e7b9a48b13f0ca8a46bec8c560426f0015c092ba73b"
+        },
+        {
+          "url": "https://mikadze.ge/contact/",
+          "status": 200,
+          "sha256": "123319892a6d29f314833049275f69188b6c16057be58dc21eb790b10a529984"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_76239",
+      "name": "კეკელია დავითი",
+      "listedAddress": "გლდანი, \"ა\" მ/რ, კორპ. 54",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:09.497Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "bd04d812f65bf6cda8faeaa43b7f2796568a59e65dc9f196fdd0ee36b3f9747c"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_76282",
+      "name": "კვეზერელი-დავითაშვილი მარიამ",
+      "listedAddress": "ავლაბრის ქუჩა 8ა",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:10.157Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e476ee6db2d0ee588f227b45d0b077145bf95031d595db75c1824f3485bd26f8"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_77063",
+      "name": "საქართველოს პროფესიონალ ბუღალტერთა და აუდიტორთა ფედერაცია",
+      "listedAddress": "წერეთლის გამზირი 61",
+      "listedWebsite": "http://www.gfpaa.ge/",
+      "checkedAt": "2026-10-19T12:59:11.572Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "აკაკი წერეთლის გამზირი 61",
+      "pages": [
+        {
+          "url": "http://www.gfpaa.ge/site/index.php",
+          "status": 200,
+          "sha256": "9a4dde4277619f3dbe17b3a7244b38611f49257a7f7ea9d5b4a9532b921728a9"
+        },
+        {
+          "url": "http://www.gfpaa.ge/site/index.php?tid=8&color=blue&lid=8&sid=8",
+          "status": 200,
+          "sha256": "d431398464ded4d8311704d0f97286c1b9b7a189782892e20abd2e6b964c936f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_77016",
+      "name": "საქართველოს პარლამენტის ეროვნული ბიბლიოთეკა",
+      "listedAddress": "გუდიაშვილის ქუჩა 7",
+      "listedWebsite": "https://www.nplg.gov.ge/",
+      "checkedAt": "2026-10-19T12:59:13.627Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.nplg.gov.ge/geo/home",
+          "status": 200,
+          "sha256": "75d72428c9cbd9829dc0f544749573194e9a3279d2e32cf1449a12ac3b09a8d3"
+        },
+        {
+          "url": "https://www.nplg.gov.ge/geo/geo/contact",
+          "status": 200,
+          "sha256": "8330967c5e56eea39209018d68722071762b4227ba6ed1936fd730653912c1e8"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_77746",
+      "name": "მენეჯმენტის სისტემები",
+      "listedAddress": "ნოდარ ბოხუას ქუჩა 4",
+      "listedWebsite": "http://www.tuv-georgia.ge/",
+      "checkedAt": "2026-10-19T12:59:13.692Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.tuv-georgia.ge/",
+          "status": 200,
+          "sha256": "d722928e1a7201f5ae82ef1b9a1520fef9a363b2dcc1f0a3e73ba607f01f41e4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_77684",
+      "name": "საქართველოს ბიზნეს საკონსულტაციო ორგანიზაციების ასოციაცია",
+      "listedAddress": "ყიფშიძის ქუჩა 7",
+      "listedWebsite": "http://www.abco.ge/",
+      "checkedAt": "2026-10-19T12:59:13.828Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ნიკოლოზ ყიფშიძის ქუჩა 7",
+      "pages": [
+        {
+          "url": "https://www.abco.ge/2.html",
+          "status": 200,
+          "sha256": "fc6b923004f4732781d7cd79ea9d61009961ec8949a2faa8d42cf92fc1204c9c"
+        },
+        {
+          "url": "https://www.abco.ge/8.html",
+          "status": 200,
+          "sha256": "7142f84238e2a1c4d329e1a3daeb08dd22c7ffa8f77a863aa832f93a002a43a9"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78384",
+      "name": "ოძელაშვილი მარიამ",
+      "listedAddress": "პეკინის გამზირი 7ა",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:15.096Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e46f513db67373685ceeab7828c339d4b08be2d067a6c4cf2c744261634bb424"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78154",
+      "name": "ჯიისი კონსალტინგი - GEC Consulting",
+      "listedAddress": "მელიქიშვილის ქუჩა 10, ოფ. 12",
+      "listedWebsite": "http://www.gec-consulting.com/",
+      "checkedAt": "2026-10-19T12:59:15.167Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.gecbusiness.com/",
+          "status": 200,
+          "sha256": "23fc94f2144f14eef546204e9a38edd6f9bdf511c4f15e1ba022b02e35719bf6"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78454",
+      "name": "შიხიაშვილი ელისო",
+      "listedAddress": "კოტე აფხაზის ქუჩა 17",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:16.340Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "48faa0b0c4a9ae031504266fc3cba2a5c4eda480c3bac0bef5e71e284282447b"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78456",
+      "name": "შოშიაშვილი ნინო",
+      "listedAddress": "კოტე აფხაზის ქუჩა 9",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:16.441Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "02710ca8402d87b1926e97e7f3afd8d085ad66c55451f68f1eeb5f38dc5e5952"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78491",
+      "name": "ჯეი პი ეი ფინანსაუდიტი",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 16",
+      "listedWebsite": "http://av.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_79100",
+      "name": "ქეიფიემჯი ჯორჯია - KPMG Georgia",
+      "listedAddress": "თავისუფლების მოედანი 4, ჯიემთი პლაზა, მე–5 სართული",
+      "listedWebsite": "http://www.kpmg.ge/",
+      "checkedAt": "2026-10-19T12:59:17.025Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "თავისუფლების მოედანი 4, GMT Plaza",
+      "pages": [
+        {
+          "url": "https://kpmg.com/ge/en.html",
+          "status": 200,
+          "sha256": "30c26f1fd8718084aaf5f03e9d0b584a21ffed67338d697b2ab11dda4cc926bc"
+        },
+        {
+          "url": "https://kpmg.com/ge/en/misc/generic-contact-page.html",
+          "status": 200,
+          "sha256": "499339f166189574ba41d5f67b4bfc024928e181be0f132a0a4b83509843670a"
+        },
+        {
+          "url": "https://kpmg.com/ge/en/about/offices.html",
+          "status": 200,
+          "sha256": "02c268f6a8a23de1a99e9a279c298092ced2a30f77191078a7592eda3fad26cd",
+          "review": "Additional exact official contact source"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_79549",
+      "name": "ბარაბაძე ნინო",
+      "listedAddress": "ნავთლუღის ქუჩა 3",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:18.287Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "744672225116ed482970688888c3c86f16476147c43c95d30599e68d8f3f930c"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_78857",
+      "name": "თი აი ეი ჯი აუდიტესკორტი",
+      "listedAddress": "ყაზბეგის გამზირი 14ა",
+      "listedWebsite": "https://www.auditescort.ge/",
+      "checkedAt": "2026-10-19T12:59:20.401Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ალექსანდრე ყაზბეგის გამზირი 14ა",
+      "pages": [
+        {
+          "url": "https://auditescort.ge/",
+          "status": 200,
+          "sha256": "13ff6f6254fc78571e7af5befff2131f13cddba20e037bb683bed2c1c37dc730"
+        },
+        {
+          "url": "https://auditescort.ge/contact-four-2/",
+          "status": 200,
+          "sha256": "334785073724fcde26b2a7c37a25c97cb34632d09fc0097aa4475aacf3a337ff"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_77552",
+      "name": "საქართველოს ეროვნული არქივის სამეცნიერო-საცნობარო ბიბლიოთეკა",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 1",
+      "listedWebsite": "http://library.archives.gov.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_79667",
+      "name": "გრანთ თორნთონ",
+      "listedAddress": "წმ. ქეთევან დედოფლის გამზირი 54",
+      "listedWebsite": "http://www.grantthornton.ge/",
+      "checkedAt": "2026-10-19T12:59:21.449Z",
+      "status": "official-exact-point-correction",
+      "accepted": true,
+      "correction": {
+        "sourceUrl": "https://www.grantthornton.ge/location/tbilisi/",
+        "address": "ილო მოსაშვილის ქუჩა 24",
+        "lat": 41.7102973,
+        "lng": 44.7544717,
+        "phone": "+995 32 260 44 06",
+        "openingHours": "",
+        "reason": "Current official Tbilisi office page publishes Mosashvili 24 and coordinates 41.7102973,44.7544717 in its map JSON. This supersedes Yell Queen Ketevan54; identity remains the same firm.",
+        "htmlSha256": "6d61492036d14486f1c6d6fd7dd7b6c383b2ad2914d107a10518ca471a185c37"
+      },
+      "pages": [
+        {
+          "url": "https://www.grantthornton.ge/",
+          "status": 200,
+          "sha256": "9030efaa789dbad73c09f679708f97d3af42c98a67435a82bbe27a3eef9c485a"
+        },
+        {
+          "url": "https://www.grantthornton.ge/Contact/",
+          "status": 200,
+          "sha256": "e93a52631355619c6056951d106484f4fa43933cef6b948ae5f62294eaef1c05"
+        },
+        {
+          "url": "https://www.grantthornton.ge/location/tbilisi/",
+          "status": 200,
+          "sha256": "6d61492036d14486f1c6d6fd7dd7b6c383b2ad2914d107a10518ca471a185c37",
+          "review": "Exact public office marker and contact address"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_101165",
+      "name": "მაღალდაძე მეგი",
+      "listedAddress": "კოტე მარჯანიშვილის ქუჩა 19",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:22.811Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "a31ba41a70105195b9e0111117c310e775758abbc29d9919614dc278515f0cc7"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_101707",
+      "name": "მანია ანჟელა",
+      "listedAddress": "იონა ვაკელის ქუჩა 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:24.700Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "746fddf6f616a5716f085503379c8276d19a61973e58f5e5158583561a652f5d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_101856",
+      "name": "ხარძიანი ინგა",
+      "listedAddress": "დავით გამრეკელის ქუჩა 6, სართ. 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:26.577Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "2a8b38d7b6fceaa5efd4c4965d840edf530e9e66574193b94d4bfad98ea4be5f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_80498",
+      "name": "ადვოკატი კონსტანტინე გელაშვილი",
+      "listedAddress": "კოსტავას ქუჩა 47, სართ. 1",
+      "listedWebsite": "http://www.konstantine.ge/",
+      "checkedAt": "2026-10-19T12:59:26.716Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "მერაბ კოსტავას ქუჩა 47",
+      "pages": [
+        {
+          "url": "https://konstantine.ge/",
+          "status": 200,
+          "sha256": "c22e96adedb38b5f55c2184443a0d0c9d7b54047f2e19a66450944336ca60282"
+        },
+        {
+          "url": "https://konstantine.ge/contact/",
+          "status": 200,
+          "sha256": "0e8607af80ab88eaac2f70c3d5ea7497027583b3d21fc13afed5b65a14610132"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_102405",
+      "name": "აუდიტ+ 2010",
+      "listedAddress": "ს. ჩიქოვანის ქუჩა 9/11",
+      "listedWebsite": "http://www.audit2010.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_102629",
+      "name": "ჭიჭინაძე მანანა",
+      "listedAddress": "ხიზანიშვილის ქუჩა 9 / ი. ვეკუას ქუჩა 6",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:28.371Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "79eff2f1b17b8369587a78eb528fd1cc93f3bf7a79bd5ac32d53430a67c6ecf4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_79611",
+      "name": "გრატა ინტერნეშენალ ჯორჯია",
+      "listedAddress": "ფალიაშვილის ქუჩა 87ბ",
+      "listedWebsite": "http://www.kjlaw.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_102475",
+      "name": "ფინანსური მართვის ჯგუფი",
+      "listedAddress": "26 მაისის მოედანი 2",
+      "listedWebsite": "http://www.fmg.ge/",
+      "checkedAt": "2026-10-19T12:59:29.740Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://fmg.ge/",
+          "status": 200,
+          "sha256": "9aa5ca2083be4233126d0d45ff3b956de4c72db9d43d5b2407c657a77566f1ce"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_103096",
+      "name": "ჯელაძე ეკატერინე",
+      "listedAddress": "წერეთლის გამზირი 49-51",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:30.121Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "8afc52bea25496c5a6310f348383fce625fdb7c8ab7e603978b9be3627286e94"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_103927",
+      "name": "აუდიტ კონსალტინგ გრუპი",
+      "listedAddress": "უზნაძის ქუჩა 6",
+      "listedWebsite": "http://www.auditgroup.ge/",
+      "checkedAt": "2026-10-19T12:59:30.197Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "note": "Official legal registered address differs from the directory visitor-office address; legal registration alone does not establish a relocation. Current visitor location remains unconfirmed.",
+      "pages": [
+        {
+          "url": "http://www.auditgroup.ge/",
+          "status": 200,
+          "sha256": "0ceeaa03c0ad46ff7cab48fdb9ad8b9abbce393a69b5795d922ef352193becfe"
+        },
+        {
+          "url": "http://www.auditgroup.ge/page.php?id=11",
+          "status": 200,
+          "sha256": "944023638c55f2b461cfe025e69396bf0f2de48cd2acbc66b1cb88c6c5100af9"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_105563",
+      "name": "ექსპერტო",
+      "listedAddress": "ლესია უკრაინკას ქუჩა 3",
+      "listedWebsite": "http://www.experto.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_103792",
+      "name": "ეიჯი ინტერნეიშენალ კონსალტინგი",
+      "listedAddress": "პეტრე ქავთარაძის I შესახვევი 10",
+      "listedWebsite": "https://www.agic.ge/",
+      "checkedAt": "2026-10-19T12:59:30.707Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://agic.ge/",
+          "status": 200,
+          "sha256": "3950d08456c3a207650e042036f8983058cacf87a624702b43450377ee2bab25"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106462",
+      "name": "დევდარიანი თინათინ",
+      "listedAddress": "ი. აბაშიძის ქუჩა 43/კავსაძის ქუჩა 9, ბინა 13",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:32.249Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "64cf32edfc2ca8dddd0247d8f20f7072872a57c2b9ddbe1aaf4882bb05c5e986"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_103962",
+      "name": "ააფ კაპიტალი",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 41",
+      "listedWebsite": "http://www.aafcapital.ge/",
+      "checkedAt": "2026-10-19T12:59:32.724Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ვაჟა-ფშაველას გამზირი 41",
+      "pages": [
+        {
+          "url": "https://aafcapital.ge/",
+          "status": 200,
+          "sha256": "95540d91614bd89acdfeabc63cc07b97284d853d23016aa274daefa8707dfdb3"
+        },
+        {
+          "url": "https://aafcapital.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "9e4238c3116a41172da2e164e86bb88431c2066e4f8c62249b71be43df24e738"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106413",
+      "name": "მაკგილი",
+      "listedAddress": "ზურაბ ავალიშვილის ქუჩა 12",
+      "listedWebsite": "https://mcgill.ge/",
+      "checkedAt": "2026-10-19T12:59:33.046Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ზურაბ ავალიშვილის ქუჩა 12",
+      "note": "Visible current Avalishvili12 contact agrees. An older image/alternative field mentions37dChavchavadze; no overwrite from stale asset metadata.",
+      "pages": [
+        {
+          "url": "https://mcgill.ge/",
+          "status": 200,
+          "sha256": "3201b94f2e85e18140702cfeb32978930312a02bfdd01d73f540f3159a5edcb0"
+        },
+        {
+          "url": "https://mcgill.ge/contact/",
+          "status": 200,
+          "sha256": "54f179017e1b21b12806f2e53c2cc3870cf75759d4dfc1be45b465af9a0970f7"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106501",
+      "name": "ბრეგვაძე მაია",
+      "listedAddress": "ბაზალეთის ქუჩა 1",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:33.636Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "dfa8a8162b007497a25011c5a171c8076b7958930fd3b97d7b9ab42cf35de288"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106515",
+      "name": "ბოჭორიშვილი ქეთევან",
+      "listedAddress": "ნავთლუღის ჩიხი 9, სართ. 2",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:34.504Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "9215d03ac4af719de5500a425b1123170f862b12c46ee211824028c355d5f82d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106572",
+      "name": "ცისკარაშვილი ოთარ",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 154, სართ. 8, ოფისი 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:34.847Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "38b34067f9910517e9f54497366a1c3008da6e5e6341058ac5e16d8e18366a15"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_106584",
+      "name": "ცხადაძე ლუიზა",
+      "listedAddress": "ნიკო ფიროსმანის ქუჩა 23, სართ. 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:35.318Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "494288ba8a4bbfc134c92469873d80ee6213f658c29cfbac87ec212ac6458dfe"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_109137",
+      "name": "აუდიტორული ფირმა ალტერ ეგო",
+      "listedAddress": "ჩიტაიას ქუჩა 7",
+      "listedWebsite": "http://www.alterego.com.ge/",
+      "checkedAt": "2026-10-19T12:59:35.368Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.alterego.com.ge/",
+          "status": 200,
+          "sha256": "06bb5518eb3660074be23ec4fc495362c5355f5675dcdac7e7a8ba4e3bdc0391"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_107802",
+      "name": "იურიდიული კომპანია, საადვოკატო ბიურო OK&CG",
+      "listedAddress": "ყაზბეგის გამზირი 12ბ, სართ. 6, ოფისი 603",
+      "listedWebsite": "https://www.myadvokat.ge/",
+      "checkedAt": "2026-10-19T12:59:35.616Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ალექსანდრე ყაზბეგის გამზირი 12ბ",
+      "pages": [
+        {
+          "url": "https://www.myadvokat.ge/ka/",
+          "status": 200,
+          "sha256": "39ab6a2f9597d975092a2262811fe50dab77c3b1e5137d379d3acb6e4c4fa8b2"
+        },
+        {
+          "url": "https://www.myadvokat.ge/ka/contact",
+          "status": 200,
+          "sha256": "6f7f4466fa81a5eb6702d195606b85b555217bf7a13881d6c031ebad40909de3"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_109186",
+      "name": "აჭარა",
+      "listedAddress": "26 მაისის მოედანი 1",
+      "listedWebsite": "https://casinoadjara.com/",
+      "checkedAt": "2026-10-19T12:59:35.922Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "26 მაისის მოედანი 1",
+      "pages": [
+        {
+          "url": "https://casinoadjara.com/",
+          "status": 200,
+          "sha256": "3e59fa3694d41ce53790c11335029b7bbadbec7e3632302a665f4e7bd6f6d4be"
+        },
+        {
+          "url": "https://casinoadjara.com/contact/",
+          "status": 200,
+          "sha256": "e3e3a734acf6d30726fc52c70a2065cdec0fa6843b03e5ebe9e954bdae331ac2"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_109325",
+      "name": "შპს ფრაისუოთერჰაუსკუპერს საქართველო",
+      "listedAddress": "ალექსიძის ქუჩა 12, ბიზნეს ცენტრი კინგ დევიდი, სართ. 7",
+      "listedWebsite": "https://www.pwc.com/ge",
+      "checkedAt": "2026-10-19T12:59:36.098Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "მერაბ ალექსიძის ქუჩა 12, King David Business Centre",
+      "pages": [
+        {
+          "url": "https://www.pwc.com/ge/en/",
+          "status": 200,
+          "sha256": "ebb709c13e6bfa6e55e57185f10c0df0104c4e31aa98f4a559c3583189319433"
+        },
+        {
+          "url": "https://www.pwc.com/ge/en/content/pwc/global/forms/contactUsNew.html?parentPagePath=/content/pwc/ge/en&territory=ge.html",
+          "status": 200,
+          "sha256": "07081b5b52cff537bcc542b4338aa7548982acfaa45245288f636fe98aaa241a"
+        },
+        {
+          "url": "https://www.pwc.com/ge/en/about-us/office.html",
+          "status": 200,
+          "sha256": "82d15c9effe884f1462087d3b32caca43d73dd9b689c99ae89dce4e7790f7bc7",
+          "review": "Additional exact official contact source"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_109791",
+      "name": "გალტ ენდ თაგარტი",
+      "listedAddress": "პუშკინის ქუჩა 3",
+      "listedWebsite": "http://www.galtandtaggart.com/",
+      "checkedAt": "2026-10-19T12:59:36.523Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://galtandtaggart.com/",
+          "status": 200,
+          "sha256": "b554048069433e55a654395507b730b43fa3515fb0286476894e899ad0700b5a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_109603",
+      "name": "ბი-ჯი-აი ედვაიზორი სერვისიზ ჯორჯია",
+      "listedAddress": "კოტე აფხაზის ქუჩა 44, \"მეიდან პალასი\"",
+      "listedWebsite": "http://www.bgi.ge/",
+      "checkedAt": "2026-10-19T12:59:36.779Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "კოტე აფხაზის ქუჩა 44",
+      "pages": [
+        {
+          "url": "https://bgi.ge/",
+          "status": 200,
+          "sha256": "e088ecbd58d0fc381dd1258fb53a32d5e2e949325a463ed15827bc43b250af2a"
+        },
+        {
+          "url": "https://bgi.ge/contact-us",
+          "status": 200,
+          "sha256": "0e0056aae20cf2054eba50ae46416da903000aad2ebe90b850d4e6d3dd449f48"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_110706",
+      "name": "ტაქსინფო ჯგუფი",
+      "listedAddress": "ალექსიძის ქუჩა 12, ბიზნეს ცენტრი კინგ დევიდი",
+      "listedWebsite": "http://www.taxinfo.ge/",
+      "checkedAt": "2026-10-19T12:59:37.333Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "მერაბ ალექსიძის ქუჩა 12",
+      "pages": [
+        {
+          "url": "https://taxinfo.ge/",
+          "status": 200,
+          "sha256": "425370a0098b6534794e2f9824fed2059e6baaca154536cfb2a6ab70ed097881"
+        },
+        {
+          "url": "https://taxinfo.ge/contact/",
+          "status": 200,
+          "sha256": "1545c83b95813b5ceb5556cca4aeefacc7ed5092cff8af214768d0949ed154f4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_110095",
+      "name": "ტარტარაშვილი ჟენია",
+      "listedAddress": "წმ. ქეთევან დედოფლის გამზირი 42",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:37.763Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "72e6255e04dc6d838f20538d95ca585833ba1a1d7aa480e16fed21800ba0d4c9"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_111434",
+      "name": "ბიზნეს ჯგუფი",
+      "listedAddress": "ჯ. კახიძის ქუჩა 8",
+      "listedWebsite": "http://www.bizgroup.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_109551",
+      "name": "აუდიტორული და ბუღალტრული სერვისების კომპანია ფინო",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 61, ბიზნეს ცენტრი \"მოზაიკა\", სართ. 5",
+      "listedWebsite": "http://www.fino.ge/",
+      "checkedAt": "2026-10-19T12:59:37.920Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "დავით აღმაშენებლის გამზირი 61",
+      "pages": [
+        {
+          "url": "https://fino.ge/",
+          "status": 200,
+          "sha256": "3899247a989c9dba3c072262b78d78ee9acb86f60b5031384e8a82ab10e7e0a4"
+        },
+        {
+          "url": "https://fino.ge/kontaqti/",
+          "status": 200,
+          "sha256": "3c3e1d9072e7e1c3fbf57de6074a6d37a0ea9a7e0953dc847fdf7b7e776b922a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_112291",
+      "name": "ეფემჯი ლეგალ",
+      "listedAddress": "26 მაისის მოედანი 2",
+      "listedWebsite": "http://www.fmglegal.ge/",
+      "checkedAt": "2026-10-19T12:59:38.345Z",
+      "status": "official-exact-point-correction",
+      "accepted": true,
+      "correction": {
+        "sourceUrl": "http://www.fmglegal.ge/",
+        "address": "დოლიძის ქუჩა 2",
+        "lat": 41.71742358163138,
+        "lng": 44.777025333382426,
+        "phone": "+995 32 247 08 00",
+        "openingHours": "",
+        "reason": "Official contact says Dolidze2 with explicit google.maps.LatLng office marker; source point is24m from Yell26MaySquare2, the same street-corner area. Official contact is used without inferring a relocation.",
+        "htmlSha256": "808126b420f721a573355beaec052111ced796c4975987de69fbd7f10d98c00a"
+      },
+      "pages": [
+        {
+          "url": "http://www.fmglegal.ge/",
+          "status": 200,
+          "sha256": "808126b420f721a573355beaec052111ced796c4975987de69fbd7f10d98c00a"
+        },
+        {
+          "url": "http://www.fmglegal.ge/",
+          "status": 200,
+          "sha256": "808126b420f721a573355beaec052111ced796c4975987de69fbd7f10d98c00a",
+          "review": "Exact public office marker and contact address"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_110942",
+      "name": "ქერქაძე თამარ",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 93",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:38.769Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "8089ef2b17cc4552dd15e76f52033de6f0c64378739e78e840823c6ea49da2fc"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_112650",
+      "name": "აუდიტის და შეფასების სახლი",
+      "listedAddress": "წერეთლის გამზირი 117ა",
+      "listedWebsite": "http://www.apphouse.ge/",
+      "checkedAt": "2026-10-19T12:59:39.119Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "note": "Official contact117 versus directory117a may refer to the same complex; exact suffix equivalence is unconfirmed. Source point retained without guessed correction.",
+      "pages": [
+        {
+          "url": "http://apphouse.ge/",
+          "status": 200,
+          "sha256": "d90142b6215b125cc5de6a74b36bbe99ebf9e092c03966bd199c9ea781def13b"
+        },
+        {
+          "url": "http://apphouse.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "8aca37185482865dcaa712fa624df719532c38206fde4cb43408c58656971470"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_113576",
+      "name": "ადვოკატი ალექსანდრე ხელაშვილი",
+      "listedAddress": "საქართველოს ერთიანობისთვის მებრძოლთა ქუჩა, კორპ. 22, სად. 3, სართ. 1",
+      "listedWebsite": "http://advokat0965.jimdo.com/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_112849",
+      "name": "ექსეფტი",
+      "listedAddress": "ჭაბუა ამირეჯიბის გზატკეცილი 6",
+      "listedWebsite": "https://accept-audit.ge/",
+      "checkedAt": "2026-10-19T12:59:39.246Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ჭაბუა ამირეჯიბის გზატკეცილი 6",
+      "pages": [
+        {
+          "url": "https://accept-audit.ge/",
+          "status": 200,
+          "sha256": "d88e7c0cd125dddcd46bd7f0eb34b4679e6dc9af41eb7c4afb0af56cfdb11685"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_111784",
+      "name": "ფაინენშელ აუთსორსი",
+      "listedAddress": "წერეთლის გამზირი 72",
+      "listedWebsite": "http://www.fin.ge/",
+      "checkedAt": "2026-10-19T12:59:40.105Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "აკაკი წერეთლის გამზირი 72",
+      "pages": [
+        {
+          "url": "https://fin.ge/",
+          "status": 200,
+          "sha256": "36f966aa097344d45f37bc3be9e6d8bde381416c1e0fcbb5d43b38868bae6c45"
+        },
+        {
+          "url": "https://fin.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "d6bb8371cb85106674b864f342fcbd7fa64d130245ca86d4a0160a3747827521"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_116231",
+      "name": "სტერ.ჯი",
+      "listedAddress": "შროშის ქუჩა 2",
+      "listedWebsite": "https://www.ster.ge/",
+      "checkedAt": "2026-10-19T12:59:40.478Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.ster.ge/",
+          "status": 200,
+          "sha256": "b89b36359cfb2c596842c602dbd5044e3ffee1ca05b5c72bcab53c5daf1a7167"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_114693",
+      "name": "ახალბედაშვილი დარეჯან",
+      "listedAddress": "მტკვრის ქუჩა 6, სართ. 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:40.500Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "0e2f0206db1f9665aaf8c142c6ce266e5805b5d8b697a6b95bae938b41501496"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_114969",
+      "name": "გზირიშვილი ლალი",
+      "listedAddress": "პეკინის გამზირი 23, ბ. 47",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:40.554Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "ae9e47f63af5b41880d1ebc4993b3176d8d2ec4db6031faed4bb4921b845106a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_118801",
+      "name": "დიდებაშვილი ლამარა",
+      "listedAddress": "მ. \"ვარკეთილის\" მიმდ. ტერიტ.",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:42.122Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "4ad5baa720e854c65ac810ae644367f3afb5b682c23c7d5e010100777b804417"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_119435",
+      "name": "რურუა თინათინ",
+      "listedAddress": "ყაზბეგის გამზირი 6",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:42.241Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "4f461c50a95031b8b95f4beb617a978a19d0818f825617e6845b16a34ccfc668"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_117356",
+      "name": "ყავლაშვილის საადვოკატო ბიურო",
+      "listedAddress": "შიო მღვიმელის ქუჩა 3",
+      "listedWebsite": "http://www.lawyer.com.ge/",
+      "checkedAt": "2026-10-19T12:59:42.339Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "შიო მღვიმელის ქუჩა 3",
+      "pages": [
+        {
+          "url": "https://lawyer.com.ge/",
+          "status": 200,
+          "sha256": "570a8513c0168d2c0c01ad422233893f373582a73ed9e0bbb4a0a2c4ac8681f8"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_119702",
+      "name": "გოლდენ ფლიის კაპიტალი",
+      "listedAddress": "თამარაშვილის ქუჩა 15ა",
+      "listedWebsite": "http://www.gf-capital.com/",
+      "checkedAt": "2026-10-19T12:59:44.040Z",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.gf-capital.com/",
+          "status": 404,
+          "sha256": "daaab5f9b33567423e668ce6787f64cf1fd8bfed56af87d01acf7a43152e098a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_120547",
+      "name": "ენ ბი აი აუთსორსინგ-კონსალტინგი",
+      "listedAddress": "ტაშკენტის ქუჩა 10, ბ. 5",
+      "listedWebsite": "http://www.nbiocc.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_120609",
+      "name": "ბიზნესინფო 2008",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 30ბ",
+      "listedWebsite": "https://bi2008.ge/",
+      "checkedAt": "2026-10-19T12:59:44.865Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ვაჟა-ფშაველას გამზირი 30ბ",
+      "pages": [
+        {
+          "url": "https://bi2008.ge/",
+          "status": 200,
+          "sha256": "c29c1c50426243db4fec3532eb5b4a425e475bafeb382e9232a35dce8ba65143"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_119829",
+      "name": "პი არ საკონსულტაციო ჯგუფი",
+      "listedAddress": "ფალიაშვილის ქუჩა 88",
+      "listedWebsite": "http://www.prcg.ge/",
+      "checkedAt": "2026-10-19T12:59:44.920Z",
+      "status": "conflicting-official-address-candidate-held",
+      "accepted": false,
+      "heldReason": "Official PRCG contact lists Tsereteli116, unlike Yell Paliashvili88. No exact current official point obtained; known conflicting location held. Source: https://www.prcg.ge/ge/page/contacts",
+      "pages": [
+        {
+          "url": "https://www.prcg.ge/ge",
+          "status": 200,
+          "sha256": "99ece9bff61cac1ae66afd06c3997a2455e879cd0467c3e6b10d0e3f7545f9f6"
+        },
+        {
+          "url": "https://www.prcg.ge/ge/page/contacts",
+          "status": 200,
+          "sha256": "fb7d0a0f89f594a0f261b5ec7097a2e536fa9b640d5260c868cad845a20b925f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_120438",
+      "name": "თბილისის მულტიფუნქციური ბიბლიოთეკები - ვაკის მედიათეკა",
+      "listedAddress": "ჭავჭავაძის გამზირი 76, ვაკის პარკი",
+      "listedWebsite": "http://www.mediatheka.ge/",
+      "checkedAt": "2026-10-19T12:59:45.230Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ილია ჭავჭავაძის გამზირი 76",
+      "pages": [
+        {
+          "url": "https://mediatheka.ge/",
+          "status": 200,
+          "sha256": "8f2134b3e0bc43ab122e6d8fcb366db0467516af5e1c620522cad8d72c62f65a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121216",
+      "name": "კიც ეკატერინა",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 108",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:46.305Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "743b400da262084e0a636fa1121a6c5f32df96102744f48aab5157f0fdb5508a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121218",
+      "name": "შენგელია ბაჩანა",
+      "listedAddress": "ფალიაშვილის ქუჩა 13/8",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:46.330Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "b8c2896773ee4b937ac68a18b05e4e461eb33f23359c539573f78555e33a260e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121220",
+      "name": "პოლიკაშვილი თამარ",
+      "listedAddress": "ათონელის ქუჩა 31",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:46.617Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "d5ff34ce66130497f4d4589c23db3d0b67c8e9b42e5b22bf6b3e9d462527c987"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121223",
+      "name": "გოგია ირმა",
+      "listedAddress": "კალოუბნის ქუჩა 14, ბ. 24",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:47.587Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "aa02d5968684a2b49c5ac71bc0337e5227d0805765d924e555439eb7ed71a447"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121222",
+      "name": "ჩუბინიძე ნანა",
+      "listedAddress": "ჭავჭავაძის გამზირი 62, სართ. 1, ბ. 4",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:47.622Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "44b513b025c82f1b3d8040f30c6ff0731bd7e45c4483543d8e38b2a065f0eeb0"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121231",
+      "name": "შვანგირაძე მზია",
+      "listedAddress": "ცინცაძის ქუჩა 50/1ა",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:47.875Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "5b05b8775ab4b66495a503ba5f8eb9025d3f6b6ceacbb2fa8210e3f6f878dc76"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121233",
+      "name": "ხაბულიანი ნინო",
+      "listedAddress": "კოსტავას ქუჩა 23",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:48.898Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "0e256ee4af5d82939d382f334da933892803e733e44e4a10944d438396baacaf"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121234",
+      "name": "ჩალათაშვილი დავით",
+      "listedAddress": "მტკვრის ქუჩა 4",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:48.911Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "d3b899d17695571d5a0105a137b7fd67bc64fc4e8d6011a3408d972bd370390f"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121238",
+      "name": "სიდამონიძე ნანი",
+      "listedAddress": "გურამიშვილის გამზირი 27",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:49.148Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "eac840759256ce2e025615d703adb6d8c72a1c6734b30062ca74e9b53d27d28d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121239",
+      "name": "მუმლაძე გალინა",
+      "listedAddress": "გურამიშვილის გამზირი 9",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:50.175Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "fd10f9a8f6f20de55d041002ab10e7768601bb8ae262e299b96d56255a7f6216"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121240",
+      "name": "ყურაშვილი ელისო",
+      "listedAddress": "ც. დადიანის ქუჩა 32",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:50.203Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "a9ec53dee760d3eedf2abc90f2ce0a2ad840cc7cba96296b6d9f5fefb95866fd"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121243",
+      "name": "შარვაძე ირმა",
+      "listedAddress": "შარტავას ქუჩა 42",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:50.425Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "4de252c10fa5bac28f3e09d0d8eafe41411e9e08f184ce5181b910bbcbac4e1d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121244",
+      "name": "გობეჯიშვილი სოფიკო",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 49",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:51.485Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "a499a2bdd41e2c3bfee85b974fd2e43185a5943e78762d6fdea30a7584b0b5a3"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121251",
+      "name": "ინწკირველი ლელა",
+      "listedAddress": "კოტე მარჯანიშვილის ქუჩა 21",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:51.493Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e510b281d94f2a23dd11c029c944564e2114f64c8812cd90b8b2b297e8589ded"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121253",
+      "name": "დემეტრაშვილი მედეა",
+      "listedAddress": "გობრონიძის ქუჩა 2",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T12:59:51.691Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "886f41d842ccb61eb6a694896de761a029d65dee5af598aa38377b9d3624baba"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_121786",
+      "name": "ალს – აუდიტ ენდ ლეგალ სერვისი",
+      "listedAddress": "კოსტავას ქუჩა 67",
+      "listedWebsite": "http://www.als.ge/",
+      "checkedAt": "2026-10-19T12:59:51.717Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://alservice.ge/",
+          "status": 200,
+          "sha256": "eed90a401a73754271193fb0c2ab843e9b250fe3d957a506c2dc8a70fad79bf2"
+        },
+        {
+          "url": "https://alservice.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "ade61d00be922b4f4077848ac18e7e122750bbc6ae7eb8dcb01337a3d8480b38"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_122855",
+      "name": "სააკაშვილის საპრეზიდენტო ბიბლიოთეკა",
+      "listedAddress": "სააკაძის დაღმართი 10",
+      "listedWebsite": "http://www.spl.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_124716",
+      "name": "ქვათი",
+      "listedAddress": "ლავრენტი არდაზიანის ქუჩა 1",
+      "listedWebsite": "http://www.qvati.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_121703",
+      "name": "ეკოვის ჯორჯია",
+      "listedAddress": "აფაქიძის ქუჩა 11",
+      "listedWebsite": "https://www.ecovis.ge/",
+      "checkedAt": "2026-10-19T12:59:53.669Z",
+      "status": "conflicting-official-address-candidate-held",
+      "accepted": false,
+      "heldReason": "Current Ecovis official footer lists Afakidze5, Tiflis Business Centre, unlike Yell Afakidze11 at a remote point. Embedded map camera centre is not accepted as exact office point. Source: https://www.ecovis.ge/geo/contact",
+      "pages": [
+        {
+          "url": "https://www.ecovis.ge/geo/home",
+          "status": 200,
+          "sha256": "52046b47a6f9b3224c6f8c9c4fbd7ad1e5bc4fe44061085bec6e74623d2cf549"
+        },
+        {
+          "url": "https://www.ecovis.ge/geo/home",
+          "status": 200,
+          "sha256": "52046b47a6f9b3224c6f8c9c4fbd7ad1e5bc4fe44061085bec6e74623d2cf549"
+        },
+        {
+          "url": "https://www.ecovis.ge/geo/contact",
+          "status": 200,
+          "sha256": "6d6cbd8c1840329b972c88aa4ae895ac1060245b17c6a568e46c29bedba01a29",
+          "review": "Additional exact official contact source"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_126047",
+      "name": "აი-დი სოლუშენი",
+      "listedAddress": "მელიქიშვილის ქუჩა 16",
+      "listedWebsite": "http://www.idsolution.ge/",
+      "checkedAt": "2026-10-19T12:59:55.850Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.idsolution.ge/",
+          "status": 200,
+          "sha256": "090ab9b0deccb15ccae8febe8eba3fc5d352ac03a215c331e1417b4ec0b1c032"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_126079",
+      "name": "აუდიტორული კომპანია ექსპერტი",
+      "listedAddress": "პეკინის გამზირი 22",
+      "listedWebsite": "http://www.auditsexperts.com/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_126185",
+      "name": "ვიპ სეკრეტარი",
+      "listedAddress": "ნავთლუღის ქუჩა 10, არქი ისანი, სად. 2, ოფ. 249",
+      "listedWebsite": "http://www.vipsecretary.ge/",
+      "checkedAt": "2026-10-19T12:59:58.611Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.vipsecretary.ge/",
+          "status": 200,
+          "sha256": "440cd8482afbb2a8ab1251b2001bb893195d291d5eff30dc9e58b4944b65205e"
+        },
+        {
+          "url": "http://www.vipsecretary.ge/Contact.htm",
+          "status": 200,
+          "sha256": "17aee646c46ddee1216a5d6ccbeaa0356ce4d438ee3f0b4649b49eb2fd026cfc"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_122017",
+      "name": "აუდიტორული კომპანია TMC",
+      "listedAddress": "უნივერსიტეტის ქუჩა 17ა",
+      "listedWebsite": "https://www.tmcgeorgia.com/",
+      "checkedAt": "2026-10-19T12:59:59.668Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "უნივერსიტეტის ქუჩა 17ა",
+      "pages": [
+        {
+          "url": "https://www.tmcgeorgia.com/",
+          "status": 200,
+          "sha256": "939e596d665d750e3d755f8856e8847cdff84d79d922f75b9097ee6c9237cefd"
+        },
+        {
+          "url": "https://www.tmcgeorgia.com/contactus",
+          "status": 200,
+          "sha256": "a8160414b37d77aa152f82b7299caf0e7a839ed2664f66cea90fd44a24808971"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_126217",
+      "name": "აუდიტ ლუქს სერვისი",
+      "listedAddress": "ც. დადიანის ქუჩა 25",
+      "listedWebsite": "http://www.auditluxservice.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_126908",
+      "name": "პისიჯი",
+      "listedAddress": "თავისუფლების მოედანი 4",
+      "listedWebsite": "http://www.pcg.ge/",
+      "checkedAt": "2026-10-19T13:00:04.757Z",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.pcg.ge/",
+          "status": 404,
+          "sha256": "0b5bec0809a316b8115f935ddf28337ebb14494ea4d608f9baee3f363b852c8e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_125396",
+      "name": "ელ სი ჯი",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 154",
+      "listedWebsite": "http://www.lcg.ge/",
+      "checkedAt": "2026-10-19T13:00:05.061Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "დავით აღმაშენებლის გამზირი 154",
+      "pages": [
+        {
+          "url": "https://lcg.ge/",
+          "status": 200,
+          "sha256": "261f9cbf8012349dcc27e9745c32a7e4a2d78aaf7250e270cc833f1d6838ab99"
+        },
+        {
+          "url": "https://lcg.ge/contact/",
+          "status": 200,
+          "sha256": "e6da9cbe1da5f08838baa973fefc53d24eb5360322735e1f066678d18c8b788d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_130826",
+      "name": "ბიზნეს კონსულტაცია, აღრიცხვა, აუდიტი",
+      "listedAddress": "ჭავჭავაძის გამზირი 49ბ, საოფისე ფართი 7",
+      "listedWebsite": "http://www.bcaa.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_135115",
+      "name": "ქეიესსი ლეგალ",
+      "listedAddress": "ბურძგლას ქუჩა 38–40",
+      "listedWebsite": "http://www.ksc.ge/",
+      "checkedAt": "2026-10-19T13:00:06.749Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.ksc.ge/",
+          "status": 200,
+          "sha256": "61824b6c0856b9899587cf15e7d4c2cda793e683a2cf4f15250d1471463ad5c8"
+        },
+        {
+          "url": "http://www.ksc.ge/contact.php?lang=geo",
+          "status": 200,
+          "sha256": "a87bf615045f0f95b9cdb7e72e350819cf6c188d289eb21b3163adbec07167f1"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_130855",
+      "name": "მოორ ეიბისი",
+      "listedAddress": "სულხან ცინცაძის ქუჩა N12 / დავით გამრეკელის ქუჩა N2, მე-4 სართული",
+      "listedWebsite": "https://www.moore-georgia.ge/",
+      "checkedAt": "2026-10-19T13:00:06.948Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "სულხან ცინცაძის ქუჩა 12 / დავით გამრეკელის ქუჩა 2",
+      "pages": [
+        {
+          "url": "https://www.moore-georgia.ge/",
+          "status": 200,
+          "sha256": "0bb915fcdbc904f76336b4ae60ae97e3d596a42cc9d21e4f44a1487181b47d32"
+        },
+        {
+          "url": "https://www.moore-georgia.ge/contact-us/",
+          "status": 200,
+          "sha256": "03930a186f7b10cfde36af8f64064e38291732406175696dee7314ea990fd08e"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_128478",
+      "name": "ჰორეკა მენეჯმენტ გრუპ",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 53",
+      "listedWebsite": "http://www.hmg.ge/",
+      "checkedAt": "2026-10-19T13:00:10.403Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "დავით აღმაშენებლის გამზირი 53",
+      "pages": [
+        {
+          "url": "https://hmg.ge/en/",
+          "status": 200,
+          "sha256": "7e20518824f1cb761b58b082cd0652ccb57e2f2db6770a0450599690ef963e8a"
+        },
+        {
+          "url": "https://hmg.ge/en/contact",
+          "status": 200,
+          "sha256": "636aec67d6a59347197fe4b6ed6c8a10fcaf963434ebcb0b87e125df6af17cb7"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135458",
+      "name": "სვანაძე დიანა",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 109",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:11.311Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "f7e750807bb405acf9b439295ac2352ead78cb487eb86aae14e941bf9663c7c8"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135457",
+      "name": "მეფარიშვილი დავით",
+      "listedAddress": "წერეთლის გამზირი 104",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:11.483Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "3f55f38b68c435c22d5b793e1964b9c937024df8c6cc143771698edb85882fb6"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135474",
+      "name": "ბერიძე ხატია",
+      "listedAddress": "კოსტავას ქუჩა 75",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:12.226Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "1dda72fd12162058631f3492cad8c33bd1b47500dbca4416b64e57ace1a7c0ba"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135475",
+      "name": "ჭიტაშვილი გიორგი",
+      "listedAddress": "ცინცაძის ქუჩა 38",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:12.643Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "1fbf9f3a9a036ce0c5a9751c88a4c0b42afa9d92250cb2b80519185de0670fff"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135477",
+      "name": "ბარბაქაძე ნანი",
+      "listedAddress": "ც. დადიანის ქუჩა 22/24, სად. 1, სართ. 2, ბ. 4",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:12.826Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e9585d731af01109f401dc1bb130eb777a2db4d37d1eee10003f2d4058b832de"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135480",
+      "name": "გელაძე ელენა",
+      "listedAddress": "გობრონიძის ქუჩა 1ბ, სართ. 2, ოთ. 6",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:13.609Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "364f1c112ff796faeca505c82c8f6debdcc9bc47c990d6148044ea11b951dad0"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135509",
+      "name": "გელაშვილი ნინო",
+      "listedAddress": "ბერი გაბრიელ სალოსის გამზირი 2",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:13.982Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "9156e1ba4e84d83238b4c2e580e606baa723ad85b52319aa02643964ed39c383"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135533",
+      "name": "ჩალაური ალექსანდრე",
+      "listedAddress": "ილია ვეკუას ქუჩა 23",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:15.301Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e4f876f2b86c7af036f9b058f6bc874556c38f87ae3a734485597aa5892c6eba"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135549",
+      "name": "ლომაშვილი გიორგი",
+      "listedAddress": "მტკვრის ქუჩა 6, სართ. 1, ბ. 1",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:15.821Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "c8c02a6e533657216cea2bc4618c37803ed0081c68fe9a1d45e91dc583f3bb08"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135565",
+      "name": "ტყეშელაშვილი ქეთევან",
+      "listedAddress": "თამარ მეფის გამზირი 12",
+      "listedWebsite": "https://www.notary.ge/geo-3718-sanotaro-biuroebi-filter&region_id=&full_name=%E1%83%A5%E1%83%94%E1%83%97%E1%83%94%E1%83%95%E1%83%90%E1%83%9C+%E1%83%A2%E1%83%A7%E1%83%94%E1%83%A8%E1%83%94%E1%83%9A%E1%83%90%E1%83%A8%E1%83%95%E1%83%98%E1%83%9A%E1%83%98",
+      "checkedAt": "2026-10-19T13:00:16.739Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/geo-3718-sanotaro-biuroebi-filter&region_id=&full_name=%E1%83%A5%E1%83%94%E1%83%97%E1%83%94%E1%83%95%E1%83%90%E1%83%9C+%E1%83%A2%E1%83%A7%E1%83%94%E1%83%A8%E1%83%94%E1%83%9A%E1%83%90%E1%83%A8%E1%83%95%E1%83%98%E1%83%9A%E1%83%98",
+          "status": 200,
+          "sha256": "007ae7d72742d711fb4db5e4e9a7f46ef048805d839b49949cd6d1cda6473b15"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "85894b37551ad5a6d90f5ca02622e1c2abdb19a1b646e24a265d25a1f9485a22"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135838",
+      "name": "კაიკაციშვილი და ადვოკატები",
+      "listedAddress": "დიღმის მასივი, კვ. 6, კორპ. 20, სად. 1, სართ. 2, ბ. 4",
+      "listedWebsite": "http://www.kbarristers.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_135592",
+      "name": "წივწივაძე დავით",
+      "listedAddress": "გობრონიძის ქუჩა 1ა",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:17.540Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "c4bfa6ae39c682849b2960dc27036a44a5ac1b8117c05da1bb08dd0c4c5a1893"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_136673",
+      "name": "ბი ბი ქეი - ბიზნესი და სამართალი",
+      "listedAddress": "ავქსენტი ცაგარელის ქუჩა 22",
+      "listedWebsite": "https://www.bbk.ge/",
+      "checkedAt": "2026-10-19T13:00:18.243Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.bbk.ge/",
+          "status": 200,
+          "sha256": "9ed23d16aa7ec7b0e5215a514cec2eb89c105ca42acf7967fea06a7094f0c697"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_140246",
+      "name": "სავი კონსალტინგი",
+      "listedAddress": "ჭავჭავაძის გამზირი 37მ",
+      "listedWebsite": "https://www.savvy.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_140613",
+      "name": "სოლვო",
+      "listedAddress": "გურამიშვილის გამზირი 41დ, ბ. 19ა",
+      "listedWebsite": "http://www.solvo.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_136437",
+      "name": "საბუღალტრო ოფისი",
+      "listedAddress": "აგლაძის ქუჩა 32",
+      "listedWebsite": "http://www.sabo.ge/",
+      "checkedAt": "2026-10-19T13:00:19.006Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.sabo.ge/",
+          "status": 200,
+          "sha256": "60f43e83aa575040e47dedbbe48af01068657406ebfb8dc357b370242515f864"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_141218",
+      "name": "ჯეოსილქროუდ",
+      "listedAddress": "ნიკოლოზ ბარათაშვილის ქუჩა 12 / ბაჩანა ბრეგვაძის ქუჩა 2",
+      "listedWebsite": "http://www.gsr.ge/",
+      "checkedAt": "2026-10-19T13:00:19.428Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://geosilkroad.company/",
+          "status": 200,
+          "sha256": "6dc9c7fc93bb488bb0520a6c780a8d3c0fb5486a4711aca49b4c53fac7393023"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_142632",
+      "name": "არევაძე, გონაშვილი და პარტნიორები",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 61",
+      "listedWebsite": "http://www.malg.gweb.ge/",
+      "checkedAt": "2026-10-19T13:00:19.637Z",
+      "status": "parked-hosting-website-removed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://malg.gweb.ge/",
+          "status": 200,
+          "sha256": "aa6bd3d2521ed62e989764367877595779840a39ffebe9d4f0a21b39edff2403"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_135521",
+      "name": "ლომაია ცირა",
+      "listedAddress": "კალოუბნის ქუჩა 1, სართ. 2, ბ. 4",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_143514",
+      "name": "ლიპარტელიანი დიმიტრი",
+      "listedAddress": "ილია ვეკუას ქუჩა 43",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:29.470Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "0b7c8d35624d56851ed872528486fcf4dc5574557c3aa8081eab2c90853c038d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_141470",
+      "name": "კაპიტალ ბალანსი",
+      "listedAddress": "პეტრე იბერის ქუჩა 16",
+      "listedWebsite": "https://www.cba.ge/",
+      "checkedAt": "2026-10-19T13:00:29.942Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "პეტრე იბერის ქუჩა 16",
+      "pages": [
+        {
+          "url": "https://www.cba.ge/",
+          "status": 200,
+          "sha256": "07a37622d082e80e41ecf0eda00b811a4e39a081955847fab3d891ba441db90f"
+        },
+        {
+          "url": "https://www.cba.ge/contact/",
+          "status": 200,
+          "sha256": "90634bde5703577ff12ea32c5a75786bee53aad62f031618c3bb11f97c1ba5bf"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_142719",
+      "name": "იურიდიული ოფისი ლეგალ რაითს ჯორჯია",
+      "listedAddress": "ლუარსაბ ანდრონიკაშვილის ქუჩა 1, სართ. 3, ოფისი 13",
+      "listedWebsite": "https://www.legalrights.ge/",
+      "checkedAt": "2026-10-19T13:00:30.614Z",
+      "status": "conflicting-official-address-candidate-held",
+      "accepted": false,
+      "heldReason": "Official Legal Rights contact lists Vazha-Pshavela71, unlike Yell Andronikashvili1. No exact current office point obtained. Source: https://legalrights.ge/კონტაქტი/",
+      "pages": [
+        {
+          "url": "https://legalrights.ge/",
+          "status": 200,
+          "sha256": "3306e8646700ac7b9dfcb977129bc3d562b508120c82e2c7d8e5136c6a54af90"
+        },
+        {
+          "url": "https://legalrights.ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "3c588a8c1e320f71eec3efb080c5edde40f4e4a6d8403fb699a046fd07c54ea2"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145121",
+      "name": "თენ სთეფ ჯორჯია",
+      "listedAddress": "რუსთავის გზატკეცილი 19, კორპ. 3, სართ. 1",
+      "listedWebsite": "http://www.tenstep.ge/",
+      "checkedAt": "2026-10-19T13:00:32.273Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.tenstep.ge/",
+          "status": 200,
+          "sha256": "1000271de34558a8dba4079ac4eb3377b9b2aa225483ec5ae272f75dfb20aea4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145271",
+      "name": "ელთიეი ჯორჯია",
+      "listedAddress": "სამტრედიის ქუჩა 13",
+      "listedWebsite": "http://www.lta.ge/",
+      "checkedAt": "2026-10-19T13:00:32.899Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "სამტრედიის ქუჩა 13",
+      "pages": [
+        {
+          "url": "https://www.lta.ge/en",
+          "status": 200,
+          "sha256": "66d7eaeae825dbe7a5bc32ea77ad5c7226c719e8f96eaf5347a64eddbbacf398"
+        },
+        {
+          "url": "https://www.lta.ge/en/consultation-booking",
+          "status": 200,
+          "sha256": "188798159bea6e9d60b4d9597aad94e5e15147a1abdb91ba82137d3c74fb5689"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145587",
+      "name": "შპს ინოქსი",
+      "listedAddress": "ი. აბაშიძის ქუჩა 34/36",
+      "listedWebsite": "http://www.innox.ge/",
+      "checkedAt": "2026-10-19T13:00:33.351Z",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://www.innox.ge/",
+          "status": 403,
+          "sha256": "5b13fb5957b84ef7bb9d0b6cd509c947ff6a37d67efdac2b896ddd3b908aad10"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_144464",
+      "name": "აბაშიძე და პარტნიორები",
+      "listedAddress": "ი. აბაშიძის ქუჩა 34–36, ბიზნეს–ცენტრი \"ტერმინალი\"",
+      "listedWebsite": "https://aplaw.ge/",
+      "checkedAt": "2026-10-19T13:00:35.242Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ირაკლი აბაშიძის ქუჩა 34/36",
+      "pages": [
+        {
+          "url": "https://aplaw.ge/en/",
+          "status": 200,
+          "sha256": "c147bcc8659ef291030f82dadc47e5ff5e21702f4f3fb43991e64d437f22f354"
+        },
+        {
+          "url": "https://aplaw.ge/en/contact",
+          "status": 200,
+          "sha256": "0b8e3fa5a5c605860a75faf594710e960a34295d4aa9a8835460e76af6b18723"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145321",
+      "name": "აისო კონსალტინგ გრუპი",
+      "listedAddress": "ქუჩიშვილის ქუჩა 20, მე-4 სართული, ოფისი #7",
+      "listedWebsite": "http://www.isogroup.ge/",
+      "checkedAt": "2026-10-19T13:00:35.410Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "გიორგი ქუჩიშვილის ქუჩა 20",
+      "pages": [
+        {
+          "url": "https://isogroup.ge/ge/",
+          "status": 200,
+          "sha256": "d0b3b62cce28772ae1d0eb4a0a84b4ebc9e7a6e2567626bb46ab5943478f65f9"
+        },
+        {
+          "url": "https://isogroup.ge/ge/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "952f3d9d6e4df973f2534db684fee2f8ad483c6657d9d292254deb8e49b65a41"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145629",
+      "name": "ებიტ ჯგუფი",
+      "listedAddress": "ბელიაშვილის ქუჩა 142, \"ბალანჩინი პლაზა\"",
+      "listedWebsite": "http://www.ebit.ge/",
+      "checkedAt": "2026-10-19T13:00:35.875Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "აკაკი ბელიაშვილის ქუჩა 142",
+      "note": "Visible current contact agrees with Beliashvili142. Conflicting Rustaveli12 JSON-LD appears to be a template; not used as relocation evidence.",
+      "pages": [
+        {
+          "url": "https://ebitgroup.pages.dev/en",
+          "status": 200,
+          "sha256": "afa74900c7fc8b8e558b9d1d2bb6c9b1b1cae833bd36aa07a27f83bbd2a59d1f"
+        },
+        {
+          "url": "https://ebitgroup.pages.dev/en/contact",
+          "status": 200,
+          "sha256": "632e821cc820db930bbce488261a4a7b39bf6c875df7a2694d25950ade2055cf"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145722",
+      "name": "შარაბიძე მაკა",
+      "listedAddress": "ნავთლუღის ქუჩა 9",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:37.366Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "22059cf81cc91b708bd737e82080310a1798943114347a59323009835936bf80"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145706",
+      "name": "ნაკაშიძე და პარტნიორები",
+      "listedAddress": "ყაზბეგის გამზირი 47, სართ. 6, ოფისი 1",
+      "listedWebsite": "https://iuristi.com/",
+      "checkedAt": "2026-10-19T13:00:37.622Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ალექსანდრე ყაზბეგის გამზირი 47",
+      "pages": [
+        {
+          "url": "https://iuristi.com/",
+          "status": 200,
+          "sha256": "00288bcc72ccd926a3cd2c9167686703a8fb04db31206f983843ecda1ba7705c"
+        },
+        {
+          "url": "https://iuristi.com/?do=feedback",
+          "status": 200,
+          "sha256": "18579892850ae473c396cecbdad668ffe47000d577844f658d5e5de56fbf51d1"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145724",
+      "name": "გეფერიძე თამარ",
+      "listedAddress": "კოსტავას ქუჩა 76",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:37.861Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "b6d31a41e58254218486131c2ce5653d0b2fd06744017940a1560ca4a48c906d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145726",
+      "name": "კაკულია ანა",
+      "listedAddress": "კალოუბნის ქუჩა 6",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:38.914Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "2f9976288859b1073aac3f46d9cd89c668f7d4e9a97d1ea4b67cd948d38c22b3"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145739",
+      "name": "ხურციძე თამარ",
+      "listedAddress": "კალოუბნის ქუჩა 1",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:39.273Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "557b89146b8a3ee0bacd8e05debe32ce21ffceab7b4aee01d53d6dc64c012608"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_145728",
+      "name": "გოგოლაძე მაიკო",
+      "listedAddress": "მარიჯანის ქუჩა 6, სართ. 2, ოფისი 5ა (ვაჟა-ფშაველას ძეგლის მიმდებარედ, დ. ტატიშვილის სამედიცინო ცენტრთან)",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:39.624Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "e23d25603fbbfcd65f56770225a7b51bee1ba5e959cb0ea6afd8918fe785a8b4"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_146845",
+      "name": "ენთები",
+      "listedAddress": "ნუცუბიძის ქუჩა 26ა",
+      "listedWebsite": "https://www.ants.ge/",
+      "checkedAt": "2026-10-19T13:00:40.016Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "შალვა ნუცუბიძის ქუჩა 26ა",
+      "pages": [
+        {
+          "url": "https://ants.ge/",
+          "status": 200,
+          "sha256": "45006522b7065c4e01b94e514fdc68050b5e62974d264634515c19ce9c6a0de8"
+        },
+        {
+          "url": "https://ants.ge/%e1%83%94%e1%83%9c%e1%83%97%e1%83%94%e1%83%91%e1%83%98%e1%83%a1-%e1%83%a1%e1%83%99%e1%83%9d%e1%83%9a%e1%83%90/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "6261e878ba86ea04fc5a4fd242a5b8d805479527a14ad5bb0f5f4569ad7167a3"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_147742",
+      "name": "ადვოკატი რევაზ რიჟამაძე",
+      "listedAddress": "წერეთლის გამზირი 116, ოფ. 375",
+      "listedWebsite": "http://lawrevazrizhamadze.blogspot.com/",
+      "checkedAt": "2026-10-19T13:00:40.168Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "http://lawrevazrizhamadze.blogspot.com/",
+          "status": 200,
+          "sha256": "2272ceb634698917e0b528038917c3a4384f8e2c95ab6ed794d650d9599f1708"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_147807",
+      "name": "ქართული ღვინის გილდია",
+      "listedAddress": "9 აპრილის ქუჩა 3",
+      "listedWebsite": "https://topgeorgian.wine/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_148354",
+      "name": "ლოიალ ფართნერს",
+      "listedAddress": "წერეთლის გამზირი 123",
+      "listedWebsite": "https://loyal.partners/",
+      "checkedAt": "2026-10-19T13:00:40.889Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://loyal.partners/",
+          "status": 200,
+          "sha256": "65c7fc08cc910ae85f729443732be85b6e90ba281c94f12659bb0ecb5295daa3"
+        },
+        {
+          "url": "https://loyal.partners/kontakty/",
+          "status": 200,
+          "sha256": "2daefa423bba918b044874dda5d568a05053d85d369039927474cac48aa2466d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_152186",
+      "name": "ჩემი ბუღალტერი - MyAccountant.ge",
+      "listedAddress": "პეკინის გამზირი 35/37",
+      "listedWebsite": "https://www.myaccountant.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_151490",
+      "name": "კვირიკაძე თეიმურაზ",
+      "listedAddress": "პუშკინის ქუჩა 19",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:41.454Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "1c7c6b6c461da3d44e01eb6e9dd943529616458ab3f68f60a654c7442c44fd05"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_150777",
+      "name": "შპს ეიდიემენ",
+      "listedAddress": "წერეთლის გამზირი 140",
+      "listedWebsite": "https://admn.ge/",
+      "checkedAt": "2026-10-19T13:00:41.829Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://admn.ge/",
+          "status": 200,
+          "sha256": "467636f4687602bcc45c718ba4ad05cc9503929288454e74dadcd070493b7356"
+        },
+        {
+          "url": "https://admn.ge/kontaqti/",
+          "status": 200,
+          "sha256": "1ba067a3b4211f2e74a83461fa62eb58488be67483efae3bb101e940bdfcd40b"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_154771",
+      "name": "აი ენდ დი ქონსალთინგ",
+      "listedAddress": "ქავთარაძის ქუჩა 14ბ, \"Dream town\"–ის ოფისები, სართ. 4",
+      "listedWebsite": "https://taxconsulting.ge/",
+      "checkedAt": "2026-10-19T13:00:42.525Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "პეტრე ქავთარაძის ქუჩა 14ბ",
+      "pages": [
+        {
+          "url": "https://taxconsulting.ge/",
+          "status": 200,
+          "sha256": "c499e5d0a7e737ee9f29a2b229a69bb2540ee49ed173a8e076c29a77e0b332e9"
+        },
+        {
+          "url": "https://taxconsulting.ge/contact-us/",
+          "status": 200,
+          "sha256": "468728135c61278cde8cd0ec13511acf1347c123a1cdfe3a24372038547b179d"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_153048",
+      "name": "საერთაშორისო იურიდიული კომპანია KH & PARTNERS",
+      "listedAddress": "ატენის ქუჩა 18გ",
+      "listedWebsite": "https://khlaws.com/",
+      "checkedAt": "2026-10-19T13:00:42.722Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ატენის ქუჩა 18გ",
+      "pages": [
+        {
+          "url": "https://khlaws.com/",
+          "status": 200,
+          "sha256": "24aec2e2598a92b3d7d68957ad8a1404e69fd70cb3fd94f3ab0da06ad5165a13"
+        },
+        {
+          "url": "https://khlaws.com/kontaqti/",
+          "status": 200,
+          "sha256": "3a844377b443fc5c3e70ea376713258d289c2e5c15ce1c01d1af8f93ba715adb"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_154866",
+      "name": "აიენსი ჯორჯია",
+      "listedAddress": "ქავთარაძის ქუჩა 14ბ, \"Dream town\"–ის ოფისები, სართ. 4",
+      "listedWebsite": "https://inc.ge/",
+      "checkedAt": "2026-10-19T13:00:44.293Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "note": "Official footer agrees with14b, but another part of the same site gives first-turn6. Mixed official address evidence remains unresolved; no guessed correction.",
+      "pages": [
+        {
+          "url": "https://inc.ge/",
+          "status": 200,
+          "sha256": "6b2c409f109ec0296c82759c1b86b3afac68c1ef86f8d622cfecfd0ebfbe64b8"
+        },
+        {
+          "url": "https://inc.ge/contact-us/",
+          "status": 200,
+          "sha256": "c61c18f5a5bca22e8be2d6f51f8036679f7ce89ea8b1e22d6ebd9af54914ab0c"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_155160",
+      "name": "შპს აიდა",
+      "listedAddress": "ყიფშიძის ქუჩა 7ბ",
+      "listedWebsite": "https://aida.ge/",
+      "checkedAt": "2026-10-19T13:00:48.202Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.aida.ge/",
+          "status": 200,
+          "sha256": "995264be6ee43c08a19bbea20fd349da1eaeb212f47633178b87734314d97362"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_154947",
+      "name": "საადვოკატო ბიურო ფხალაძე და პარტნიორები",
+      "listedAddress": "ყაზბეგის გამზირი 24გ",
+      "listedWebsite": "https://www.pkhaladze-law.ge/",
+      "checkedAt": "2026-10-19T13:00:48.484Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ალექსანდრე ყაზბეგის გამზირი 24გ",
+      "pages": [
+        {
+          "url": "https://pkhaladze-law.ge/",
+          "status": 200,
+          "sha256": "5ea5f2787c3d50e4848eb029d94bd40c1d6b706aec72a193283de3fd8db28149"
+        },
+        {
+          "url": "https://pkhaladze-law.ge/contact-us",
+          "status": 200,
+          "sha256": "5eba32748e89ed7d940e3ac99cc1521d49371bb07472f1928f9171f2f605db50"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_155176",
+      "name": "საადვოკატო ოფისი",
+      "listedAddress": "მირიან მეფის ქუჩა 5, სად. 1, ბ. 26",
+      "listedWebsite": "https://geo-lawyer.com/",
+      "checkedAt": "2026-10-19T13:00:50.006Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "მირიან მეფის ქუჩა 5",
+      "pages": [
+        {
+          "url": "https://geo-lawyer.com/",
+          "status": 200,
+          "sha256": "1702eba4dd8d1764e697d3f5aee9c6444d79be9ac9a73c2f795ca8591d0c81e5"
+        },
+        {
+          "url": "https://geo-lawyer.com/%e1%83%99%e1%83%9d%e1%83%9c%e1%83%a2%e1%83%90%e1%83%a5%e1%83%a2%e1%83%98/",
+          "status": 200,
+          "sha256": "6d14541b6157d9a97c5d244cf964d7560a364e437419abaf4d93f5effda057ae"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_155467",
+      "name": "მომავლის იურისტთა გუნდი",
+      "listedAddress": "ბელიაშვილის ქუჩა 106, ბიზნეს ცენტრი მიონი",
+      "listedWebsite": "https://yourlawyers.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_155418",
+      "name": "ჯორჯიაფაი",
+      "listedAddress": "თორნიკე ერისთავის ქუჩა 29",
+      "listedWebsite": "https://georgiafy.ge/",
+      "checkedAt": "2026-10-19T13:00:52.321Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "თორნიკე ერისთავის ქუჩა 29",
+      "pages": [
+        {
+          "url": "https://georgiafy.ge/",
+          "status": 200,
+          "sha256": "a06e39a42936a46636a5c838345318190e8d6f4d962506d451e6d107f7a79923"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_155810",
+      "name": "კევლიშვილი ნინო",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 71, ფართი 7",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:55.137Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "7d6eb2a65519a38e11f33d81f4e49154edf18d31e9ca7679bd744923e56619ec"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_155891",
+      "name": "გელუკაშვილი თამთა",
+      "listedAddress": "პეტრე იბერის ქუჩა 6",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:55.783Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "743f5d5801a6826dab9b345019de346698629435920b6ddc00f5aa1174d1e1ad"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_156760",
+      "name": "ედიშერაშვილი თეა",
+      "listedAddress": "ა. მირცხულავას ქუჩა 9, კორპუსი #2, სართული 2, ოფისი #4",
+      "listedWebsite": "https://www.notary.ge/geo-3718-sanotaro-biuroebi-filter&region_id=&full_name=%E1%83%97%E1%83%94%E1%83%90+%E1%83%94%E1%83%93%E1%83%98%E1%83%A8%E1%83%94%E1%83%A0%E1%83%90%E1%83%A8%E1%83%95%E1%83%98%E1%83%9A%E1%83%98",
+      "checkedAt": "2026-10-19T13:00:57.502Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/geo-3718-sanotaro-biuroebi-filter&region_id=&full_name=%E1%83%97%E1%83%94%E1%83%90+%E1%83%94%E1%83%93%E1%83%98%E1%83%A8%E1%83%94%E1%83%A0%E1%83%90%E1%83%A8%E1%83%95%E1%83%98%E1%83%9A%E1%83%98",
+          "status": 200,
+          "sha256": "0760c8a45a226dfdb398007563bc0f20bd652157f8cc75db37b726e2d5e811da"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "317c3bbd5ce529cc31ada66c9cf75ff33d3da752e280154357cc9db4867d81c1"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_156763",
+      "name": "მოდებაძე ლიანა",
+      "listedAddress": "ვაჟა-ფშაველას გამზირი 30ა, სართ. 2, ბ. 1",
+      "listedWebsite": "https://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:00:57.804Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "dafdabe62423fe5b409e5670fcddf547a71e33a7ad68d9c06d14237675e33db3"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_157329",
+      "name": "ესბისი მენეჯმენტი",
+      "listedAddress": "კავსაძის ქუჩა 3",
+      "listedWebsite": "https://www.arvc.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_156780",
+      "name": "ტეფნაძე ნათია",
+      "listedAddress": "ილია ვეკუას ქუჩა 157",
+      "listedWebsite": "http://www.notary.ge/",
+      "checkedAt": "2026-10-19T13:01:00.351Z",
+      "status": "shared-chamber-website-not-office-verification",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://www.notary.ge/",
+          "status": 200,
+          "sha256": "2ca578f557f73170113671e11ab45494a57ef96b7fc874f192c7cc2ae4cd4f2f"
+        },
+        {
+          "url": "https://www.notary.ge/geo-35-kontaqti",
+          "status": 200,
+          "sha256": "cff4a51d4d4b94c0628d3e5cd53f1399cf9f107f0787d38fc7ecfd36430d4618"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_158252",
+      "name": "შპს კონსალტინგ პორტი",
+      "listedAddress": "ამაღლების ქუჩა 12",
+      "listedWebsite": "https://www.consultingport.ge/",
+      "checkedAt": "2026-10-19T13:01:01.067Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ამაღლების ქუჩა 12",
+      "pages": [
+        {
+          "url": "https://www.consultingport.ge/",
+          "status": 200,
+          "sha256": "26b51dfdff847a9ca7e2ec3290e54555c065bc60ba049c81b9d4c7f4525388fb"
+        },
+        {
+          "url": "https://www.consultingport.ge/kontaqti",
+          "status": 200,
+          "sha256": "a2b5144947c42b764cc09baa9722dd3c241cb455cb0de8cb51e4f07c76db5df2"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_160056",
+      "name": "პოლარისი",
+      "listedAddress": "კოსტავას ქუჩა 14 (სტამბა, D ბლოკი)",
+      "listedWebsite": "https://www.polarisfinance.ge/",
+      "checkedAt": "2026-10-19T13:01:05.206Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "მერაბ კოსტავას ქუჩა 14დ",
+      "pages": [
+        {
+          "url": "https://www.polarisfinance.ge/",
+          "status": 200,
+          "sha256": "0eb5f6c578c5e59ca16590f2838b939bbbcd2fd70b8e0232011a3cb39e8ecc2b"
+        },
+        {
+          "url": "https://www.polarisfinance.ge/contact-us",
+          "status": 200,
+          "sha256": "ebff56b36042df9d07112b716452f73e9abc04fe77b2879d8956362b1de02b5a"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_159143",
+      "name": "ედვანსდ აუდიტ ენდ ქონსალთინგ კომპანი",
+      "listedAddress": "დავით აღმაშენებლის გამზირი 61, ბიზნეს ცენტრი \"მოზაიკა\"",
+      "listedWebsite": "https://www.aacc.ge/",
+      "checkedAt": "2026-10-19T13:01:05.316Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ბიზნესცენტრი მოზაიკა, დავით აღმაშენებლის გამზირი 61",
+      "pages": [
+        {
+          "url": "https://www.aacc.ge/ka-ge",
+          "status": 200,
+          "sha256": "4587681e28f275602de31fb650afdd8ccf66fca4a6624606b6dd39d1b757f78f"
+        },
+        {
+          "url": "https://www.aacc.ge/ka-ge/contact",
+          "status": 200,
+          "sha256": "222fecc0b125aad1c54de6a0c6c60235e6d40e3add7f81eb0d4d62ef82009716"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_161680",
+      "name": "ანდერსენ საქართველო",
+      "listedAddress": "ჭავჭავაძის გამზირი 60, სართ. 17, ოფისი 65",
+      "listedWebsite": "https://ge.andersen.com/",
+      "checkedAt": "2026-10-19T13:01:05.545Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "note": "Official page has60b Chavchavadze, same17th floor as directory60, and a distinct Kavsadze3 office. Do not merge the second office into this point.",
+      "pages": [
+        {
+          "url": "https://ge.andersen.com/",
+          "status": 200,
+          "sha256": "c749f88dbba76062cdf1e7d7b328038745add823fd22a74df6a3cde3763e0ab7"
+        },
+        {
+          "url": "https://ge.andersen.com/contact-andersen-georgia/",
+          "status": 200,
+          "sha256": "3f4603fd361b7f4646ffd12ed79ba5e91fedf6e31d3583ce31dbfd0d63968872"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_163004",
+      "name": "ლიგალისი",
+      "listedAddress": "კოტე მარჯანიშვილის ქუჩა 7",
+      "listedWebsite": "https://legalis.ge/",
+      "checkedAt": "2026-10-19",
+      "status": "unavailable-address-unconfirmed",
+      "accepted": true,
+      "pages": []
+    },
+    {
+      "placeId": "directory_yell_161988",
+      "name": "თალორიმ",
+      "listedAddress": "აგლაძის ქუჩა 15, ბიზნეს-ცენტრი \"მეგალაინი\"",
+      "listedWebsite": "https://talorim.com/",
+      "checkedAt": "2026-10-19T13:01:07.285Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://talorim.com/",
+          "status": 200,
+          "sha256": "e822d317d015121cc0300a4995fefc7619195dc3be05907a18be545d5dbf7d48"
+        },
+        {
+          "url": "https://talorim.com/contact",
+          "status": 200,
+          "sha256": "e32dafc3db405083bcd5f8008f31b7761b6e5bf482be0f5db19ecdaee6771414"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_162592",
+      "name": "შპს სთართჯი.ქომ",
+      "listedAddress": "ათონელის ქუჩა 18/22",
+      "listedWebsite": "https://startge.com/",
+      "checkedAt": "2026-10-19T13:01:07.553Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://startge.com/en/",
+          "status": 200,
+          "sha256": "e1fb9864741022852d24030c9fa566385261cca1eba79d5703a29cdadab65d95"
+        },
+        {
+          "url": "https://startge.com/en/en/contact",
+          "status": 404,
+          "sha256": "2b52c50fc6d2d52bcf20ccd0a631778bb4e748673c9651a6d7282e149d140dce"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_163629",
+      "name": "ლეგალ ენდ ქომფლაენს ჰაბ",
+      "listedAddress": "ჭავჭავაძის გამზირი 37მ, \"აქსის თაუერსი\"",
+      "listedWebsite": "https://lchub.ge/",
+      "checkedAt": "2026-10-19T13:01:10.202Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "ილია ჭავჭავაძის გამზირი 37მ",
+      "note": "Official contact also lists a second office at Mozaika61; preserve the reviewed Chavchavadze37m branch without merging branches.",
+      "pages": [
+        {
+          "url": "https://lchub.ge/ka",
+          "status": 200,
+          "sha256": "a11fda510f535f8c6580786ce79dae074d5b3d68f0cd3a4f27119987ab65dba0"
+        },
+        {
+          "url": "https://lchub.ge/ka/contact",
+          "status": 200,
+          "sha256": "489e4baeedd815ee94c1881005e033228125ccc32f0510791c721ac4e2f981ab"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_163090",
+      "name": "ჩიქოვანის საადვოკატო ბიურო",
+      "listedAddress": "კოტე მარჯანიშვილის ქუჩა 7",
+      "listedWebsite": "https://chikovanilaw.com/",
+      "checkedAt": "2026-10-19T13:01:10.484Z",
+      "status": "readable-address-unconfirmed",
+      "accepted": true,
+      "pages": [
+        {
+          "url": "https://chikovanilaw.com/",
+          "status": 200,
+          "sha256": "d4ffbdf1450d16eac002faebb42a23760a2714c882ffdf1f31fcffe380d4a6fe"
+        },
+        {
+          "url": "https://chikovanilaw.com/contact/",
+          "status": 200,
+          "sha256": "6a7df96f960c9c2a785b5e7433d1b2b3ec5217b11f97fb910ee0e4f8cc681d40"
+        }
+      ]
+    },
+    {
+      "placeId": "directory_yell_163694",
+      "name": "აკურაი",
+      "listedAddress": "კარტოზიას ქუჩა 8",
+      "listedWebsite": "https://www.accurai.ge/",
+      "checkedAt": "2026-10-19T13:01:11.506Z",
+      "status": "visible-official-address-corroborated",
+      "accepted": true,
+      "corroboratedAddress": "გივი კარტოზიას ქუჩა 8",
+      "pages": [
+        {
+          "url": "https://www.accurai.ge/",
+          "status": 200,
+          "sha256": "9126726077a2b315aff4cca609ecf6d553c775bed0b7e673e28dde5d97d659df"
+        },
+        {
+          "url": "https://www.accurai.ge/contact-3",
+          "status": 200,
+          "sha256": "a9925980c63773525c99c59762271e0f7851dd219783b092b5ed418d2f70ab9d"
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import { readCoordinates } from '../src/lib/coordinates.js';
 import { VERIFIED_PLACE_SUPPLEMENT, VERIFIED_SITE_ANCHORS } from './verified-place-supplement.mjs';
 import { createDirectoryRecords, mergeDirectoryRecords } from './source-directory-policy.mjs';
 import { SOURCE_DIRECTORY_DEFINITIONS } from './source-directory-definitions.mjs';
+import { linkMetroEntrances } from './metro-entrances.mjs';
 
 const TAGS = /^(name(:ka|:en|:ru)?|alt_name(:ka|:en)?|short_name(:ka|:en)?|brand(:wikidata)?|operator|amenity|shop|tourism|leisure|office|craft|healthcare(:speciality)?|public_transport|railway|station|subway|bus|train|highway|building|education|landuse|historic|natural|man_made|emergency|addr:(street|street:ka|street:en|housenumber|city|postcode|place|unit)|contact:(phone|mobile|website|email)|phone|mobile|website|url|email|opening_hours|cuisine|diet:[\w_]+|wheelchair|outdoor_seating|indoor|internet_access|takeaway|delivery|reservation|access|fee|level|description(:ka|:en)?|wikidata|wikipedia|check_date|source|entrance|ref|network|vending|drinking_water|sport|payment:[\w_]+)$/;
 const text = (value, max = 300) => typeof value === 'string' ? value.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '';
@@ -220,9 +221,10 @@ export async function buildDataset(input, output, definitions = SOURCE_DIRECTORY
   const directoryMerge=mergeDirectoryRecords(osmPlaces,directoryRecords,definitions);
   const supplementalPlaces=directoryMerge.additions;
   const places=[...osmPlaces,...supplementalPlaces].sort((a,b)=>a.id.localeCompare(b.id));
+  const metro=linkMetroEntrances(places,uniqueElements);
   const brands=assignBrands(places);
   const malls=assignMallTenants(places,uniqueElements);
-  const {rows,addressCount,streetCount}=createSearchRows(places,uniqueElements);
+  const {rows,addressCount,streetCount}=createSearchRows(places.filter(place=>!place.raw?.mapHidden),uniqueElements);
   const shards=new Map(), lookup={};
   for (const place of places) {
     const key=shardKey(place.lat,place.lng);
@@ -244,7 +246,7 @@ export async function buildDataset(input, output, definitions = SOURCE_DIRECTORY
     const info=await writeJson(`places-${key}.json`,records);
     shardEntries.push({key,file:`places-${key}.json`,count:records.length,bounds:[44.6+x*0.025,41.58+y*0.025,44.6+(x+1)*0.025,41.58+(y+1)*0.025],...info});
   }
-  const overview=places.slice().sort((a,b)=>importance(b)-importance(a)||a.id.localeCompare(b.id)).slice(0,500);
+  const overview=places.filter(place=>!place.raw?.mapHidden).sort((a,b)=>importance(b)-importance(a)||a.id.localeCompare(b.id)).slice(0,500);
   const overviewInfo=await writeJson('overview.json',overview);
   const lookupInfo=await writeJson('lookup.json',lookup);
   const searchInfo=await writeJson('search-index.json',packSearchRows(rows));
@@ -260,6 +262,7 @@ export async function buildDataset(input, output, definitions = SOURCE_DIRECTORY
     group.sourceUrls=unique([...group.sourceUrls,definition.sourceUrl]);
   }
   Object.assign(manifest,{
+    metro,
     officialSources:unique(directoryRecords.filter(place=>place.raw.source==='official-directory').map(place=>place.raw.sourceUrl)),
     directorySources:unique(directoryRecords.map(place=>place.raw.sourceUrl)),
     directoryRecordCount:definitions.length,

@@ -88,7 +88,7 @@ export function applyPlaceTheme(map, mode = 'light') {
 export function placesToGeoJSON(places, toneOf, iconOf = () => 'map-pin') {
   return {
     type: 'FeatureCollection',
-    features: places.filter(isMapCoordinate).map((place) => {
+    features: places.filter(place => isMapCoordinate(place) && place.category !== 'metro' && !place.raw?.mapHidden).map((place) => {
       const { lat, lng } = readCoordinates(place);
       const tone = toneOf(place);
       const icon = markerIcon(iconOf(place));

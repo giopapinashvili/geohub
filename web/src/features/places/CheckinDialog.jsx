@@ -9,10 +9,10 @@ import { toast } from '../../lib/toast.js';
 import { upload } from '../../lib/media.js';
 import { getPosition, distanceKm, cityLabel } from '../../lib/geo.js';
 import { listMapPlaces, getPlace, checkIn } from '../../data/places.js';
-import { mergeImportedPlaces, isImportedPlaceId } from '../../data/importedPlaces.js';
+import { mergeImportedPlaces, isImportedPlaceId, loadImportedPlaces } from '../../data/importedPlaces.js';
 import { searchImported } from '../../lib/discoveryClient.js';
 import { rankRecords } from '../../lib/discoverySearch.js';
-import { readCoordinates } from '../../lib/coordinates.js';
+import { readCoordinates, readDestinationCoordinates } from '../../lib/coordinates.js';
 import { PlaceCard } from './PlaceCard.jsx';
 import { categoryOf } from './categories.js';
 import { PersonalActionNotice } from '../auth/PersonalActionNotice.jsx';
@@ -36,7 +36,12 @@ function PickPlace({ onPick, onAdd }) {
   useEffect(() => {
     let active = true;
     setLocalError(false);
-    listMapPlaces().then(result => { if (active) { setPlaces(result.places); setTruncated(result.truncated); } }).catch(() => { if (active) { setPlaces([]); setLocalError(true); } });
+    Promise.allSettled([listMapPlaces(),loadImportedPlaces()]).then(([native,overview])=>{
+      if (!active) return;
+      setPlaces(mergeImportedPlaces(native.status==='fulfilled' ? native.value.places : [],overview.status==='fulfilled' ? overview.value.places : []));
+      setTruncated(native.status==='fulfilled' && native.value.truncated);
+      setLocalError(native.status==='rejected' || overview.status==='rejected');
+    });
     return () => { active = false; };
   }, [retry]);
   useEffect(() => {
@@ -56,7 +61,8 @@ function PickPlace({ onPick, onAdd }) {
     return () => { active = false; clearTimeout(timer); };
   }, [term, retry]);
   const list = useMemo(() => {
-    const rows = term ? rankRecords(mergeImportedPlaces(places || [], remoteState.rows), term, { limit: 40 }) : places || [];
+    const candidates=mergeImportedPlaces(places || [], remoteState.rows);
+    const rows = term ? rankRecords(candidates, term, { limit: 40 }) : candidates;
     const withDistance = rows.map(p => ({ p, d: pos && readCoordinates(p) ? distanceKm(pos, p) : Infinity }));
     return term ? withDistance : withDistance.sort((a, b) => (a.d - b.d) || ((b.p.checkinCount || 0) - (a.p.checkinCount || 0))).slice(0, 40);
   }, [places, pos, term, remoteState.rows]);
@@ -105,7 +111,8 @@ export function CheckinDialog({ place: initial, onClose, onAddPlace, onDone }) {
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (place) getPosition({ timeout: 8000 }).then(setPos).catch(() => setPos(null)); }, [place?.id]);
   useEffect(() => { if (!file) { setPreview(''); return undefined; } const u = URL.createObjectURL(file); setPreview(u); return () => URL.revokeObjectURL(u); }, [file]);
-  const near = pos && place?.lat != null && distanceKm(pos, place) <= NEAR_KM;
+  const destination=readDestinationCoordinates(place);
+  const near = pos && destination && distanceKm(pos, destination) <= NEAR_KM;
 
   const submit = async () => {
     setBusy(true);

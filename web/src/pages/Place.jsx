@@ -16,7 +16,7 @@ import { uid, isAdmin } from '../lib/auth.js';
 import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { cityLabel } from '../lib/geo.js';
-import { readCoordinates, isMapCoordinate } from '../lib/coordinates.js';
+import { readDestinationCoordinates, isMapCoordinate } from '../lib/coordinates.js';
 import {
   listenPlace, listenPlaceReviews, addPlaceReview, deletePlaceReview, reviewStats, placeCheckins, placePosts, deletePlace,
 } from '../data/places.js';
@@ -164,7 +164,7 @@ export default function Place({ params }) {
 
   const cat = categoryOf(place);
   const directory = importedPlaceEntries(place);
-  const coords = readCoordinates(place);
+  const coords = readDestinationCoordinates(place);
   const stats = reviewStats(reviews || [], place);
   const photos = [place.image, ...place.photos].filter((x, i, a) => x && a.indexOf(x) === i);
   const own = place.creatorId === uid.value;

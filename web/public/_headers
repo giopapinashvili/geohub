@@ -36,6 +36,18 @@
 /place-data/manifest.json
   Cache-Control: no-cache
 
+/catalog-data/*
+  Cache-Control: public, max-age=3600
+
+/catalog-data/index.json
+  Cache-Control: no-cache
+
+/catalog-data/services-index.json
+  Cache-Control: no-cache
+
+/catalog-data/search/manifest.json
+  Cache-Control: no-cache
+
 /place-media/*.jpg
   Cache-Control: public, max-age=31536000, immutable
 

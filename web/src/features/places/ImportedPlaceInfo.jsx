@@ -5,6 +5,7 @@ import { Spinner } from '../../ui/misc.jsx';
 import { PlaceBrand } from './PlaceBrand.jsx';
 import { getImportedManifest, getImportedPlace } from '../../data/importedPlaces.js';
 import { taxonomyCategory } from '../../lib/placeTaxonomy.js';
+import { phoneContacts } from '../../lib/phoneContacts.js';
 import '../../styles/imported-place-info.css';
 
 const DIETS = {vegan:'ვეგანური არჩევანი',vegetarian:'ვეგეტარიანული არჩევანი',halal:'ჰალალის არჩევანი',kosher:'კოშერის არჩევანი','gluten-free':'უგლუტენო არჩევანი','lactose-free':'ლაქტოზის გარეშე'};
@@ -81,8 +82,7 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
   const raw=place.raw;
   const facets=place.facets || {};
   const website=httpUrl(raw.website);
-  const phone=typeof raw.phone==='string' ? raw.phone.split(';')[0].trim() : '';
-  const telephone=phone.replace(/[^\d+]/g,'');
+  const phones=phoneContacts(raw.phone, place);
   const labels=[...(facets.diets || []).map(id=>DIETS[id]).filter(Boolean),
     facets.wheelchair==='yes' ? 'ეტლით მისაწვდომი' : facets.wheelchair==='limited' ? 'ეტლით ნაწილობრივ მისაწვდომი' : '',
     facets.outdoorSeating ? 'გარე დასაჯდომი სივრცე' : '',facets.takeaway ? 'წასაღებად' : '',facets.delivery ? 'მიტანა' : ''].filter(Boolean);
@@ -94,7 +94,9 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
       {(raw.coordinateNote || raw.coordinateAccuracy==='approximate-center') && <p class="imported-place-location-note"><Icon name="crosshair" size={16}/><span>{raw.coordinateNote || 'კოორდინატი აღნიშნავს ობიექტის სავარაუდო ცენტრს; შესასვლელი შეიძლება სხვა მხარეს იყოს.'}</span></p>}
       {showFacts && <div class="imported-place-facts">
         {raw.openingHours && <p><Icon name="clock" size={17}/><span><small>სამუშაო საათები წყაროს მიხედვით</small>{raw.openingHours}</span></p>}
-        {phone && telephone && <a href={`tel:${telephone}`}><Icon name="phone" size={17}/><span>{phone}</span></a>}
+        {phones.map((phone,index)=>phone.href
+          ? <a key={index} href={phone.href}><Icon name="phone" size={17}/><span>{phone.text}</span></a>
+          : <p key={index}><Icon name="phone" size={17}/><span>{phone.text}</span></p>)}
         {website && <a href={website} target="_blank" rel="noopener noreferrer"><Icon name="globe-simple" size={17}/><span>{new URL(website).hostname}</span><Icon name="arrow-up-right" size={13}/></a>}
       </div>}
       {labels.length>0 && <ul class="imported-place-facets" aria-label="წყაროში მითითებული მახასიათებლები">{labels.map(label=><li key={label}>{label}</li>)}</ul>}

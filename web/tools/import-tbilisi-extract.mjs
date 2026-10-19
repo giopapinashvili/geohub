@@ -57,7 +57,8 @@ for (const item of relations) {
   if (!boxes.length && !points.length) continue;
   const all = [...points,...boxes.flatMap(b=>[[b[1],b[0]],[b[3],b[2]]])];
   const bounds = boundsOf(all);
-  elements.push({...clean(item),center:{lat:(bounds[1]+bounds[3])/2,lon:(bounds[0]+bounds[2])/2},bounds});
+  elements.push({...clean(item),center:{lat:(bounds[1]+bounds[3])/2,lon:(bounds[0]+bounds[2])/2},bounds,
+    ...(item.tags.public_transport === 'stop_area' ? {members:item.members.map(({type,id,role})=>({type,id,role}))} : {})});
 }
 const source={url:sourceUrl,sourceDate,extractedAt:new Date().toISOString(),bbox};
 await mkdir(dirname(output),{recursive:true});

@@ -1,0 +1,133 @@
+{
+  "sourceCheckedAt": "2026-10-19",
+  "brands": [
+    {
+      "id": "amboli",
+      "url": "https://amboli.ge/images/logo.svg",
+      "sourceUrl": "https://amboli.ge/contact",
+      "width": 420,
+      "height": 81,
+      "sha256": "c744126861b2e270924442fb29737a8e363623dc49f4077971e575fc6f3498c6",
+      "originalWidth": 151,
+      "originalHeight": 30,
+      "file": "services-amboli.png",
+      "publisher": "ამბოლი",
+      "rights": "source-published"
+    },
+    {
+      "id": "tegeta",
+      "url": "https://tegeta.ge/images/tegeta-logo-ge.svg",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "width": 420,
+      "height": 75,
+      "sha256": "59928c7d29ff72416b4ac9eac16cb7bee067fe776440bee7d35f29bee545f774",
+      "originalWidth": 516,
+      "originalHeight": 92,
+      "file": "services-tegeta.png",
+      "publisher": "თეგეტა",
+      "rights": "source-published"
+    },
+    {
+      "id": "greenway",
+      "url": "https://greenway.ge/images/logo.svg",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "width": 420,
+      "height": 102,
+      "sha256": "e53e501e7f04bebf601a9489175addfe0d477c2a4f25a613fe3632d2a1a1bc8e",
+      "originalWidth": 190,
+      "originalHeight": 46,
+      "file": "services-greenway.png",
+      "publisher": "გრინვეი",
+      "rights": "source-published"
+    },
+    {
+      "id": "inex",
+      "url": "https://inex.ge/inex-logo.svg",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "width": 420,
+      "height": 92,
+      "sha256": "a1267b836f4b4413189b42c58456056f5105dbc1a150bcc6a92aff2f532791c5",
+      "originalWidth": 178,
+      "originalHeight": 40,
+      "file": "services-inex.png",
+      "publisher": "ინექსი",
+      "rights": "source-published"
+    },
+    {
+      "id": "usa2georgia",
+      "url": "https://www.usa2georgia.com/assets/u2g_logo-F_ueaK9n.png",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "width": 420,
+      "height": 127,
+      "sha256": "175d1c789989df2633e72978b2fd368934ee7789ed36235033013826eb8dc807",
+      "originalWidth": 180,
+      "originalHeight": 12,
+      "file": "services-usa2georgia.png",
+      "publisher": "USA2GEORGIA",
+      "rights": "source-published"
+    },
+    {
+      "id": "realtor",
+      "url": "https://www.realtor.ge/theme/images/logo.png",
+      "sourceUrl": "https://www.realtor.ge/ka/contact",
+      "width": 420,
+      "height": 85,
+      "sha256": "4ad3364a2e25ca1822276320378a170e0866fe7e3bcafe6e1a3b7c1752357cea",
+      "originalWidth": 181,
+      "originalHeight": 40,
+      "file": "services-realtor.png",
+      "publisher": "Realtor.ge",
+      "rights": "source-published"
+    },
+    {
+      "id": "ardi",
+      "url": "https://www.ardi.ge/assets/frontend/assets/img/logo_ge.svg",
+      "sourceUrl": "https://www.ardi.ge/ge/contact",
+      "width": 176,
+      "height": 160,
+      "sha256": "698074cb8c9de54b7f62c1377b38b68d583ec038b7259ea948957a20f9eb137d",
+      "originalWidth": 985,
+      "originalHeight": 897,
+      "file": "services-ardi.png",
+      "publisher": "არდი",
+      "rights": "source-published"
+    },
+    {
+      "id": "irao",
+      "url": "https://www.irao.ge/wp-content/uploads/2026/07/IRAO-Primary-Georgian-tagline.svg",
+      "sourceUrl": "https://irao.ge/contact/",
+      "width": 420,
+      "height": 149,
+      "sha256": "e7b3da6bcaa37cc15dc08dd789ed7c8c0ed8d37b4d71af2c4a66fb30c0302cdd",
+      "originalWidth": 510,
+      "originalHeight": 181,
+      "file": "services-irao.png",
+      "publisher": "ირაო",
+      "rights": "source-published"
+    },
+    {
+      "id": "shangrila",
+      "url": "https://shangrila.ge/wp-content/themes/shangri-la-theme/img/logo.png",
+      "sourceUrl": "https://shangrila.ge/ge/contacts/",
+      "width": 248,
+      "height": 160,
+      "sha256": "7668abfe66281efb048e31119d930fa9338afe1460bf2f2a1e7f1643a5ac8a8d",
+      "originalWidth": 115,
+      "originalHeight": 71,
+      "file": "services-shangrila.png",
+      "publisher": "შანგრი ლა",
+      "rights": "source-published"
+    },
+    {
+      "id": "onex",
+      "url": "https://www.onex.ge/_next/static/media/logo-download.c0f12364.svg",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "width": 160,
+      "height": 160,
+      "sha256": "f8666441be2106188cac365ec3bb9e3ac9938867fad39caa61864f13af63677f",
+      "file": "services-onex.png",
+      "publisher": "ონექსი",
+      "rights": "source-published"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { NATIVE_PLACE_SOURCE_LINKS } from './nativePlaceSourceLinks.js';
 import { NATIVE_PLACE_SOURCE_RECORDS } from './nativePlaceSourceRecords.generated.js';
 import { applyCuratedPlaceMedia } from './curatedPlaceMedia.js';
 
-/** Display enrichment only: retain the original page, owner, coordinates and activity. */
+/** Retain page/owner/activity; only explicitly reviewed legacy station points are corrected. */
 export function enrichNativePlace(place) {
   const linkedOsmId = NATIVE_PLACE_SOURCE_LINKS[place?.id];
   const source = NATIVE_PLACE_SOURCE_RECORDS[linkedOsmId];
@@ -18,12 +18,19 @@ export function enrichNativePlace(place) {
   for (const key of ['website', 'phone', 'openingHours', 'brand', 'operator', 'wikidata', 'tenantIds', 'mallId', 'mallName']) {
     if (raw[key] == null || raw[key] === '') raw[key] = source.raw[key];
   }
+  const metro = source.category === 'metro' && source.raw.mapPlaceId;
+  if (metro) {
+    raw.originalNativeCoordinates ||= {lat:place.lat,lng:place.lng};
+    raw.originalNativeName ||= place.name;
+    for (const key of ['mapHidden','mapPlaceId','mapCoordinates','metroEntranceIds','coordinateNote','coordinateAccuracy','coordinateSourceUrl']) raw[key] = source.raw[key];
+  }
   return applyCuratedPlaceMedia({ ...place,
+    ...(metro ? {name:source.name,category:'metro',lat:source.lat,lng:source.lng} : {}),
     image: place.image || source.image || '',
     photos: [...new Set([...(place.photos || []), ...(source.photos || [])])],
     description: place.description || source.description || '',
     address: place.address || source.address || '', city: place.city || source.city || '',
-    aliases: [...new Set([...(place.aliases || []), ...(source.aliases || [])])],
+    aliases: [...new Set([...(place.aliases || []), ...(source.aliases || []), ...(metro ? [raw.originalNativeName] : [])])],
     facets: { ...source.facets, ...place.facets }, raw,
   });
 }

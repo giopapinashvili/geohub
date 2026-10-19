@@ -6,6 +6,8 @@ import { SOURCE_DIRECTORY_POST } from './source-directory-post.mjs';
 import { SOURCE_DIRECTORY_MALLS_HEALTH } from './source-directory-malls-health.mjs';
 import { SOURCE_DIRECTORY_FOOD } from './source-directory-food.mjs';
 import { SOURCE_DIRECTORY_PHARMACIES } from './source-directory-pharmacies.mjs';
+import { SOURCE_DIRECTORY_SERVICES } from './source-directory-services.mjs';
+import { SOURCE_DIRECTORY_PROFESSIONAL } from './source-directory-professional.mjs';
 
 // Previously published directory IDs are resolved before subsequent sources.
 export const SOURCE_DIRECTORY_DEFINITIONS = [
@@ -13,4 +15,6 @@ export const SOURCE_DIRECTORY_DEFINITIONS = [
   ...SOURCE_DIRECTORY_INSTITUTIONS, ...SOURCE_DIRECTORY_POST, ...SOURCE_DIRECTORY_MALLS_HEALTH,
   ...SOURCE_DIRECTORY_FOOD,
   ...SOURCE_DIRECTORY_PHARMACIES,
+  ...SOURCE_DIRECTORY_SERVICES,
+  ...SOURCE_DIRECTORY_PROFESSIONAL,
 ];

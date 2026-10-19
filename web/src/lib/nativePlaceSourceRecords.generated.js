@@ -881,5 +881,1241 @@ export const NATIVE_PLACE_SOURCE_RECORDS = {
       "attribution": "© OpenStreetMap contributors",
       "attributionUrl": "https://www.openstreetmap.org/copyright"
     }
+  },
+  "osm_node_729551832": {
+    "id": "osm_node_729551832",
+    "name": "ტექნიკური უნივერსიტეტი",
+    "category": "metro",
+    "lat": 41.720348800000004,
+    "lng": 44.7766431,
+    "aliases": [
+      "Technical University",
+      "Техникури университети",
+      "Teknikuri Universiteti",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "729551832",
+      "sourceUrl": "https://www.openstreetmap.org/node/729551832",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "alt_name:en": "Teknikuri Universiteti",
+        "name": "ტექნიკური უნივერსიტეტი",
+        "name:en": "Technical University",
+        "name:ka": "ტექნიკური უნივერსიტეტი",
+        "name:ru": "Техникури университети",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1638726",
+        "wikipedia": "ka:ტექნიკური უნივერსიტეტი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1016505079",
+        "osm_node_1381379416",
+        "osm_node_1520817752",
+        "osm_node_2258111693",
+        "osm_node_2258111711"
+      ],
+      "mapPlaceId": "osm_node_1016505079",
+      "mapCoordinates": {
+        "lat": 41.721141800000005,
+        "lng": 44.7744335
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_729562896": {
+    "id": "osm_node_729562896",
+    "name": "ვაჟა-ფშაველა",
+    "category": "metro",
+    "lat": 41.724034100000004,
+    "lng": 44.730853,
+    "aliases": [
+      "Vazha-Pshavela",
+      "Важа-Пшавела",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "729562896",
+      "sourceUrl": "https://www.openstreetmap.org/node/729562896",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ვაჟა-ფშაველა",
+        "name:en": "Vazha-Pshavela",
+        "name:ka": "ვაჟა-ფშაველა",
+        "name:ru": "Важа-Пшавела",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1346764",
+        "wikipedia": "ka:ვაჟა-ფშაველა (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_478546391",
+        "osm_node_7498910236"
+      ],
+      "mapPlaceId": "osm_node_478546391",
+      "mapCoordinates": {
+        "lat": 41.723743500000005,
+        "lng": 44.731030700000005
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_288584312": {
+    "id": "osm_node_288584312",
+    "name": "300 არაგველი",
+    "category": "metro",
+    "lat": 41.687994800000006,
+    "lng": 44.826233200000004,
+    "aliases": [
+      "300 Aragveli",
+      "300 Арагвели",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "288584312",
+      "sourceUrl": "https://www.openstreetmap.org/node/288584312",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "300 არაგველი",
+        "name:en": "300 Aragveli",
+        "name:ka": "300 არაგველი",
+        "name:ru": "300 Арагвели",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2066652",
+        "wikipedia": "ka:300 არაგველი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_2051797907",
+        "osm_node_2051797908"
+      ],
+      "mapPlaceId": "osm_node_2051797907",
+      "mapCoordinates": {
+        "lat": 41.687704700000005,
+        "lng": 44.827054000000004
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_7285245527": {
+    "id": "osm_node_7285245527",
+    "name": "ვარკეთილი",
+    "category": "metro",
+    "lat": 41.69189660000001,
+    "lng": 44.8708845,
+    "aliases": [
+      "Varketili",
+      "Варкетили",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "7285245527",
+      "sourceUrl": "https://www.openstreetmap.org/node/7285245527",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ვარკეთილი",
+        "name:en": "Varketili",
+        "name:ka": "ვარკეთილი",
+        "name:ru": "Варкетили",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q3648856",
+        "wikipedia": "ka:ვარკეთილი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_10017940724",
+        "osm_node_11176888213",
+        "osm_node_9712245598"
+      ],
+      "mapPlaceId": "osm_node_10017940724",
+      "mapCoordinates": {
+        "lat": 41.69119070000001,
+        "lng": 44.8701444
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_729562894": {
+    "id": "osm_node_729562894",
+    "name": "დელისი",
+    "category": "metro",
+    "lat": 41.7254865,
+    "lng": 44.745341100000005,
+    "aliases": [
+      "Delisi",
+      "Делиси",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "no",
+      "internetAccess": "wlan"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "729562894",
+      "sourceUrl": "https://www.openstreetmap.org/node/729562894",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "internet_access": "wlan",
+        "name": "დელისი",
+        "name:en": "Delisi",
+        "name:ka": "დელისი",
+        "name:ru": "Делиси",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:30",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "no",
+        "wikidata": "Q1184311",
+        "wikipedia": "ka:დელისი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:30",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1016403265",
+        "osm_node_1016403319",
+        "osm_node_1565056689",
+        "osm_node_5188669782"
+      ],
+      "mapPlaceId": "osm_node_1016403265",
+      "mapCoordinates": {
+        "lat": 41.725443500000004,
+        "lng": 44.746476900000005
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_729561142": {
+    "id": "osm_node_729561142",
+    "name": "სამედიცინო უნივერსიტეტი",
+    "category": "metro",
+    "lat": 41.7272794,
+    "lng": 44.7638395,
+    "aliases": [
+      "Medical University",
+      "Самедицино университети",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "no"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "729561142",
+      "sourceUrl": "https://www.openstreetmap.org/node/729561142",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "სამედიცინო უნივერსიტეტი",
+        "name:en": "Medical University",
+        "name:ka": "სამედიცინო უნივერსიტეტი",
+        "name:ru": "Самедицино университети",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "no",
+        "wikidata": "Q1375904",
+        "wikipedia": "ka:სამედიცინო უნივერსიტეტი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1017705689",
+        "osm_node_1596388743",
+        "osm_node_1596388745",
+        "osm_node_6859717858"
+      ],
+      "mapPlaceId": "osm_node_1017705689",
+      "mapCoordinates": {
+        "lat": 41.7272788,
+        "lng": 44.7651109
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_289358478": {
+    "id": "osm_node_289358478",
+    "name": "რუსთაველი",
+    "category": "metro",
+    "lat": 41.703497000000006,
+    "lng": 44.789646700000006,
+    "aliases": [
+      "Rustaveli",
+      "Руставели",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "289358478",
+      "sourceUrl": "https://www.openstreetmap.org/node/289358478",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "რუსთაველი",
+        "name:en": "Rustaveli",
+        "name:ka": "რუსთაველი",
+        "name:ru": "Руставели",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1631672",
+        "wikipedia": "ka:რუსთაველი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_717877029"
+      ],
+      "mapPlaceId": "osm_node_717877029",
+      "mapCoordinates": {
+        "lat": 41.7041783,
+        "lng": 44.7897133
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_437955651": {
+    "id": "osm_node_437955651",
+    "name": "ახმეტელის თეატრი",
+    "category": "metro",
+    "lat": 41.7910558,
+    "lng": 44.814998300000006,
+    "aliases": [
+      "Akhmeteli Theatre",
+      "Ахметелис театри",
+      "Akhmetelis Teatri",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "437955651",
+      "sourceUrl": "https://www.openstreetmap.org/node/437955651",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "alt_name:en": "Akhmetelis Teatri",
+        "name": "ახმეტელის თეატრი",
+        "name:en": "Akhmeteli Theatre",
+        "name:ka": "ახმეტელის თეატრი",
+        "name:ru": "Ахметелис театри",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2469715",
+        "wikipedia": "ka:ახმეტელის თეატრი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-12-20T18:24:42.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_9831532406"
+      ],
+      "mapPlaceId": "osm_node_9831532406",
+      "mapCoordinates": {
+        "lat": 41.7915688,
+        "lng": 44.8156528
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_7285245525": {
+    "id": "osm_node_7285245525",
+    "name": "სადგურის მოედანი-1",
+    "category": "metro",
+    "lat": 41.7225435,
+    "lng": 44.79776880000001,
+    "aliases": [
+      "Station Square-1",
+      "Садгурис Моедани-1",
+      "Sadguris Moedani-1",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "7285245525",
+      "sourceUrl": "https://www.openstreetmap.org/node/7285245525",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "alt_name:en": "Sadguris Moedani-1",
+        "name": "სადგურის მოედანი-1",
+        "name:en": "Station Square-1",
+        "name:ka": "სადგურის მოედანი-1",
+        "name:ru": "Садгурис Моедани-1",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1632208",
+        "wikipedia": "ka:სადგურის მოედანი 1 (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-09-10T06:55:58.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1474122954",
+        "osm_node_729521078"
+      ],
+      "mapPlaceId": "osm_node_1474122954",
+      "mapCoordinates": {
+        "lat": 41.724099200000005,
+        "lng": 44.799722900000006
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_289383777": {
+    "id": "osm_node_289383777",
+    "name": "ნაძალადევი",
+    "category": "metro",
+    "lat": 41.7334036,
+    "lng": 44.79642570000001,
+    "aliases": [
+      "Nadzaledevi",
+      "Надзаладеви",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "289383777",
+      "sourceUrl": "https://www.openstreetmap.org/node/289383777",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ნაძალადევი",
+        "name:en": "Nadzaledevi",
+        "name:ka": "ნაძალადევი",
+        "name:ru": "Надзаладеви",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1750859",
+        "wikipedia": "ka:ნაძალადევი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1452387939"
+      ],
+      "mapPlaceId": "osm_node_1452387939",
+      "mapCoordinates": {
+        "lat": 41.7326229,
+        "lng": 44.7970003
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_5768595732": {
+    "id": "osm_node_5768595732",
+    "name": "ავლაბარი",
+    "category": "metro",
+    "lat": 41.6922591,
+    "lng": 44.815840900000005,
+    "aliases": [
+      "Avlabari",
+      "Авлабари",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "no"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "5768595732",
+      "sourceUrl": "https://www.openstreetmap.org/node/5768595732",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ავლაბარი",
+        "name:en": "Avlabari",
+        "name:ka": "ავლაბარი",
+        "name:ru": "Авлабари",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "no",
+        "wikidata": "Q2470476",
+        "wikipedia": "ka:ავლაბარი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_5754552802",
+        "osm_node_5754552803"
+      ],
+      "mapPlaceId": "osm_node_5754552802",
+      "mapCoordinates": {
+        "lat": 41.6925012,
+        "lng": 44.815128400000006
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_288584317": {
+    "id": "osm_node_288584317",
+    "name": "ისანი",
+    "category": "metro",
+    "lat": 41.6866252,
+    "lng": 44.8399633,
+    "aliases": [
+      "Isani",
+      "Исани",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "288584317",
+      "sourceUrl": "https://www.openstreetmap.org/node/288584317",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ისანი",
+        "name:en": "Isani",
+        "name:ka": "ისანი",
+        "name:ru": "Исани",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q3545116",
+        "wikipedia": "ka:ისანი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_5361933493"
+      ],
+      "mapPlaceId": "osm_node_5361933493",
+      "mapCoordinates": {
+        "lat": 41.6864719,
+        "lng": 44.840875200000006
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_729578803": {
+    "id": "osm_node_729578803",
+    "name": "წერეთელი",
+    "category": "metro",
+    "lat": 41.726412200000006,
+    "lng": 44.7876612,
+    "aliases": [
+      "Tsereteli",
+      "Церетели",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "729578803",
+      "sourceUrl": "https://www.openstreetmap.org/node/729578803",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "წერეთელი",
+        "name:en": "Tsereteli",
+        "name:ka": "წერეთელი",
+        "name:ru": "Церетели",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q191599",
+        "wikipedia": "ka:წერეთელი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_9772383930",
+        "osm_node_9772383931"
+      ],
+      "mapPlaceId": "osm_node_9772383930",
+      "mapCoordinates": {
+        "lat": 41.7271568,
+        "lng": 44.787678400000004
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_437955726": {
+    "id": "osm_node_437955726",
+    "name": "გურამიშვილი",
+    "category": "metro",
+    "lat": 41.7757645,
+    "lng": 44.7955795,
+    "aliases": [
+      "Guramishvili",
+      "Гурамишвили",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "437955726",
+      "sourceUrl": "https://www.openstreetmap.org/node/437955726",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "გურამიშვილი",
+        "name:en": "Guramishvili",
+        "name:ka": "გურამიშვილი",
+        "name:ru": "Гурамишвили",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2029309",
+        "wikipedia": "ka:გურამიშვილი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-12-20T18:24:42.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_11172468318"
+      ],
+      "mapPlaceId": "osm_node_11172468318",
+      "mapCoordinates": {
+        "lat": 41.7751037,
+        "lng": 44.795385
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_7285245526": {
+    "id": "osm_node_7285245526",
+    "name": "სადგურის მოედანი-2",
+    "category": "metro",
+    "lat": 41.722577900000005,
+    "lng": 44.7964416,
+    "aliases": [
+      "Station Square-2",
+      "Садгурис Моедани-2",
+      "Sadguris Moedani-2",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "7285245526",
+      "sourceUrl": "https://www.openstreetmap.org/node/7285245526",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "alt_name:en": "Sadguris Moedani-2",
+        "name": "სადგურის მოედანი-2",
+        "name:en": "Station Square-2",
+        "name:ka": "სადგურის მოედანი-2",
+        "name:ru": "Садгурис Моедани-2",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2211128",
+        "wikipedia": "ka:სადგურის მოედანი 2 (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_11373742137",
+        "osm_node_729521075"
+      ],
+      "mapPlaceId": "osm_node_11373742137",
+      "mapCoordinates": {
+        "lat": 41.722633300000005,
+        "lng": 44.796019900000005
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_729529330": {
+    "id": "osm_node_729529330",
+    "name": "სამგორი",
+    "category": "metro",
+    "lat": 41.685517600000004,
+    "lng": 44.85448280000001,
+    "aliases": [
+      "Samgori",
+      "Самгори",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "729529330",
+      "sourceUrl": "https://www.openstreetmap.org/node/729529330",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "სამგორი",
+        "name:en": "Samgori",
+        "name:ka": "სამგორი",
+        "name:ru": "Самгори",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q3545105",
+        "wikipedia": "ka:სამგორი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2026-04-09T21:02:02.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1381790242",
+        "osm_node_5207368135",
+        "osm_node_5361933465",
+        "osm_node_5361933466"
+      ],
+      "mapPlaceId": "osm_node_1381790242",
+      "mapCoordinates": {
+        "lat": 41.6858452,
+        "lng": 44.853469200000006
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_289384125": {
+    "id": "osm_node_289384125",
+    "name": "მარჯანიშვილი",
+    "category": "metro",
+    "lat": 41.709594100000004,
+    "lng": 44.796874900000006,
+    "aliases": [
+      "Marjanishvili",
+      "Марджанишвили",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "no"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "289384125",
+      "sourceUrl": "https://www.openstreetmap.org/node/289384125",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "მარჯანიშვილი",
+        "name:en": "Marjanishvili",
+        "name:ka": "მარჯანიშვილი",
+        "name:ru": "Марджанишвили",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "no",
+        "wikidata": "Q1891659",
+        "wikipedia": "ka:მარჯანიშვილი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_2274047253"
+      ],
+      "mapPlaceId": "osm_node_2274047253",
+      "mapCoordinates": {
+        "lat": 41.7098256,
+        "lng": 44.797541700000004
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_4632061332": {
+    "id": "osm_node_4632061332",
+    "name": "დიდუბე",
+    "category": "metro",
+    "lat": 41.7494522,
+    "lng": 44.779994,
+    "aliases": [
+      "Didube",
+      "Дидубе",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "4632061332",
+      "sourceUrl": "https://www.openstreetmap.org/node/4632061332",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "დიდუბე",
+        "name:en": "Didube",
+        "name:ka": "დიდუბე",
+        "name:ru": "Дидубе",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q1210655",
+        "wikipedia": "ka:დიდუბე (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-12-05T03:42:08.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_11992312576",
+        "osm_node_3081640444"
+      ],
+      "mapPlaceId": "osm_node_11992312576",
+      "mapCoordinates": {
+        "lat": 41.75001820000001,
+        "lng": 44.7800402
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_289358479": {
+    "id": "osm_node_289358479",
+    "name": "თავისუფლების მოედანი",
+    "category": "metro",
+    "lat": 41.6945248,
+    "lng": 44.800563000000004,
+    "aliases": [
+      "Liberty Square",
+      "Тависуплебис моедани",
+      "Tavisuplebis Moedani",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "yes"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "289358479",
+      "sourceUrl": "https://www.openstreetmap.org/node/289358479",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "alt_name:en": "Tavisuplebis Moedani",
+        "name": "თავისუფლების მოედანი",
+        "name:en": "Liberty Square",
+        "name:ka": "თავისუფლების მოედანი",
+        "name:ru": "Тависуплебис моедани",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "yes",
+        "wikidata": "Q2028202",
+        "wikipedia": "ka:თავისუფლების მოედანი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-12-02T22:09:12.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_1445251964"
+      ],
+      "mapPlaceId": "osm_node_1445251964",
+      "mapCoordinates": {
+        "lat": 41.6949582,
+        "lng": 44.8001426
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_437955710": {
+    "id": "osm_node_437955710",
+    "name": "სარაჯიშვილი",
+    "category": "metro",
+    "lat": 41.7840581,
+    "lng": 44.799917900000004,
+    "aliases": [
+      "Sarajishvili",
+      "Сараджишвили",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "437955710",
+      "sourceUrl": "https://www.openstreetmap.org/node/437955710",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "სარაჯიშვილი",
+        "name:en": "Sarajishvili",
+        "name:ka": "სარაჯიშვილი",
+        "name:ru": "Сараджишвили",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2029301",
+        "wikipedia": "ka:სარაჯიშვილი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_4632061342"
+      ],
+      "mapPlaceId": "osm_node_4632061342",
+      "mapCoordinates": {
+        "lat": 41.7835679,
+        "lng": 44.7994884
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_725175525": {
+    "id": "osm_node_725175525",
+    "name": "გოცირიძე",
+    "category": "metro",
+    "lat": 41.742940100000006,
+    "lng": 44.7840452,
+    "aliases": [
+      "Gotsiridze",
+      "Гоциридзе",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "725175525",
+      "sourceUrl": "https://www.openstreetmap.org/node/725175525",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "გოცირიძე",
+        "name:en": "Gotsiridze",
+        "name:ka": "გოცირიძე",
+        "name:ru": "Гоциридзе",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q653494",
+        "wikipedia": "ka:გოცირიძე (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_289384944"
+      ],
+      "mapPlaceId": "osm_node_289384944",
+      "mapCoordinates": {
+        "lat": 41.7426399,
+        "lng": 44.7846065
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_358503996": {
+    "id": "osm_node_358503996",
+    "name": "სახელმწიფო უნივერსიტეტი",
+    "category": "metro",
+    "lat": 41.722825300000004,
+    "lng": 44.7185112,
+    "aliases": [
+      "State University",
+      "Сахельмципо Университети",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "facets": {
+      "wheelchair": "no",
+      "internetAccess": "wlan"
+    },
+    "raw": {
+      "osmType": "node",
+      "osmId": "358503996",
+      "sourceUrl": "https://www.openstreetmap.org/node/358503996",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "internet_access": "wlan",
+        "name": "სახელმწიფო უნივერსიტეტი",
+        "name:en": "State University",
+        "name:ka": "სახელმწიფო უნივერსიტეტი",
+        "name:ru": "Сахельмципо Университети",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wheelchair": "no",
+        "wikidata": "Q4146738",
+        "wikipedia": "ka:სახელმწიფო უნივერსიტეტი (თბილისის მეტრო)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_5188669771",
+        "osm_node_5188669772",
+        "osm_node_5188669775",
+        "osm_node_5188669776"
+      ],
+      "mapPlaceId": "osm_node_5188669771",
+      "mapCoordinates": {
+        "lat": 41.7225418,
+        "lng": 44.7170648
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
+  },
+  "osm_node_5267558014": {
+    "id": "osm_node_5267558014",
+    "name": "ღრმაღელე",
+    "category": "metro",
+    "lat": 41.764974,
+    "lng": 44.7899602,
+    "aliases": [
+      "Ghrmaghele",
+      "Грмагеле",
+      "თბილისის სატრანსპორტო კომპანია"
+    ],
+    "raw": {
+      "osmType": "node",
+      "osmId": "5267558014",
+      "sourceUrl": "https://www.openstreetmap.org/node/5267558014",
+      "coordinateAccuracy": "source-point",
+      "named": true,
+      "tags": {
+        "name": "ღრმაღელე",
+        "name:en": "Ghrmaghele",
+        "name:ka": "ღრმაღელე",
+        "name:ru": "Грмагеле",
+        "network": "თბილისის მეტროპოლიტენი",
+        "opening_hours": "Mo-Su 06:00-24:00",
+        "operator": "თბილისის სატრანსპორტო კომპანია",
+        "public_transport": "station",
+        "railway": "station",
+        "station": "subway",
+        "subway": "yes",
+        "wikidata": "Q2029321",
+        "wikipedia": "en:Ghrmaghele (Tbilisi Metro)"
+      },
+      "sourceUpdatedAt": "2025-10-24T12:45:22.000Z",
+      "openingHours": "Mo-Su 06:00-24:00",
+      "operator": "თბილისის სატრანსპორტო კომპანია",
+      "mapHidden": true,
+      "metroEntranceIds": [
+        "osm_node_4632061333"
+      ],
+      "mapPlaceId": "osm_node_4632061333",
+      "mapCoordinates": {
+        "lat": 41.7655072,
+        "lng": 44.790234600000005
+      },
+      "coordinateNote": "სადგურის მიწისქვეშა მდებარეობა. რუკაზე მეტროს ნიშნები მხოლოდ ჩასასვლელებთან ჩანს.",
+      "source": "openstreetmap",
+      "sourceDate": "2026-10-17",
+      "attribution": "© OpenStreetMap contributors",
+      "attributionUrl": "https://www.openstreetmap.org/copyright"
+    }
   }
 };

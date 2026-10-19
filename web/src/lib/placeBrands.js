@@ -2,9 +2,11 @@ import { PLACE_BRANDS as BASE_PLACE_BRANDS } from './placeBrandRegistry.js';
 import { INSTITUTION_PLACE_BRANDS } from './institutionBrandRegistry.generated.js';
 import { DIRECTORY_PLACE_BRANDS } from './directoryBrandRegistry.generated.js';
 import { WOLT_PLACE_BRANDS } from './woltBrandRegistry.generated.js';
+import { SERVICES_PLACE_BRANDS } from './servicesBrandRegistry.generated.js';
+import { PROFESSIONAL_PLACE_BRANDS } from './professionalBrandRegistry.generated.js';
 import { canonicalCategory } from './placeTaxonomy.js';
 
-export const PLACE_BRANDS = { ...WOLT_PLACE_BRANDS, ...DIRECTORY_PLACE_BRANDS, ...BASE_PLACE_BRANDS, ...INSTITUTION_PLACE_BRANDS };
+export const PLACE_BRANDS = { ...WOLT_PLACE_BRANDS, ...DIRECTORY_PLACE_BRANDS, ...BASE_PLACE_BRANDS, ...INSTITUTION_PLACE_BRANDS, ...SERVICES_PLACE_BRANDS, ...PROFESSIONAL_PLACE_BRANDS };
 const normalize = value => String(value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 const aliases = new Map(Object.entries(PLACE_BRANDS).flatMap(([id, entry]) => entry.aliases.map(alias => [normalize(alias), id])));
 const domains = new Map(Object.entries(PLACE_BRANDS).flatMap(([id, entry]) => (entry.domains || []).map(domain => [domain, id])));
@@ -21,7 +23,7 @@ export function placeBrandId(place) {
   const tags = place.raw?.tags || {};
   for (const value of [place.brand, place.raw?.brand, tags.brand]) {
     const id = aliases.get(normalize(value));
-    if (id) return id;
+    if (id && allowedCategory(id, place)) return id;
   }
   // A source may omit brand while still giving an unambiguous exact name.
   for (const value of [place.name, ...(Array.isArray(place.aliases) ? place.aliases : []), tags['name:ka'], tags['name:en'], tags.operator]) {

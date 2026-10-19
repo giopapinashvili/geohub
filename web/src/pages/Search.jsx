@@ -16,7 +16,7 @@ import { PlaceCard } from '../features/places/PlaceCard.jsx';
 import { EventCard } from '../features/events/EventCard.jsx';
 import { VideoCard } from '../features/video/VideoCard.jsx';
 import { addressHref } from '../lib/catalogDiscovery.js';
-import { formatCommercePrice } from '../lib/commerce.js';
+import { sourceCatalogPriceLabel } from '../lib/sourceCatalogPresentation.js';
 import { categoryOf } from '../features/places/categories.js';
 import '../styles/discovery-search.css';
 
@@ -67,8 +67,9 @@ function CatalogRow({ item }) {
     <span class="result-row-thumb"><Img src={item.itemImage} width={120} alt="" fallback={<span class="result-row-ico"><Icon name={item.matchedItemType === 'dish' ? 'fork-knife' : item.matchedItemType === 'service' ? 'wrench' : 'tag'} size={22} /></span>} /></span>
     <span class="result-row-text">
       <strong>{item.matchedItemTitle}</strong>
+      {item.itemCategoryNames?.length > 0 && <span class="small muted">{item.itemCategoryNames.join(' · ')}</span>}
       <span class="small muted">{[item.businessName, item.branchName !== item.businessName && item.branchName, item.address].filter(Boolean).join(' · ')}</span>
-      <span class="small"><b class="tone-brand">{formatCommercePrice(item.priceMinor, item.currency)}</b>{item.preparationMinutes != null && <span class="muted"> · მომზადება: {item.preparationMinutes} წთ</span>}</span>
+      <span class="small"><b class="tone-brand">{sourceCatalogPriceLabel(item)}</b>{item.priceContext === 'delivery-marketplace' && <span class="muted"> · Wolt-ის ფასი{item.priceType === 'base-with-required-options' ? ' · საწყისი' : ''}</span>}{item.preparationMinutes != null && <span class="muted"> · მომზადება: {item.preparationMinutes} წთ</span>}</span>
       <span class="small muted">{[type, similar(item)].filter(Boolean).join(' · ')}</span>
     </span>
     <Icon name="caret-right" size={18} class="muted" />

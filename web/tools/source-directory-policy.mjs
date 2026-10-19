@@ -14,7 +14,7 @@ export function directoryEditorial(definition) {
   const explicit = definition.posts || definition.editorial?.posts;
   const posts = explicit || [
     ...(definition.description ? [{id:`${definition.id}_about`,title:`${definition.name} — შესახებ`,body:definition.description,sourceUrl:definition.sourceUrl}] : []),
-    ...(definition.address ? [{id:`${definition.id}_visit`,title:`${definition.name} — მისვლა და კონტაქტი`,body:[`ოფიციალურ ცნობარში მითითებული მისამართი: ${definition.address}.`,definition.openingHours && `სამუშაო საათები: ${definition.openingHours}.`,definition.phone && `საკონტაქტო ნომერი: ${definition.phone}.`,definition.coordinateNote].filter(Boolean).join(' '),sourceUrl:definition.sourceUrl}] : []),
+    ...(definition.address ? [{id:`${definition.id}_visit`,title:`${definition.name} — მისვლა და კონტაქტი`,body:[`${definition.sourceKind==='merchant-directory' ? 'წყაროს ცნობარში' : 'ოფიციალურ ცნობარში'} მითითებული მისამართი: ${definition.address}.`,definition.openingHours && `სამუშაო საათები: ${definition.openingHours}.`,definition.phone && `საკონტაქტო ნომერი: ${definition.phone}.`,definition.coordinateNote].filter(Boolean).join(' '),sourceUrl:definition.sourceUrl}] : []),
   ];
   return {
     ...(definition.editorial || {}), description:definition.description || '', reviewedAt:checkedAt,

@@ -1,0 +1,218 @@
+{
+  "sourceCheckedAt": "2026-10-19",
+  "brands": [
+    {
+      "id": "pkf",
+      "sourceUrl": "https://pkf.ge/",
+      "url": "https://pkf.ge/_next/static/media/pkfnewlogo.35c63c02.svg",
+      "originalWidth": 3200,
+      "originalHeight": 1333,
+      "width": 420,
+      "height": 144,
+      "sha256": "c99f7208e7cf7091aa63337ac0f7ef481ef681d3276e2d79f3f763cada32d1b9",
+      "file": "professional-pkf.png",
+      "publisher": "PKF Georgia",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_72015"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_72015",
+          "name": "ფი ქეი ეფ ჯორჯია",
+          "officialWebsite": "https://pkf.ge/",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=72015"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://pkf.ge/",
+        "address": "Iakob Nikoladze #3, I floor",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "kpmg",
+      "sourceUrl": "https://kpmg.com/ge/en.html",
+      "url": "https://kpmg.com/content/experience-fragments/kpmgpublic/ge/en/site/header/master/_jcr_content/root/header_v2/logo.coreimg.svg/1752236369554/logo.svg",
+      "originalWidth": 205,
+      "originalHeight": 80,
+      "width": 420,
+      "height": 165,
+      "sha256": "7fa4f557d15910dcc51b198375a1f82652c6ec4f600189338d86e9d0f49facc3",
+      "file": "professional-kpmg.png",
+      "publisher": "KPMG Georgia",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_79100"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_79100",
+          "name": "ქეიფიემჯი ჯორჯია - KPMG Georgia",
+          "officialWebsite": "http://www.kpmg.ge/",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=79100"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://kpmg.com/ge/en/about/offices.html",
+        "address": "5th floor, GMT Plaza, Liberty Square N4, Tbilisi",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "bdo",
+      "sourceUrl": "https://www.bdo.ge/ka-ge/home-ge",
+      "url": "https://cdn.bdo.global/images/bdo_logo/1.0.0/bdo_logo_color.png",
+      "originalWidth": 284,
+      "originalHeight": 110,
+      "width": 420,
+      "height": 163,
+      "sha256": "cf3f1bb5e0198afcbb60be312040fba29d41a30a6e192950395bd0ea0ebb2622",
+      "file": "professional-bdo.png",
+      "publisher": "BDO საქართველო",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_69692",
+        "directory_yell_70266"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_69692",
+          "name": "ბიდიო ლეგალი",
+          "officialWebsite": "https://www.bdo.ge/ka-ge/servisebi/bdo-legal",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=69692"
+        },
+        {
+          "id": "directory_yell_70266",
+          "name": "ბიდიო აუდიტი",
+          "officialWebsite": "https://www.bdo.ge/",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=70266"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://www.bdo.ge/ka-ge/contact",
+        "address": "თარხნიშვილის 2, ვერე ბიზნეს ცენტრი, 0108 თბილისი",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "pwc",
+      "sourceUrl": "https://www.pwc.com/ge/en/",
+      "url": "https://www.pwc.com/etc.clientlibs/pwc/clientlibs/rebrand-clientlibs/components-colors/resources/images/slim-header-v2/PwC-logo.svg",
+      "originalWidth": 187,
+      "originalHeight": 141,
+      "width": 370,
+      "height": 180,
+      "sha256": "ca672d5db49dbd4740475c7f39748b51c0a168e3f94e2d6e4382c8198ad3c4f2",
+      "file": "professional-pwc.png",
+      "publisher": "PwC Georgia",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_109325"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_109325",
+          "name": "შპს ფრაისუოთერჰაუსკუპერს საქართველო",
+          "officialWebsite": "https://www.pwc.com/ge",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=109325"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://www.pwc.com/ge/en/about-us/office.html",
+        "address": "#12 M. Aleksidze Street, King David Business Centre, 7th floor",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "nplaw",
+      "sourceUrl": "https://nplaw.ge/",
+      "url": "https://nplaw.ge/newassets/images/logo-geo.png",
+      "originalWidth": 2500,
+      "originalHeight": 1145,
+      "width": 393,
+      "height": 180,
+      "sha256": "5955ffd11e8a41c70b0389a389226ed18ab3182b721c71e9bf46357ea2c043ae",
+      "file": "professional-nplaw.png",
+      "publisher": "ნოდია, ურუმაშვილი და პარტნიორები",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_75670"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_75670",
+          "name": "ნოდია, ურუმაშვილი და პარტნიორები",
+          "officialWebsite": "http://www.nplaw.ge/",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=75670"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing."
+    },
+    {
+      "id": "moore",
+      "sourceUrl": "https://www.moore-georgia.ge/",
+      "url": "https://www.moore-georgia.ge/#header-logo__dark",
+      "inline": true,
+      "originalWidth": 400,
+      "originalHeight": 104,
+      "width": 420,
+      "height": 112,
+      "sha256": "e643f602595152d865faffca31383b040d95fddaf9f06234350d534a65f6741e",
+      "file": "professional-moore.png",
+      "publisher": "Moore ABC Georgia",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_130855"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_130855",
+          "name": "მოორ ეიბისი",
+          "officialWebsite": "https://www.moore-georgia.ge/",
+          "directorySourceUrl": "https://www.yell.ge/company.php?lan=geo&id=130855"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://www.moore-georgia.ge/contact-us/",
+        "address": "Sulxan Tsintsadze 12 / D. Gamrekeli 2, Tbilisi",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    },
+    {
+      "id": "grantthornton",
+      "sourceUrl": "https://www.grantthornton.ge/location/tbilisi/",
+      "url": "https://www.grantthornton.ge/location/tbilisi/#header-logo",
+      "inline": true,
+      "width": 420,
+      "height": 78,
+      "sha256": "c36f446a7cf686f79c260b6319df1889669257ff82eed0baf6193ffc1f3c8342",
+      "file": "professional-grantthornton.png",
+      "publisher": "Grant Thornton Georgia",
+      "rights": "source-published",
+      "placeIds": [
+        "directory_yell_79667"
+      ],
+      "identityEvidence": [
+        {
+          "id": "directory_yell_79667",
+          "name": "გრანთ თორნთონ",
+          "officialWebsite": "http://www.grantthornton.ge/",
+          "directorySourceUrl": "https://www.grantthornton.ge/location/tbilisi/"
+        }
+      ],
+      "assetTreatment": "Original official header artwork; format conversion, transparent edge trim and resize only; no redrawing.",
+      "currentOfficeEvidence": {
+        "url": "https://www.grantthornton.ge/location/tbilisi/",
+        "address": "24 I. Mosashvili Street, Tbilisi",
+        "sourceCheckedAt": "2026-10-19"
+      }
+    }
+  ],
+  "scope": "Bounded official-site sample; exact reviewed provider IDs only. Other directory providers are not assigned these logos."
+}

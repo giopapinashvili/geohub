@@ -1,0 +1,2300 @@
+{
+  "sourceCheckedAt": "2026-10-19",
+  "scope": "Verified Tbilisi public service/chain locations; not comprehensive city coverage.",
+  "baselineCount": 49159,
+  "sourceCandidates": 146,
+  "accepted": 106,
+  "new": 76,
+  "matched": 30,
+  "photos": 28,
+  "sourceCounts": {
+    "tegeta": {
+      "listed": 10,
+      "sourceUrl": "https://tegeta.ge/branches"
+    },
+    "amboli": {
+      "listed": 13,
+      "sourceUrl": "https://amboli.ge/contact"
+    },
+    "greenway": {
+      "listed": 13,
+      "sourceUrl": "https://greenway.ge/service-centers"
+    },
+    "usa2georgia": {
+      "listed": 8,
+      "sourceUrl": "https://www.usa2georgia.com/locations"
+    },
+    "usa2locker": {
+      "listed": 19,
+      "sourceUrl": "https://www.usa2georgia.com/locations"
+    },
+    "inex": {
+      "listed": 7,
+      "sourceUrl": "https://inex.ge/ka/pickup-locations"
+    },
+    "silknet": {
+      "listed": 26,
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers"
+    },
+    "onex": {
+      "listed": 7,
+      "sourceUrl": "https://www.onex.ge/contact-us"
+    },
+    "aldagi_provider_8f61ceed": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/8f61ceede6fad7fceff596cd23de679a"
+    },
+    "aldagi_provider_a8311819": {
+      "listed": 2,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/a831181979773ba8829e794202469215"
+    },
+    "aldagi_provider_49342421": {
+      "listed": 5,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825"
+    },
+    "aldagi_provider_98b6247b": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/98b6247bad4b3a4428c7aa2399981faf"
+    },
+    "aldagi_provider_eae597d9": {
+      "listed": 5,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a"
+    },
+    "aldagi_provider_3b9a1eba": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/3b9a1eba35156a44785a963ab8c941c1"
+    },
+    "aldagi_provider_f60e16da": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/f60e16da9a0f6c3d36697c8a5de1df81"
+    },
+    "aldagi_provider_aade84cc": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/aade84cc4d073b49bfc1222c3b1ac9e2"
+    },
+    "aldagi_provider_9ee6f91d": {
+      "listed": 1,
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/9ee6f91dd80481f5636d2c4cf5bf752b"
+    },
+    "aldagi": {
+      "listed": 19,
+      "sourceUrl": "https://aldagi.ge/ge/contact"
+    },
+    "irao": {
+      "listed": 1,
+      "sourceUrl": "https://irao.ge/contact/"
+    },
+    "unison": {
+      "listed": 1,
+      "sourceUrl": "https://unison.ge/contact"
+    },
+    "gpi": {
+      "listed": 1,
+      "sourceUrl": "https://www.gpih.ge/კონტაქტი/"
+    },
+    "ardi": {
+      "listed": 1,
+      "sourceUrl": "https://www.ardi.ge/ge/contact"
+    },
+    "realtor": {
+      "listed": 1,
+      "sourceUrl": "https://www.realtor.ge/ka/contact"
+    },
+    "shangrila": {
+      "listed": 1,
+      "sourceUrl": "https://shangrila.ge/ge/contacts/"
+    }
+  },
+  "byCategory": {
+    "car-parts": 1,
+    "car-repair": 15,
+    "vehicle-inspection": 13,
+    "logistics": 13,
+    "parcel-locker": 24,
+    "telecom": 19,
+    "car-wash": 7,
+    "fuel": 5,
+    "parking": 1,
+    "insurance": 6,
+    "real-estate": 1,
+    "casino": 1
+  },
+  "events": [
+    {
+      "source": "tegeta",
+      "sourceRecordId": "52",
+      "disposition": "outside-tbilisi-source-city",
+      "address": "ქ.გარდაბანი, თბილისის შემოვლითი გზა 36-ე კმ",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "31",
+      "id": "directory_tegeta_31",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, დ. აღმაშენებლის ხეივანი №129",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "29",
+      "id": "directory_tegeta_29",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, თენგიზ შეშელიძის ქ. №43",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "33",
+      "id": "directory_tegeta_33",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, ა. ბელიაშვილის ქ. №129",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "58",
+      "id": "directory_tegeta_58",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, ა. ბელიაშვილის ქ. №127",
+      "officialPoint": {
+        "lat": 41.7770841,
+        "lng": 44.7817205
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "32",
+      "id": "directory_tegeta_32",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, უნივერსიტეტის ქ. №6",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1337715673",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "60",
+      "id": "directory_tegeta_60",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, ელბაქიძის აღმართთან არსებული გვირაბის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.7079332,
+        "lng": 44.7915607
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11854276156",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "34",
+      "id": "directory_tegeta_34",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ.თბილისი, ვარკეთილი, ხვედელიძის ქ. №7 (ყოფ. მიტროფანე ლაღიძის ქუჩა)",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [
+        {
+          "id": "osm_way_289000975",
+          "address": "პეტრე ხვედელიძის ქუჩა 7"
+        },
+        {
+          "id": "osm_way_899958846",
+          "address": "პეტრე ხვედელიძის ქუჩა 7"
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "59",
+      "id": "directory_tegeta_59",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, კახეთის გზატკეცილი №63",
+      "officialPoint": {
+        "lat": 41.6842785,
+        "lng": 44.8879395
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "35",
+      "id": "directory_tegeta_35",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, კახეთის გზატკეცილი №15",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "61",
+      "id": "directory_tegeta_61",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, დ. აღმაშენებლის ხეივანი მე-13 კმ.",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "68c26fb5ce3ae8e8a56904a662ab9c99",
+      "id": "directory_amboli_68c26fb5ce3ae8e8a56904a662ab9c99",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "უნივერსიტეტის ქუჩა 6, თბილისი",
+      "officialPoint": {
+        "lat": 41.718759212332024,
+        "lng": 44.73909616470337
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a",
+      "id": "directory_amboli_eae597d9326cf898c551d2f2d204744a",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "0186, პ. ქავთარაძის ქ. N16",
+      "officialPoint": {
+        "lat": 41.72220665919331,
+        "lng": 44.73277688026428
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12112094144",
+          "name": "ამბოლი",
+          "distanceMetres": 3
+        },
+        {
+          "id": "osm_node_12734054729",
+          "name": "ამბოლი",
+          "distanceMetres": 17
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "38b9925fbe55ea0f1f65311cf401d1fe",
+      "id": "directory_amboli_38b9925fbe55ea0f1f65311cf401d1fe",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "მერაბ კოსტავას ქუჩა 64, თბილისი 0144",
+      "officialPoint": {
+        "lat": 41.71372294512535,
+        "lng": 44.779657430444956
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "6b0b24f4599bdfc2b902d72128195474",
+      "id": "directory_amboli_6b0b24f4599bdfc2b902d72128195474",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "მტკვრის მარცხენა სანაპირო, ქსნის ქუჩის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.75811556990237,
+        "lng": 44.78244066238403
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "be386c7fb0e509bc596d8ffb2437b1c0",
+      "id": "directory_amboli_be386c7fb0e509bc596d8ffb2437b1c0",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "მტკვრის მარჯვენა სანაპირო, პრეზიდენტ ჰეიდარ ალიევის სანაპირო",
+      "officialPoint": {
+        "lat": 41.72853249674348,
+        "lng": 44.777051347861736
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "a1304f542310d83f724627e6a7d9ef93",
+      "id": "directory_amboli_a1304f542310d83f724627e6a7d9ef93",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "ილია ვეკუას ქ. #42, თბილისი 0144",
+      "officialPoint": {
+        "lat": 41.80213378133693,
+        "lng": 44.826341651831164
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "3b9a1eba35156a44785a963ab8c941c1",
+      "id": "directory_amboli_3b9a1eba35156a44785a963ab8c941c1",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "0154, აკაკი წერეთლის გამზ. 40",
+      "officialPoint": {
+        "lat": 41.728556524344505,
+        "lng": 44.787123799324036
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "85b5811db007caaa98be32c7f96c1f01",
+      "id": "directory_amboli_85b5811db007caaa98be32c7f96c1f01",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "0131, ქართულ-ამერიკული მეგობრობის ქ. N23",
+      "officialPoint": {
+        "lat": 41.78728102353347,
+        "lng": 44.7792112827301
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_4155159864",
+          "name": "ამბოლი",
+          "distanceMetres": 4
+        },
+        {
+          "id": "osm_node_11990457445",
+          "name": "ამბოლი",
+          "distanceMetres": 12
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "b1e251a47f8c08ee6353c295846fd8ed",
+      "id": "directory_amboli_b1e251a47f8c08ee6353c295846fd8ed",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "ქეთევან დედოფლის გამზ. 108",
+      "officialPoint": {
+        "lat": 41.6861212807121,
+        "lng": 44.848941583819354
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "183a9d1d31a815b95dd0d4b71a0609a1",
+      "id": "directory_amboli_183a9d1d31a815b95dd0d4b71a0609a1",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "0120, მოსკოვის გამზ. N31",
+      "officialPoint": {
+        "lat": 41.6772632376099,
+        "lng": 44.87341046333313
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_688637155",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "cec111cc9610135ec27d7d416fe6318b",
+      "id": "directory_amboli_cec111cc9610135ec27d7d416fe6318b",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "ნიკოლოზ ხუდადოვის ქუჩა (წრესთან), თბილისი 0162",
+      "officialPoint": {
+        "lat": 41.73592341765608,
+        "lng": 44.84057697428962
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13970071601",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "e414db4ce64c2e3187c8f02f039a911d",
+      "id": "directory_amboli_e414db4ce64c2e3187c8f02f039a911d",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "ვიქტორ კუპრაძის 64, თბილისი 0159",
+      "officialPoint": {
+        "lat": 41.70978645301367,
+        "lng": 44.87250857430027
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12766134527",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "amboli",
+      "sourceRecordId": "b383a14c7a3eceeca2baad280c7524b8",
+      "id": "directory_amboli_b383a14c7a3eceeca2baad280c7524b8",
+      "sourceUrl": "https://amboli.ge/contact",
+      "address": "ავჭალის ქუჩა, ზაჰესი (თბილისის შემოსავლელი)",
+      "officialPoint": {
+        "lat": 41.825713989466145,
+        "lng": 44.747389082601515
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1323",
+      "id": "directory_greenway_1323",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "არსენ ოქროჯანაშვილის ქუჩა #8 (ზაჰესი)",
+      "officialPoint": {
+        "lat": 41.827426,
+        "lng": 44.754357
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1324",
+      "id": "directory_greenway_1324",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "დავით აღმაშენებლის ხეივანი #164",
+      "officialPoint": {
+        "lat": 41.782314,
+        "lng": 44.768498
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1325",
+      "id": "directory_greenway_1325",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "ნოდარ ბოხუას ქუჩა #1 (ბელიაშვილი)",
+      "officialPoint": {
+        "lat": 41.780524,
+        "lng": 44.782297
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1326",
+      "id": "directory_greenway_1326",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "ილია ვეკუას ქუჩა #54 (გლდანი)",
+      "officialPoint": {
+        "lat": 41.804,
+        "lng": 44.830985
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1327",
+      "id": "directory_greenway_1327",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "ეველინა თავაძის ქ. #2დ (ყოფილი ფეიქრების ქუჩა)",
+      "officialPoint": {
+        "lat": 41.769773,
+        "lng": 44.782493
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6723770999",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1328",
+      "id": "directory_greenway_1328",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "რაფაელ აგლაძის 25 (ელიავა)",
+      "officialPoint": {
+        "lat": 41.7320096,
+        "lng": 44.7819705
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1329",
+      "id": "directory_greenway_1329",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "რევაზ ურიდია #211 (ხუდადოვი)",
+      "officialPoint": {
+        "lat": 41.729654,
+        "lng": 44.826592
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12177787569",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1330",
+      "id": "directory_greenway_1330",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "უნივერსიტეტის ქუჩა #24 (ძველი #6)",
+      "officialPoint": {
+        "lat": 41.718501,
+        "lng": 44.738946
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_56125363",
+      "matchMethod": "official-address-and-exact-brand",
+      "distanceMetres": 4,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1331",
+      "id": "directory_greenway_1331",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "ბერი გაბრიელ სალოსის ქუჩა #175ა (ისანი)",
+      "officialPoint": {
+        "lat": 41.670201,
+        "lng": 44.873586
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_1380333707",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1332",
+      "id": "directory_greenway_1332",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "რუსთავის გზატკეცილი, ვახტანგ გორგასალის #117(მაკდონალდსის მიმდებარედ)",
+      "officialPoint": {
+        "lat": 41.669199,
+        "lng": 44.856417
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_1255966242",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1333",
+      "id": "directory_greenway_1333",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "ვიქტორ კუპრაძის ქუჩა #64 (ვარკეთილი)",
+      "officialPoint": {
+        "lat": 41.709708,
+        "lng": 44.872705
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1334",
+      "id": "directory_greenway_1334",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "იასონ ლორთქიფანიძის #6 (კახეთის გზატკეცილი #103)",
+      "officialPoint": {
+        "lat": 41.691532,
+        "lng": 44.913537
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "greenway",
+      "sourceRecordId": "1335",
+      "id": "directory_greenway_1335",
+      "sourceUrl": "https://greenway.ge/service-centers",
+      "address": "კახეთის გზატკეცილი #147",
+      "officialPoint": {
+        "lat": 41.69231,
+        "lng": 44.973005
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12768307258",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_17",
+      "id": "directory_usa2georgia_office_17",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ვიქტორ კუპრაძის ქ. N74",
+      "officialPoint": {
+        "lat": 41.711968,
+        "lng": 44.8825
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12554066911",
+          "name": "USA2Georgia",
+          "distanceMetres": 26
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_7",
+      "id": "directory_usa2georgia_office_7",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ვაჟა-ფშაველას გამზ. N96",
+      "officialPoint": {
+        "lat": 41.722761,
+        "lng": 44.721804
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_8419981117",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_1",
+      "id": "directory_usa2georgia_office_1",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ა. ცაგარელის ქ. N31",
+      "officialPoint": {
+        "lat": 41.723842,
+        "lng": 44.764105
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9840198396",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_6",
+      "id": "directory_usa2georgia_office_6",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ილო მოსაშვილის ქ. N2",
+      "officialPoint": {
+        "lat": 41.710139,
+        "lng": 44.758487
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6782386375",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_2",
+      "id": "directory_usa2georgia_office_2",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ლუბლიანას ქ. N3",
+      "officialPoint": {
+        "lat": 41.767479,
+        "lng": 44.775156
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11610272915",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_4",
+      "id": "directory_usa2georgia_office_4",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ხიზანიშვილის ქ. N108",
+      "officialPoint": {
+        "lat": 41.803583,
+        "lng": 44.828806
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11989607578",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_5",
+      "id": "directory_usa2georgia_office_5",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "აწყურის ქ. N45",
+      "officialPoint": {
+        "lat": 41.688204,
+        "lng": 44.840438
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_5704683553",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 25,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "usa2georgia",
+      "sourceRecordId": "office_13",
+      "id": "directory_usa2georgia_office_13",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "დემეტრე თავდადებულის ქ., N10ბ",
+      "officialPoint": {
+        "lat": 41.796447,
+        "lng": 44.759612
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "350",
+      "id": "directory_usa2locker_350",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ალ. ყაზბეგის გამზ. N16",
+      "officialPoint": {
+        "lat": 41.7253857,
+        "lng": 44.7591782
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "312",
+      "id": "directory_usa2locker_312",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "დ. აღმაშენებლის ხეივანი, N179",
+      "officialPoint": {
+        "lat": 41.767319,
+        "lng": 44.769316
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "256",
+      "id": "directory_usa2locker_256",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "გაბრიელ სალოსის გამზ. N41",
+      "officialPoint": {
+        "lat": 41.676564,
+        "lng": 44.844003
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "246",
+      "id": "directory_usa2locker_246",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ვ. ბაგრატიონის ქ. N42",
+      "officialPoint": {
+        "lat": 41.727383,
+        "lng": 44.787557
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "200",
+      "id": "directory_usa2locker_200",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ა. ბელიაშვილის ქ. N106",
+      "officialPoint": {
+        "lat": 41.77963,
+        "lng": 44.781582
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "198",
+      "id": "directory_usa2locker_198",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ა. წერეთლის გამზ. N116",
+      "officialPoint": {
+        "lat": 41.738536,
+        "lng": 44.780694
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "186",
+      "id": "directory_usa2locker_186",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ვაჟა ფშაველას გამზ. N29",
+      "officialPoint": {
+        "lat": 41.726807,
+        "lng": 44.756798
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "182",
+      "id": "directory_usa2locker_182",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "შ. რუსთაველის გამზ. N2/4",
+      "officialPoint": {
+        "lat": 41.694442,
+        "lng": 44.799919
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "176",
+      "id": "directory_usa2locker_176",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ო. ხიზანიშვილის ქ. N57",
+      "officialPoint": {
+        "lat": 41.80361,
+        "lng": 44.830197
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11989607578",
+          "name": "USA2Georgia",
+          "distanceMetres": 118
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "174",
+      "id": "directory_usa2locker_174",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ა. ჩიქობავას ქ. N22",
+      "officialPoint": {
+        "lat": 41.707625,
+        "lng": 44.804921
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "172",
+      "id": "directory_usa2locker_172",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ა. გობრონიძის ქ. N18",
+      "officialPoint": {
+        "lat": 41.788309,
+        "lng": 44.81876
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "168",
+      "id": "directory_usa2locker_168",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ვ. გორგასალის ქ. N61",
+      "officialPoint": {
+        "lat": 41.678513,
+        "lng": 44.824436
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "166",
+      "id": "directory_usa2locker_166",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "დ. გურამიშვილის გამზ. N64",
+      "officialPoint": {
+        "lat": 41.767459,
+        "lng": 44.790802
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "162",
+      "id": "directory_usa2locker_162",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "კალოუბნის ქ. N9",
+      "officialPoint": {
+        "lat": 41.688911,
+        "lng": 44.874916
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "156",
+      "id": "directory_usa2locker_156",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ს. ეულის ქ.",
+      "officialPoint": {
+        "lat": 41.722538,
+        "lng": 44.717009
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "150",
+      "id": "directory_usa2locker_150",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ი. ჭავჭავაძის გამზ. N34",
+      "officialPoint": {
+        "lat": 41.7090034,
+        "lng": 44.7691343
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "144",
+      "id": "directory_usa2locker_144",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ს. ცინცაძის ქ.",
+      "officialPoint": {
+        "lat": 41.7215431,
+        "lng": 44.7663712
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "98",
+      "id": "directory_usa2locker_98",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ი. ჭავჭავაძის გამზ. N37",
+      "officialPoint": {
+        "lat": 41.711422,
+        "lng": 44.758282
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "usa2locker",
+      "sourceRecordId": "94",
+      "id": "directory_usa2locker_94",
+      "sourceUrl": "https://www.usa2georgia.com/locations",
+      "address": "ი. ვეკუას ქ. N14",
+      "officialPoint": {
+        "lat": 41.793807,
+        "lng": 44.818169
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "7",
+      "id": "directory_inex_7",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "ვაკე-საბურთალო, მ. თამარაშვილის გამზ. N10",
+      "officialPoint": {
+        "lat": 41.7233,
+        "lng": 44.7457
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10947366605",
+          "name": "ინექს",
+          "distanceMetres": 59
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "1",
+      "id": "directory_inex_1",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "წერეთლის გამზირი N57",
+      "officialPoint": {
+        "lat": 41.7341,
+        "lng": 44.7843
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "2",
+      "id": "directory_inex_2",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "ბიზნეს ცენტრი ბიემესი ხიზანიშვილის 23",
+      "officialPoint": {
+        "lat": 41.7949,
+        "lng": 44.8178
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12778059913",
+          "name": "ინექს",
+          "distanceMetres": 26
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "45",
+      "id": "directory_inex_45",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "აწყურის 45",
+      "officialPoint": {
+        "lat": 41.6954,
+        "lng": 44.8375
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "697",
+      "id": "directory_inex_697",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "მირიან მეფის 42",
+      "officialPoint": {
+        "lat": 41.7873,
+        "lng": 44.758
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "4",
+      "id": "directory_inex_4",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "საქართველოს ერთიანობისთვის მებრძოლთა ქუჩა 41",
+      "officialPoint": {
+        "lat": 41.6977,
+        "lng": 44.8787
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "inex",
+      "sourceRecordId": "716",
+      "id": "directory_inex_716",
+      "sourceUrl": "https://inex.ge/ka/pickup-locations",
+      "address": "ჰუალინგ პლაზა, ჯ. ლეჟავას 22",
+      "officialPoint": {
+        "lat": 41.7071,
+        "lng": 44.861
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2417",
+      "id": "directory_silknet_2417",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ისთ ფოინთი, ა. თვალჭრელიძის #2",
+      "officialPoint": {
+        "lat": 41.691032,
+        "lng": 44.896318
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2376",
+      "id": "directory_silknet_2376",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "გლდანი მოლი, გლდანი, მ/ს ახმეტელის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.79229,
+        "lng": 44.81568
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2375",
+      "id": "directory_silknet_2375",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "გლდანი პლაზა, გლდანი, ი. ვეკუას 14",
+      "officialPoint": {
+        "lat": 41.79387,
+        "lng": 44.81804
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11222897310",
+          "name": "სილქნეტი",
+          "distanceMetres": 70
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2350",
+      "id": "directory_silknet_2350",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო დელისი",
+      "officialPoint": {
+        "lat": 41.72533,
+        "lng": 44.74468
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2349",
+      "id": "directory_silknet_2349",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო სამედიცინო ინსტიტუტი",
+      "officialPoint": {
+        "lat": 41.72731,
+        "lng": 44.76275
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2348",
+      "id": "directory_silknet_2348",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო დიდუბე",
+      "officialPoint": {
+        "lat": 41.74985,
+        "lng": 44.77948
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2347",
+      "id": "directory_silknet_2347",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო სადგურის მოედანი 2",
+      "officialPoint": {
+        "lat": 41.72395,
+        "lng": 44.79932
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2346",
+      "id": "directory_silknet_2346",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო სადგურის მოედანი 3",
+      "officialPoint": {
+        "lat": 41.722527,
+        "lng": 44.79608
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2326",
+      "id": "directory_silknet_2326",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო ისანი",
+      "officialPoint": {
+        "lat": 41.68655,
+        "lng": 44.84089
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2325",
+      "id": "directory_silknet_2325",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო მარჯანიშვილი",
+      "officialPoint": {
+        "lat": 41.70988,
+        "lng": 44.7976
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "2301",
+      "id": "directory_silknet_2301",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტრო სადგურის მოედანი 1",
+      "officialPoint": {
+        "lat": 41.721995,
+        "lng": 44.7978674
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1965",
+      "id": "directory_silknet_1965",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "სითი მოლი საბურთალო, ვაჟა-ფშაველას #70, სართ. G; გუდვილის სალაროების პირდაპირ.",
+      "officialPoint": {
+        "lat": 41.7238,
+        "lng": 44.7377
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_relation_17841671",
+          "name": "Silknet",
+          "address": "ვაჟა-ფშაველას გამზირი 70",
+          "distanceMetres": 60
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1954",
+      "id": "directory_silknet_1954",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "გალერია თბილისი, რუსთაველის გამზ. #2/4",
+      "officialPoint": {
+        "lat": 41.69459818387551,
+        "lng": 44.79996555159902
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1710",
+      "id": "directory_silknet_1710",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "სითი მოლი გლდანი, სითი მოლი, გლდანი, ილია ვეკუას #1",
+      "officialPoint": {
+        "lat": 41.7903575,
+        "lng": 44.8143959
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1674",
+      "id": "directory_silknet_1674",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "სითი მოლი საბურთალო 2, ვაჟა -ფშაველას გამზ. #70, სითი მოლი, სართული G",
+      "officialPoint": {
+        "lat": 41.7238,
+        "lng": 44.7377
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_relation_17841671",
+          "name": "Silknet",
+          "address": "ვაჟა-ფშაველას გამზირი 70",
+          "distanceMetres": 60
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1633",
+      "id": "directory_silknet_1633",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "თბილისის საერთაშორისო აეროპორტი (ჩამოფრენის დარბაზიდან მარჯვნივ), სამუშაო საათები: ყოველდღე, 24 საათი. შესვენება: ფრენების განრიგის გათვალისწინებით",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1632",
+      "id": "directory_silknet_1632",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ილია ჭავჭავაძის გამზ. #37მ, აგროჰაბი",
+      "officialPoint": {
+        "lat": 41.71130717601862,
+        "lng": 44.7601648643416
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1487",
+      "id": "directory_silknet_1487",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "თბილისი ცენტრალი, III სართული",
+      "officialPoint": {
+        "lat": 41.7206524,
+        "lng": 44.7993474
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_way_1280895098",
+          "name": "სილქნეტი",
+          "distanceMetres": 84
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "1409",
+      "id": "directory_silknet_1409",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ცოტნე დადიანის #7; სავაჭრო ცენტრი ქარვასლა",
+      "officialPoint": {
+        "lat": 41.717413,
+        "lng": 44.802715
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "176",
+      "id": "directory_silknet_176",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ალ. ყაზბეგის გამზ. #14",
+      "officialPoint": {
+        "lat": 41.725415,
+        "lng": 44.759965
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6423024786",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "461",
+      "id": "directory_silknet_461",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ცინცაძის ქ. #2",
+      "officialPoint": {
+        "lat": 41.722479,
+        "lng": 44.773208
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_9834163740",
+          "name": "სილქნეტი",
+          "distanceMetres": 30
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "172",
+      "id": "directory_silknet_172",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "პირველი რესპუბლიკის მოედანი #6",
+      "officialPoint": {
+        "lat": 41.703765,
+        "lng": 44.791687
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11473324005",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "171",
+      "id": "directory_silknet_171",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტროსადგურ \"ვარკეთილი\"-ს მიმდებარე ტერიტორია",
+      "officialPoint": {
+        "lat": 41.691631402773666,
+        "lng": 44.869812652176016
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12854941627",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "460",
+      "id": "directory_silknet_460",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "მეტეხის ქ. #22",
+      "officialPoint": {
+        "lat": 41.691802,
+        "lng": 44.814208
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11197924438",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "177",
+      "id": "directory_silknet_177",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "თევდორე მღვდლის ქ. #46",
+      "officialPoint": {
+        "lat": 41.7293725804718,
+        "lng": 44.790513282590254
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4603523050",
+      "matchMethod": "official-address-and-exact-brand",
+      "distanceMetres": 116,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "silknet",
+      "sourceRecordId": "417",
+      "id": "directory_silknet_417",
+      "sourceUrl": "https://silknet.com/ge/footer/service-centers",
+      "address": "ბაქოს ქუჩა #2",
+      "officialPoint": {
+        "lat": 41.717834,
+        "lng": 44.792224
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_14108319588",
+          "name": "სილქნეტი",
+          "distanceMetres": 49
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "1",
+      "id": "directory_onex_1",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ალ. ყაზბეგის გამზირი 19ბ",
+      "officialPoint": {
+        "lat": 41.7257616,
+        "lng": 44.7598714
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11059280805",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "33",
+      "id": "directory_onex_33",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ნიკორა, თავხელიძის 1",
+      "officialPoint": {
+        "lat": 41.722824,
+        "lng": 44.73205
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "34",
+      "id": "directory_onex_34",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ნიკორა, ფალიაშვილის 90",
+      "officialPoint": {
+        "lat": 41.7095276,
+        "lng": 44.75757502
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "35",
+      "id": "directory_onex_35",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ნიკორა, მარჯანიშვილის 16",
+      "officialPoint": {
+        "lat": 41.70926706,
+        "lng": 44.79485766
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "36",
+      "id": "directory_onex_36",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ნიკორა, მირიან მეფის 84",
+      "officialPoint": {
+        "lat": 41.7872281,
+        "lng": 44.7454022
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "37",
+      "id": "directory_onex_37",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ნიკორა, შუამთის 12",
+      "officialPoint": {
+        "lat": 41.6870522,
+        "lng": 44.8771336
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "130",
+      "id": "directory_onex_130",
+      "sourceUrl": "https://www.onex.ge/contact-us",
+      "address": "ანაპის 414-ე დივიზიის ქუჩა 16",
+      "officialPoint": {
+        "lat": 41.777352,
+        "lng": 44.807347
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_8f61ceed",
+      "sourceRecordId": "8f61ceede6fad7fceff596cd23de679a_241c5ce080",
+      "id": "directory_aldagi_provider_8f61ceed_8f61ceede6fad7fceff596cd23de679a_241c5ce080",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/8f61ceede6fad7fceff596cd23de679a",
+      "address": "თბილისი, მტკვრის მარჯვენა სანაპირო, ჰეიდარ ალიევის ქ. N14",
+      "officialPoint": {
+        "lat": 41.7283144,
+        "lng": 44.7772058
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_a8311819",
+      "sourceRecordId": "a831181979773ba8829e794202469215_b8d75c0322",
+      "id": "directory_aldagi_provider_a8311819_a831181979773ba8829e794202469215_b8d75c0322",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/a831181979773ba8829e794202469215",
+      "address": "თბილისი, აკაკი წერეთლის გამზირი N123",
+      "officialPoint": {
+        "lat": 41.747485172050354,
+        "lng": 44.77885924417906
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_a8311819",
+      "sourceRecordId": "a831181979773ba8829e794202469215_75bc35afa5",
+      "id": "directory_aldagi_provider_a8311819_a831181979773ba8829e794202469215_75bc35afa5",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/a831181979773ba8829e794202469215",
+      "address": "თბილისი, უნივერსიტეტის ქუჩა N6",
+      "officialPoint": {
+        "lat": 41.718441889622206,
+        "lng": 44.737135014267736
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi_provider_49342421",
+      "sourceRecordId": "49342421892f758f50668e83f083c825_330c8b9dd7",
+      "id": "directory_aldagi_provider_49342421_49342421892f758f50668e83f083c825_330c8b9dd7",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825",
+      "address": "თბილისი, აეროპორტი N2, სავაჭრო-საბითუმო ბაზა ცეკავშირი",
+      "officialPoint": {
+        "lat": 41.692826213467484,
+        "lng": 44.96096585832808
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_49342421",
+      "sourceRecordId": "49342421892f758f50668e83f083c825_fcd7fcc867",
+      "id": "directory_aldagi_provider_49342421_49342421892f758f50668e83f083c825_fcd7fcc867",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825",
+      "address": "თბილისი, ორთაჭალა, დიმიტრი გულიას ქუჩა, შსს-ს მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.68466433288792,
+        "lng": 44.826643939955176
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_49342421",
+      "sourceRecordId": "49342421892f758f50668e83f083c825_7450e37072",
+      "id": "directory_aldagi_provider_49342421_49342421892f758f50668e83f083c825_7450e37072",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825",
+      "address": "თბილისი, აკაკი ბელიაშვილის ქუჩა N183",
+      "officialPoint": {
+        "lat": 41.78368885051248,
+        "lng": 44.781879322104366
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_49342421",
+      "sourceRecordId": "49342421892f758f50668e83f083c825_cf7fa0d1e4",
+      "id": "directory_aldagi_provider_49342421_49342421892f758f50668e83f083c825_cf7fa0d1e4",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825",
+      "address": "თბილისი, აწყურის ქუჩა N92",
+      "officialPoint": {
+        "lat": 41.68869110595643,
+        "lng": 44.84166019576088
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_49342421",
+      "sourceRecordId": "49342421892f758f50668e83f083c825_f0bd15bbb5",
+      "id": "directory_aldagi_provider_49342421_49342421892f758f50668e83f083c825_f0bd15bbb5",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/49342421892f758f50668e83f083c825",
+      "address": "თბილისი, პეტრე ქავთარაძის ქუჩა N54",
+      "officialPoint": {
+        "lat": 41.72161498625507,
+        "lng": 44.72374917628199
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_98b6247b",
+      "sourceRecordId": "98b6247bad4b3a4428c7aa2399981faf_243deb731d",
+      "id": "directory_aldagi_provider_98b6247b_98b6247bad4b3a4428c7aa2399981faf_243deb731d",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/98b6247bad4b3a4428c7aa2399981faf",
+      "address": "თბილისი, რიყის ტერიტორია",
+      "officialPoint": {
+        "lat": 41.69171853335108,
+        "lng": 44.811042825949194
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi_provider_eae597d9",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a_d2c8c305ce",
+      "id": "directory_aldagi_provider_eae597d9_eae597d9326cf898c551d2f2d204744a_d2c8c305ce",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a",
+      "address": "თბილისი, ბერი გაბრიელ სალოსის N175ა",
+      "officialPoint": {
+        "lat": 41.672210402927945,
+        "lng": 44.87359621068847
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_eae597d9",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a_67bed718a8",
+      "id": "directory_aldagi_provider_eae597d9_eae597d9326cf898c551d2f2d204744a_67bed718a8",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a",
+      "address": "თბილისი, დავით აღმაშენებლის ხეივანი N164",
+      "officialPoint": {
+        "lat": 41.785460875513564,
+        "lng": 44.76785280492161
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_eae597d9",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a_12b2909da7",
+      "id": "directory_aldagi_provider_eae597d9_eae597d9326cf898c551d2f2d204744a_12b2909da7",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a",
+      "address": "თბილისი, გლდანი, ილია ვეკუას N54",
+      "officialPoint": {
+        "lat": 41.80721692181493,
+        "lng": 44.831882497049925
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_eae597d9",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a_7a6ee6fa22",
+      "id": "directory_aldagi_provider_eae597d9_eae597d9326cf898c551d2f2d204744a_7a6ee6fa22",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a",
+      "address": "თბილისი, ფეიქრების ქუჩა N2",
+      "officialPoint": {
+        "lat": 41.772275678235864,
+        "lng": 44.78107073064246
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_eae597d9",
+      "sourceRecordId": "eae597d9326cf898c551d2f2d204744a_361a8f6f1f",
+      "id": "directory_aldagi_provider_eae597d9_eae597d9326cf898c551d2f2d204744a_361a8f6f1f",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/eae597d9326cf898c551d2f2d204744a",
+      "address": "თბილისი, ბელიაშვილი, ნოდარ ბოხუას N1",
+      "officialPoint": {
+        "lat": 41.78354086980339,
+        "lng": 44.782100698880456
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_3b9a1eba",
+      "sourceRecordId": "3b9a1eba35156a44785a963ab8c941c1_8b16f7d449",
+      "id": "directory_aldagi_provider_3b9a1eba_3b9a1eba35156a44785a963ab8c941c1_8b16f7d449",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/3b9a1eba35156a44785a963ab8c941c1",
+      "address": "თბილისი, ქ.თბილისი ფეიქართა II ",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi_provider_f60e16da",
+      "sourceRecordId": "f60e16da9a0f6c3d36697c8a5de1df81_143fbfe1ee",
+      "id": "directory_aldagi_provider_f60e16da_f60e16da9a0f6c3d36697c8a5de1df81_143fbfe1ee",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/f60e16da9a0f6c3d36697c8a5de1df81",
+      "address": "თბილისი, ბერი გაბრიელ სალოსი ქუჩა 132",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi_provider_aade84cc",
+      "sourceRecordId": "aade84cc4d073b49bfc1222c3b1ac9e2_8dbd426b13",
+      "id": "directory_aldagi_provider_aade84cc_aade84cc4d073b49bfc1222c3b1ac9e2_8dbd426b13",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/aade84cc4d073b49bfc1222c3b1ac9e2",
+      "address": "თბილისი, აღმაშენებლის ხეივანი #13",
+      "officialPoint": {
+        "lat": 41.7849074,
+        "lng": 44.7660779
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi_provider_9ee6f91d",
+      "sourceRecordId": "9ee6f91dd80481f5636d2c4cf5bf752b_f7e13f4b7c",
+      "id": "directory_aldagi_provider_9ee6f91d_9ee6f91dd80481f5636d2c4cf5bf752b_f7e13f4b7c",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/9ee6f91dd80481f5636d2c4cf5bf752b",
+      "address": "თბილისი, ლევან რჩეულიშვილის ქ. 25",
+      "officialPoint": {
+        "lat": 41.7690242,
+        "lng": 44.7547413
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "head_office",
+      "id": "directory_aldagi_head_office",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "ანა პოლიტკოვსკაიას ქუჩა 16",
+      "officialPoint": {
+        "lat": 41.72036569570052,
+        "lng": 44.71050965453727
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12951993903",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 24,
+      "finalDisposition": "enrich-existing"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "3e76a9be31",
+      "id": "directory_aldagi_3e76a9be31",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "ი. ჭავჭავაძის გამზირი #20 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [
+        {
+          "id": "osm_way_565074675",
+          "address": "ალექსანდრე ჭავჭავაძის ქუჩა 20"
+        },
+        {
+          "id": "osm_way_1072637999",
+          "address": "ილია ჭავჭავაძის გამზირი 20"
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "721bde1ccb",
+      "id": "directory_aldagi_721bde1ccb",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6, თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1337715673",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "2565f6d921",
+      "id": "directory_aldagi_2565f6d921",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ.აღმაშენებლის ხეივანი #116, თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "1a426114c0",
+      "id": "directory_aldagi_1a426114c0",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6 თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1337715673",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "2d44711590",
+      "id": "directory_aldagi_2d44711590",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #160 თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1181771291",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "cab4a88a37",
+      "id": "directory_aldagi_cab4a88a37",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #129 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "bf3fce8e7a",
+      "id": "directory_aldagi_bf3fce8e7a",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "ბალანჩინი პლაზა, ბელიაშვილის ქუჩა #142 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "b11eb0ae77",
+      "id": "directory_aldagi_b11eb0ae77",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6 თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1337715673",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "6e5ee29fdc",
+      "id": "directory_aldagi_6e5ee29fdc",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #204 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "75a1894673",
+      "id": "directory_aldagi_75a1894673",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #84 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "c6501ae191",
+      "id": "directory_aldagi_c6501ae191",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #197 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "a69cf9a003",
+      "id": "directory_aldagi_a69cf9a003",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "ბალანჩინი პლაზა, ა. ბელიაშვილის ქუჩა #142 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "93b1ccbd5d",
+      "id": "directory_aldagi_93b1ccbd5d",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #155 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "bb2c735e64",
+      "id": "directory_aldagi_bb2c735e64",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #116 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "9d6a0b4a2b",
+      "id": "directory_aldagi_9d6a0b4a2b",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #137 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "ca1059d43f",
+      "id": "directory_aldagi_ca1059d43f",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "მარშალ გელოვანის გამზირი #68 თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_1180024129",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "2690bc76d9",
+      "id": "directory_aldagi_2690bc76d9",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "დ. აღმაშენებლის ხეივანი #100 თბილისი, საქართველო",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "4b18a1373c",
+      "id": "directory_aldagi_4b18a1373c",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "რ. აგლაძის #15, თბილისი, საქართველო",
+      "officialPoint": null,
+      "coordinateSourceId": "osm_way_35283128",
+      "disposition": "new-at-verified-address",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "irao",
+      "sourceRecordId": "head_office",
+      "id": "directory_irao_head_office",
+      "sourceUrl": "https://irao.ge/contact/",
+      "address": "ვახტანგ ბოჭორიშვილის ქუჩა 88/15",
+      "officialPoint": {
+        "lat": 41.7249258,
+        "lng": 44.7793886
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "unison",
+      "sourceRecordId": "head_office",
+      "id": "directory_unison_head_office",
+      "sourceUrl": "https://unison.ge/contact",
+      "address": "დავით გამრეკელის ქუჩა 19",
+      "officialPoint": null,
+      "disposition": "unresolved-no-coordinate-anchor",
+      "anchorCandidates": [
+        {
+          "id": "osm_way_83607103",
+          "address": "დავით გამრეკელის ქუჩა 19"
+        },
+        {
+          "id": "osm_way_1258409142",
+          "address": "ირაკლი გამრეკელის ქუჩა 19"
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "gpi",
+      "sourceRecordId": "kostava_67",
+      "id": "directory_gpi_kostava_67",
+      "sourceUrl": "https://www.gpih.ge/კონტაქტი/",
+      "address": "მერაბ კოსტავას ქუჩა 67",
+      "officialPoint": null,
+      "disposition": "unresolved-near-existing-at-address",
+      "candidates": [
+        {
+          "id": "osm_node_11396337915",
+          "distanceMetres": 42
+        }
+      ],
+      "finalDisposition": "held"
+    },
+    {
+      "source": "ardi",
+      "sourceRecordId": "3",
+      "id": "directory_ardi_3",
+      "sourceUrl": "https://www.ardi.ge/ge/contact",
+      "address": "ზურაბ ანჯაფარიძის ქუჩა 28",
+      "officialPoint": {
+        "lat": 41.723485,
+        "lng": 44.716731
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "realtor",
+      "sourceRecordId": "chavchavadze_66",
+      "id": "directory_realtor_chavchavadze_66",
+      "sourceUrl": "https://www.realtor.ge/ka/contact",
+      "address": "ილია ჭავჭავაძის გამზირი 66",
+      "officialPoint": {
+        "lat": 41.710964693084,
+        "lng": 44.757110277848
+      },
+      "disposition": "new-official-point",
+      "finalDisposition": "append"
+    },
+    {
+      "source": "shangrila",
+      "sourceRecordId": "tbilisi",
+      "id": "directory_shangrila_tbilisi",
+      "sourceUrl": "https://shangrila.ge/ge/contacts/",
+      "address": "მტკვრის მარჯვენა სანაპირო, მშვიდობის ხიდთან ახლოს",
+      "officialPoint": {
+        "lat": 41.6932655,
+        "lng": 44.8072373
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_relation_18276377",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11,
+      "finalDisposition": "enrich-existing"
+    }
+  ],
+  "manualReview": [
+    {
+      "source": "onex",
+      "sourceRecordId": "35",
+      "disposition": "media-excluded-generated-image",
+      "reason": "Official image filename explicitly indicates ChatGPT-generated imagery; not used as real branch photo."
+    },
+    {
+      "source": "onex",
+      "sourceRecordId": "37",
+      "disposition": "media-excluded-generated-image",
+      "reason": "Official image filename explicitly indicates ChatGPT-generated imagery; not used as real branch photo."
+    },
+    {
+      "source": "aldagi-partners",
+      "sourceRecordId": "183a9d1d31a815b95dd0d4b71a0609a1",
+      "name": "ამბოლი",
+      "disposition": "prefer-direct-provider-directory",
+      "reason": "Avoid stale partner coordinates and duplicate direct-provider branches."
+    },
+    {
+      "source": "aldagi-partners",
+      "sourceRecordId": "d467cff017fb7d3aa420c4acf48fc3f4",
+      "name": "გრინვეი",
+      "disposition": "prefer-direct-provider-directory",
+      "reason": "Avoid stale partner coordinates and duplicate direct-provider branches."
+    },
+    {
+      "source": "aldagi-partners",
+      "sourceRecordId": "12812c605e088cbda01ff323c3bb64d9",
+      "name": "თეგეტა მოტორსი",
+      "disposition": "prefer-direct-provider-directory",
+      "reason": "Avoid stale partner coordinates and duplicate direct-provider branches."
+    },
+    {
+      "source": "aldagi-partners",
+      "sourceRecordId": "cb3d04cd66358ae4abd28d1a692fc68f",
+      "name": "ტოიოტა ცენტრი თეგეტა",
+      "disposition": "prefer-direct-provider-directory",
+      "reason": "Avoid stale partner coordinates and duplicate direct-provider branches."
+    },
+    {
+      "source": "ardi",
+      "sourceRecordId": "17",
+      "address": "ზურაბ ანჯაფარიძის ქუჩა 30",
+      "disposition": "duplicate-official-coordinate-conflicting-address",
+      "reason": "Official marker equals source3 address28 exactly; do not manufacture a distinct entrance or duplicate the point."
+    },
+    {
+      "source": "tegeta",
+      "sourceRecordId": "32",
+      "id": "directory_tegeta_32",
+      "sourceUrl": "https://tegeta.ge/branches",
+      "address": "ქ. თბილისი, უნივერსიტეტის ქ. №6",
+      "disposition": "held-after-location-review",
+      "reason": "Exact old street/number matches an apartment building, while official Tegeta branch photo depicts an automotive campus elsewhere. University Street numbering conflict; no coordinate guessing."
+    },
+    {
+      "source": "aldagi_provider_a8311819",
+      "sourceRecordId": "a831181979773ba8829e794202469215_75bc35afa5",
+      "id": "directory_aldagi_provider_a8311819_a831181979773ba8829e794202469215_75bc35afa5",
+      "sourceUrl": "https://aldagi.ge/providers/quick-view/a831181979773ba8829e794202469215",
+      "address": "თბილისი, უნივერსიტეტის ქუჩა N6",
+      "disposition": "held-after-location-review",
+      "reason": "Official partner address says University6; nearest mapped car wash has University32. Distinct identity/numbering is unresolved."
+    },
+    {
+      "source": "aldagi_provider_aade84cc",
+      "id": "directory_aldagi_provider_aade84cc_aade84cc4d073b49bfc1222c3b1ac9e2_8dbd426b13",
+      "disposition": "media-excluded-promotional-or-unconfirmed-facility",
+      "originalUrl": "https://aldagi.ge/upload/Providers/61911173_2444206305631660_5422742505823141888_n_beca2699.jpg",
+      "reason": "Image is promotional content or does not establish the actual building; not used as place photography."
+    },
+    {
+      "source": "aldagi_provider_9ee6f91d",
+      "id": "directory_aldagi_provider_9ee6f91d_9ee6f91dd80481f5636d2c4cf5bf752b_f7e13f4b7c",
+      "disposition": "media-excluded-promotional-or-unconfirmed-facility",
+      "originalUrl": "https://aldagi.ge/upload/Providers/%E1%83%A1%E1%83%98%E1%83%97%E1%83%98_%E1%83%92%E1%83%90%E1%83%A0%E1%83%90%E1%83%9F%E1%83%98_d4546e3c.jpg",
+      "reason": "Image is promotional content or does not establish the actual building; not used as place photography."
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "721bde1ccb",
+      "id": "directory_aldagi_721bde1ccb",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6, თბილისი, საქართველო",
+      "disposition": "held-after-location-review",
+      "reason": "Exact old street/number matches an apartment building, while official Tegeta branch photo depicts an automotive campus elsewhere. University Street numbering conflict; no coordinate guessing."
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "1a426114c0",
+      "id": "directory_aldagi_1a426114c0",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6 თბილისი, საქართველო",
+      "disposition": "held-after-location-review",
+      "reason": "Exact old street/number matches an apartment building, while official Tegeta branch photo depicts an automotive campus elsewhere. University Street numbering conflict; no coordinate guessing."
+    },
+    {
+      "source": "aldagi",
+      "sourceRecordId": "b11eb0ae77",
+      "id": "directory_aldagi_b11eb0ae77",
+      "sourceUrl": "https://aldagi.ge/ge/contact",
+      "address": "უნივერსიტეტის ქუჩა #6 თბილისი, საქართველო",
+      "disposition": "held-after-location-review",
+      "reason": "Exact old street/number matches an apartment building, while official Tegeta branch photo depicts an automotive campus elsewhere. University Street numbering conflict; no coordinate guessing."
+    },
+    {
+      "source": "shangrila",
+      "id": "directory_shangrila_tbilisi",
+      "disposition": "media-excluded-promotional-or-unconfirmed-facility",
+      "originalUrl": "https://shangrila.ge/wp-content/uploads/2025/04/Home-960-580.jpg",
+      "reason": "Image is promotional content or does not establish the actual building; not used as place photography."
+    }
+  ],
+  "unavailable": [
+    {
+      "sourceUrl": "https://ambassadori.com/tbilisi/contact",
+      "reason": "Embedded marker is outside Tbilisi (Kachreti coordinates); no casino location inferred."
+    },
+    {
+      "sourceUrl": "https://www.primeinsurance.ge/ge/home",
+      "reason": "Contact address University24 conflicts with embedded marker elsewhere; no point copied."
+    }
+  ],
+  "validation": {
+    "allUniqueIds": true,
+    "allWithinSourceBbox": true,
+    "actualImporter": true,
+    "matchedIdsAndCoordinatesPreserved": true
+  }
+}

@@ -64,6 +64,7 @@ const ROWS = {
   ],
   auto: [
     ['car-dealer','ავტომობილების გაყიდვა','car'], ['car-repair','ავტოსერვისი','wrench'], ['tires','საბურავები და ვულკანიზაცია','car'],
+    ['vehicle-inspection','ტექინსპექტირება','shield-check'],
     ['car-parts','ავტონაწილები','wrench'], ['car-wash','ავტოსამრეცხაო','car'], ['car-rental','ავტოგაქირავება','car'],
     ['fuel','ავტოგასამართი სადგური','car'], ['charging-station','ელექტრომობილის დამტენი','lightning'], ['parking','ავტოსადგომი','car'],
     ['motorcycle','მოტოციკლები','car'], ['bicycle-shop','ველოსიპედის მაღაზია','navigation-arrow'],
@@ -109,7 +110,7 @@ const ROWS = {
   ],
   services: [
     ['office','ოფისი','briefcase'], ['real-estate','უძრავი ქონების სააგენტო','house-line'], ['telecom','ინტერნეტისა და კავშირის ოფისი','phone'],
-    ['lawyer','იურიდიული მომსახურება','briefcase'], ['accountant','ბუღალტერია','receipt'], ['travel-agency','ტურისტული სააგენტო','globe-simple'],
+    ['lawyer','იურიდიული მომსახურება','briefcase'], ['notary','ნოტარიუსი','stamp'], ['accountant','ბუღალტერია','receipt'], ['travel-agency','ტურისტული სააგენტო','globe-simple'],
     ['employment-agency','დასაქმების სააგენტო','briefcase'], ['it-services','IT სერვისები','laptop'], ['coworking','საერთო სამუშაო სივრცე','users-three'],
     ['beauty','სილამაზის სალონი','sparkle'], ['hairdresser','თმის სალონი','user'], ['tattoo','ტატუ და პირსინგი','paint-brush'],
     ['spa','სპა','waves'], ['massage','მასაჟი','heart'], ['laundry','სამრეცხაო','t-shirt'], ['dry-cleaning','ქიმწმენდა','t-shirt'],
@@ -160,10 +161,11 @@ export function taxonomyCategory(value) { return BY_ID[canonicalCategory(value)]
 export function matchesPlaceCategory(place, selected) {
   if (!selected || selected === 'all') return true;
   const category = taxonomyCategory(place.category || place.categoryId);
-  return category.id === selected || (GROUPS[selected] && category.group === selected);
+  return category.id === selected || (selected === 'metro' && category.id === 'metro-entrance') || (GROUPS[selected] && category.group === selected);
 }
 
 const AMENITIES = {
+  vehicle_inspection:'vehicle-inspection',
   restaurant:'restaurant', cafe:'cafe', bar:'bar', pub:'pub', biergarten:'bar', fast_food:'fast-food', food_court:'food-court', ice_cream:'ice-cream',
   hospital:'hospital', clinic:'clinic', doctors:'doctor', dentist:'dentist', pharmacy:'pharmacy', veterinary:'veterinary',
   bank:'bank', atm:'atm', payment_terminal:'payment-terminal', payment_centre:'payment-terminal', bureau_de_change:'exchange',
@@ -184,7 +186,7 @@ const SHOPS = {
 };
 const LEISURE = { park:'park', garden:'garden', nature_reserve:'nature-reserve', playground:'playground', indoor_play:'kids-centre', amusement_arcade:'gaming', adult_gaming_centre:'casino', escape_game:'escape-room', bowling_alley:'bowling', sports_centre:'sports', fitness_centre:'gym', fitness_station:'fitness-station', stadium:'stadium', pitch:'sports-pitch', swimming_pool:'swimming-pool', water_park:'water-park', dance:'dance-school', sauna:'spa', spa:'spa' };
 const TOURISM = { hotel:'hotel', hostel:'hostel', guest_house:'guest-house', apartment:'apartment', motel:'motel', camp_site:'camping', caravan_site:'camping', museum:'museum', gallery:'gallery', attraction:'attraction', artwork:'artwork', viewpoint:'viewpoint', zoo:'zoo', theme_park:'theme-park', picnic_site:'picnic-site', information:'information' };
-const OFFICES = { estate_agent:'real-estate', telecommunication:'telecom', lawyer:'lawyer', accountant:'accountant', insurance:'insurance', employment_agency:'employment-agency', it:'it-services', coworking:'coworking', government:'government', diplomatic:'embassy', educational_institution:'training', logistics:'logistics', financial:'financial-services', financial_advisor:'financial-services' };
+const OFFICES = { estate_agent:'real-estate', telecommunication:'telecom', lawyer:'lawyer', notary:'notary', accountant:'accountant', insurance:'insurance', employment_agency:'employment-agency', it:'it-services', coworking:'coworking', government:'government', diplomatic:'embassy', educational_institution:'training', logistics:'logistics', financial:'financial-services', financial_advisor:'financial-services' };
 
 // A building-use tag describes the mapped structure, not a verified operating
 // merchant. Keep generic commercial structures separate from actual shops.

@@ -97,6 +97,8 @@ test('new source retrieval supports typos and sends explicit price/branch facts 
 test('published city snapshot loads entirely inside the private server without making network requests', async () => {
   const result = await loadAdvisorCity();
   const manifest=JSON.parse(await readFile(new URL('../public/place-data/manifest.json',import.meta.url),'utf8'));
-  assert.equal(result.records.length, manifest.osmPlaceCount);
+  assert.equal(result.records.length, manifest.osmPlaceCount - (manifest.categoryCounts.metro || 0));
+  assert.ok(!result.records.some(record=>record.id==='osm_node_289383777'), 'underground station centers are not public map destinations');
+  assert.ok(result.records.some(record=>record.id==='osm_node_1452387939' && record.name==='ნაძალადევი'), 'the named entrance remains discoverable');
   assert.ok(result.records.every(record => record.key.startsWith('place:osm_') && record.source === 'OpenStreetMap'));
 });

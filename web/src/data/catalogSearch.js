@@ -5,7 +5,9 @@ import { getPlace } from './places.js';
 import { normBiz } from './normalize.js';
 import { rankRecords } from '../lib/discoverySearch.js';
 import { searchableCatalogItem, matchesCatalogFilters, publicCatalogBusiness, catalogLocations, catalogResult } from '../lib/catalogDiscovery.js';
-import { matchesPlaceCategory } from '../lib/placeTaxonomy.js';
+import { matchesPlaceFilters } from '../lib/discoveryFilters.js';
+import { searchDirectoryCatalog } from './directoryCatalogSearch.js';
+import { searchSourceServices } from './sourceCatalogs.js';
 
 const CATALOG_CAP = 2000;
 const BRANCH_CAP = 500;
@@ -40,7 +42,7 @@ const businessFor = (businessId) => cachedList(`businesses:search:catalog:${busi
 }).then(([result]) => result);
 
 /** One row per matched item and known branch. Includes non-map businesses too. */
-export async function searchCatalog(term, n = 20, { filters = {}, category = 'all' } = {}) {
+async function searchManagedCatalog(term, n = 20, { filters = {}, category = 'all' } = {}) {
   const output = [];
   const coverage = { scannedCount: 0, cap: CATALOG_CAP, truncated: false, unavailable: false };
   output.coverage = coverage;
@@ -56,7 +58,7 @@ export async function searchCatalog(term, n = 20, { filters = {}, category = 'al
     return businesses.get(id);
   };
   const candidates = [];
-  const candidateLimit = category === 'all' ? n : Math.min(100, Math.max(40, n * 3));
+  const candidateLimit = category === 'all' && !Object.values(filters).some(Boolean) ? n : Math.min(100, Math.max(40, n * 3));
   // Sequential batches bound Firestore fan-out even for a broad dish query.
   for (let offset = 0; offset < matches.length; offset += 5) {
     const batch = await Promise.all(matches.slice(offset, offset + 5).map(async (item) => {
@@ -71,7 +73,7 @@ export async function searchCatalog(term, n = 20, { filters = {}, category = 'al
     for (let index = 0; batch.some((rows) => index < rows.length) && candidates.length < candidateLimit; index++) {
       for (const rows of batch) if (rows[index] && candidates.length < candidateLimit) candidates.push(rows[index]);
     }
-    if (candidates.length >= candidateLimit) break;
+    if (candidates.length >= candidateLimit) {coverage.truncated = true;break;}
   }
   for (let offset = 0; offset < candidates.length; offset += 5) {
     const rows = await Promise.all(candidates.slice(offset, offset + 5).map(async ({ item, business, branch }) => {
@@ -83,9 +85,29 @@ export async function searchCatalog(term, n = 20, { filters = {}, category = 'al
       }
       return catalogResult(item, business, branch, place);
     }));
-    output.push(...rows.filter((row) => row && matchesPlaceCategory(row, category)));
+    output.push(...rows.filter((row) => row && matchesPlaceFilters(row, filters, category)));
     if (output.length >= n) { output.splice(n); break; }
   }
+  return output;
+}
+
+/** Independent sources fail separately; a missing managed catalog cannot hide public menus. */
+export async function searchCatalog(term, n = 20, options = {}) {
+  const results = await Promise.allSettled([
+    searchManagedCatalog(term,n,options), searchDirectoryCatalog(term,n,options), searchSourceServices(term,n,options),
+  ]);
+  const coverage = {unavailable:false,truncated:false,scannedCount:0};
+  const seen = new Set();
+  const rows = [];
+  for (const result of results) {
+    if (result.status === 'rejected') {coverage.unavailable=true;continue;}
+    coverage.unavailable ||= result.value.coverage?.unavailable === true;
+    coverage.truncated ||= result.value.coverage?.truncated === true;
+    coverage.scannedCount += result.value.coverage?.scannedCount || 0;
+    for (const row of result.value) if (!seen.has(row.resultId)) {seen.add(row.resultId);rows.push({...row,businessName:row.businessName || row.name,branchName:row.branchName || row.name});}
+  }
+  const output=rows.sort((a,b)=>(b.searchScore || 0)-(a.searchScore || 0)).slice(0,n);
+  output.coverage=coverage;
   return output;
 }
 

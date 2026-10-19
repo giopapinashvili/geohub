@@ -36,7 +36,7 @@ test('pharmacy and Georgian brand aliases share the same artwork across surfaces
   }
 });
 
-test('stations precede entrances, ordinary places and street furniture as zoom increases', () => {
+test('metro entrances are visible from the station zoom before ordinary places', () => {
   const station = markerPriority({ category: 'metro' });
   const entrance = markerPriority({ category: 'metro-entrance' });
   const cafe = markerPriority({ category: 'cafe' });
@@ -44,7 +44,7 @@ test('stations precede entrances, ordinary places and street furniture as zoom i
   assert.equal(station.brand, 'metro');
   assert.equal(entrance.brand, 'metro');
   assert.ok(station.minZoom < cafe.minZoom);
-  assert.ok(station.minZoom < entrance.minZoom);
+  assert.equal(station.minZoom, entrance.minZoom);
   assert.ok(cafe.minZoom < signals.minZoom);
   assert.ok(station.rank < cafe.rank);
 });

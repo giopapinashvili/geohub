@@ -8,7 +8,10 @@ const directory = new URL('../public/map-brands/', import.meta.url);
 
 test('every displayed logo is a local, attributed asset with the reviewed content hash', async () => {
   const credits = JSON.parse(await readFile(new URL('credits.json', directory), 'utf8'));
-  const extra = await Promise.all(['institution-credits.json','directory-credits.json','wolt-credits.json'].map(file=>readFile(new URL(file,directory),'utf8').then(JSON.parse).catch(error=>{if(error.code==='ENOENT')return {logos:[]};throw error;})));
+  const extra = await Promise.all(['institution-credits.json','directory-credits.json','wolt-credits.json','services-credits.json','professional-credits.json'].map(async file=>{
+    const value=JSON.parse(await readFile(new URL(file,directory),'utf8'));
+    return value.brands ? {logos:value.brands.map(brand=>({...brand,id:`${file.replace('-credits.json','')}-${brand.id}`}))} : value;
+  }));
   const byId = new Map([...credits.logos,...extra.flatMap(value=>value.logos || [])].map(credit => [credit.id, credit]));
   for (const [id, brand] of Object.entries(PLACE_BRANDS)) {
     assert.match(brand.file, /^[a-z0-9.-]+\.(png|svg)$/i, id);

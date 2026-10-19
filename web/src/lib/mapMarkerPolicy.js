@@ -19,7 +19,7 @@ export function markerPriority(place) {
   const category = canonicalCategory(place?.category);
   const brand = markerBrand(place);
   if (category === 'metro') return { minZoom: 11, rank: 0, brand: 'metro', brandAlways: true };
-  if (category === 'metro-entrance') return { minZoom: 15, rank: 2, brand: 'metro', brandAlways: true };
+  if (category === 'metro-entrance') return { minZoom: 11, rank: 0, brand: 'metro', brandAlways: true };
   const brandAlways = !!brand;
   if (REGION.has(category)) return { minZoom: 10, rank: 10, brand, brandAlways };
   if (IMPORTANT.has(category)) return { minZoom: 12, rank: 20, brand, brandAlways };

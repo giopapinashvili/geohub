@@ -6,7 +6,8 @@ import { TextArea } from '../../ui/Field.jsx';
 import { Empty, Img, Spinner } from '../../ui/misc.jsx';
 import { t, tn } from '../../lib/i18n.js';
 import { cityLabel } from '../../lib/geo.js';
-import { readCoordinates } from '../../lib/coordinates.js';
+import { readDestinationCoordinates } from '../../lib/coordinates.js';
+import { phoneContacts } from '../../lib/phoneContacts.js';
 import { timeAgo } from '../../lib/format.js';
 import { uid, isAdmin } from '../../lib/auth.js';
 import { requireLogin, storyCreator } from '../../lib/store.js';
@@ -84,7 +85,7 @@ function ReviewForm({ placeId, onDone }) {
 /** Non-modal place drawer: all content belongs to the current map selection. */
 export function MapPlaceDetails({ place, onClose, onCheckin }) {
   const cat = categoryOf(place);
-  const coords = readCoordinates(place);
+  const coords = readDestinationCoordinates(place);
   const closeRef = useRef(null);
   const scrollRef = useRef(null);
   const navRef = useRef(null);
@@ -142,8 +143,7 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
   const stats = reviewStats(reviews || [], place);
   const mine = reviews?.some((r) => r.userId === viewerId);
   const raw = place.raw || {};
-  const phone = typeof raw.phone === 'string' ? raw.phone.trim() : '';
-  const telephone = phone.replace(/[^\d+]/g, '');
+  const phones = phoneContacts(raw.phone, place);
   const website = websiteUrl(raw.website || raw.url);
   const hours = [raw.hours, raw.openingHours].find((v) => typeof v === 'string' && v.trim());
   const facilities = (Array.isArray(raw.amenities) ? raw.amenities : Array.isArray(raw.facilities) ? raw.facilities : []).filter((v) => typeof v === 'string' && v.trim()).slice(0, 12);
@@ -228,7 +228,9 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
           <PlaceCoordinates key={place.id} place={place} showMissing />
           <ImportedPlaceInfo place={place} showFacts={false}/>
           {hours && <div class="map-detail-info-row"><Icon name="clock" size={18} /><span>{hours}</span></div>}
-          {phone && telephone && <a class="map-detail-info-row" href={`tel:${telephone}`}><Icon name="phone" size={18} /><span>{phone}</span></a>}
+          {phones.map((phone,index) => phone.href
+            ? <a key={index} class="map-detail-info-row" href={phone.href}><Icon name="phone" size={18} /><span>{phone.text}</span></a>
+            : <p key={index} class="map-detail-info-row"><Icon name="phone" size={18} /><span>{phone.text}</span></p>)}
           {website && <a class="map-detail-info-row" href={website} target="_blank" rel="noopener noreferrer"><Icon name="globe" size={18} /><span>{new URL(website).hostname}</span><Icon name="arrow-up-right" size={14} /></a>}
           {facilities.length > 0 && <div class="map-detail-facilities">{facilities.map((text) => <span key={text}>{text}</span>)}</div>}
         </section>

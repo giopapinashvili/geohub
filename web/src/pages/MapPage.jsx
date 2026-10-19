@@ -181,7 +181,10 @@ export default function MapPage() {
     let active = true;
     setLinkedPlace(null);
     if (selectedId && !knownSelection) {
-      getPlace(selectedId).then((p) => { if (active) setLinkedPlace(p); }).catch(() => {});
+      getPlace(selectedId).then((p) => { if (active) {
+        if (p?.raw?.mapPlaceId) setQuery({ place: p.raw.mapPlaceId });
+        else setLinkedPlace(p);
+      } }).catch(() => {});
     }
     return () => { active = false; };
   }, [selectedId, !!knownSelection]);

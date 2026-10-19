@@ -40,6 +40,14 @@ cache the hash-named data assets immutably without making refreshes stale.
 
 ## Runtime
 
+Metro markers represent pedestrian entrances, not underground station centers.
+The PBF extractor retains `public_transport=stop_area` relation members, and
+`metro-entrances.mjs` uses only those explicit memberships to give each entrance
+its station name. Entrances keep their own coordinates; no nearest-station guess
+is made. Station IDs remain resolvable for old pages, but `raw.mapHidden` removes
+their centers from map symbols and search. `raw.mapPlaceId` redirects an old map
+link to a documented entrance. The manifest records linked and unresolved counts.
+
 - `loadImportedPlaces(bounds, { zoom })` fetches only intersecting 0.025° shards.
   Distant zoom uses a 500-place overview. A 64-shard safety limit returns honest
   `coverage.truncated` metadata; zoom in for detail.
@@ -146,6 +154,58 @@ Items restricted to named branches cannot appear at headquarters or another
 branch. All catalog links point to the actual business, item and selected branch.
 Demonstration data is excluded. No prices, preparation times or branch positions
 are inferred. Validate with `node --test web/tools/catalog-discovery.test.mjs`.
+
+## Source menus, products and services
+
+The public merchant source catalog is separate from owner-managed Firestore
+catalogs. `catalog-data/index.json` maps each reviewed Wolt venue to its existing
+canonical place; accepted source definitions are the allowlist. A restaurant's
+root response can contain its full menu, while larger shops require category
+pagination. A partial response is never labelled complete. The importer retains
+source dates, exact item IDs, source categories, product images, GEL minor-unit
+prices and optional choices. Missing prices stay unknown. Delivery prices are
+explicitly labelled and are not asserted to be in-store prices or branch stock.
+Preparation times, dietary guarantees, ratings and customer content are not
+inferred. Explicit publisher dietary flags are retained separately and labelled
+as source declarations; product names cannot establish them. Unavailable items
+are omitted from search. Old price snapshots expire.
+
+`directoryCatalogSearch.js` uses a small prefix index and loads relevant catalog
+files on demand. Georgian, transliterated Georgian and misspellings share the
+same ranking; numeric product models stay exact. Product categories remain
+visible so an accessory with a short phone-model name is not presented as the
+phone itself. Result links preserve the exact place and item. Unknown diet or
+preparation-time fields cannot satisfy those filters.
+
+`source-service-catalog.mjs` contains individually sourced provider services.
+Its publisher validates every place membership, price and source URL before
+emitting content-addressed files and `services-index.json`. Branch-specific
+services remain branch-specific; provider-wide digital services say so. Clinic
+catalogs with limited source results retain a partial marker and their own branch
+source links. A provider's generic contact page cannot establish a service at
+every branch. Run this publisher after rebuilding the place dataset.
+
+```powershell
+node web/tools/import-directory-catalogs.mjs --phase=roots
+node web/tools/import-directory-catalogs.mjs --phase=complete
+node web/tools/publish-service-catalog.mjs
+node web/tools/audit-place-content.mjs
+node --test web/tools/directory-catalog*.test.mjs web/tools/source-catalog-runtime.test.mjs web/tools/source-service-catalog.test.mjs
+```
+
+The merchant importer saves responses and progress under the ignored
+`.codex/artifacts/directory-catalogs/` directory. Respect source throttling and
+Retry-After; do not rotate identities or increase request rates to bypass limits.
+`--rebuild-only` reconstructs indexes from existing local venue files without
+remote requests. Catalog indexes and mutable venue/search filenames revalidate;
+hashed service files can remain cached. Memory caching is bounded to 12 MiB and
+contains only public catalog data, with no account cookies or credentials.
+
+`place-content-audit.json` distinguishes mapped objects, named places, photographs,
+logos, sourced posts and actual nonempty catalogs by category. It is a source
+inventory, not a claim that every business or every product has been found.
+Owner-entered catalogs are outside this static audit. Infrastructure is not
+expected to have a commercial catalog.
 
 ## Explicit community experience
 

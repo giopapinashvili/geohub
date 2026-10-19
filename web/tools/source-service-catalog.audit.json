@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-19",
+  "notes": [
+    "EVEX clinic relationships contain only20 specialty/service entries per returned list; this is a documented partial list, not a claim of full clinic coverage. Unverified/invalid clinic coordinate rows excluded.",
+    "Provider-scoped bank/telecom items attach only to official directory membership; digital channels are explicit and are not branch stock/onsite availability.",
+    "Unknown prices remain null. Observed fixed prices expire after7days for runtime display; source terms always take precedence.",
+    "No illustrative photos were added as service photographs. Existing actual venue media remains separate.",
+    "British Council Rustaveli34 membership is based on exact institution name plus addressed building bounds and current official course address. A started course does not imply currently open enrollment. Zero price is limited to explicitly free placement service.",
+    "Tegeta services attach only to reviewed canonical branch mappings and explicit service_type relations. Unresolved branch coordinates are excluded; product category143 is excluded.",
+    "Amboli public PassengerCar service selector returns4 service categories and explicit branch IDs; only reviewed Tbilisi canonical matches are included. Truck selector returned no services. No booking, request or OTP endpoint was used; no personal information was submitted."
+  ],
+  "sources": [
+    "https://www.magticom.ge/mobile-internet-packages",
+    "https://cellfie.ge/private-customers/useful-combination",
+    "https://silknet.com/personal/tv/products/silk-tv",
+    "https://silknet.com/ge/personal/silk/products/double?city=101797",
+    "https://silknet.com/ge/personal/tv/additional",
+    "https://tbcbank.ge/ka/digital-services/internet-bank",
+    "https://tbcbank.ge/ka/transfers",
+    "https://libertybank.ge/ka/produqtebi/chemtvis/distantsiuri-momsakhureba/internet-banki",
+    "https://www.cmchospital.ge/ge/services",
+    "https://gh.ge/clinic/tbilisis-mravalprofiluri-samedicino-centri/",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-varketilis-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-vazisubnis-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-gldanis-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-guramishvilis-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-saburtalos-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-didubis-poliklinika",
+    "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-tsintsadzis-poliklinika",
+    "https://www.britishcouncil.ge/english/adults/classes",
+    "https://www.britishcouncil.ge/english/adults/ielts-preparation",
+    "https://www.britishcouncil.ge/english",
+    "https://www.britishcouncil.ge/english/corporate-solutions",
+    "https://www.britishcouncil.ge/english/adults/speaking-and-grammar-courses-adults",
+    "https://tegeta.ge/branches",
+    "https://amboli.ge/service-reservation/"
+  ],
+  "excluded": [
+    {
+      "provider": "cmc",
+      "title": "ველმო",
+      "reason": "Brand label alone does not identify a specific service"
+    },
+    {
+      "provider": "tegeta",
+      "sourceId": 143,
+      "reason": "Source category means products for special-purpose machinery, not a service; not added to service catalog."
+    }
+  ],
+  "sourceFetches": [
+    {
+      "id": "tegeta-central",
+      "url": "https://tegetamotors.ge/ka/branches/centraluri-filiali",
+      "finalUrl": "https://tegetamotors.ge/ka/branches/centraluri-filiali",
+      "status": 403,
+      "bytes": 5514,
+      "sha256": "acaf89d065bce7d9fdfd781cfb4734685a6cedeb8008f8dc588bc12415b23351",
+      "checkedAt": "2026-10-19T11:58:08.192Z"
+    },
+    {
+      "id": "amboli-book",
+      "url": "https://amboli.ge/service-reservation/",
+      "finalUrl": "https://amboli.ge/service-reservation/",
+      "status": 200,
+      "bytes": 17450,
+      "sha256": "32f1d34c9e3ac7d56c209ab1ad0c39d574252bea22529167eeec5d50b0f0672a",
+      "checkedAt": "2026-10-19T11:58:08.247Z"
+    },
+    {
+      "id": "magti-internet",
+      "url": "https://www.magticom.ge/mobile-internet-packages",
+      "finalUrl": "https://www.magticom.ge/mobile-internet-packages",
+      "status": 200,
+      "bytes": 137439,
+      "sha256": "008d756447f7b424c158b572d8c298a927d956a991feed73346fda3d9e548108",
+      "checkedAt": "2026-10-19T11:58:08.582Z"
+    },
+    {
+      "id": "cmc-services",
+      "url": "https://www.cmchospital.ge/ge/services",
+      "finalUrl": "https://www.cmchospital.ge/ge/services",
+      "status": 200,
+      "bytes": 1102030,
+      "sha256": "ee7f82789d062426645073e665c64d3107b32512de8f2775565b64de936cae5d",
+      "checkedAt": "2026-10-19T11:58:09.858Z"
+    },
+    {
+      "id": "british-courses",
+      "url": "https://www.britishcouncil.ge/english",
+      "finalUrl": "https://www.britishcouncil.ge/english",
+      "status": 200,
+      "bytes": 58959,
+      "sha256": "ba698d2c668af578d658d95524d6051f2b939b6a2a6c5abbfd59e783ac382b14",
+      "checkedAt": "2026-10-19T11:58:11.726Z"
+    },
+    {
+      "id": "british-adults",
+      "url": "https://www.britishcouncil.ge/english/adults/classes",
+      "finalUrl": "https://www.britishcouncil.ge/english/adults/classes",
+      "status": 200,
+      "bytes": 48087,
+      "sha256": "801e009c39c34977717d8058488f7b29dc4fb660f800a5a3bba1cf340562be8a",
+      "checkedAt": "2026-10-19T11:58:11.739Z"
+    },
+    {
+      "id": "evex-services",
+      "url": "https://evex.ge/ka/servisebi-detalurad",
+      "finalUrl": "https://evex.ge/ka/servisebi-detalurad",
+      "status": 200,
+      "bytes": 387402,
+      "sha256": "5c40d8f3ebf5055af9b3fe8b842b82a453f6302bf523b90b18302eac5f18f25d",
+      "checkedAt": "2026-10-19T11:58:11.924Z"
+    },
+    {
+      "id": "gh-tbilisi",
+      "url": "https://gh.ge/clinic/tbilisis-mravalprofiluri-samedicino-centri/",
+      "finalUrl": "https://gh.ge/clinic/tbilisis-mravalprofiluri-samedicino-centri/",
+      "status": 200,
+      "bytes": 161499,
+      "sha256": "ab365dc373612b56fe72d4d11eb9f409898ec821fa297b5576e3ac71278f919a",
+      "checkedAt": "2026-10-19T11:58:22.506Z"
+    },
+    {
+      "id": "tbc-services",
+      "url": "https://tbcbank.ge/ka/retail",
+      "finalUrl": "https://tbcbank.ge/ka/retail",
+      "status": 200,
+      "bytes": 9693,
+      "sha256": "c2037683399594614bce385897509bb575a3bc3484fb3a73dfb5251835244306",
+      "checkedAt": "2026-10-19T11:58:31.118Z"
+    },
+    {
+      "id": "liberty-services",
+      "url": "https://libertybank.ge/ka/produqtebi/chemtvis",
+      "error": "fetch failed"
+    },
+    {
+      "id": "bog-services",
+      "url": "https://bankofgeorgia.ge/ka/retail",
+      "finalUrl": "https://bankofgeorgia.ge/ka/retail/main",
+      "status": 200,
+      "bytes": 30102,
+      "sha256": "45b18cbb1165b3fe0e54fd64016ae220758d25d05f2019d929810c77aa06a296",
+      "checkedAt": "2026-10-19T11:58:44.993Z"
+    },
+    {
+      "url": "https://amboli.ge/service-reservation/",
+      "selectorEndpoint": "https://amboli.ge/service-reservation/get-page/",
+      "vehicleType": "PassengerCar",
+      "serviceCategoryId": "6c42c1e06de37a638e69afa285a0084d",
+      "status": 200,
+      "sha256": "bcfa086927c94417bf11284ea4d00d3e1bdf2cf93bd1bf50246e3c74f0902733",
+      "checkedAt": "2026-10-19T12:27:08.924Z",
+      "branchesReturned": 25
+    },
+    {
+      "url": "https://amboli.ge/service-reservation/",
+      "selectorEndpoint": "https://amboli.ge/service-reservation/get-page/",
+      "vehicleType": "PassengerCar",
+      "serviceCategoryId": "38b9925fbe55ea0f1f65311cf401d1fe",
+      "status": 200,
+      "sha256": "9e5c7f70ececc4d3d4d2f6ef0672a7331f29eebc67c3cd199e6c14d43ef0d08c",
+      "checkedAt": "2026-10-19T12:27:09.212Z",
+      "branchesReturned": 25
+    },
+    {
+      "url": "https://amboli.ge/service-reservation/",
+      "selectorEndpoint": "https://amboli.ge/service-reservation/get-page/",
+      "vehicleType": "PassengerCar",
+      "serviceCategoryId": "b383a14c7a3eceeca2baad280c7524b8",
+      "status": 200,
+      "sha256": "b8bbcab71483cc3c89f862472923b1dc257b34a7fc3739ed0cdd9ca4d0527c82",
+      "checkedAt": "2026-10-19T12:27:09.274Z",
+      "branchesReturned": 25
+    },
+    {
+      "url": "https://amboli.ge/service-reservation/",
+      "selectorEndpoint": "https://amboli.ge/service-reservation/get-page/",
+      "vehicleType": "PassengerCar",
+      "serviceCategoryId": "b1e251a47f8c08ee6353c295846fd8ed",
+      "status": 200,
+      "sha256": "f71ff4f24ed05e0d8c741b6b678c2892044e04d2a9dbf1adc0689b5f1c5152de",
+      "checkedAt": "2026-10-19T12:27:09.353Z",
+      "branchesReturned": 25
+    }
+  ],
+  "stats": {
+    "items": 245,
+    "providers": 11,
+    "places": 141,
+    "priced": 27,
+    "branchScoped": 192,
+    "byProvider": {
+      "magti": {
+        "items": 7,
+        "places": 10
+      },
+      "cellfie": {
+        "items": 14,
+        "places": 20
+      },
+      "silknet": {
+        "items": 6,
+        "places": 3
+      },
+      "tbc": {
+        "items": 12,
+        "places": 41
+      },
+      "liberty": {
+        "items": 10,
+        "places": 45
+      },
+      "cmc": {
+        "items": 39,
+        "places": 1
+      },
+      "geohospitals_tbilisi": {
+        "items": 48,
+        "places": 1
+      },
+      "evex": {
+        "items": 82,
+        "places": 7
+      },
+      "british_council": {
+        "items": 7,
+        "places": 1
+      },
+      "tegeta": {
+        "items": 16,
+        "places": 2
+      },
+      "amboli": {
+        "items": 4,
+        "places": 10
+      }
+    }
+  }
+}

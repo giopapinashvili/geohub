@@ -25,4 +25,30 @@ export const NATIVE_PLACE_SOURCE_LINKS = {
   vUHbNFTGGwRHZzpMcCKY: 'osm_relation_1020718', // Parliament; 49 m.
   xEFKicwm2wbefLCGCNRg: 'osm_relation_1020718', // Existing separate native Parliament record; 39 m.
   vazWmYllXHKVMw4zqKWS: 'osm_way_549602873', // Metekhi Bridge; 74 m.
+  // Reviewed legacy station pages, matched by exact station identity, not distance.
+  // Their old seed coordinates include misplaced centers. Surface map destinations
+  // come from each station's explicit OSM stop-area entrance membership.
+  '1u8Z1htmIBMRES8hsoka': 'osm_node_729551832', // Technical University
+  '2zM8p1rhGZC6SbIhTyq8': 'osm_node_729562896', // Vazha-Pshavela
+  AQcL2oBKrKElcg4WAg6z: 'osm_node_288584312', // 300 Aragveli
+  BBY5cFQuG3rwspRmuZyH: 'osm_node_7285245527', // Varketili
+  BslHWCcUORNI8wPTC69s: 'osm_node_729562894', // Delisi
+  CZiA3plo4JjuTMmdRWQk: 'osm_node_729561142', // Medical University
+  IV6KdLB1lVCj3kxdI6uh: 'osm_node_289358478', // Rustaveli
+  MOHKyxbArASshhpGwToi: 'osm_node_437955651', // Akhmeteli Theatre
+  NDc0dLE15sr7xfbUMvUV: 'osm_node_7285245525', // Station Square 1
+  OGfdgRGGLQuY3KuxtDLG: 'osm_node_289383777', // Nadzaladevi
+  Sm4FHBHLvz0XpyNk1izV: 'osm_node_5768595732', // Avlabari
+  Wm26jgsAUa7PXy0nIpL9: 'osm_node_288584317', // Isani
+  XPDBOcqNUFISF5WTJd8E: 'osm_node_729578803', // Tsereteli
+  dZkyztXGxcc73odcoGOV: 'osm_node_437955726', // Guramishvili
+  f1MCzdy8CdtjZU4rAwxH: 'osm_node_7285245526', // Station Square 2
+  gm5e3De7VncSOrD59bdC: 'osm_node_729529330', // Samgori
+  kYwrjGa3FfM2CwVadcFT: 'osm_node_289384125', // Marjanishvili
+  pj3fmUFERF1bPlZb8fJH: 'osm_node_4632061332', // Didube
+  qirgxmRxdVwIfR7PXpFO: 'osm_node_289358479', // Liberty Square
+  raIfnyiJbPaA3QoTDU9s: 'osm_node_437955710', // Sarajishvili
+  vpQFPnVaKzrpYcEyyeG8: 'osm_node_725175525', // Gotsiridze
+  wohT13oYIiOJCl5bxtw5: 'osm_node_358503996', // State University
+  xzwAWFYC2FmcTNw0s4yi: 'osm_node_5267558014', // Ghrmaghele
 };

@@ -3,7 +3,7 @@ import { Icon } from '../../ui/Icon.jsx';
 import { Img } from '../../ui/misc.jsx';
 import { t, formatCount } from '../../lib/i18n.js';
 import { cityLabel } from '../../lib/geo.js';
-import { readCoordinates } from '../../lib/coordinates.js';
+import { readDestinationCoordinates } from '../../lib/coordinates.js';
 import { categoryOf } from './categories.js';
 import { PlaceCoordinates } from './PlaceCoordinates.jsx';
 import { placePageHref } from '../../lib/placeLinks.js';
@@ -16,7 +16,7 @@ export function MapPlacePreview({ place, onExpand, onClose, onCheckin }) {
   const cat = categoryOf(place);
   const rating = Number(place.rating);
   const description = String(place.description || '').trim().replace(/\s+/g, ' ');
-  const coords = readCoordinates(place);
+  const coords = readDestinationCoordinates(place);
   const pageHref = placePageHref(place);
 
   return (

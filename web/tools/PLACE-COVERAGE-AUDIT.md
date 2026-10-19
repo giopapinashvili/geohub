@@ -1,6 +1,55 @@
 # Place coverage review — 19 October 2026
 
-## Latest public-directory expansion
+## Metro, service locations and professional directories
+
+The next source wave expands the 49,159-object publication to **49,533 mapped
+objects: 374 additions, zero removed IDs**. It accepts 106 official service/chain
+records (76 additions, 30 existing enrichments) and 310 public Yell business
+directory records (298 additions, 12 existing enrichments). The two ledgers retain
+40 and 76 unresolved candidates respectively. No city coverage percentage is
+claimed. Public directory presence does not prove current operation.
+
+The official service wave includes Tegeta, Amboli, Greenway, USA2Georgia,
+Inex, Onex, Silknet and selected insurance/partner locations. It adds 28 reviewed
+source photos and 10 official logos. The professional wave covers accountants,
+lawyers, notaries, consulting offices, libraries and neutral casino location
+facts. Its 191 website links, 308 public office phone records and 168 source hour
+records retain their source attribution. A check of 195 linked website entries
+corroborated 54 visible official addresses, corrected four exact points and held
+three conflicting new candidates. Shared notary-chamber pages do not verify an
+individual office. Seven official logos cover eight exact professional pages;
+FINO and AACC share an explicitly labelled photograph of their actual building.
+Personal tax identifiers, reviews and marketing prose were not copied.
+
+Metro symbols now use **48 documented entrances across 23 stations**, named by
+explicit OSM stop-area membership. Station-center records remain available at
+their original IDs but are excluded from map symbols/search. Older map links
+redirect to a real entrance. Nadzaladevi's entrance is `osm_node_1452387939`
+at `41.7326229, 44.7970003`.
+
+The audit also found **23 legacy GeoHub station pages** with seeded station
+coordinates, including a misplaced Nadzaladevi record. Their exact station
+identities are now reviewed source links. Display names and station coordinates
+are corrected; old coordinates/names remain in provenance, IDs/ownership/activity
+remain intact, and map destinations use the entrance. The native display bridge
+now has 44 links to 43 distinct source records. No name-proximity rule is used to
+assign these identities.
+
+Actual public menu/product files and official service files are now attached to
+canonical places. `place-content-audit.json` records current nonempty catalog,
+photo/logo and editorial coverage by category. Large marketplace shops remain
+explicitly partial until every category page is fetched. Product/source prices
+are dated, expire, and are not asserted to be in-store prices or stock. Unknown
+prices remain unknown. Source dietary flags are retained only when explicit.
+
+The 3,551 accepted marketplace venues have all been attempted: 2,849 source
+catalogs are complete, 701 are partial, and one source returns HTTP 404. The
+snapshot contains 206,670 source items, 201,583 with source image URLs. Eleven
+full responses are empty; they are not fabricated menus. Official sources add
+245 service entries tied to 141 exact places. These are dated source snapshots,
+not assertions of current stock, in-store prices or all-city completeness.
+
+## Earlier public-directory expansion
 
 Compared with the previously published 45,637-object snapshot, the current
 publication contains **49,159 mapped objects: 3,522 additions and zero removed

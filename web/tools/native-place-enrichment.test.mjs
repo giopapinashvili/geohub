@@ -91,6 +91,30 @@ test('source enrichment uses reviewed IDs, never tenant names or nearby coordina
   assert.equal(tenant.description,'');
 });
 
+test('legacy metro seed pages keep identity and activity but use reviewed station facts and entrance destinations',()=>{
+ const id='OGfdgRGGLQuY3KuxtDLG';
+ const original={name:'Nadzaladevi Metro Station',categoryId:'transport',lat:41.727,lng:44.7955,ownerId:'keep-owner',reviewCount:9,checkinCount:12};
+ const place=normPlace(id,original);
+ assert.equal(place.id,id);assert.equal(place.raw.ownerId,'keep-owner');assert.equal(place.reviewCount,9);assert.equal(place.checkinCount,12);
+ assert.equal(place.name,'ნაძალადევი');assert.equal(place.category,'metro');
+ assert.deepEqual(place.raw.originalNativeCoordinates,{lat:41.727,lng:44.7955});
+ assert.equal(place.raw.mapHidden,true);assert.equal(place.raw.mapPlaceId,'osm_node_1452387939');
+ assert.ok(Math.abs(place.lat-41.7334036)<1e-7);
+ assert.ok(place.aliases.includes(original.name));
+ assert.deepEqual(enrichNativePlace(place),place,'repeated hydration retains original coordinate evidence');
+ const entry={id:place.raw.mapPlaceId,name:'ნაძალადევი',category:'metro-entrance',lat:41.7326229,lng:44.7970003,raw:{}};
+ assert.deepEqual(mergeImportedPlaces([place],[entry]).map(row=>row.id),[entry.id]);
+ const known=Object.entries(NATIVE_PLACE_SOURCE_LINKS).filter(([,sourceId])=>NATIVE_PLACE_SOURCE_RECORDS[sourceId].category==='metro');
+ assert.equal(known.length,23);
+ for(const [nativeId,sourceId]of known){
+  const hydrated=normPlace(nativeId,{name:'Legacy station',categoryId:'transport',lat:41.7,lng:44.8});
+  assert.equal(hydrated.raw.mapPlaceId,NATIVE_PLACE_SOURCE_RECORDS[sourceId].raw.mapPlaceId);
+  assert.equal(hydrated.raw.mapHidden,true);
+ }
+ const unrelated=normPlace('unreviewed_transport',{name:'Metro Cafe',categoryId:'transport',lat:41.7,lng:44.8});
+ assert.equal(unrelated.raw.mapHidden,undefined);
+});
+
 test('native photo credits and editorial metadata coexist with later source enrichment',()=>{
  const ownPhoto={url:'/owner-photo.jpg',author:'Owner',caption:'Owner caption'};
  const ownPost={id:'owner-editorial',title:'Owner title',body:'Owner information',sourceUrl:'https://example.org/owner'};

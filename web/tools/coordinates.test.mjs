@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readCoordinates, isMapCoordinate, formatCoordinates, coordinatesForWrite } from '../src/lib/coordinates.js';
+import { readCoordinates, readDestinationCoordinates, isMapCoordinate, formatCoordinates, coordinatesForWrite } from '../src/lib/coordinates.js';
+
+test('routing uses explicit metro entrances while ordinary places and invalid destination overrides retain their own coordinates',()=>{
+  const station={category:'metro',lat:41.7334036,lng:44.7964257,raw:{mapHidden:true,mapPlaceId:'osm_node_1452387939',mapCoordinates:{lat:41.7326229,lng:44.7970003}}};
+  assert.deepEqual(readDestinationCoordinates(station),station.raw.mapCoordinates);
+  assert.deepEqual(readCoordinates(station),{lat:station.lat,lng:station.lng});
+  assert.deepEqual(readDestinationCoordinates({...station,category:'cafe'}),{lat:station.lat,lng:station.lng});
+  assert.deepEqual(readDestinationCoordinates({...station,raw:{...station.raw,mapCoordinates:{lat:999,lng:44.8}}}),{lat:station.lat,lng:station.lng});
+  assert.equal(readDestinationCoordinates(null),null);
+});
 
 test('WGS84 preserves zero, negative coordinates and numeric decimal legacy values', () => {
   assert.deepEqual(readCoordinates({ lat: 0, lng: 0 }), { lat: 0, lng: 0 });

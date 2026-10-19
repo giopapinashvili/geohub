@@ -15,6 +15,14 @@ export function readCoordinates(value) {
   return lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : null;
 }
 
+/** An explicitly linked metro entrance is the routing destination, not its underground platform. */
+export function readDestinationCoordinates(place) {
+  if (place?.category === 'metro' && place.raw?.mapHidden && place.raw?.mapPlaceId) {
+    return readCoordinates(place.raw.mapCoordinates) || readCoordinates(place);
+  }
+  return readCoordinates(place);
+}
+
 /** Web Mercator cannot display the poles, even though they are valid WGS84. */
 export function isMapCoordinate(value) {
   const coords = readCoordinates(value);
