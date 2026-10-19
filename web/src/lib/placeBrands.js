@@ -1,10 +1,14 @@
-import { PLACE_BRANDS } from './placeBrandRegistry.js';
+import { PLACE_BRANDS as BASE_PLACE_BRANDS } from './placeBrandRegistry.js';
+import { INSTITUTION_PLACE_BRANDS } from './institutionBrandRegistry.generated.js';
+import { DIRECTORY_PLACE_BRANDS } from './directoryBrandRegistry.generated.js';
+import { WOLT_PLACE_BRANDS } from './woltBrandRegistry.generated.js';
 import { canonicalCategory } from './placeTaxonomy.js';
 
-export { PLACE_BRANDS };
+export const PLACE_BRANDS = { ...WOLT_PLACE_BRANDS, ...DIRECTORY_PLACE_BRANDS, ...BASE_PLACE_BRANDS, ...INSTITUTION_PLACE_BRANDS };
 const normalize = value => String(value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 const aliases = new Map(Object.entries(PLACE_BRANDS).flatMap(([id, entry]) => entry.aliases.map(alias => [normalize(alias), id])));
 const domains = new Map(Object.entries(PLACE_BRANDS).flatMap(([id, entry]) => (entry.domains || []).map(domain => [domain, id])));
+const exactPlaces = new Map(Object.entries(PLACE_BRANDS).flatMap(([id, entry]) => (entry.placeIds || []).map(placeId => [placeId, id])));
 const allowedCategory = (id, place) => !PLACE_BRANDS[id].categories || PLACE_BRANDS[id].categories.includes(canonicalCategory(place?.category));
 
 /** Only reviewed exact identities match. Never infer a logo from fuzzy search. */
@@ -12,6 +16,8 @@ export function placeBrandId(place) {
   if (!place) return '';
   const category = canonicalCategory(place.category);
   if (category === 'metro' || category === 'metro-entrance') return 'metro';
+  const exact = exactPlaces.get(place.raw?.linkedOsmId || place.id);
+  if (exact && allowedCategory(exact, place)) return exact;
   const tags = place.raw?.tags || {};
   for (const value of [place.brand, place.raw?.brand, tags.brand]) {
     const id = aliases.get(normalize(value));

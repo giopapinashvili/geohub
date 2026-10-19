@@ -25,7 +25,9 @@
 .imported-mall-list { display: grid; margin-top: 10px; gap: 3px; }
 .imported-mall-list > a { display: flex; align-items: center; gap: 9px; padding: 10px; min-height: 48px; border-radius: 10px; color: var(--text); text-decoration: none; }
 .imported-mall-list > a:hover { background: var(--surface-2); }
-.imported-mall-list > a > span { flex: 1; min-width: 0; }
+.imported-mall-list > a > .imported-mall-tenant-text { flex: 1; min-width: 0; }
+.imported-mall-list > a > .place-brand { flex: none; }
+.imported-mall-list > a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .imported-mall-list strong { display: block; font-size: 12px; overflow-wrap: anywhere; }
 .imported-mall-list small { display: block; margin-top: 2px; color: var(--text-3); font-size: 11px; }
 .imported-place-mall-link { display: flex; align-items: center; gap: 7px; min-height: 44px; font-size: 12px; color: var(--brand-text); }

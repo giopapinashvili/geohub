@@ -21,7 +21,7 @@ const counts=places=>{
     count.total++;count.named+=Number(Boolean(place.raw.named));
     const tags=place.raw.tags||{};
     const explicit=['amenity','shop','office','healthcare','craft','tourism','leisure','education'].some(key=>tags[key]);
-    count.explicitUse+=Number(explicit || place.raw.source==='official-directory');
+    count.explicitUse+=Number(explicit || ['official-directory','merchant-directory'].includes(place.raw.source));
     count.buildingOnly+=Number(Boolean(tags.building)&&!explicit);
   }
   return {total:places.length,groups,categories};
@@ -34,6 +34,7 @@ const audit={
   before:counts(before),after:counts(after),
   added:added.length,removed:removed.map(place=>({id:place.id,name:place.name})),
   addedOfficial:added.filter(place=>place.raw.source==='official-directory'),
+  addedMerchantDirectory:added.filter(place=>place.raw.source==='merchant-directory').map(place=>({id:place.id,name:place.name,sourceUrl:place.raw.sourceUrl})),
   addedMappedBuildings:added.filter(place=>place.raw.recordKind==='mapped-building').length,
   addedNamed:added.filter(place=>place.raw.named).map(place=>({id:place.id,name:place.name,category:place.category,recordKind:place.raw.recordKind||'mapped-place',address:place.address||'',lat:place.lat,lng:place.lng,sourceUrl:place.raw.sourceUrl})),
   correctedCampusLocations:after.filter(place=>place.raw.originalSourceCenter).map(place=>({id:place.id,name:place.name,previous:place.raw.originalSourceCenter,lat:place.lat,lng:place.lng,coordinateSourceId:place.raw.coordinateSourceId,evidence:place.raw.coordinateEvidenceUrl})),

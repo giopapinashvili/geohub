@@ -218,6 +218,7 @@ export const NATIVE_PLACE_SOURCE_RECORDS = {
       "Lolita"
     ],
     "facets": {
+      "delivery": true,
       "cuisine": [
         "italian"
       ],
@@ -245,11 +246,86 @@ export const NATIVE_PLACE_SOURCE_RECORDS = {
       "sourceUpdatedAt": "2025-10-11T11:32:03.000Z",
       "phone": "+995 32 202 02 99",
       "openingHours": "Mo-Su 11:00-23:00",
+      "photoCredits": [
+        {
+          "url": "/place-media/directory-wolt-media-ee9f3034d2cc392bf6516aa6.jpg",
+          "sha256": "ee9f3034d2cc392bf6516aa6b395c7cd69f03d9930c98d63e6d6febc1b4dbd02",
+          "originalUrl": "https://imageproxy.wolt.com/assets/676aafe0a6a85f526b47375c",
+          "fetchedUrl": "https://imageproxy.wolt.com/assets/676aafe0a6a85f526b47375c?w=800",
+          "fetchedSHA256": "685b4694e8686229c359bc37e8d755310d7c062015ff67bc51812899a2b551e0",
+          "width": 800,
+          "height": 450,
+          "sourceWidth": 960,
+          "sourceHeight": 540,
+          "bytes": 70777,
+          "previewTransform": "Fit within 800 × 800 pixels; JPEG quality 80; no semantic edits.",
+          "sourceCheckedAt": "2026-10-19",
+          "imageKind": "merchant-listing-illustration",
+          "caption": "Wolt-ის მენიუს/პროდუქტების ილუსტრაცია ამ ობიექტის გვერდიდან; შენობის ფასადის ფოტო არ არის დადასტურებული.",
+          "sourceUrl": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1",
+          "author": "ობიექტის Wolt-გვერდის გამომქვეყნებელი",
+          "publisher": "Wolt",
+          "rights": "source-published",
+          "dateTaken": ""
+        }
+      ],
+      "officialDirectory": [
+        {
+          "id": "directory_wolt_676aa09e68ede1f41faff911",
+          "sourceKind": "merchant-directory",
+          "sourceUrl": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1",
+          "sourceName": "Wolt — მოვაჭრეთა საჯარო ცნობარი",
+          "sourceRecordId": "676aa09e68ede1f41faff911",
+          "checkedAt": "2026-10-19",
+          "name": "Lolita",
+          "address": "Tamar Chovelidze st. 7",
+          "lat": 41.70577195,
+          "lng": 44.78692864,
+          "coordinateAccuracy": "source-point",
+          "coordinateSourceUrl": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1",
+          "coordinateNote": "კოორდინატები გამოქვეყნებულია Wolt-ის საჯარო სავაჭრო ცნობარში. ზუსტი შესასვლელი და ადგილზე სტუმრობის შესაძლებლობა ამ წყაროთი ცალკე დადასტურებული არ არის.",
+          "matchEvidence": "Wolt record 676aa09e68ede1f41faff911 (Lolita; Tamar Chovelidze st. 7) corresponds to existing osm_node_6653160546 (ლოლიტა; address not supplied): same-name-nearby, source points 8.6 metres apart, compatible category restaurant, no conflicting published house number, and a single eligible candidate within the strict identity radius. Existing coordinates and ownership remain unchanged."
+        }
+      ],
+      "editorial": {
+        "description": "Lolita Wolt-ის თბილისის საჯარო ცნობარში წარმოდგენილია როგორც კვების ობიექტი. წყაროში მითითებული მისამართია: Tamar Chovelidze st. 7. მენიუს მიმართულებები: ამერიკული, მექსიკური. ეს არის მიწოდების პლატფორმის ჩანაწერი; ადგილზე სტუმრობის პირობები უშუალოდ ობიექტთან გადაამოწმე.",
+        "reviewedAt": "2026-10-19",
+        "sources": [
+          {
+            "label": "Wolt — მოვაჭრეთა საჯარო ცნობარი",
+            "url": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1"
+          }
+        ],
+        "posts": [
+          {
+            "id": "directory_wolt_676aa09e68ede1f41faff911_directory-introduction",
+            "title": "Lolita — ინფორმაცია წყაროდან",
+            "body": "Lolita Wolt-ის თბილისის საჯარო ცნობარში წარმოდგენილია როგორც კვების ობიექტი. წყაროში მითითებული მისამართია: Tamar Chovelidze st. 7. მენიუს მიმართულებები: ამერიკული, მექსიკური. ეს არის მიწოდების პლატფორმის ჩანაწერი; ადგილზე სტუმრობის პირობები უშუალოდ ობიექტთან გადაამოწმე.",
+            "sourceUrl": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1",
+            "authorType": "directory",
+            "reviewedAt": "2026-10-19"
+          },
+          {
+            "id": "directory_wolt_676aa09e68ede1f41faff911_directory-location",
+            "title": "მისამართი და მდებარეობა",
+            "body": "Wolt-ის საჯარო გვერდზე მითითებული მისამართი: Tamar Chovelidze st. 7. რუკის წერტილი ამავე ცნობარიდან არის აღებული. მიწოდების დრო არ ნიშნავს კერძის მომზადების დროს; ადგილზე მომსახურების საათები და შესასვლელი ობიექტთან გადაამოწმე.",
+            "sourceUrl": "https://wolt.com/ka/geo/tbilisi/restaurant/lolita1",
+            "authorType": "directory",
+            "reviewedAt": "2026-10-19"
+          }
+        ]
+      },
       "source": "openstreetmap",
       "sourceDate": "2026-10-17",
       "attribution": "© OpenStreetMap contributors",
       "attributionUrl": "https://www.openstreetmap.org/copyright"
-    }
+    },
+    "description": "Lolita Wolt-ის თბილისის საჯარო ცნობარში წარმოდგენილია როგორც კვების ობიექტი. წყაროში მითითებული მისამართია: Tamar Chovelidze st. 7. მენიუს მიმართულებები: ამერიკული, მექსიკური. ეს არის მიწოდების პლატფორმის ჩანაწერი; ადგილზე სტუმრობის პირობები უშუალოდ ობიექტთან გადაამოწმე.",
+    "address": "Tamar Chovelidze st. 7",
+    "image": "/place-media/directory-wolt-media-ee9f3034d2cc392bf6516aa6.jpg",
+    "photos": [
+      "/place-media/directory-wolt-media-ee9f3034d2cc392bf6516aa6.jpg"
+    ]
   },
   "osm_node_1567308849": {
     "id": "osm_node_1567308849",

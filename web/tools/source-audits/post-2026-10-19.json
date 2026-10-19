@@ -1,0 +1,198 @@
+{
+  "source": "https://gpost.ge/help/offices",
+  "reviewedAt": "2026-10-19",
+  "sourceRows": 20,
+  "added": 5,
+  "enriched": 15,
+  "photos": 21,
+  "excludedImages": [
+    {
+      "url": "https://gpost.ge/Content/images/products/649bec4b6324f714b0182e56.png",
+      "reason": "Company contractor logo, not a venue photograph."
+    },
+    {
+      "url": "https://gpost.ge/Content/images/elements/georgian-post-contractor.png",
+      "reason": "Company contractor logo, not a venue photograph."
+    },
+    {
+      "url": "https://gpost.ge/Content/images/elements/georgian-post-contractor.png",
+      "reason": "Company contractor logo, not a venue photograph."
+    },
+    {
+      "url": "https://gpost.ge/Content/images/products/649c295c6324f714b0185737.png",
+      "reason": "Company contractor logo, not a venue photograph."
+    },
+    {
+      "url": "https://gpost.ge/Content/images/elements/georgian-post-contractor.png",
+      "reason": "Company contractor logo, not a venue photograph."
+    }
+  ],
+  "coordinateWarnings": [
+    {
+      "postcode": "0108",
+      "publisherPoint": {
+        "lat": 41.72212858317543,
+        "lng": 44.798225462436676
+      },
+      "retainedOsmId": "osm_node_6872669686",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    },
+    {
+      "postcode": "0114",
+      "publisherPoint": {
+        "lat": 41.681439,
+        "lng": 44.8217493
+      },
+      "retainedOsmId": "osm_node_5237497573",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    },
+    {
+      "postcode": "0119",
+      "publisherPoint": {
+        "lat": 41.740408,
+        "lng": 44.780372
+      },
+      "retainedOsmId": "osm_node_12153989646",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    },
+    {
+      "postcode": "0137",
+      "publisherPoint": {
+        "lat": 41.674742,
+        "lng": 44.876326
+      },
+      "retainedOsmId": "osm_node_5526551685",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    },
+    {
+      "postcode": "0144",
+      "publisherPoint": {
+        "lat": 41.687242,
+        "lng": 44.8316023
+      },
+      "retainedOsmId": "osm_node_5526551683",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    },
+    {
+      "postcode": "0160",
+      "publisherPoint": {
+        "lat": 41.728521,
+        "lng": 44.7661083
+      },
+      "retainedOsmId": "osm_node_5526551676",
+      "note": "Publisher map point conflicts with existing branch or address geometry; source ref and address facts linked, OSM coordinates retained."
+    }
+  ],
+  "records": [
+    {
+      "id": "directory_gpost_0102",
+      "matchedPlaceId": "osm_node_4994922621",
+      "sourceUrl": "https://gpost.ge/help/offices#39",
+      "coordinateSourceId": "osm_node_4994922621"
+    },
+    {
+      "id": "directory_gpost_0108",
+      "matchedPlaceId": "osm_node_6872669686",
+      "sourceUrl": "https://gpost.ge/help/offices#430",
+      "coordinateSourceId": "osm_node_6872669686"
+    },
+    {
+      "id": "directory_gpost_0114",
+      "matchedPlaceId": "osm_node_5237497573",
+      "sourceUrl": "https://gpost.ge/help/offices#44",
+      "coordinateSourceId": "osm_node_5237497573"
+    },
+    {
+      "id": "directory_gpost_0119",
+      "matchedPlaceId": "osm_node_12153989646",
+      "sourceUrl": "https://gpost.ge/help/offices#243",
+      "coordinateSourceId": "osm_node_12153989646"
+    },
+    {
+      "id": "directory_gpost_0137",
+      "matchedPlaceId": "osm_node_5526551685",
+      "sourceUrl": "https://gpost.ge/help/offices#227",
+      "coordinateSourceId": "osm_node_5526551685"
+    },
+    {
+      "id": "directory_gpost_0144",
+      "matchedPlaceId": "osm_node_5526551683",
+      "sourceUrl": "https://gpost.ge/help/offices#41",
+      "coordinateSourceId": "osm_node_5526551683"
+    },
+    {
+      "id": "directory_gpost_0159",
+      "matchedPlaceId": "osm_node_9790998184",
+      "sourceUrl": "https://gpost.ge/help/offices#40",
+      "coordinateSourceId": "osm_node_9790998184"
+    },
+    {
+      "id": "directory_gpost_0160",
+      "matchedPlaceId": "osm_node_5526551676",
+      "sourceUrl": "https://gpost.ge/help/offices#46",
+      "coordinateSourceId": "osm_node_5526551676"
+    },
+    {
+      "id": "directory_gpost_0163",
+      "matchedPlaceId": "osm_node_12987350442",
+      "sourceUrl": "https://gpost.ge/help/offices#226",
+      "coordinateSourceId": "osm_node_12987350442"
+    },
+    {
+      "id": "directory_gpost_0167",
+      "matchedPlaceId": "osm_node_5526551681",
+      "sourceUrl": "https://gpost.ge/help/offices#308",
+      "coordinateSourceId": "osm_node_5526551681"
+    },
+    {
+      "id": "directory_gpost_0178",
+      "matchedPlaceId": "osm_node_5526551680",
+      "sourceUrl": "https://gpost.ge/help/offices#37",
+      "coordinateSourceId": "osm_node_5526551680"
+    },
+    {
+      "id": "directory_gpost_0179",
+      "matchedPlaceId": "osm_node_1783317640",
+      "sourceUrl": "https://gpost.ge/help/offices#45",
+      "coordinateSourceId": "osm_node_1783317640"
+    },
+    {
+      "id": "directory_gpost_0180",
+      "matchedPlaceId": "osm_node_5526551678",
+      "sourceUrl": "https://gpost.ge/help/offices#38",
+      "coordinateSourceId": "osm_node_5526551678"
+    },
+    {
+      "id": "directory_gpost_0186",
+      "matchedPlaceId": "osm_node_8242321019",
+      "sourceUrl": "https://gpost.ge/help/offices#47",
+      "coordinateSourceId": "osm_node_8242321019"
+    },
+    {
+      "id": "directory_gpost_0190",
+      "matchedPlaceId": "osm_node_6601774886",
+      "sourceUrl": "https://gpost.ge/help/offices#285",
+      "coordinateSourceId": "osm_node_6601774886"
+    },
+    {
+      "id": "directory_gpost_80114",
+      "sourceUrl": "https://gpost.ge/help/offices#672"
+    },
+    {
+      "id": "directory_gpost_80159",
+      "sourceUrl": "https://gpost.ge/help/offices#710"
+    },
+    {
+      "id": "directory_gpost_80160",
+      "sourceUrl": "https://gpost.ge/help/offices#707"
+    },
+    {
+      "id": "directory_gpost_80167",
+      "sourceUrl": "https://gpost.ge/help/offices#770"
+    },
+    {
+      "id": "directory_gpost_80180",
+      "sourceUrl": "https://gpost.ge/help/offices#820"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { Icon } from '../../ui/Icon.jsx';
 import { Button } from '../../ui/Button.jsx';
 import { Spinner } from '../../ui/misc.jsx';
+import { PlaceBrand } from './PlaceBrand.jsx';
 import { getImportedManifest, getImportedPlace } from '../../data/importedPlaces.js';
 import { taxonomyCategory } from '../../lib/placeTaxonomy.js';
 import '../../styles/imported-place-info.css';
@@ -38,11 +39,11 @@ function MallDirectory({ place }) {
     <div class="imported-mall-directory">
       <h3>რა არის შიგნით</h3>
       {ids.length ? <>
-        <p class="muted small">წყაროში მონიშნულია {ids.length} ობიექტი ამ შენობაში. სია შეიძლება არასრული იყოს.</p>
+        <p class="muted small">{place.raw.tenantCoverage==='official-directory-and-mapped-points' ? 'ოფიციალური ცნობარისა და რუკის მონაცემებით' : 'რუკის მონაცემებით'} ამ სავაჭრო ცენტრში მითითებულია {ids.length} ობიექტი. სია შეიძლება არასრული იყოს.</p>
         <Button variant="secondary" size="sm" icon="storefront" aria-expanded={open} onClick={()=>setOpen(value=>!value)}>{open ? 'სიის დახურვა' : 'მაღაზიებისა და სერვისების ნახვა'}</Button>
         {open && <div class="imported-mall-list">
           {state.loading ? <Spinner /> : <>
-            {state.records.slice(0,limit).map(tenant=><a key={tenant.id} href={`/place/${tenant.id}`}><Icon name={taxonomyCategory(tenant.category).icon} size={20} /><span><strong>{tenant.name}</strong><small>{taxonomyCategory(tenant.category).label}{tenant.facets?.level ? ` · სართული ${tenant.facets.level}` : ''}</small></span><Icon name="arrow-up-right" size={15}/></a>)}
+            {state.records.slice(0,limit).map(tenant=><a key={tenant.id} href={`/place/${tenant.id}`}><PlaceBrand place={tenant} fallback={<Icon name={taxonomyCategory(tenant.category).icon} size={20} />}/><span class="imported-mall-tenant-text"><strong>{tenant.name}</strong><small>{taxonomyCategory(tenant.category).label}{tenant.facets?.level ? ` · სართული ${tenant.facets.level}` : ''}</small></span><Icon name="arrow-up-right" size={15}/></a>)}
             {state.records.length>limit && <Button variant="ghost" size="sm" onClick={()=>setLimit(value=>value+30)}>მეტის ჩვენება</Button>}
             {state.failed>0 && <div class="imported-place-retry" role="status"><span>ზოგი ობიექტი ვერ ჩაიტვირთა.</span><Button variant="ghost" size="sm" onClick={()=>setRetry(value=>value+1)}>ხელახლა ცდა</Button></div>}
           </>}
@@ -65,7 +66,8 @@ function SourceDetails({ place }) {
         <p>{url ? <a href={url} target="_blank" rel="noopener noreferrer">OpenStreetMap-ის ჩანაწერი <Icon name="arrow-up-right" size={12}/></a> : 'OpenStreetMap'} · ნაკრები: {date(raw.sourceDate)}</p>
         {raw.sourceUpdatedAt && <p>ამ ჩანაწერის ბოლო ცვლილება წყაროში: {date(raw.sourceUpdatedAt)}</p>}
         <p>საათები, საკონტაქტო ინფორმაცია და ობიექტის მდგომარეობა წყაროს მონაცემებს ეყრდნობა; ამ გვერდის შექმნა მათ ადგილზე გადამოწმებას არ ნიშნავს.</p>
-        {manifest && <p>თბილისისა და შემოგარენის ამ ნაკრებშია {manifest.totalPlaces.toLocaleString('ka-GE')} ობიექტი, {manifest.addressCount.toLocaleString('ka-GE')} მისამართი და {manifest.streetCount.toLocaleString('ka-GE')} ქუჩის სახელი. დაფარვა დამოკიდებულია OpenStreetMap-ში შევსებულ ინფორმაციაზე.</p>}
+        {manifest && <p>თბილისისა და შემოგარენის ამ ნაკრებშია {manifest.totalPlaces.toLocaleString('ka-GE')} ობიექტი, {manifest.addressCount.toLocaleString('ka-GE')} მისამართი და {manifest.streetCount.toLocaleString('ka-GE')} ქუჩის სახელი. ნაკრები აერთიანებს OpenStreetMap-სა და მითითებულ საჯარო ცნობარებს; შენობებიც შედის და ქალაქის სრული ბიზნეს-რეესტრი არ არის.</p>}
+        {raw.officialDirectory?.map(entry=><p key={entry.id}>{httpUrl(entry.sourceUrl) && <a href={httpUrl(entry.sourceUrl)} target="_blank" rel="noopener noreferrer">{entry.sourceName || 'დამატებითი ოფიციალური წყარო'}</a>}{entry.checkedAt ? ` · გადამოწმება: ${date(entry.checkedAt)}` : ''}</p>)}
         {error && <button type="button" class="link" onClick={load}>ნაკრების ინფორმაციის ხელახლა ჩატვირთვა</button>}
         <p><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL</a></p>
       </div>
@@ -75,7 +77,7 @@ function SourceDetails({ place }) {
 
 /** Facts imported from an attributed snapshot. Never fabricates reviews/photos. */
 export function ImportedPlaceInfo({ place, showFacts=true }) {
-  if (!place?.raw || (!['openstreetmap','official-directory'].includes(place.raw.source) && !place.raw.linkedOsmId)) return null;
+  if (!place?.raw || (!['openstreetmap','official-directory','merchant-directory'].includes(place.raw.source) && !place.raw.linkedOsmId)) return null;
   const raw=place.raw;
   const facets=place.facets || {};
   const website=httpUrl(raw.website);
@@ -89,7 +91,7 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
       {raw.operatingStatus === 'source-reports-inactive' && <p class="imported-place-location-note"><Icon name="info" size={16}/><span>{raw.sourceNote || 'წყაროს მიხედვით ამჟამად არ ფუნქციონირებს.'}</span></p>}
       {raw.editorial?.highlights?.length > 0 && <ul class="imported-place-facets">{raw.editorial.highlights.map(label => <li key={label}>{label}</li>)}</ul>}
       {raw.editorial?.sources?.length > 0 && <div class="imported-editorial-sources"><span>ინფორმაციის წყარო:</span>{raw.editorial.sources.filter(source => httpUrl(source.url)).map(source => <a key={source.url} href={httpUrl(source.url)} target="_blank" rel="noopener noreferrer">{source.label}<Icon name="arrow-up-right" size={13}/></a>)}</div>}
-      {raw.coordinateAccuracy==='approximate-center' && <p class="imported-place-location-note"><Icon name="crosshair" size={16}/><span>კოორდინატი აღნიშნავს ობიექტის სავარაუდო ცენტრს; შესასვლელი შეიძლება სხვა მხარეს იყოს.</span></p>}
+      {(raw.coordinateNote || raw.coordinateAccuracy==='approximate-center') && <p class="imported-place-location-note"><Icon name="crosshair" size={16}/><span>{raw.coordinateNote || 'კოორდინატი აღნიშნავს ობიექტის სავარაუდო ცენტრს; შესასვლელი შეიძლება სხვა მხარეს იყოს.'}</span></p>}
       {showFacts && <div class="imported-place-facts">
         {raw.openingHours && <p><Icon name="clock" size={17}/><span><small>სამუშაო საათები წყაროს მიხედვით</small>{raw.openingHours}</span></p>}
         {phone && telephone && <a href={`tel:${telephone}`}><Icon name="phone" size={17}/><span>{phone}</span></a>}
@@ -99,7 +101,7 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
       {['private','no','customers','permit','members'].includes(facets.access) && <p class="muted small">წყაროში მითითებულია შესვლის შეზღუდვა: {({private:'კერძო ტერიტორია',no:'საჯარო შესვლა აკრძალულია',customers:'მხოლოდ მომხმარებლებისთვის',permit:'საჭიროა ნებართვა',members:'მხოლოდ წევრებისთვის'})[facets.access]}.</p>}
       {raw.mallId && <a class="imported-place-mall-link" href={`/place/${raw.mallId}`}><Icon name="buildings" size={17}/>{raw.mallName || 'სავაჭრო ცენტრი'}<Icon name="arrow-up-right" size={13}/></a>}
       <MallDirectory key={place.id} place={place}/>
-      {raw.source === 'openstreetmap' || raw.linkedOsmId ? <SourceDetails key={place.id} place={place}/> : httpUrl(raw.sourceUrl) && <a class="imported-source-post-link" href={httpUrl(raw.sourceUrl)} target="_blank" rel="noopener noreferrer">დაწესებულების ოფიციალური წყარო<Icon name="arrow-up-right" size={15}/></a>}
+      {raw.source === 'openstreetmap' || raw.linkedOsmId ? <SourceDetails key={place.id} place={place}/> : httpUrl(raw.sourceUrl) && <a class="imported-source-post-link" href={httpUrl(raw.sourceUrl)} target="_blank" rel="noopener noreferrer">{raw.sourceName || 'ცნობარის წყარო'}<Icon name="arrow-up-right" size={15}/></a>}
     </div>
   );
 }

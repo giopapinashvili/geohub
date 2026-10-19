@@ -1,0 +1,5820 @@
+{
+  "checkedAt": "2026-10-19",
+  "sourceCounts": {
+    "psp": {
+      "nationwide": 365,
+      "listed": 184,
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "dataUrl": "https://app.psp.ge/graphql"
+    },
+    "aversi": {
+      "nationwide": 390,
+      "listed": 160,
+      "sourceUrl": "https://www.aversi.ge/1/apothecas"
+    }
+  },
+  "comparisonSnapshot": {
+    "totalPlaces": 49113,
+    "includes": [
+      "OSM",
+      "official chain and bank directories",
+      "Wolt merchant directory"
+    ]
+  },
+  "counts": {
+    "psp": {
+      "records": 150,
+      "matched": 123,
+      "new": 27,
+      "photos": 135
+    },
+    "aversi": {
+      "records": 116,
+      "matched": 97,
+      "new": 19,
+      "photos": 90
+    }
+  },
+  "total": 266,
+  "matched": 220,
+  "new": 46,
+  "photos": 225,
+  "sourceUnavailable": [
+    {
+      "source": "gpc",
+      "url": "https://gpc.ge/ka/branches",
+      "checkedAt": "2026-10-19",
+      "result": "Public rendered locator payload returned branchesData:[], citiesData:[] and total:0. This is not evidence of no operating branches; no branches inferred."
+    }
+  ],
+  "notes": [
+    "All 160 Aversi branch coordinates were read from the destination of the directions link published on the exact official branch page. No Google review or photo content was imported.",
+    "PSP locations and source image paths are published by the official app.psp.ge public getPharmacies GraphQL query. 365 nationwide records were read in four paginated requests; 184 carry the Tbilisi source city.",
+    "Near existing same-brand points without a sufficiently unique identity match are held to prevent duplicate branches.",
+    "Explicit settlements Tskneti, Kojori and Shindisi retain their settlement names even when included in the official Tbilisi locator.",
+    "Image credits identify the publishing source, not an inferred photographer. No creative-commons license or unknown capture date is fabricated."
+  ],
+  "photoAudit": {
+    "psp": {
+      "reviewedSourceImages": 168,
+      "failedDownloads": [
+        {
+          "sourceRecordId": "1177",
+          "originalUrl": "https://assets.psp.ge/media/stores/002_3.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "1664",
+          "originalUrl": "https://assets.psp.ge/media/stores/003.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "1667",
+          "originalUrl": "https://assets.psp.ge/media/stores/001_1.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "1841",
+          "originalUrl": "https://assets.psp.ge/media/stores/094.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2048",
+          "originalUrl": "https://assets.psp.ge/media/stores/086.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2072",
+          "originalUrl": "https://assets.psp.ge/media/stores/020_1.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2258",
+          "originalUrl": "https://assets.psp.ge/media/stores/028.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2328",
+          "originalUrl": "https://assets.psp.ge/media/stores/000.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2549",
+          "originalUrl": "https://assets.psp.ge/media/stores/064.1_1.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "2554",
+          "originalUrl": "https://assets.psp.ge/media/stores/069.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "3279",
+          "originalUrl": "https://assets.psp.ge/media/stores/001_8.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "4719",
+          "originalUrl": "https://assets.psp.ge/media/stores/193.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "4720",
+          "originalUrl": "https://assets.psp.ge/media/stores/194.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "7264",
+          "originalUrl": "https://assets.psp.ge/media/stores/175.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "7267",
+          "originalUrl": "https://assets.psp.ge/media/stores/227.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "7268",
+          "originalUrl": "https://assets.psp.ge/media/stores/228..JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        }
+      ],
+      "published": 135,
+      "excludedPlaceholders": []
+    },
+    "aversi": {
+      "reviewedSourceImages": 128,
+      "failedDownloads": [
+        {
+          "sourceRecordId": "29",
+          "originalUrl": "https://www.aversi.ge/uploads/map/5cf456b66d5c65bbad8a41b3751cb598.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "44",
+          "originalUrl": "https://www.aversi.ge/uploads/map/bcfa289dbf1a97cdc126ad97839e391f.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "120",
+          "originalUrl": "https://www.aversi.ge/uploads/map/38079e6a86e8d0a6789b9c9c88a0659c.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "192",
+          "originalUrl": "https://www.aversi.ge/uploads/map/58a63fa5ebf23940f22e9450eee64d03.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "207",
+          "originalUrl": "https://www.aversi.ge/uploads/map/a0d36c8565e461b343c6e096925a96e7.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        },
+        {
+          "sourceRecordId": "209",
+          "originalUrl": "https://www.aversi.ge/uploads/map/c1549ce06acf222af37bfca149fca500.JPG",
+          "error": "Error: HTTP 403 text/html; charset=UTF-8"
+        }
+      ],
+      "published": 90,
+      "excludedPlaceholders": [
+        {
+          "sourceRecordId": "117",
+          "reason": "Reviewed image is a brand logo, not a branch photograph."
+        }
+      ],
+      "unresolvedImageLinks": [
+        {
+          "sourceRecordId": "53",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/49/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "107",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/94/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "173",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/323/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "227",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/486/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "11",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/14/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "19",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/21/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "39",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/38/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "91",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/78/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "217",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/449/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "62",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/55/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "60",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/53/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "170",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/311/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "221",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/466/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "102",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/89/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "145",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/245/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "169",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/310/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "188",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/377/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "224",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/479/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "226",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/482/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "25",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/26/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "220",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/465/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "51",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/47/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "133",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/110/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "174",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/325/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "219",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/462/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        },
+        {
+          "sourceRecordId": "228",
+          "sourceUrl": "https://www.aversi.ge/ka/apothecas/488/",
+          "reason": "Official page lists an image, but public link resolution did not return an available image URL."
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "source": "psp",
+      "sourceRecordId": "1013",
+      "id": "directory_psp_1013",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გამზირი ვაჟა-ფშაველა გამზ., N 83 , კვარტალი III , კორპუსი 22ა",
+      "officialPoint": {
+        "lat": 41.723892,
+        "lng": 44.724737
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4726700817",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1093",
+      "id": "directory_psp_1093",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დ. გურამიშვილის გამზ. N23 ა",
+      "officialPoint": {
+        "lat": 41.765393,
+        "lng": 44.791269
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12294129701",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1104",
+      "id": "directory_psp_1104",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აბაშიძის ქ. N41",
+      "officialPoint": {
+        "lat": 41.708214,
+        "lng": 44.761772
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11536792554",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1177",
+      "id": "directory_psp_1177",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბერი გაბრიელ სალოსის გამზ. N102",
+      "officialPoint": {
+        "lat": 41.67455,
+        "lng": 44.85594
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11557893969",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1295",
+      "id": "directory_psp_1295",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბ. ხმელნიცკის ქ. N3ა",
+      "officialPoint": {
+        "lat": 41.671678,
+        "lng": 44.87614
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1437",
+      "id": "directory_psp_1437",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა-ფშაველას გამზ. VII კვ. კორპ. N5ბ",
+      "officialPoint": {
+        "lat": 41.723445,
+        "lng": 44.728551
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11215535616",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1453",
+      "id": "directory_psp_1453",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი. პეტრიწის ქ. N8",
+      "officialPoint": {
+        "lat": 41.792366,
+        "lng": 44.760655
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11795556875",
+          "name": "პსპ",
+          "address": "QQR6+X72 Tbilisi",
+          "distanceMetres": 85
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1488",
+      "id": "directory_psp_1488",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სულხან ცინცაძის ქ. N12 (აქსისი)",
+      "officialPoint": {
+        "lat": 41.721424,
+        "lng": 44.769258
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11329467499",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1489",
+      "id": "directory_psp_1489",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლუბლიანას ქ. N13",
+      "officialPoint": {
+        "lat": 41.775014,
+        "lng": 44.775108
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_8325461533",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1495",
+      "id": "directory_psp_1495",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "რუსთაველის გამზ. 2/4 (სავაჭრო ცენტრი \"გალერია თბილისი\")",
+      "officialPoint": {
+        "lat": 41.694779,
+        "lng": 44.8002
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10295008376",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1496",
+      "id": "directory_psp_1496",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ყიფშიძის ქ. N7გ",
+      "officialPoint": {
+        "lat": 41.713959,
+        "lng": 44.757957
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10725616005",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1497",
+      "id": "directory_psp_1497",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი.ჭავჭავაძის გამზ. N42",
+      "officialPoint": {
+        "lat": 41.709722,
+        "lng": 44.76734
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10947367405",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1498",
+      "id": "directory_psp_1498",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ცინცაძის ქ. N7",
+      "officialPoint": {
+        "lat": 41.72232,
+        "lng": 44.769881
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11304910024",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1504",
+      "id": "directory_psp_1504",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აფრიკა, ჭიჭინაძის ქ. N10 ა",
+      "officialPoint": {
+        "lat": 41.671125,
+        "lng": 44.916403
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "directory_wolt_682dd8092651d7109352155b",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1633",
+      "id": "directory_psp_1633",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აკაკი წერეთელი გამზ. N80",
+      "officialPoint": {
+        "lat": 41.734262,
+        "lng": 44.783283
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4366254893",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1644",
+      "id": "directory_psp_1644",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "პავლე ინგოროყვას N17/9 აპრილის ქ. N5",
+      "officialPoint": {
+        "lat": 41.695691,
+        "lng": 44.796321
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10293637630",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1652",
+      "id": "directory_psp_1652",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ნუცუბიძის ქ. N221, კორპ.N4",
+      "officialPoint": {
+        "lat": 41.725455,
+        "lng": 44.716805
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4648875290",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1664",
+      "id": "directory_psp_1664",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დადიანის ქ. #34 კორპ. 4-4",
+      "officialPoint": {
+        "lat": 41.732013,
+        "lng": 44.797136
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11392590265",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1665",
+      "id": "directory_psp_1665",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი. ჭავჭავაძის გამზ. N22",
+      "officialPoint": {
+        "lat": 41.708672,
+        "lng": 44.773869
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_1690085028",
+          "name": "პსპ",
+          "address": "22 Ilia Chavchavadze Avenue, T'bilisi",
+          "distanceMetres": 46
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1666",
+      "id": "directory_psp_1666",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც. დადიანის ქ. N144/14",
+      "officialPoint": {
+        "lat": 41.741625,
+        "lng": 44.79384
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_5017970821",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1667",
+      "id": "directory_psp_1667",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი.ჭავჭავაძის გამზ. N37დ",
+      "officialPoint": {
+        "lat": 41.711088,
+        "lng": 44.760929
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11333624670",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1840",
+      "id": "directory_psp_1840",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თევდორე მღვდლის 3/თამარ მეფის 32",
+      "officialPoint": {
+        "lat": 41.721447,
+        "lng": 44.797077
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_7529498087",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1841",
+      "id": "directory_psp_1841",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გუდამაყრის ქ. N5",
+      "officialPoint": {
+        "lat": 41.767707,
+        "lng": 44.796025
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12539070398",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1848",
+      "id": "directory_psp_1848",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "შარტავას ქ. N35/37",
+      "officialPoint": {
+        "lat": 41.728965,
+        "lng": 44.771765
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_5898451033",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1851",
+      "id": "directory_psp_1851",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვასო გოძიაშვილის ქ. N 6",
+      "officialPoint": {
+        "lat": 41.755287,
+        "lng": 44.766473
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12556094976",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "1917",
+      "id": "directory_psp_1917",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დიღმის მასივი , III კვ. კორპ. N1ბ",
+      "officialPoint": {
+        "lat": 41.756896,
+        "lng": 44.774448
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11795584178",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2048",
+      "id": "directory_psp_2048",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წინანდელის ქ. N18",
+      "officialPoint": {
+        "lat": 41.689943,
+        "lng": 44.827491
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4716083599",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2070",
+      "id": "directory_psp_2070",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ქართველიშვილის ქ. რესპუბლიკური საავადმყოფოს მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.728805,
+        "lng": 44.758937
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1589109380",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 15
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2072",
+      "id": "directory_psp_2072",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დავით აღმაშენებლის გამზ. N3",
+      "officialPoint": {
+        "lat": 41.703053,
+        "lng": 44.804624
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4476610263",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2074",
+      "id": "directory_psp_2074",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ხომლელის ქ. N2",
+      "officialPoint": {
+        "lat": 41.69175,
+        "lng": 44.871418
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_2881420855",
+          "name": "პსპ",
+          "address": "რომანოზ ხომლელის ქუჩა 2",
+          "distanceMetres": 27
+        },
+        {
+          "id": "osm_node_14208251901",
+          "name": "პსპ",
+          "distanceMetres": 44
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2195",
+      "id": "directory_psp_2195",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გლდანის „ა“ მიკრო/რაიონი, N50 კორპუსის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.792622,
+        "lng": 44.815515
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_8176324196",
+          "name": "პსპ",
+          "address": "ომარ ხიზანიშვილის ქუჩა",
+          "distanceMetres": 10
+        },
+        {
+          "id": "osm_node_12038089515",
+          "name": "პსპ",
+          "address": "ომარ ხიზანიშვილის ქუჩა 9",
+          "distanceMetres": 44
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2196",
+      "id": "directory_psp_2196",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "შანდორ პეტეფის ქ.N 1",
+      "officialPoint": {
+        "lat": 41.690693,
+        "lng": 44.866848
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4501289690",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2244",
+      "id": "directory_psp_2244",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "რუსთავის გზატკეც. N19, კორპ. N1",
+      "officialPoint": {
+        "lat": 41.646203,
+        "lng": 44.909804
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_915371102",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2245",
+      "id": "directory_psp_2245",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლუბლიანას ქ. N15",
+      "officialPoint": {
+        "lat": 41.776063,
+        "lng": 44.775062
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9229264087",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2247",
+      "id": "directory_psp_2247",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თამარ მეფის გამზ. N31",
+      "officialPoint": {
+        "lat": 41.720475,
+        "lng": 44.797243
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12099161161",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2250",
+      "id": "directory_psp_2250",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მესხიშვილის ქ. N 12",
+      "officialPoint": {
+        "lat": 41.693144,
+        "lng": 44.814662
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11339107083",
+          "name": "პსპ",
+          "distanceMetres": 4
+        },
+        {
+          "id": "osm_node_11262640273",
+          "name": "პსპ",
+          "distanceMetres": 48
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2252",
+      "id": "directory_psp_2252",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გლდანის საცხოვრებელ რაიონის მე-5 და მე-7 მ/რ-ის გამყოფი გზის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.803722,
+        "lng": 44.831633
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12058590074",
+          "name": "პსპ",
+          "address": "Gldani V",
+          "distanceMetres": 30
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2258",
+      "id": "directory_psp_2258",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მუხიანის დასახლება III მ/რ კორპ 1",
+      "officialPoint": {
+        "lat": 41.78536,
+        "lng": 44.82932
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_587758300",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2297",
+      "id": "directory_psp_2297",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დავით აღმაშენებლის გამზ. N97",
+      "officialPoint": {
+        "lat": 41.710968,
+        "lng": 44.79664
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_3874402457",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2314",
+      "id": "directory_psp_2314",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ყაზბეგის გამზ. #8",
+      "officialPoint": {
+        "lat": 41.725936,
+        "lng": 44.765953
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6950863786",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2328",
+      "id": "directory_psp_2328",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კ. გამსახურდიას გამზ. N45 (გაგარინის მოედანი)",
+      "officialPoint": {
+        "lat": 41.731818,
+        "lng": 44.767542
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_8240499104",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2355",
+      "id": "directory_psp_2355",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ა. წერეთლის გამზ. N128",
+      "officialPoint": {
+        "lat": 41.745191,
+        "lng": 44.777895
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_4366313793",
+          "name": "პსპ",
+          "address": "აკაკი წერეთლის გამზირი",
+          "distanceMetres": 26
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2390",
+      "id": "directory_psp_2390",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "შ. ნუცუბიძის ქ. N179 და 181 კორპუსებს შორის",
+      "officialPoint": {
+        "lat": 41.726364,
+        "lng": 44.725551
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11678488808",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2391",
+      "id": "directory_psp_2391",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვარკეთილის დასახლება 3, 3 მ/რ, კორპ. N 303-ის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.702544,
+        "lng": 44.873106
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11534002943",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2392",
+      "id": "directory_psp_2392",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მაზნიაშვილის ქ. 20/ჩუბინიშვილისქ . N2",
+      "officialPoint": {
+        "lat": 41.709953,
+        "lng": 44.803967
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4213489760",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2393",
+      "id": "directory_psp_2393",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ინგოროყვას ქ. N1/ლეონიძის ქ. N 9",
+      "officialPoint": {
+        "lat": 41.692433,
+        "lng": 44.79857
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1652551412",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2394",
+      "id": "directory_psp_2394",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თემქა, X კვ. კორპ. N24",
+      "officialPoint": {
+        "lat": 41.78028,
+        "lng": 44.804445
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4525219189",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2395",
+      "id": "directory_psp_2395",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვახტანგ გორგასლის ქ. N39",
+      "officialPoint": {
+        "lat": 41.682454,
+        "lng": 44.82331
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11377685054",
+          "name": "პსპ",
+          "distanceMetres": 11
+        },
+        {
+          "id": "osm_node_11377685048",
+          "name": "პსპ",
+          "address": "39 Gorgasali St",
+          "distanceMetres": 43
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2426",
+      "id": "directory_psp_2426",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ხიზანიშვილის ქ. ნაკვეთი 14/41",
+      "officialPoint": {
+        "lat": 41.794731,
+        "lng": 44.81934
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11222897295",
+          "name": "პსპ",
+          "distanceMetres": 42
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2433",
+      "id": "directory_psp_2433",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მელიქიშვილის გამზ. N18",
+      "officialPoint": {
+        "lat": 41.70834,
+        "lng": 44.78164
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10291487524",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2444",
+      "id": "directory_psp_2444",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვეკუას ქ. N1 (ორბელიანის მოედანი)",
+      "officialPoint": {
+        "lat": 41.697096,
+        "lng": 44.803397
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4185241290",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2447",
+      "id": "directory_psp_2447",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "იოსებიძის ქ. N60",
+      "officialPoint": {
+        "lat": 41.726496,
+        "lng": 44.77121
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4467281389",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2448",
+      "id": "directory_psp_2448",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მარჯანიშვილის ქ. N26ა",
+      "officialPoint": {
+        "lat": 41.710253,
+        "lng": 44.798525
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_5358528211",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2546",
+      "id": "directory_psp_2546",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სულხან ცინცაძის ქ. N77",
+      "officialPoint": {
+        "lat": 41.721136,
+        "lng": 44.761174
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_867698093",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2548",
+      "id": "directory_psp_2548",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა-ფშაველას გამზ. N48",
+      "officialPoint": {
+        "lat": 41.725067,
+        "lng": 44.744679
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4054920584",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2549",
+      "id": "directory_psp_2549",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც. დადიანის ქ. N303",
+      "officialPoint": {
+        "lat": 41.746327,
+        "lng": 44.792397
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9937313594",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2552",
+      "id": "directory_psp_2552",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "პეკინის გამზირი 14",
+      "officialPoint": {
+        "lat": 41.72159,
+        "lng": 44.774208
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_637408325",
+      "matchMethod": "official-address-and-exact-brand",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2554",
+      "id": "directory_psp_2554",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაზისუბანი, I მ/რ, კორპ. N12",
+      "officialPoint": {
+        "lat": 41.702511,
+        "lng": 44.849324
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_3140264734",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2615",
+      "id": "directory_psp_2615",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ილია ვეკუას ქ. N33",
+      "officialPoint": {
+        "lat": 41.793053,
+        "lng": 44.817767
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12445349542",
+          "name": "პსპ",
+          "distanceMetres": 11
+        },
+        {
+          "id": "osm_node_11222897336",
+          "name": "პსპ",
+          "distanceMetres": 27
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2619",
+      "id": "directory_psp_2619",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ჯავახეთის ქ. N33/33 ა",
+      "officialPoint": {
+        "lat": 41.691736,
+        "lng": 44.87092
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_14208251901",
+          "name": "პსპ",
+          "distanceMetres": 13
+        },
+        {
+          "id": "osm_node_2881420855",
+          "name": "პსპ",
+          "address": "რომანოზ ხომლელის ქუჩა 2",
+          "distanceMetres": 23
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2622",
+      "id": "directory_psp_2622",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მოსკოვის პროსპექტი II კვ. I კორპ.",
+      "officialPoint": {
+        "lat": 41.672533,
+        "lng": 44.883672
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12909828359",
+          "name": "პსპ",
+          "address": "39a Moscow Ave",
+          "distanceMetres": 39
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2623",
+      "id": "directory_psp_2623",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლავრენტი მანაგაძის ქ.N5/ კასპის ქ. N18",
+      "officialPoint": {
+        "lat": 41.690428,
+        "lng": 44.82937
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2624",
+      "id": "directory_psp_2624",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ა.წერეთლის გამზ. N48",
+      "officialPoint": {
+        "lat": 41.730224,
+        "lng": 44.786006
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1428648149",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2652",
+      "id": "directory_psp_2652",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გლდანი, I მ/რ კარტოგრაფიული ფაბრიკის მიმდებარედ ,(შენობა-ნაგებობა N 1)",
+      "officialPoint": {
+        "lat": 41.791555,
+        "lng": 44.816668
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12445349583",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 24
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2655",
+      "id": "directory_psp_2655",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წამებულის გამზ. N91",
+      "officialPoint": {
+        "lat": 41.685464,
+        "lng": 44.853114
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11758032825",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2716",
+      "id": "directory_psp_2716",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დიღმის მასივი, II კვ. კორპ. N7ბ",
+      "officialPoint": {
+        "lat": 41.755078,
+        "lng": 44.775034
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12059187142",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "2765",
+      "id": "directory_psp_2765",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა-ფშაველას გამზ. N41",
+      "officialPoint": {
+        "lat": 41.725813,
+        "lng": 44.746295
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4054920583",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3042",
+      "id": "directory_psp_3042",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მეტრო სადგურ \"ისანთან\" ყოფილი ავტოსალაროების მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.686706,
+        "lng": 44.841718
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12846973553",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3043",
+      "id": "directory_psp_3043",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მეფე მირიანის ქ. N90",
+      "officialPoint": {
+        "lat": 41.787205,
+        "lng": 44.746162
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10581387878",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3049",
+      "id": "directory_psp_3049",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დიღმის მას. IV კვ. კორპ. N5ა",
+      "officialPoint": {
+        "lat": 41.763458,
+        "lng": 44.775351
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11610272887",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3252",
+      "id": "directory_psp_3252",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ქეთევან წამებულის გამზ. N2",
+      "officialPoint": {
+        "lat": 41.693063,
+        "lng": 44.815063
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11262640273",
+          "name": "პსპ",
+          "distanceMetres": 19
+        },
+        {
+          "id": "osm_node_11339107083",
+          "name": "პსპ",
+          "distanceMetres": 31
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3257",
+      "id": "directory_psp_3257",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვარკეთილი 3, IV მ/რ. 410 კორპ. მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.708395,
+        "lng": 44.877014
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12766134548",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3259",
+      "id": "directory_psp_3259",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მუხიანი, მე-3 მ/რ, კორპ. N5",
+      "officialPoint": {
+        "lat": 41.785197,
+        "lng": 44.832639
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "directory_wolt_680e2c355fc0850180db9db4",
+          "name": "პსპ დუმბაძე",
+          "address": "QRPJ+36F Tbilisi",
+          "distanceMetres": 31
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3262",
+      "id": "directory_psp_3262",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დოლიძის ქ. კორპ. N6",
+      "officialPoint": {
+        "lat": 41.716792,
+        "lng": 44.772293
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10670301533",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3275",
+      "id": "directory_psp_3275",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გურამიშვილის გამზ. N 1",
+      "officialPoint": {
+        "lat": 41.751117,
+        "lng": 44.790406
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10676780719",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3277",
+      "id": "directory_psp_3277",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დოლიძის ქ. N2",
+      "officialPoint": {
+        "lat": 41.717239,
+        "lng": 44.774336
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11257955877",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 23
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3278",
+      "id": "directory_psp_3278",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დიღმის მასივი, 1 კვ. კორპ. N2-ა",
+      "officialPoint": {
+        "lat": 41.759321,
+        "lng": 44.770924
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12095148163",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3279",
+      "id": "directory_psp_3279",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ფალიაშვილის ქ. N82",
+      "officialPoint": {
+        "lat": 41.709403,
+        "lng": 44.758987
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11107926705",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3436",
+      "id": "directory_psp_3436",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ალ. ყაზბეგის გამზ. N24ა",
+      "officialPoint": {
+        "lat": 41.724092,
+        "lng": 44.746021
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_3828249957",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3439",
+      "id": "directory_psp_3439",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლილოს დასახლება, II კვ.კორპ.N8 (ნაკვეთი N 2/23)",
+      "officialPoint": {
+        "lat": 41.681104,
+        "lng": 44.981819
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1316165316",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3440",
+      "id": "directory_psp_3440",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ყაზბეგის გამზ. N14",
+      "officialPoint": {
+        "lat": 41.725421,
+        "lng": 44.759974
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_6950864187",
+          "name": "პსპ",
+          "address": "Kazbegi 14",
+          "distanceMetres": 34
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3441",
+      "id": "directory_psp_3441",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ა.წერეთლის გამზ.N133გ",
+      "officialPoint": {
+        "lat": 41.749714,
+        "lng": 44.777726
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12032603351",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3445",
+      "id": "directory_psp_3445",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გიორგი ძოწენიძის ქ. N18",
+      "officialPoint": {
+        "lat": 41.729259,
+        "lng": 44.732393
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_478544856",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3610",
+      "id": "directory_psp_3610",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "საბადურის ქ. N20/7",
+      "officialPoint": {
+        "lat": 41.688302,
+        "lng": 44.827788
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12030543171",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3611",
+      "id": "directory_psp_3611",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ამაღლების ქ. N9",
+      "officialPoint": {
+        "lat": 41.689997,
+        "lng": 44.795472
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1204785422",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3824",
+      "id": "directory_psp_3824",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვ. გორგასალის ქ. N39",
+      "officialPoint": {
+        "lat": 41.682913,
+        "lng": 44.823109
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11377685048",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3826",
+      "id": "directory_psp_3826",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გურამიშვილის გამზ. N34",
+      "officialPoint": {
+        "lat": 41.762995,
+        "lng": 44.788496
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6349969886",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3828",
+      "id": "directory_psp_3828",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "პეტრიაშვილის ქ. N26",
+      "officialPoint": {
+        "lat": 41.706048,
+        "lng": 44.779858
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4396331790",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "3830",
+      "id": "directory_psp_3830",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც. დადიანის ქ. N7",
+      "officialPoint": {
+        "lat": 41.719545,
+        "lng": 44.80213
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11368896066",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4128",
+      "id": "directory_psp_4128",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლორთქიფანიძის ქ. N 31 (კლინიკა \"კურაციო\")",
+      "officialPoint": {
+        "lat": 41.719944,
+        "lng": 44.741759
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4132",
+      "id": "directory_psp_4132",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დიღმის მას. V კვ. კორპ. N1ა",
+      "officialPoint": {
+        "lat": 41.763501,
+        "lng": 44.774329
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11610272886",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4442",
+      "id": "directory_psp_4442",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წერონისის ქ.N 144",
+      "officialPoint": {
+        "lat": 41.734513,
+        "lng": 44.821747
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6008885685",
+      "matchMethod": "official-address-and-exact-brand",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4475",
+      "id": "directory_psp_4475",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ტაშკენტის ქ. N 22/22",
+      "officialPoint": {
+        "lat": 41.728898,
+        "lng": 44.763348
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11113116547",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4708",
+      "id": "directory_psp_4708",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კალაუბნის ქ. N8",
+      "officialPoint": {
+        "lat": 41.689553,
+        "lng": 44.873154
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11534002909",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4709",
+      "id": "directory_psp_4709",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თემქა 3-ე მიკრო, III კვარტ. 53-ე კორპ.-ის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.777598,
+        "lng": 44.822556
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13206784502",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4710",
+      "id": "directory_psp_4710",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ომარ ხიზანიშვილის ქ. N 17",
+      "officialPoint": {
+        "lat": 41.794361,
+        "lng": 44.817421
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11222897327",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4711",
+      "id": "directory_psp_4711",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ხიზანიშვილის ქ. N15",
+      "officialPoint": {
+        "lat": 41.792742,
+        "lng": 44.816092
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12038089515",
+          "name": "პსპ",
+          "address": "ომარ ხიზანიშვილის ქუჩა 9",
+          "distanceMetres": 8
+        },
+        {
+          "id": "osm_node_8176324196",
+          "name": "პსპ",
+          "address": "ომარ ხიზანიშვილის ქუჩა",
+          "distanceMetres": 58
+        },
+        {
+          "id": "osm_node_11222897336",
+          "name": "პსპ",
+          "distanceMetres": 121
+        },
+        {
+          "id": "osm_node_12445349583",
+          "name": "პსპ",
+          "distanceMetres": 122
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4713",
+      "id": "directory_psp_4713",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი. ჭავჭავაძის გამზ. N54",
+      "officialPoint": {
+        "lat": 41.710257,
+        "lng": 44.762212
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4225725289",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4719",
+      "id": "directory_psp_4719",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ურეკის ქ. N15",
+      "officialPoint": {
+        "lat": 41.779109,
+        "lng": 44.803211
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11070139205",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4720",
+      "id": "directory_psp_4720",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა-ფშაველას მე-3 კვარტალი, კორპუსი N14",
+      "officialPoint": {
+        "lat": 41.724053,
+        "lng": 44.726905
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11195775973",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4721",
+      "id": "directory_psp_4721",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კახეთის გზატკეცილი, სს ,,ანალიზხელსაწყოს\" კედელთან",
+      "officialPoint": {
+        "lat": 41.687812,
+        "lng": 44.856063
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12919494722",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "4743",
+      "id": "directory_psp_4743",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კონსტანტინე ლესელიძის ქ. N 11 (გლდანი)",
+      "officialPoint": {
+        "lat": 41.804631,
+        "lng": 44.82827
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_2413042433",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7252",
+      "id": "directory_psp_7252",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ომარ ხიზანიშვილის ქ. N 13",
+      "officialPoint": {
+        "lat": 41.79322,
+        "lng": 44.81756
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11222897336",
+          "name": "პსპ",
+          "distanceMetres": 14
+        },
+        {
+          "id": "osm_node_12445349542",
+          "name": "პსპ",
+          "distanceMetres": 27
+        },
+        {
+          "id": "osm_node_11222897327",
+          "name": "პსპ",
+          "distanceMetres": 116
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7253",
+      "id": "directory_psp_7253",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მირიან მეფის ქ. N11გ",
+      "officialPoint": {
+        "lat": 41.787631,
+        "lng": 44.759167
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10266899310",
+          "name": "პსპ",
+          "address": "მირიან მეფის ქუჩა N11",
+          "distanceMetres": 25
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7261",
+      "id": "directory_psp_7261",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მუხიანი ქ.2ა (კლინიკა ჯერარსი)",
+      "officialPoint": {
+        "lat": 41.77287,
+        "lng": 44.82362
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11207997873",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7263",
+      "id": "directory_psp_7263",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ჭავჭავაძის გამზ. N37მ ( აქსის თაუერსი )",
+      "officialPoint": {
+        "lat": 41.711561,
+        "lng": 44.756349
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10817099405",
+          "name": "პსპ",
+          "distanceMetres": 45
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7264",
+      "id": "directory_psp_7264",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გ.მელიქიშვილის ქ. N7 (ვარკეთილი)",
+      "officialPoint": {
+        "lat": 41.6951,
+        "lng": 44.867503
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7265",
+      "id": "directory_psp_7265",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც.დადიანის ქუჩა 145",
+      "officialPoint": {
+        "lat": 41.736949,
+        "lng": 44.795891
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11533703434",
+          "name": "პსპ",
+          "distanceMetres": 60
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7267",
+      "id": "directory_psp_7267",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ს.თაყაიშვილის ქ. N46",
+      "officialPoint": {
+        "lat": 41.708045,
+        "lng": 44.881946
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12766030850",
+          "name": "პსპ",
+          "address": "PV5M+43W თბილისი",
+          "distanceMetres": 58
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7268",
+      "id": "directory_psp_7268",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თეოფანე დავითაიას ქ. N1ბ",
+      "officialPoint": {
+        "lat": 41.700041,
+        "lng": 44.852379
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11816640448",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7270",
+      "id": "directory_psp_7270",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ჭავჭავაძის გამზ. N50",
+      "officialPoint": {
+        "lat": 41.71004,
+        "lng": 44.764221
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4387353894",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7271",
+      "id": "directory_psp_7271",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბაგები, წყნეთის გზატკეცილი N29",
+      "officialPoint": {
+        "lat": 41.710236,
+        "lng": 44.731753
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_7476742494",
+          "name": "პსპ",
+          "distanceMetres": 40
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7273",
+      "id": "directory_psp_7273",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კრწანისის ქუჩა N12 / გორგასლის ქ N71",
+      "officialPoint": {
+        "lat": 41.67504,
+        "lng": 44.82437
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7274",
+      "id": "directory_psp_7274",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ფარნავაზ მეფის N1",
+      "officialPoint": {
+        "lat": 41.789027,
+        "lng": 44.765809
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11373998290",
+          "name": "პსპ",
+          "distanceMetres": 44
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7279",
+      "id": "directory_psp_7279",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "პოლიტკოვსკაიას ქ. N1",
+      "officialPoint": {
+        "lat": 41.720362,
+        "lng": 44.714278
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10798134258",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 15
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7281",
+      "id": "directory_psp_7281",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა-ფშაველას გამზ. მე-6 კვ, კორპ 5ბ",
+      "officialPoint": {
+        "lat": 41.722482,
+        "lng": 44.718497
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10870923805",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 24
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7284",
+      "id": "directory_psp_7284",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "(წყნეთი) შოთა რუსთაველის ქ. N52/ გოგებაშვილის ქ. N5",
+      "officialPoint": {
+        "lat": 41.696461,
+        "lng": 44.699882
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11514315936",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7285",
+      "id": "directory_psp_7285",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სოფელი შინდისი (წავკისის გადასახვევთან)",
+      "officialPoint": {
+        "lat": 41.667808,
+        "lng": 44.762169
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_8698208678",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7286",
+      "id": "directory_psp_7286",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ამაშუკელის ქ. N23",
+      "officialPoint": {
+        "lat": 41.733,
+        "lng": 44.739258
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10555246257",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7287",
+      "id": "directory_psp_7287",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც.დადიანის N45",
+      "officialPoint": {
+        "lat": 41.72502,
+        "lng": 44.799893
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13448618961",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7288",
+      "id": "directory_psp_7288",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მიცკევიჩის ქ. N25ბ",
+      "officialPoint": {
+        "lat": 41.72455,
+        "lng": 44.763474
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13571802850",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7289",
+      "id": "directory_psp_7289",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წმ. ქეთევან წამებულის მოედანი N2",
+      "officialPoint": {
+        "lat": 41.692393,
+        "lng": 44.816439
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11262640274",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 0
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7290",
+      "id": "directory_psp_7290",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვარკეთილი 3, I მ/რ, სუხიშვილის ქუჩა 35",
+      "officialPoint": {
+        "lat": 41.701815,
+        "lng": 44.876764
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11534002971",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7291",
+      "id": "directory_psp_7291",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ი. ჭავჭავაძის გამზ. N41",
+      "officialPoint": {
+        "lat": 41.712459,
+        "lng": 44.752068
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10817099406",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7292",
+      "id": "directory_psp_7292",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თბილისი, ავთო ვარაზის ქ. N37",
+      "officialPoint": {
+        "lat": 41.736773,
+        "lng": 44.718494
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7293",
+      "id": "directory_psp_7293",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "იოანე პეტრიწის ქ. N15",
+      "officialPoint": {
+        "lat": 41.792738,
+        "lng": 44.757682
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11795556674",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7294",
+      "id": "directory_psp_7294",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ევგენი მიქელაძის ქუჩა N4",
+      "officialPoint": {
+        "lat": 41.762998,
+        "lng": 44.771257
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7297",
+      "id": "directory_psp_7297",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ქავთარაძის ქ. N1",
+      "officialPoint": {
+        "lat": 41.72441,
+        "lng": 44.738477
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_relation_17841690",
+          "name": "პსპ",
+          "address": "ვაჟა-ფშაველას გამზირი 70",
+          "distanceMetres": 63
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7298",
+      "id": "directory_psp_7298",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თინათინის ქ. N4",
+      "officialPoint": {
+        "lat": 41.786034,
+        "lng": 44.759677
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7300",
+      "id": "directory_psp_7300",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თამარ მეფის გამზ. N5",
+      "officialPoint": {
+        "lat": 41.718098,
+        "lng": 44.791246
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_8599203531",
+          "name": "პსპ",
+          "distanceMetres": 37
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7301",
+      "id": "directory_psp_7301",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წერეთლის გამზ. N140",
+      "officialPoint": {
+        "lat": 41.748888,
+        "lng": 44.777001
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10204030245",
+          "name": "პსპ",
+          "distanceMetres": 82
+        },
+        {
+          "id": "osm_node_12032603351",
+          "name": "პსპ",
+          "distanceMetres": 115
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7309",
+      "id": "directory_psp_7309",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წერეთლის გამზ. N55",
+      "officialPoint": {
+        "lat": 41.730992,
+        "lng": 44.78585
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11105021305",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7312",
+      "id": "directory_psp_7312",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "წინამძღვრიშვილის ქ. N137",
+      "officialPoint": {
+        "lat": 41.722167,
+        "lng": 44.792513
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12881375201",
+          "name": "PSP",
+          "address": "Mikheil Tsinamdzghvrishvili Street 137",
+          "distanceMetres": 60
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7313",
+      "id": "directory_psp_7313",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "პეკინის გამზ.23",
+      "officialPoint": {
+        "lat": 41.724267,
+        "lng": 44.77188
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11241752305",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7319",
+      "id": "directory_psp_7319",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სარაჯიშვილის გამზ. N21",
+      "officialPoint": {
+        "lat": 41.796497,
+        "lng": 44.800802
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13529062301",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7325",
+      "id": "directory_psp_7325",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ასლანიდის ქ. N13ა / ბერბუკის ქ. N8",
+      "officialPoint": {
+        "lat": 41.718205,
+        "lng": 44.781265
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10614496055",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7331",
+      "id": "directory_psp_7331",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ჩოლოყაშვილის ქ. N40ა",
+      "officialPoint": {
+        "lat": 41.676672,
+        "lng": 44.843884
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10223842242",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7334",
+      "id": "directory_psp_7334",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დ. აღმაშენებლის გამზ N96",
+      "officialPoint": {
+        "lat": 41.70985,
+        "lng": 44.796899
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10300242382",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7339",
+      "id": "directory_psp_7339",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ოთარ ჩხეიძის ქ N10 (შანხაის დასახლება)",
+      "officialPoint": {
+        "lat": 41.722501,
+        "lng": 44.740207
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10932496506",
+          "name": "პსპ",
+          "distanceMetres": 28
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "7346",
+      "id": "directory_psp_7346",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვაჟა - ფშაველას გამზ. N13",
+      "officialPoint": {
+        "lat": 41.727525,
+        "lng": 44.764082
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_761234064",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9086",
+      "id": "directory_psp_9086",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბერი გაბრიელ სალოსის გამზ. N137",
+      "officialPoint": {
+        "lat": 41.6729,
+        "lng": 44.861389
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "directory_wolt_682dd809757bb8f44f85ccf2",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9087",
+      "id": "directory_psp_9087",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აგლაძის ქ. N79",
+      "officialPoint": {
+        "lat": 41.743708,
+        "lng": 44.774541
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11999328404",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9089",
+      "id": "directory_psp_9089",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ც. დადიანის ქ. N71",
+      "officialPoint": {
+        "lat": 41.727896,
+        "lng": 44.799023
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11392595374",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9094",
+      "id": "directory_psp_9094",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ქინძმარაულის შესახვევი, N5 და N4ა-ს მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.666422,
+        "lng": 44.892013
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9096",
+      "id": "directory_psp_9096",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თბილისი, სანდრო ახმეტეილს ქ. N13",
+      "officialPoint": {
+        "lat": 41.793459,
+        "lng": 44.812377
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9097",
+      "id": "directory_psp_9097",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მოსკოვის გამზ. კორპ N38",
+      "officialPoint": {
+        "lat": 41.674565,
+        "lng": 44.879718
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12889530511",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9098",
+      "id": "directory_psp_9098",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ნესტან-დარეჯანის ქ.N8",
+      "officialPoint": {
+        "lat": 41.785343,
+        "lng": 44.749258
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9100",
+      "id": "directory_psp_9100",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დ.გურამიშვილის გამზ. N50",
+      "officialPoint": {
+        "lat": 41.765694,
+        "lng": 44.789445
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11513895380",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9103",
+      "id": "directory_psp_9103",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "26 მაისის სახელობის მოედანი",
+      "officialPoint": {
+        "lat": 41.720018,
+        "lng": 44.778282
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11373991004",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9105",
+      "id": "directory_psp_9105",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "არჩილ მეფის ქ.9",
+      "officialPoint": {
+        "lat": 41.792346,
+        "lng": 44.739371
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11795556669",
+          "name": "პსპ",
+          "distanceMetres": 33
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9107",
+      "id": "directory_psp_9107",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გლდანი, III მკრ კორპ.74",
+      "officialPoint": {
+        "lat": 41.798046,
+        "lng": 44.823894
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "directory_wolt_680f41bb1a89f161fcb4358c",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 22
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9111",
+      "id": "directory_psp_9111",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ჯავახეთის ქ.2 მეტრო ვარკეთილის შესასვლელთან",
+      "officialPoint": {
+        "lat": 41.691736,
+        "lng": 44.870001
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_14208251901",
+          "name": "პსპ",
+          "distanceMetres": 77
+        },
+        {
+          "id": "osm_node_2881420855",
+          "name": "პსპ",
+          "address": "რომანოზ ხომლელის ქუჩა 2",
+          "distanceMetres": 96
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9112",
+      "id": "directory_psp_9112",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აღმაშენებლის ქ. N128 (სოფელი დიღომი)",
+      "officialPoint": {
+        "lat": 41.771526,
+        "lng": 44.738395
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13654369002",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9118",
+      "id": "directory_psp_9118",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "შუამთის ქ. N10",
+      "officialPoint": {
+        "lat": 41.688106,
+        "lng": 44.873249
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9131",
+      "id": "directory_psp_9131",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სუხიშვილის ქ. N1",
+      "officialPoint": {
+        "lat": 41.70199,
+        "lng": 44.872816
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11534002945",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 15
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9135",
+      "id": "directory_psp_9135",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გაბრიელ სალოსის გამზ. N158",
+      "officialPoint": {
+        "lat": 41.67072,
+        "lng": 44.872643
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9136",
+      "id": "directory_psp_9136",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "საქართველოს ერთიანობისთვის მებრძოლთა ქუჩა N31",
+      "officialPoint": {
+        "lat": 41.697658,
+        "lng": 44.876253
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13166651740",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9137",
+      "id": "directory_psp_9137",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კალოუბნის ქ. N41",
+      "officialPoint": {
+        "lat": 41.688165,
+        "lng": 44.883754
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9138",
+      "id": "directory_psp_9138",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ზურაბ პატარიძის ქ.N5",
+      "officialPoint": {
+        "lat": 41.705008,
+        "lng": 44.851591
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11816628945",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9139",
+      "id": "directory_psp_9139",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "დ.გურამიშვილის გამზ N 62ბ",
+      "officialPoint": {
+        "lat": 41.768565,
+        "lng": 44.791479
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11987223924",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9141",
+      "id": "directory_psp_9141",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ვიქტორ კუპრაძის N72",
+      "officialPoint": {
+        "lat": 41.712693,
+        "lng": 44.876634
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12766030855",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9144",
+      "id": "directory_psp_9144",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მეფე მირიანის ქ. N100",
+      "officialPoint": {
+        "lat": 41.787199,
+        "lng": 44.743026
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9145",
+      "id": "directory_psp_9145",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "სანდრო ეულის ქ. N7 (კლინიკა „რეიმანი“)",
+      "officialPoint": {
+        "lat": 41.723212,
+        "lng": 44.715362
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11510875869",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9146",
+      "id": "directory_psp_9146",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლიბანის ქ. N19",
+      "officialPoint": {
+        "lat": 41.817116,
+        "lng": 44.796677
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9147",
+      "id": "directory_psp_9147",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლილოს დასახლება, კვ.4, N13ა",
+      "officialPoint": {
+        "lat": 41.679909,
+        "lng": 44.978797
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9150",
+      "id": "directory_psp_9150",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მეველის ქ N4",
+      "officialPoint": {
+        "lat": 41.684502,
+        "lng": 44.854168
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12919588572",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9154",
+      "id": "directory_psp_9154",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "რუსთავის გზატკეცილი N1",
+      "officialPoint": {
+        "lat": 41.659676,
+        "lng": 44.890092
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9156",
+      "id": "directory_psp_9156",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თეიმურაზ ბოჭორიშვილის ქ.18",
+      "officialPoint": {
+        "lat": 41.791392,
+        "lng": 44.808922
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9160",
+      "id": "directory_psp_9160",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მოსკოვის გამზ. N2, ფართი N2 (სამგორი მოლი)",
+      "officialPoint": {
+        "lat": 41.685934,
+        "lng": 44.853957
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12749814950",
+          "name": "პსპ",
+          "distanceMetres": 31
+        },
+        {
+          "id": "osm_node_11758032825",
+          "name": "პსპ",
+          "distanceMetres": 98
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9163",
+      "id": "directory_psp_9163",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მუხიანის დასახლება, II მიკრო-რაიონი, კორპუსი 5",
+      "officialPoint": {
+        "lat": 41.788012,
+        "lng": 44.82435
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9176",
+      "id": "directory_psp_9176",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გიორგი ჭყონდიდელის ქ.38",
+      "officialPoint": {
+        "lat": 41.741076,
+        "lng": 44.79116
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_13058316192",
+          "name": "პსპ",
+          "distanceMetres": 46
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9178",
+      "id": "directory_psp_9178",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "გორგასლის ქ.77",
+      "officialPoint": {
+        "lat": 41.675309,
+        "lng": 44.828245
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13232743564",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9187",
+      "id": "directory_psp_9187",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბევრეთის ქუჩა",
+      "officialPoint": {
+        "lat": 41.680174,
+        "lng": 44.818291
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13287671301",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9189",
+      "id": "directory_psp_9189",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თ.ქევხიშვილის ქ.N9, N11",
+      "officialPoint": {
+        "lat": 41.707592,
+        "lng": 44.841845
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9191",
+      "id": "directory_psp_9191",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მემედ აბაშიძის N11",
+      "officialPoint": {
+        "lat": 41.796549,
+        "lng": 44.828387
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9194",
+      "id": "directory_psp_9194",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "თბილისი, ჭავჭავაძის გამზ.34 (სავაჭრო ცენტრი პიქსელი, გუდვილი)",
+      "officialPoint": {
+        "lat": 41.709086,
+        "lng": 44.76996
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_13495615701",
+          "name": "PSP",
+          "address": "ილია ჭავჭავაძის გამზირი",
+          "distanceMetres": 29
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9198",
+      "id": "directory_psp_9198",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ლევან რჩეულიშვილის ქ. N14 (თემქა)",
+      "officialPoint": {
+        "lat": 41.78022,
+        "lng": 44.820545
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_2381020287",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9200",
+      "id": "directory_psp_9200",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "აკაკი ბაქრაძის ქ. N 7ა",
+      "officialPoint": {
+        "lat": 41.750401,
+        "lng": 44.771765
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9201",
+      "id": "directory_psp_9201",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "მოსკოვის გამზირი N13",
+      "officialPoint": {
+        "lat": 41.6824,
+        "lng": 44.859925
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_14004848604",
+          "name": "პსპ",
+          "distanceMetres": 27
+        }
+      ]
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9203",
+      "id": "directory_psp_9203",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ქერჩის ქ. N47 (გლდანი)",
+      "officialPoint": {
+        "lat": 41.799575,
+        "lng": 44.813067
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9206",
+      "id": "directory_psp_9206",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ზ. ფანასკერტელ-ციციშვილის ქ. N20ვ",
+      "officialPoint": {
+        "lat": 41.718271,
+        "lng": 44.767756
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_14073189219",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9207",
+      "id": "directory_psp_9207",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ზაქარია ფალიაშვილის ქუჩა N87",
+      "officialPoint": {
+        "lat": 41.710301,
+        "lng": 44.753822
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9209",
+      "id": "directory_psp_9209",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "კალოუბნის ქ. N18",
+      "officialPoint": {
+        "lat": 41.689122,
+        "lng": 44.877314
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "psp",
+      "sourceRecordId": "9219",
+      "id": "directory_psp_9219",
+      "sourceUrl": "https://www.psp.ge/aftiaqebi",
+      "address": "ბერი გაბრიელ სალოსის მოედანი N3",
+      "officialPoint": {
+        "lat": 41.676652,
+        "lng": 44.839401
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "1",
+      "id": "directory_aversi_1",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/5/",
+      "address": "კოსტავას ქ. No11.",
+      "officialPoint": {
+        "lat": 41.70457809095281,
+        "lng": 44.790178835392
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_6406734385",
+          "name": "ავერსი",
+          "distanceMetres": 117
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "27",
+      "id": "directory_aversi_27",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/28/",
+      "address": "მაჩაბლის ქ. No1",
+      "officialPoint": {
+        "lat": 41.69267314510467,
+        "lng": 44.80030417442322
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11375419173",
+          "name": "ავერსი",
+          "distanceMetres": 61
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "53",
+      "id": "directory_aversi_53",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/49/",
+      "address": "პუშკინის ქ. No3",
+      "officialPoint": {
+        "lat": 41.69319127501734,
+        "lng": 44.80212361495541
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9469097109",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "63",
+      "id": "directory_aversi_63",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/56/",
+      "address": "მელიქიშვილის ქ. No8/2",
+      "officialPoint": {
+        "lat": 41.70710619382232,
+        "lng": 44.78497534990311
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4418624789",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 24
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "107",
+      "id": "directory_aversi_107",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/94/",
+      "address": "კოსტავას ქ. No22 (ფილარმონიასთან)",
+      "officialPoint": {
+        "lat": 41.7062271261573,
+        "lng": 44.787129163742065
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11255319757",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "173",
+      "id": "directory_aversi_173",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/323/",
+      "address": "დაბა კოჯორი, იუნკერთა ქ. N31",
+      "officialPoint": {
+        "lat": 41.663437653063276,
+        "lng": 44.70710143446922
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9492422804",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "208",
+      "id": "directory_aversi_208",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/421/",
+      "address": "ბარათაშვილის 2",
+      "officialPoint": {
+        "lat": 41.69671499924531,
+        "lng": 44.80380079537903
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11816707104",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "227",
+      "id": "directory_aversi_227",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/486/",
+      "address": "ქ.თბილისი ძმები ზუბალაშვილებსის13/ალ.ჭავჭავაძის7",
+      "officialPoint": {
+        "lat": 41.70019685674041,
+        "lng": 44.79358847380836
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_14155455208",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "11",
+      "id": "directory_aversi_11",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/14/",
+      "address": "ჭავჭავაძის გამზ. No50",
+      "officialPoint": {
+        "lat": 41.709975595281094,
+        "lng": 44.76453423500061
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10925872164",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "30",
+      "id": "directory_aversi_30",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/31/",
+      "address": "ჭავჭავაძის გამზ. No54",
+      "officialPoint": {
+        "lat": 41.71019971537524,
+        "lng": 44.76229203503072
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10947367506",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "47",
+      "id": "directory_aversi_47",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/45/",
+      "address": "ფალიაშვილის ქ. No15",
+      "officialPoint": {
+        "lat": 41.70818949302235,
+        "lng": 44.77458983659744
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11034390207",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "81",
+      "id": "directory_aversi_81",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/68/",
+      "address": "ფალიაშვილის ქ. No82",
+      "officialPoint": {
+        "lat": 41.7093541011483,
+        "lng": 44.75904382874929
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6038511685",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "99",
+      "id": "directory_aversi_99",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/85/",
+      "address": "ჭავჭავაძის გამზ. No41",
+      "officialPoint": {
+        "lat": 41.71249647803278,
+        "lng": 44.7518527507782
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_590475035",
+          "name": "ავერსი",
+          "address": "ილია ჭავჭავაძის გამზირი 41",
+          "distanceMetres": 30
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "148",
+      "id": "directory_aversi_148",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/259/",
+      "address": "არაყიშვილის N8 (აბაშიძის N26)",
+      "officialPoint": {
+        "lat": 41.707466446274395,
+        "lng": 44.767333487691694
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4152031224",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "163",
+      "id": "directory_aversi_163",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/295/",
+      "address": "არაყიშვილის ქ.No3",
+      "officialPoint": {
+        "lat": 41.7091026843421,
+        "lng": 44.76722912351355
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_7829898927",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "164",
+      "id": "directory_aversi_164",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/297/",
+      "address": "წყნეთის გზატკეცილი No15",
+      "officialPoint": {
+        "lat": 41.709142009484054,
+        "lng": 44.73375905303827
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_7476742498",
+          "name": "ავერსი",
+          "address": "15 Tskneti Highway",
+          "distanceMetres": 27
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "167",
+      "id": "directory_aversi_167",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/304/",
+      "address": "ნ. ყიფშიძის ქ. No6",
+      "officialPoint": {
+        "lat": 41.71436760790826,
+        "lng": 44.7578356873614
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13998063501",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "179",
+      "id": "directory_aversi_179",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/334/",
+      "address": "წყნეთი, რუსთაველის ქ. N50",
+      "officialPoint": {
+        "lat": 41.69673643227363,
+        "lng": 44.70038005084486
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9424893744",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "207",
+      "id": "directory_aversi_207",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/422/",
+      "address": "კეკელიძის ქ. N10",
+      "officialPoint": {
+        "lat": 41.70724125805993,
+        "lng": 44.7783727149345
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11813767370",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "3",
+      "id": "directory_aversi_3",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/7/",
+      "address": "ა.ყაზბეგის გამზ. No5",
+      "officialPoint": {
+        "lat": 41.72648267775168,
+        "lng": 44.76699650287628
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11297666271",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "19",
+      "id": "directory_aversi_19",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/21/",
+      "address": "ვაჟა-ფშაველას გამზ. კვარტ. III, კორპ.No9",
+      "officialPoint": {
+        "lat": 41.724108481610564,
+        "lng": 44.72762167453766
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11195775969",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "21",
+      "id": "directory_aversi_21",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/23/",
+      "address": "ვაჟა-ფშაველას გამზ. No39",
+      "officialPoint": {
+        "lat": 41.725902148855944,
+        "lng": 44.747185707092285
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10690764406",
+          "name": "ავერსი",
+          "address": "ვაჟა-ფშაველას გამზირი 39",
+          "distanceMetres": 36
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "23",
+      "id": "directory_aversi_23",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/24/",
+      "address": "პეკინის გამზ. No2",
+      "officialPoint": {
+        "lat": 41.718895351952476,
+        "lng": 44.77694749832153
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9834259231",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "33",
+      "id": "directory_aversi_33",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/33/",
+      "address": "პეკინის გამზ. No45",
+      "officialPoint": {
+        "lat": 41.73183330571267,
+        "lng": 44.76763755083084
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_591514731",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "34",
+      "id": "directory_aversi_34",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/34/",
+      "address": "ცინცაძის. No1",
+      "officialPoint": {
+        "lat": 41.722735171281315,
+        "lng": 44.77258086204529
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_9834173612",
+          "name": "ავერსი",
+          "address": "1 Sulkhan Tsintsadze St",
+          "distanceMetres": 29
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "39",
+      "id": "directory_aversi_39",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/38/",
+      "address": "ბახტრიონის ქ. No20",
+      "officialPoint": {
+        "lat": 41.72042890481342,
+        "lng": 44.76698309183121
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "41",
+      "id": "directory_aversi_41",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/40/",
+      "address": "ა.ყაზბეგის გამზ. No8",
+      "officialPoint": {
+        "lat": 41.72599823675957,
+        "lng": 44.765639305114746
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10992100405",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "46",
+      "id": "directory_aversi_46",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/44/",
+      "address": "ნუცუბიძის ქ. No179",
+      "officialPoint": {
+        "lat": 41.726330539651734,
+        "lng": 44.72527474164963
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_6578223385",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "65",
+      "id": "directory_aversi_65",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/58/",
+      "address": "დოლიძის ქ N24 / ბალანჩივაძის N17",
+      "officialPoint": {
+        "lat": 41.717030846043315,
+        "lng": 44.77435475657192
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_707962259",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "78",
+      "id": "directory_aversi_78",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/66/",
+      "address": "პეტრიწის ქ. No5",
+      "officialPoint": {
+        "lat": 41.79284955686178,
+        "lng": 44.761469811201096
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_581791678",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "89",
+      "id": "directory_aversi_89",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/76/",
+      "address": "ვაჟა-ფშაველას გამზ. No27ბ.",
+      "officialPoint": {
+        "lat": 41.72894085921723,
+        "lng": 44.75850462913513
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_1589109378",
+          "name": "ავერსი",
+          "address": "Vazha-Pshavela Ave 27b",
+          "distanceMetres": 45
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "91",
+      "id": "directory_aversi_91",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/78/",
+      "address": "ვაჟა-ფშაველას გამზ. No27ბ",
+      "officialPoint": {
+        "lat": 41.72874845514965,
+        "lng": 44.75881465425311
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1589109378",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "94",
+      "id": "directory_aversi_94",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/81/",
+      "address": "ცინცაძის ქ. No9",
+      "officialPoint": {
+        "lat": 41.72177023305591,
+        "lng": 44.76753830909729
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11304910022",
+          "name": "ავერსი",
+          "distanceMetres": 106
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "97",
+      "id": "directory_aversi_97",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/4/",
+      "address": "გამრეკელის N16",
+      "officialPoint": {
+        "lat": 41.72455929448342,
+        "lng": 44.76848206057674
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11289808169",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "120",
+      "id": "directory_aversi_120",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/271/",
+      "address": "ვაჟა ფშაველას N6",
+      "officialPoint": {
+        "lat": 41.727335445169004,
+        "lng": 44.76658880710602
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4411056805",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "150",
+      "id": "directory_aversi_150",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/268/",
+      "address": "ვაჟა–ფშაველას მეოთხე კვარტალი, პირველი კორპუსის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.72365204936408,
+        "lng": 44.72279906272888
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10651928105",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "153",
+      "id": "directory_aversi_153",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/274/",
+      "address": "ა.ყაზბეგის გამზ. No16",
+      "officialPoint": {
+        "lat": 41.72351591982077,
+        "lng": 44.7573459148407
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "154",
+      "id": "directory_aversi_154",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/277/",
+      "address": "ბერბუკის No8",
+      "officialPoint": {
+        "lat": 41.71804447459303,
+        "lng": 44.78123098611832
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10614496054",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 6
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "157",
+      "id": "directory_aversi_157",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/281/",
+      "address": "შარტავას 4/6",
+      "officialPoint": {
+        "lat": 41.72471880453156,
+        "lng": 44.77558929473162
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11478634072",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "158",
+      "id": "directory_aversi_158",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/283/",
+      "address": "მირიან მეფის No75",
+      "officialPoint": {
+        "lat": 41.78739301891439,
+        "lng": 44.74315568804741
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10578940350",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "160",
+      "id": "directory_aversi_160",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/288/",
+      "address": "ნუცუბიძის II მკრ, I კვარტალი, No3დ",
+      "officialPoint": {
+        "lat": 41.72865975993203,
+        "lng": 44.724081621091834
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12059474470",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "165",
+      "id": "directory_aversi_165",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/298/",
+      "address": "ფანასკერტელის ქ. N20–ე (იყალთოს გორა)",
+      "officialPoint": {
+        "lat": 41.71823845427608,
+        "lng": 44.767050408196205
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11530752569",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "166",
+      "id": "directory_aversi_166",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/301/",
+      "address": "სოფელი დიღომი, დ. აღმაშენებლის No124",
+      "officialPoint": {
+        "lat": 41.77135210344821,
+        "lng": 44.73884228792167
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13654369404",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "172",
+      "id": "directory_aversi_172",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/318/",
+      "address": "ტაშკენტის ქ. N27",
+      "officialPoint": {
+        "lat": 41.728907102330886,
+        "lng": 44.76361481320095
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11113161106",
+          "name": "ავერსი",
+          "address": "27 Tashkenti St",
+          "distanceMetres": 26
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "177",
+      "id": "directory_aversi_177",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/331/",
+      "address": "გოძიაშვილის ქ. No17",
+      "officialPoint": {
+        "lat": 41.755713750846034,
+        "lng": 44.7664692209763
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11049467537",
+          "name": "ავერსი",
+          "distanceMetres": 48
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "178",
+      "id": "directory_aversi_178",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/332/",
+      "address": "მირიან მეფის ქ No96",
+      "officialPoint": {
+        "lat": 41.78723667282228,
+        "lng": 44.743756800321286
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10578934498",
+          "name": "ავერსი",
+          "distanceMetres": 19
+        },
+        {
+          "id": "osm_node_10578940350",
+          "name": "ავერსი",
+          "distanceMetres": 53
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "180",
+      "id": "directory_aversi_180",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/350/",
+      "address": "მინდელის ქ -11",
+      "officialPoint": {
+        "lat": 41.72100584737241,
+        "lng": 44.70773951515167
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10777577805",
+          "name": "ავერსი",
+          "distanceMetres": 55
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "181",
+      "id": "directory_aversi_181",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/357/",
+      "address": "მ.მაჭავარიანის ქ.#65(ვაშლიჯვარი)",
+      "officialPoint": {
+        "lat": 41.75205088580062,
+        "lng": 44.76156884448203
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12556094957",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "182",
+      "id": "directory_aversi_182",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/351/",
+      "address": "ჩიქოვანის ქ N 45",
+      "officialPoint": {
+        "lat": 41.714971575374925,
+        "lng": 44.773057720068635
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11307849424",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "187",
+      "id": "directory_aversi_187",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/372/",
+      "address": "სიმონ კანდელაკის 59",
+      "officialPoint": {
+        "lat": 41.73043002200261,
+        "lng": 44.75980786825092
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12827914293",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "192",
+      "id": "directory_aversi_192",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/389/",
+      "address": "ვ.ბოჭორიშვილის ქ.#24 (სპორტის სასახლესთან მორკინალის მხარეს)",
+      "officialPoint": {
+        "lat": 41.721437155445166,
+        "lng": 44.781002615430396
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11387536927",
+          "name": "ავერსი",
+          "address": "24 Vakhtang Bochorishvili St, T'bilisi",
+          "distanceMetres": 30
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "194",
+      "id": "directory_aversi_194",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/382/",
+      "address": "დიდი დიღომი,თინათინის ქ.#1",
+      "officialPoint": {
+        "lat": 41.7869221842911,
+        "lng": 44.7591760952265
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10266899209",
+          "name": "ავერსი",
+          "address": "Tinatini St 1",
+          "distanceMetres": 53
+        },
+        {
+          "id": "osm_node_10266899309",
+          "name": "ავერსი",
+          "address": "მირიან მეფის ქუჩა, Tbilisi, Georgia",
+          "distanceMetres": 99
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "195",
+      "id": "directory_aversi_195",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/383/",
+      "address": "დიდი დიღომი,პეტრე იბერის#14",
+      "officialPoint": {
+        "lat": 41.79227675294819,
+        "lng": 44.75681086620658
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "197",
+      "id": "directory_aversi_197",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/391/",
+      "address": "დიდი დიღომი,4მკრ,25კორპ",
+      "officialPoint": {
+        "lat": 41.793293005898086,
+        "lng": 44.73715801376495
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "200",
+      "id": "directory_aversi_200",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/399/",
+      "address": "მირიან მეფის #11გ",
+      "officialPoint": {
+        "lat": 41.78767486497427,
+        "lng": 44.75892802398691
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10266899309",
+          "name": "ავერსი",
+          "address": "მირიან მეფის ქუჩა, Tbilisi, Georgia",
+          "distanceMetres": 40
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "202",
+      "id": "directory_aversi_202",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/409/",
+      "address": "ნუცუბიძის მე-5მ/რ,ა.ვარაზის#16",
+      "officialPoint": {
+        "lat": 41.73270682167588,
+        "lng": 44.72224017937884
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11968713275",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "210",
+      "id": "directory_aversi_210",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/427/",
+      "address": "დავარის ქ. N41",
+      "officialPoint": {
+        "lat": 41.78590529205132,
+        "lng": 44.75550090263192
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "212",
+      "id": "directory_aversi_212",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/442/",
+      "address": "ქ. თბილისი სააკაძის დაღმართი N11 (კლინიკა კანი)",
+      "officialPoint": {
+        "lat": 41.72535225770075,
+        "lng": 44.77904940799441
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13478658589",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "217",
+      "id": "directory_aversi_217",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/449/",
+      "address": "ლევან ალექსიძის ქ. 2",
+      "officialPoint": {
+        "lat": 41.71978437700777,
+        "lng": 44.72347210306322
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13470335563",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "223",
+      "id": "directory_aversi_223",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/476/",
+      "address": "ქ.თბილისი პეკინის N7",
+      "officialPoint": {
+        "lat": 41.72095296421464,
+        "lng": 44.77539356438313
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_583713682",
+          "name": "ავერსი",
+          "distanceMetres": 61
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "17",
+      "id": "directory_aversi_17",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/19/",
+      "address": "გორგასლის ქ. No79",
+      "officialPoint": {
+        "lat": 41.67528590318716,
+        "lng": 44.82880264520645
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9863981571",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "62",
+      "id": "directory_aversi_62",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/55/",
+      "address": "რუსთავის გზატ. No 265 ა",
+      "officialPoint": {
+        "lat": 41.64555446503236,
+        "lng": 44.91058212118175
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_915371104",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "112",
+      "id": "directory_aversi_112",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/97/",
+      "address": "გორგასლის ქ. No39",
+      "officialPoint": {
+        "lat": 41.682960505893966,
+        "lng": 44.823137819767
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11377685043",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "199",
+      "id": "directory_aversi_199",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/400/",
+      "address": "მარნეულის გზადკეცილი#36",
+      "officialPoint": {
+        "lat": 41.64654831437395,
+        "lng": 44.89872203786879
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "201",
+      "id": "directory_aversi_201",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/392/",
+      "address": "კრწანისის ქ N 14-2 (ნიუ ჰოსპიტალი)",
+      "officialPoint": {
+        "lat": 41.67558442354813,
+        "lng": 44.82389478236112
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11236885942",
+          "name": "ავერსი",
+          "distanceMetres": 120
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "222",
+      "id": "directory_aversi_222",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/468/",
+      "address": "ქ.თბილისი გორგასლის 81გ",
+      "officialPoint": {
+        "lat": 41.67502871502809,
+        "lng": 44.8294597864151
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_9863981571",
+          "name": "ავერსი",
+          "address": "Gorgasali St 79",
+          "distanceMetres": 68
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "8",
+      "id": "directory_aversi_8",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/9/",
+      "address": "წინანდლის ქ. No9-10",
+      "officialPoint": {
+        "lat": 41.6902376117314,
+        "lng": 44.82905477285385
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_478568497",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 8
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "10",
+      "id": "directory_aversi_10",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/11/",
+      "address": "ქ.წამებულის მოედ. No2",
+      "officialPoint": {
+        "lat": 41.69296556314138,
+        "lng": 44.81495440006256
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_583656840",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "16",
+      "id": "directory_aversi_16",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/18/",
+      "address": "ნავთლუღის ქ. No2–ის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.685973182290574,
+        "lng": 44.841045617415524
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_way_1117847672",
+          "name": "ავერსი",
+          "distanceMetres": 31
+        },
+        {
+          "id": "osm_node_11758032791",
+          "name": "ავერსი",
+          "distanceMetres": 46
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "52",
+      "id": "directory_aversi_52",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/48/",
+      "address": "თეოფანე დავითაიას ქუჩა No9",
+      "officialPoint": {
+        "lat": 41.700438796243034,
+        "lng": 44.85205069184303
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_2126768471",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "60",
+      "id": "directory_aversi_60",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/53/",
+      "address": "ბერი გაბრიელ სალოსის გამზ.. No155",
+      "officialPoint": {
+        "lat": 41.671615610174946,
+        "lng": 44.86837645056226
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_587762773",
+          "name": "ავერსი",
+          "distanceMetres": 98
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "74",
+      "id": "directory_aversi_74",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/65/",
+      "address": "მეველეს ქ. No3",
+      "officialPoint": {
+        "lat": 41.684659171812676,
+        "lng": 44.85387861728668
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_590397413",
+          "name": "ავერსი",
+          "distanceMetres": 29
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "98",
+      "id": "directory_aversi_98",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/84/",
+      "address": "წინანდლის ქ. No10",
+      "officialPoint": {
+        "lat": 41.688621215897726,
+        "lng": 44.827461540699005
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_583651854",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "115",
+      "id": "directory_aversi_115",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/101/",
+      "address": "თეოფანე დავითაიას N30",
+      "officialPoint": {
+        "lat": 41.7055923477278,
+        "lng": 44.84474301338196
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12875234459",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 20
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "116",
+      "id": "directory_aversi_116",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/102/",
+      "address": "ნავთლუღის ქ. No15/1",
+      "officialPoint": {
+        "lat": 41.68433466598679,
+        "lng": 44.84012961387634
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4920541825",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 19
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "146",
+      "id": "directory_aversi_146",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/246/",
+      "address": "თეოფანე დავითაიას N13",
+      "officialPoint": {
+        "lat": 41.70238441683708,
+        "lng": 44.84971526522582
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "156",
+      "id": "directory_aversi_156",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/280/",
+      "address": "წინანდლის ქ.No23",
+      "officialPoint": {
+        "lat": 41.69017879937575,
+        "lng": 44.82747445735331
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_way_1273899714",
+          "name": "ავერსი",
+          "address": "წინანდალის ქუჩა 23",
+          "distanceMetres": 32
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "190",
+      "id": "directory_aversi_190",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/379/",
+      "address": "ყვარლის ქუჩა N99ა",
+      "officialPoint": {
+        "lat": 41.69452172198939,
+        "lng": 44.84483716862856
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12846973532",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "191",
+      "id": "directory_aversi_191",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/385/",
+      "address": "ბოგდან ხმელნიცკის N6ბ",
+      "officialPoint": {
+        "lat": 41.67171673556869,
+        "lng": 44.875405826931875
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "directory_wolt_68db96f3c881f2389c6db5af",
+          "name": "Aversi Aviamsheni",
+          "address": "6a Bogdan Khmelnitski St, T'bilisi",
+          "distanceMetres": 39
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "203",
+      "id": "directory_aversi_203",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/402/",
+      "address": "გიორგი მუხაძის ქ.#70",
+      "officialPoint": {
+        "lat": 41.69508054716961,
+        "lng": 44.924379140138626
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_1186323728",
+      "matchMethod": "official-address-and-exact-brand",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "204",
+      "id": "directory_aversi_204",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/407/",
+      "address": "გაბრიელ სალოსის #122",
+      "officialPoint": {
+        "lat": 41.67299593199558,
+        "lng": 44.863333931185366
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "205",
+      "id": "directory_aversi_205",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/412/",
+      "address": "ქინძმარაულის N3",
+      "officialPoint": {
+        "lat": 41.66833701762612,
+        "lng": 44.890254242345655
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12909868705",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "206",
+      "id": "directory_aversi_206",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/417/",
+      "address": "ზურაბ პატარიძის N3",
+      "officialPoint": {
+        "lat": 41.70463623004655,
+        "lng": 44.849857920787024
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11816640457",
+          "name": "ავერსი",
+          "address": "3 ზურაბ პატარიძის ქუჩა, Tbilisi, Georgia",
+          "distanceMetres": 109
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "209",
+      "id": "directory_aversi_209",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/420/",
+      "address": "ნავთლუღის ქუჩა N6/2",
+      "officialPoint": {
+        "lat": 41.68611401514377,
+        "lng": 44.841189506392375
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11758032791",
+          "name": "ავერსი",
+          "distanceMetres": 34
+        },
+        {
+          "id": "osm_way_1117847672",
+          "name": "ავერსი",
+          "distanceMetres": 47
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "211",
+      "id": "directory_aversi_211",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/441/",
+      "address": "ბერი გაბრიელ სალოსის მოედანი N1",
+      "officialPoint": {
+        "lat": 41.676538021704815,
+        "lng": 44.838952124118805
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12474079853",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "214",
+      "id": "directory_aversi_214",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/452/",
+      "address": "ვაზისუბნის დასახლება კორპუსი N5-ის მიმდებარედ",
+      "officialPoint": {
+        "lat": 41.69382109516227,
+        "lng": 44.858891134593065
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12860413666",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "20",
+      "id": "directory_aversi_20",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/22/",
+      "address": "ჯავახეთის I-შესახვევი N12",
+      "officialPoint": {
+        "lat": 41.69233465955291,
+        "lng": 44.87036347389221
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "38",
+      "id": "directory_aversi_38",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/37/",
+      "address": "მოსკოვის პრ. No41 ბ.42",
+      "officialPoint": {
+        "lat": 41.672030281040925,
+        "lng": 44.885008335113525
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_496873188",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "43",
+      "id": "directory_aversi_43",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/41/",
+      "address": "ხომლელის ქ.(მ.”ვარკეთილთან”)",
+      "officialPoint": {
+        "lat": 41.69137527366553,
+        "lng": 44.87108498811722
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_way_284397398",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "69",
+      "id": "directory_aversi_69",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/61/",
+      "address": "კალოუბნის ქ. No14",
+      "officialPoint": {
+        "lat": 41.689338252376714,
+        "lng": 44.87549476849352
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_590489717",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "86",
+      "id": "directory_aversi_86",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/73/",
+      "address": "სესილია თაყაიშვილის ქ. No70",
+      "officialPoint": {
+        "lat": 41.70238478494755,
+        "lng": 44.88137881977277
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_7100046586",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "92",
+      "id": "directory_aversi_92",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/79/",
+      "address": "ლილოს დასახლება II კვარტ. კორპ.8",
+      "officialPoint": {
+        "lat": 41.6811335887252,
+        "lng": 44.98198628425598
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1316165385",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "95",
+      "id": "directory_aversi_95",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/236/",
+      "address": "ვარკეთილი-3, III ა მიკრორაიონი, 345 კორპუსი",
+      "officialPoint": {
+        "lat": 41.707799026837954,
+        "lng": 44.87744450569153
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12766134538",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "100",
+      "id": "directory_aversi_100",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/87/",
+      "address": "ჭიჭინაძის ქ. 8ა",
+      "officialPoint": {
+        "lat": 41.67114472333126,
+        "lng": 44.91595834493637
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_590481367",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "170",
+      "id": "directory_aversi_170",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/311/",
+      "address": "ვიქტორ კუპრაძის 72, კორპ.26",
+      "officialPoint": {
+        "lat": 41.71225031680698,
+        "lng": 44.87718176926592
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12766030856",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 18
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "175",
+      "id": "directory_aversi_175",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/327/",
+      "address": "ლიზა ნაკაშიძე-ბოლქვაძე N5",
+      "officialPoint": {
+        "lat": 41.69070244745695,
+        "lng": 44.86812355917862
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11816640377",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "176",
+      "id": "directory_aversi_176",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/330/",
+      "address": "სუხიშვილის ქ. No35",
+      "officialPoint": {
+        "lat": 41.70176862560912,
+        "lng": 44.877084365206734
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11534002976",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "189",
+      "id": "directory_aversi_189",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/376/",
+      "address": "ანთიმოზ ივერიელის #1",
+      "officialPoint": {
+        "lat": 41.68830974958013,
+        "lng": 44.85896810889244
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12860413674",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "213",
+      "id": "directory_aversi_213",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/443/",
+      "address": "ქ.თბილისი მოსკოვის გამზირი N2",
+      "officialPoint": {
+        "lat": 41.68583612152862,
+        "lng": 44.85402945609189
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12749814951",
+          "name": "ავერსი",
+          "distanceMetres": 28
+        },
+        {
+          "id": "osm_node_590397413",
+          "name": "ავერსი",
+          "distanceMetres": 103
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "221",
+      "id": "directory_aversi_221",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/466/",
+      "address": "ალექსანდრე თვალჭრელიძის N2 (სავაჭრო ცენტრ ისთ ფოინთში)",
+      "officialPoint": {
+        "lat": 41.68973999216234,
+        "lng": 44.90021498804615
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "2",
+      "id": "directory_aversi_2",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/6/",
+      "address": "თ.მეფის გამზ. No28-30",
+      "officialPoint": {
+        "lat": 41.72070518068125,
+        "lng": 44.797155261039734
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10819945553",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 21
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "13",
+      "id": "directory_aversi_13",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/3/",
+      "address": "დ.აღმაშენებლის გამზ. No148ა",
+      "officialPoint": {
+        "lat": 41.716288210541784,
+        "lng": 44.792169154581494
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_581967824",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "72",
+      "id": "directory_aversi_72",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/63/",
+      "address": "წინამძღვრიშვილის ქ. No137",
+      "officialPoint": {
+        "lat": 41.721584172997346,
+        "lng": 44.792791095807374
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12881375204",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 17
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "83",
+      "id": "directory_aversi_83",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/70/",
+      "address": "ჩუბინაშვილის ქ. No4",
+      "officialPoint": {
+        "lat": 41.71016481509086,
+        "lng": 44.80375215411186
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4576295191",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 3
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "84",
+      "id": "directory_aversi_84",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/71/",
+      "address": "ხეთაგუროვის ქ. No4",
+      "officialPoint": {
+        "lat": 41.701661387792925,
+        "lng": 44.80775937438011
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_590437360",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "101",
+      "id": "directory_aversi_101",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/88/",
+      "address": "მარჯანიშვილის ქ. No28",
+      "officialPoint": {
+        "lat": 41.71030728434642,
+        "lng": 44.79888898749653
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_590484164",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 13
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "122",
+      "id": "directory_aversi_122",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/105/",
+      "address": "ჩიტაიას ქ. No37",
+      "officialPoint": {
+        "lat": 41.715579869775496,
+        "lng": 44.80250358581543
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11368918446",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "124",
+      "id": "directory_aversi_124",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/107/",
+      "address": "აბასთუმნის ქ. No1",
+      "officialPoint": {
+        "lat": 41.72210420698956,
+        "lng": 44.796625965935505
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_7529498088",
+          "name": "ავერსი",
+          "address": "სადგურის მოედანი",
+          "distanceMetres": 80
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "142",
+      "id": "directory_aversi_142",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/239/",
+      "address": "თევდორე მღვდლის ქ. 3 / თამარ მეფის გამზ. No32",
+      "officialPoint": {
+        "lat": 41.721223173047626,
+        "lng": 44.79718498029011
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_7529498088",
+          "name": "ავერსი",
+          "address": "სადგურის მოედანი",
+          "distanceMetres": 28
+        },
+        {
+          "id": "osm_node_10819945553",
+          "name": "ავერსი",
+          "distanceMetres": 67
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "168",
+      "id": "directory_aversi_168",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/306/",
+      "address": "წერონისის და ხერთვისის ქუჩის გადაკვეთაზე",
+      "officialPoint": {
+        "lat": 41.734546286823964,
+        "lng": 44.82131406744104
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_12480617972",
+          "name": "ავერსი",
+          "distanceMetres": 33
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "184",
+      "id": "directory_aversi_184",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/363/",
+      "address": "მარჯანიშვილის ქ N26",
+      "officialPoint": {
+        "lat": 41.710178330770255,
+        "lng": 44.79821406304836
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11358652519",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "196",
+      "id": "directory_aversi_196",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/398/",
+      "address": "აღმაშენებლის გამზირი N98",
+      "officialPoint": {
+        "lat": 41.7099614444787,
+        "lng": 44.79682164201177
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10300242383",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 7
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "12",
+      "id": "directory_aversi_12",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/15/",
+      "address": "ლუბლიანას ქ. No13გ",
+      "officialPoint": {
+        "lat": 41.77235988988954,
+        "lng": 44.77500557899475
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "15",
+      "id": "directory_aversi_15",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/17/",
+      "address": "ა.წერეთლის გამზ. No143",
+      "officialPoint": {
+        "lat": 41.75008374049623,
+        "lng": 44.777392745018005
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10009889322",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "45",
+      "id": "directory_aversi_45",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/43/",
+      "address": "ა.წერეთლის გამზ. No110",
+      "officialPoint": {
+        "lat": 41.73556627077937,
+        "lng": 44.78259086608887
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11220729456",
+          "name": "ავერსი",
+          "distanceMetres": 49
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "57",
+      "id": "directory_aversi_57",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/51/",
+      "address": "დიღმის მასივი, II კვარ. კორ.6 ბ.",
+      "officialPoint": {
+        "lat": 41.75561548560021,
+        "lng": 44.774604588747025
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_587761870",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 12
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "70",
+      "id": "directory_aversi_70",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/62/",
+      "address": "დიღმის მასივი, V კვარ. კორპ..3 ა.",
+      "officialPoint": {
+        "lat": 41.764293831866674,
+        "lng": 44.7742223739624
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11610272898",
+          "name": "ავერსი",
+          "distanceMetres": 39
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "102",
+      "id": "directory_aversi_102",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/89/",
+      "address": "ა. წერეთლის გამზ. No55",
+      "officialPoint": {
+        "lat": 41.730380489855015,
+        "lng": 44.786305952479864
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_4473111715",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "106",
+      "id": "directory_aversi_106",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/93/",
+      "address": "ტრანსპორტის ქ. No1 (მ. დიდუბის მიმდებარედ)",
+      "officialPoint": {
+        "lat": 41.749475409535016,
+        "lng": 44.77970480918884
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10943685205",
+          "name": "ავერსი",
+          "distanceMetres": 38
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "136",
+      "id": "directory_aversi_136",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/113/",
+      "address": "ჟვანიას ქ. No 9",
+      "officialPoint": {
+        "lat": 41.784816440264166,
+        "lng": 44.77616423558766
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_9864199040",
+          "name": "ავერსი",
+          "distanceMetres": 107
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "141",
+      "id": "directory_aversi_141",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/235/",
+      "address": "ჩაჩავას ქ. #5. სს \"კ.ერისთავის სახელობის ექსპერიმენტული და კლინიკური ქირურგიის ეროვნული ცენტრი“",
+      "officialPoint": {
+        "lat": 41.77468029412144,
+        "lng": 44.77955460548401
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "145",
+      "id": "directory_aversi_145",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/245/",
+      "address": "ლუბლიანას #5, რკინიგზის საავადმყოფო.",
+      "officialPoint": {
+        "lat": 41.7753924013446,
+        "lng": 44.77597117424011
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_8325461534",
+          "name": "ავერსი",
+          "distanceMetres": 98
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "169",
+      "id": "directory_aversi_169",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/310/",
+      "address": "დიღმის მასივი, კვარტალი III, კორპუსი 1ბ",
+      "officialPoint": {
+        "lat": 41.75693615466752,
+        "lng": 44.77441372751059
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11795584177",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "188",
+      "id": "directory_aversi_188",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/377/",
+      "address": "ქ.თბილისი, წყალტუბოს ქ.#12-14",
+      "officialPoint": {
+        "lat": 41.74441336580159,
+        "lng": 44.77614631523826
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11978795160",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "224",
+      "id": "directory_aversi_224",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/479/",
+      "address": "დიღმის მასივი, 6 კვარტალი, 15ბ კორპუსი",
+      "officialPoint": {
+        "lat": 41.760574472029965,
+        "lng": 44.77327592243441
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "226",
+      "id": "directory_aversi_226",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/482/",
+      "address": "ა. წერეთლის გაზმ. N128",
+      "officialPoint": {
+        "lat": 41.745579011209195,
+        "lng": 44.77779010591191
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_14026174617",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 0
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "25",
+      "id": "directory_aversi_25",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/26/",
+      "address": "ც.დადიანის ქ. No321",
+      "officialPoint": {
+        "lat": 41.750243826633124,
+        "lng": 44.79071795940399
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_583696619",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "29",
+      "id": "directory_aversi_29",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/30/",
+      "address": "ანაპის 414-ე დივიზიის ქ. 14",
+      "officialPoint": {
+        "lat": 41.77787576916086,
+        "lng": 44.80563131422741
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11208027007",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 5
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "40",
+      "id": "directory_aversi_40",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/39/",
+      "address": "გუდამაყრის ქ. No4 (კლინიკური საავადმყ. მიმდ), ნაკვ.05/001",
+      "officialPoint": {
+        "lat": 41.76848702828171,
+        "lng": 44.795352816581726
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_way_1132040000",
+          "name": "ავერსი",
+          "distanceMetres": 25
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "58",
+      "id": "directory_aversi_58",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/52/",
+      "address": "ც.დადიანის ქ. No34",
+      "officialPoint": {
+        "lat": 41.73214356040521,
+        "lng": 44.79719281196594
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11392590259",
+          "name": "ავერსი",
+          "distanceMetres": 99
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "88",
+      "id": "directory_aversi_88",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/75/",
+      "address": "ზღვისუბანი, მე-3 მიკრო რაიონი, მე-5 კვარტალი, ნაკვ. 10/024",
+      "officialPoint": {
+        "lat": 41.77730055317948,
+        "lng": 44.82241750429629
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13206789301",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "93",
+      "id": "directory_aversi_93",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/80/",
+      "address": "ც. დადიანის ქ. No261",
+      "officialPoint": {
+        "lat": 41.74299952925977,
+        "lng": 44.79374349117279
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_590454824",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "103",
+      "id": "directory_aversi_103",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/90/",
+      "address": "გურამიშვილის გამზ. მ. ღრმაღელის მიმდ. ტერიტორია",
+      "officialPoint": {
+        "lat": 41.765633243811834,
+        "lng": 44.790437668561935
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_14281307883",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "138",
+      "id": "directory_aversi_138",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/114/",
+      "address": "ც. დადიანის II მკრ. II კორპუსი",
+      "officialPoint": {
+        "lat": 41.73488974950715,
+        "lng": 44.796744883060455
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "161",
+      "id": "directory_aversi_161",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/289/",
+      "address": "ხუდადოვის ქ. No95ა",
+      "officialPoint": {
+        "lat": 41.72971507368996,
+        "lng": 44.82840088076523
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10358466403",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "183",
+      "id": "directory_aversi_183",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/359/",
+      "address": "დადიანის ქ. No 71",
+      "officialPoint": {
+        "lat": 41.72791326154436,
+        "lng": 44.79899209463947
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11392595375",
+          "name": "ავერსი",
+          "distanceMetres": 32
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "185",
+      "id": "directory_aversi_185",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/367/",
+      "address": "ჭყონდიდელის #101",
+      "officialPoint": {
+        "lat": 41.74827403930058,
+        "lng": 44.78724992758235
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_9913980143",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "186",
+      "id": "directory_aversi_186",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/368/",
+      "address": "გურამიშვილის #31",
+      "officialPoint": {
+        "lat": 41.77228781046679,
+        "lng": 44.79415854929866
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_13585324876",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 9
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "215",
+      "id": "directory_aversi_215",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/453/",
+      "address": "ც. დადიანის #7 (სავაჭრო ცენტრი ქარვასლა)",
+      "officialPoint": {
+        "lat": 41.71920480494942,
+        "lng": 44.80250129783263
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_13827456652",
+          "name": "ავერსი",
+          "distanceMetres": 39
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "220",
+      "id": "directory_aversi_220",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/465/",
+      "address": "ჭყონდიდელის #40",
+      "officialPoint": {
+        "lat": 41.741312370515615,
+        "lng": 44.790962149991984
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_14214660563",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "225",
+      "id": "directory_aversi_225",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/471/",
+      "address": "ხუდადოვის ქ. N2 (გადასასვლელ ხიდთან)",
+      "officialPoint": {
+        "lat": 41.7242668205874,
+        "lng": 44.7992417218963
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "9",
+      "id": "directory_aversi_9",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/10/",
+      "address": "ომარ ხიზანიშვილის ქ. 20",
+      "officialPoint": {
+        "lat": 41.7926085870708,
+        "lng": 44.81550693511963
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_8176324194",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "14",
+      "id": "directory_aversi_14",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/255/",
+      "address": "ალექსი გობრონიძის ქუჩა #2",
+      "officialPoint": {
+        "lat": 41.79136072901402,
+        "lng": 44.81692314147949
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_10819509712",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 10
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "44",
+      "id": "directory_aversi_44",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/42/",
+      "address": "გლდანის ილია ვეკუას N 19",
+      "officialPoint": {
+        "lat": 41.79164869841406,
+        "lng": 44.81671929359436
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_10819509712",
+          "name": "ავერსი",
+          "distanceMetres": 27
+        },
+        {
+          "id": "osm_node_582659796",
+          "name": "ავერსი",
+          "distanceMetres": 74
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "51",
+      "id": "directory_aversi_51",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/47/",
+      "address": "მუხიანის III მკრ. კორ. V",
+      "officialPoint": {
+        "lat": 41.785147074166275,
+        "lng": 44.83207494020462
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "directory_wolt_68db9358d53493fd46f071f6",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "66",
+      "id": "directory_aversi_66",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/59/",
+      "address": "გლდანი, V მკრ. კორ. No14",
+      "officialPoint": {
+        "lat": 41.80311842739231,
+        "lng": 44.83128905296326
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12431793656",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 16
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "87",
+      "id": "directory_aversi_87",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/74/",
+      "address": "მუხიანის II მკრ. კორპ. No8",
+      "officialPoint": {
+        "lat": 41.787868997100574,
+        "lng": 44.826305508613586
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_7276639686",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 14
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "90",
+      "id": "directory_aversi_90",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/77/",
+      "address": "გლდანი, V მკრ",
+      "officialPoint": {
+        "lat": 41.80060710020374,
+        "lng": 44.82524871826172
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_590449842",
+          "name": "ავერსი",
+          "distanceMetres": 44
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "111",
+      "id": "directory_aversi_111",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/96/",
+      "address": "სარაჯიშვილის ქ. No13",
+      "officialPoint": {
+        "lat": 41.79424436420235,
+        "lng": 44.80102300643921
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_1382297392",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 11
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "117",
+      "id": "directory_aversi_117",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/103/",
+      "address": "გლდანის No8 ს. ა. დ.",
+      "officialPoint": {
+        "lat": 41.81368251882264,
+        "lng": 44.83368158340454
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "133",
+      "id": "directory_aversi_133",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/110/",
+      "address": "გლდანის VI-VIII მიკრორაიონებს შორის",
+      "officialPoint": {
+        "lat": 41.80460198367147,
+        "lng": 44.82841640710831
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_12425650044",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 4
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "143",
+      "id": "directory_aversi_143",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/241/",
+      "address": "გლდანის 5 მკრ. 10–ე კორპუსის მიმდ.",
+      "officialPoint": {
+        "lat": 41.79843460282184,
+        "lng": 44.829993546009064
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "osm_node_11992411253",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 2
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "147",
+      "id": "directory_aversi_147",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/451/",
+      "address": "ომარ ხიზანიშვილის ქ.7",
+      "officialPoint": {
+        "lat": 41.791921668213426,
+        "lng": 44.815414398908615
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_582659796",
+          "name": "ავერსი",
+          "distanceMetres": 39
+        },
+        {
+          "id": "osm_node_8176324194",
+          "name": "ავერსი",
+          "address": "ომარ ხიზანიშვილის ქუჩა",
+          "distanceMetres": 87
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "162",
+      "id": "directory_aversi_162",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/291/",
+      "address": "ავჭალა, ლიბანის ქ. No19–სა და No25–ს შორის",
+      "officialPoint": {
+        "lat": 41.81779745250106,
+        "lng": 44.79634046136482
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_13526660502",
+          "name": "ავერსი",
+          "address": "ლიბანის ქუჩა 21",
+          "distanceMetres": 36
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "171",
+      "id": "directory_aversi_171",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/317/",
+      "address": "ზაჰესი, კოლონიის მიმდებარე ტერიტორია",
+      "officialPoint": {
+        "lat": 41.82836614843386,
+        "lng": 44.76217883617994
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "174",
+      "id": "directory_aversi_174",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/325/",
+      "address": "ვეკუას ქ. No55 (ყოფილი ხიზანიშვილის ქ.)",
+      "officialPoint": {
+        "lat": 41.79470174273288,
+        "lng": 44.819306154697365
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_11222897329",
+          "name": "ავერსი",
+          "distanceMetres": 54
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "198",
+      "id": "directory_aversi_198",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/390/",
+      "address": "გლდ.მე-7მ/რ,მირაქიშვილის#29",
+      "officialPoint": {
+        "lat": 41.80337240810987,
+        "lng": 44.83694271782529
+      },
+      "disposition": "new-official-point"
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "216",
+      "id": "directory_aversi_216",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/445/",
+      "address": "თიანეთის გზატკეცილი 49",
+      "officialPoint": {
+        "lat": 41.81278902496311,
+        "lng": 44.82054054415442
+      },
+      "disposition": "enrich-existing",
+      "matchedPlaceId": "directory_wolt_68db92b5d51733006b411123",
+      "matchMethod": "unique-exact-brand-and-source-point",
+      "distanceMetres": 1
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "219",
+      "id": "directory_aversi_219",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/462/",
+      "address": "ომარ ხიზანიშვილის ქ. 5ა",
+      "officialPoint": {
+        "lat": 41.791614807615694,
+        "lng": 44.815688197571355
+      },
+      "disposition": "unresolved-near-existing",
+      "candidates": [
+        {
+          "id": "osm_node_582659796",
+          "name": "ავერსი",
+          "distanceMetres": 26
+        },
+        {
+          "id": "osm_node_10819509712",
+          "name": "ავერსი",
+          "distanceMetres": 97
+        },
+        {
+          "id": "osm_node_8176324194",
+          "name": "ავერსი",
+          "address": "ომარ ხიზანიშვილის ქუჩა",
+          "distanceMetres": 120
+        }
+      ]
+    },
+    {
+      "source": "aversi",
+      "sourceRecordId": "228",
+      "id": "directory_aversi_228",
+      "sourceUrl": "https://www.aversi.ge/ka/apothecas/488/",
+      "address": "ქ. თბილისი, მუხიანი, დუმბაძის ქ. N9",
+      "officialPoint": {
+        "lat": 41.78446151080149,
+        "lng": 44.83349540817011
+      },
+      "disposition": "new-official-point"
+    }
+  ]
+}

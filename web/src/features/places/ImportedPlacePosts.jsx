@@ -18,7 +18,7 @@ function DirectoryPhotos({ entry }) {
     <div class={`imported-source-photos${entry.photos.length === 1 ? ' is-single' : ''}`}>
       {entry.photos.map((photo, index) => <figure key={photo.url}>
         <button type="button" class="imported-source-photo-open" onClick={() => setActive(index)} aria-label={`${photo.caption} — ფოტოს გახსნა`}><Img src={photo.url} width={800} alt={photo.caption}/><span><Icon name="magnifying-glass" size={17}/></span></button>
-        <figcaption><strong>{photo.caption}</strong><span>{photo.dateLabel} · {photo.authorUrl ? <a href={photo.authorUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> : photo.author}</span><span><a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">ორიგინალი ფოტო</a> · <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a></span></figcaption>
+        <figcaption><strong>{photo.caption}</strong><span>{photo.dateLabel} · {photo.rights === 'source-published' ? 'გამომქვეყნებელი: ' : ''}{photo.authorUrl ? <a href={photo.authorUrl} target="_blank" rel="noopener noreferrer">{photo.author}</a> : photo.author}</span><span><a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">ფოტოს წყარო</a> · {photo.rights === 'source-published' ? 'გამომქვეყნებლის ცნობარის ფოტო' : <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a>}</span></figcaption>
       </figure>)}
     </div>
     <p class="muted small">ფოტო ასახავს გადაღების დროინდელ მდგომარეობას. პრევიუ შემცირებულია და ჩარჩოზეა მორგებული.</p>
@@ -31,7 +31,7 @@ export function ImportedPlacePosts({ place, includePhotos = true }) {
   const entry = importedPlaceEntries(place);
   if (!entry) return null;
   return <section class="imported-directory-feed" aria-label="GeoHub-ის ცნობარი და ფოტოამბები">
-    {entry.editorialPosts.map((post, index) => <article key={index} class="card card-pad imported-source-post imported-editorial-post" data-place-id={entry.placeId}><DirectoryHeader entry={entry}/><h3>{post.title}</h3><p>{post.body}</p>{post.sourceUrl && <a class="imported-source-post-link" href={post.sourceUrl} target="_blank" rel="noopener noreferrer">ოფიციალური წყარო<Icon name="arrow-up-right" size={15}/></a>}</article>)}
+    {entry.editorialPosts.map((post, index) => <article key={index} class="card card-pad imported-source-post imported-editorial-post" data-place-id={entry.placeId}><DirectoryHeader entry={entry}/><h3>{post.title}</h3><p>{post.body}</p>{post.sourceUrl && <a class="imported-source-post-link" href={post.sourceUrl} target="_blank" rel="noopener noreferrer">ინფორმაციის წყარო<Icon name="arrow-up-right" size={15}/></a>}</article>)}
     {includePhotos && entry.photos.length > 0 && <DirectoryPhotos key={entry.placeId} entry={entry}/>}
     <article class="card card-pad imported-source-post imported-visitor-post" data-place-id={entry.placeId}>
       <DirectoryHeader entry={entry}/>

@@ -22,8 +22,15 @@ const MEDIA = {
 export function applyCuratedPlaceMedia(place) {
   const sourceId = place?.raw?.linkedOsmId || place?.id;
   const editorial = getPlaceEditorial(sourceId);
-  if (editorial) place = { ...place, description: place.description || editorial.description,
-    raw: { ...place.raw, editorial, website: place.raw?.website || editorial.website } };
+  if (editorial) {
+    const directory = place.raw?.editorial || {};
+    const merged = { ...editorial, ...directory, description: directory.description || editorial.description,
+      sources: [...new Map([...(editorial.sources || []), ...(directory.sources || [])].map(value => [value.url, value])).values()],
+      posts: [...new Map([...(editorial.posts || []), ...(directory.posts || [])].map(value => [value.id, value])).values()],
+    };
+    place = { ...place, description: place.description || editorial.description,
+      raw: { ...place.raw, editorial: merged, website: place.raw?.website || editorial.website } };
+  }
   const generated = places[sourceId];
   const manual = MEDIA[sourceId];
   const institution = getInstitutionPhotos(sourceId);

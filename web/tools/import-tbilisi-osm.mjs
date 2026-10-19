@@ -9,6 +9,8 @@ import { createHash } from 'node:crypto';
 import { categoryFromOsm, facetsFromOsm, taxonomyCategory } from '../src/lib/placeTaxonomy.js';
 import { readCoordinates } from '../src/lib/coordinates.js';
 import { VERIFIED_PLACE_SUPPLEMENT, VERIFIED_SITE_ANCHORS } from './verified-place-supplement.mjs';
+import { createDirectoryRecords, mergeDirectoryRecords } from './source-directory-policy.mjs';
+import { SOURCE_DIRECTORY_DEFINITIONS } from './source-directory-definitions.mjs';
 
 const TAGS = /^(name(:ka|:en|:ru)?|alt_name(:ka|:en)?|short_name(:ka|:en)?|brand(:wikidata)?|operator|amenity|shop|tourism|leisure|office|craft|healthcare(:speciality)?|public_transport|railway|station|subway|bus|train|highway|building|education|landuse|historic|natural|man_made|emergency|addr:(street|street:ka|street:en|housenumber|city|postcode|place|unit)|contact:(phone|mobile|website|email)|phone|mobile|website|url|email|opening_hours|cuisine|diet:[\w_]+|wheelchair|outdoor_seating|indoor|internet_access|takeaway|delivery|reservation|access|fee|level|description(:ka|:en)?|wikidata|wikipedia|check_date|source|entrance|ref|network|vending|drinking_water|sport|payment:[\w_]+)$/;
 const text = (value, max = 300) => typeof value === 'string' ? value.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '';
@@ -73,26 +75,7 @@ const elementCoordinates = element => element && readCoordinates({lat:element.la
 
 /** A directory assertion and its coordinate evidence are recorded separately. */
 export function createVerifiedSupplement(elements, definitions = VERIFIED_PLACE_SUPPLEMENT) {
-  const index = new Map(elements.map(element => [elementId(element),element]));
-  return definitions.map(definition => {
-    const coordinateElement = definition.coordinateSourceId && index.get(definition.coordinateSourceId);
-    const coords = definition.coordinateSourceId ? elementCoordinates(coordinateElement) : readCoordinates(definition);
-    if (!coords) throw new Error(`Verified directory record has no coordinate evidence: ${definition.id}`);
-    if (!definition.id.startsWith('directory_') || !/^https:\/\//.test(definition.sourceUrl) || !definition.sourceCertainty) throw new Error(`Invalid directory provenance: ${definition.id}`);
-    return {
-      id:definition.id,name:definition.name,category:definition.category,...coords,
-      address:definition.address,city:'თბილისი',aliases:definition.aliases || [],description:definition.description,
-      ...(definition.indoor ? {facets:{indoor:true}} : {}),
-      raw:{
-        source:'official-directory',sourceUrl:definition.sourceUrl,sourceCheckedAt:'2026-10-19',named:true,
-        sourceCertainty:definition.sourceCertainty,coordinateAccuracy:definition.coordinateAccuracy,
-        coordinateNote:definition.coordinateNote,website:definition.website,
-        ...(definition.phone ? {phone:definition.phone} : {}),
-        ...(definition.parentPlaceId ? {parentPlaceId:definition.parentPlaceId} : {}),
-        ...(coordinateElement ? {coordinateSourceId:definition.coordinateSourceId,coordinateSourceUrl:sourceUrl(coordinateElement)} : {coordinateSourceUrl:definition.sourceUrl}),
-      },
-    };
-  });
+  return createDirectoryRecords(elements,definitions);
 }
 
 /** A campus relation's bounding rectangle is not a valid entrance/location. */
@@ -151,20 +134,22 @@ function assignBrands(places) {
   }
   return summary.sort((a,b)=>b.mappedLocations-a.mappedLocations);
 }
-function assignMallTenants(places, elements) {
+export function assignMallTenants(places, elements) {
   const malls = places.filter(place=>place.category==='mall');
   const geometry = new Map(elements.filter(e=>e.tags?.shop==='mall' && e.geometry?.length>3).map(e=>[`osm_${e.type}_${e.id}`,e.geometry]));
   const allowed = new Set(['shopping','food','services','finance','entertainment','health']);
   let linked=0;
   for (const mall of malls) {
     const polygon=geometry.get(mall.id);
-    if (!polygon) continue;
     const bounds=mall.raw.bounds;
-    const tenants=places.filter(place=>place.id!==mall.id && place.raw.osmType==='node' && allowed.has(taxonomyCategory(place.category).group)
-      && place.lng>=bounds[0] && place.lng<=bounds[2] && place.lat>=bounds[1] && place.lat<=bounds[3] && insidePolygon(place,polygon));
+    const explicit=places.filter(place=>place.id!==mall.id && place.raw.parentPlaceId===mall.id);
+    const mapped=polygon && bounds ? places.filter(place=>place.id!==mall.id && place.raw.osmType==='node' && allowed.has(taxonomyCategory(place.category).group)
+      && place.lng>=bounds[0] && place.lng<=bounds[2] && place.lat>=bounds[1] && place.lat<=bounds[3] && insidePolygon(place,polygon)) : [];
+    const tenants=[...new Map([...explicit,...mapped].map(place=>[place.id,place])).values()];
     if (!tenants.length) continue;
     mall.raw.tenantIds=tenants.map(place=>place.id);
-    mall.raw.tenantCoverage='mapped-points-in-building';
+    mall.raw.tenantCoverage=explicit.length ? 'official-directory-and-mapped-points' : 'mapped-points-in-building';
+    if (explicit.length) mall.raw.tenantSources=unique(explicit.flatMap(place=>[place.raw.source==='official-directory' && place.raw.sourceUrl,...(place.raw.officialDirectory || []).map(entry=>entry.sourceUrl)]));
     for (const tenant of tenants) { tenant.raw.mallId=mall.id; tenant.raw.mallName=mall.name; }
     linked+=tenants.length;
   }
@@ -223,14 +208,17 @@ export function packSearchRows(rows) {
   })};
 }
 
-export async function buildDataset(input, output) {
+export async function buildDataset(input, output, definitions = SOURCE_DIRECTORY_DEFINITIONS) {
   const snapshot=JSON.parse(await readFile(input,'utf8'));
   const source=snapshot.source;
   if (!source?.url || !source.sourceDate || !Array.isArray(source.bbox)) throw new Error('Input must include source URL, snapshot date and bbox');
   const uniqueElements=[...new Map(snapshot.elements.map(element=>[`${element.type}:${element.id}`,element])).values()];
   const osmPlaces=uniqueElements.map(normalizeOsmPlace).filter(Boolean);
   const coordinateCorrections=applyVerifiedSiteAnchors(osmPlaces,uniqueElements);
-  const supplementalPlaces=createVerifiedSupplement(uniqueElements);
+  const directoryRecords=createVerifiedSupplement(uniqueElements,definitions);
+  for (const record of directoryRecords) if (record.lng<source.bbox[0] || record.lat<source.bbox[1] || record.lng>source.bbox[2] || record.lat>source.bbox[3]) throw new Error(`Official directory point outside snapshot coverage: ${record.id}`);
+  const directoryMerge=mergeDirectoryRecords(osmPlaces,directoryRecords,definitions);
+  const supplementalPlaces=directoryMerge.additions;
   const places=[...osmPlaces,...supplementalPlaces].sort((a,b)=>a.id.localeCompare(b.id));
   const brands=assignBrands(places);
   const malls=assignMallTenants(places,uniqueElements);
@@ -262,6 +250,27 @@ export async function buildDataset(input, output) {
   const searchInfo=await writeJson('search-index.json',packSearchRows(rows));
   const categoryCounts={}; for(const place of places)categoryCounts[place.category]=(categoryCounts[place.category]||0)+1;
   const manifest={version:1,datasetId:`tbilisi-osm-${source.sourceDate}`,generatedAt:new Date().toISOString(),source,license:'ODbL-1.0',licenseUrl:'https://opendatacommons.org/licenses/odbl/1-0/',attribution:'© OpenStreetMap contributors',attributionUrl:'https://www.openstreetmap.org/copyright',coverageNote:'Bounding rectangle around Tbilisi and surroundings. OSM records plus individually attributed official directory facts; not a complete city directory. Building outlines and individual campus buildings are not counted as separate active institutions. Opening hours, contacts and names may be outdated.',totalPlaces:places.length,osmPlaceCount:osmPlaces.length,supplementalPlaceCount:supplementalPlaces.length,coordinateCorrections,officialSources:unique(supplementalPlaces.map(place=>place.raw.sourceUrl)),mappedBuildingCount:osmPlaces.filter(place=>place.raw.recordKind==='mapped-building').length,addressCount,streetCount,sourceElements:uniqueElements.length,categoryCounts,brands,malls,overview:{file:'overview.json',count:overview.length,...overviewInfo},lookup:{file:'lookup.json',...lookupInfo},search:{file:'search-index.json',count:rows.length,...searchInfo},shards:shardEntries.sort((a,b)=>a.key.localeCompare(b.key))};
+  const sourceGroups=new Map();
+  for (const definition of definitions) {
+    const key=definition.sourceName || new URL(definition.sourceUrl).hostname;
+    if (!sourceGroups.has(key)) sourceGroups.set(key,{name:key,sourceKind:definition.sourceKind || 'official-directory',reviewedRecords:0,addedPlaces:0,enrichedPlaces:0,sourceUrls:[]});
+    const group=sourceGroups.get(key);
+    group.reviewedRecords++;
+    group[definition.matchedPlaceId ? 'enrichedPlaces' : 'addedPlaces']++;
+    group.sourceUrls=unique([...group.sourceUrls,definition.sourceUrl]);
+  }
+  Object.assign(manifest,{
+    officialSources:unique(directoryRecords.filter(place=>place.raw.source==='official-directory').map(place=>place.raw.sourceUrl)),
+    directorySources:unique(directoryRecords.map(place=>place.raw.sourceUrl)),
+    directoryRecordCount:definitions.length,
+    officialDirectoryRecordCount:definitions.filter(definition=>definition.sourceKind!=='merchant-directory').length,
+    officialEnrichedPlaceCount:new Set(definitions.filter(definition=>definition.sourceKind!=='merchant-directory' && definition.matchedPlaceId).map(definition=>directoryMerge.resolvedIds[definition.id])).size,
+    directoryEnrichedPlaceCount:new Set(definitions.filter(definition=>definition.matchedPlaceId).map(definition=>directoryMerge.resolvedIds[definition.id])).size,
+    officialSourceGroups:[...sourceGroups.values()].filter(group=>group.sourceKind==='official-directory'),
+    directorySourceGroups:[...sourceGroups.values()],
+    coverageNote:'Bounding rectangle around Tbilisi and surroundings. OSM records plus individually attributed public directories. This is not a complete city census; structures, branches and equipment are separate mapped objects. Marketplace listings do not prove dine-in/public entry or current inventory. Source checks do not imply an on-site visit.',
+    namedPlaceCount:places.filter(place=>place.raw.named && place.raw.recordKind!=='mapped-building').length,
+  });
   await writeJson('manifest.json',manifest);
   // Only obsolete unhashed files generated by this importer are removed.
   // Hashed snapshots remain valid for already-open tabs across an update.
@@ -269,7 +278,7 @@ export async function buildDataset(input, output) {
     if (/^(overview|lookup|search-index|places--?\d+_-?\d+)\.json$/.test(name)) await unlink(join(output,name));
   }
   const totalBytes=(await Promise.all(shardEntries.map(entry=>stat(join(output,entry.file))))).reduce((sum,entry)=>sum+entry.size,0)+overviewInfo.bytes+lookupInfo.bytes+searchInfo.bytes;
-  return {places:places.length,osmPlaces:osmPlaces.length,supplementalPlaces:supplementalPlaces.length,coordinateCorrections,addressCount,streetCount,shards:shards.size,totalBytes,largestShard:Math.max(...shardEntries.map(entry=>entry.bytes)),brands:brands.slice(0,12),malls,categoryCounts};
+  return {places:places.length,osmPlaces:osmPlaces.length,supplementalPlaces:supplementalPlaces.length,officialEnrichedPlaceCount:manifest.officialEnrichedPlaceCount,officialSourceGroups:manifest.officialSourceGroups.map(({sourceUrls,...group})=>group),coordinateCorrections,addressCount,streetCount,shards:shards.size,totalBytes,largestShard:Math.max(...shardEntries.map(entry=>entry.bytes)),brands:brands.slice(0,12),malls,categoryCounts};
 }
 
 if (process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {

@@ -184,7 +184,8 @@ async function directoryJson(env, origin, path) {
   const response = await env.ASSETS.fetch(new Request(new URL(path, origin)));
   if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) return null;
   const length = Number(response.headers.get('content-length'));
-  if (length > 8 * 1024 * 1024) return null;
+  // Match the importer's bounded shard limit, including attributed source facts.
+  if (length > 24 * 1024 * 1024) return null;
   return response.json();
 }
 
@@ -206,7 +207,8 @@ export async function loadImportedPlaceMeta(id, env, origin) {
     directoryJson(env, origin, '/place-media/institutions-credits.json').catch(() => null),
     directoryJson(env, origin, '/place-media/credits.json').catch(() => null),
   ]);
-  const photo = [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
+  const directPhoto = arr(place.raw?.photoCredits).find(entry => entry.url === place.image && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|jpeg|webp|png)$/.test(entry.url));
+  const photo = directPhoto || [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
   const name = clean(place.name) || SITE;
   const details = [clean(place.address), clean(place.city)].filter(Boolean).join(' · ');
   const photoSize = photo?.preview;

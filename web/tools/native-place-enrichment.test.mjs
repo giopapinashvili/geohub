@@ -6,6 +6,7 @@ import {importedPlaceEntries} from '../src/lib/importedPlacePosts.js';
 import {NATIVE_PLACE_SOURCE_LINKS} from '../src/lib/nativePlaceSourceLinks.js';
 import {NATIVE_PLACE_SOURCE_RECORDS} from '../src/lib/nativePlaceSourceRecords.generated.js';
 import {VERIFIED_PLACE_SUPPLEMENT} from './verified-place-supplement.mjs';
+import {SOURCE_DIRECTORY_DEFINITIONS} from './source-directory-definitions.mjs';
 import {getImportedPlace,loadImportedSearchIndex,mergeImportedPlaces} from '../src/data/importedPlaces.js';
 
 // normalize.js imports browser i18n; provide only its initial language attribute.
@@ -90,6 +91,20 @@ test('source enrichment uses reviewed IDs, never tenant names or nearby coordina
   assert.equal(tenant.description,'');
 });
 
+test('native photo credits and editorial metadata coexist with later source enrichment',()=>{
+ const ownPhoto={url:'/owner-photo.jpg',author:'Owner',caption:'Owner caption'};
+ const ownPost={id:'owner-editorial',title:'Owner title',body:'Owner information',sourceUrl:'https://example.org/owner'};
+ const place={id:FABRIKA_NATIVE_ID,name:'Fabrika',image:ownPhoto.url,photos:[ownPhoto.url],raw:{photoCredits:[ownPhoto],editorial:{description:'Owner text',sources:[{url:ownPost.sourceUrl,label:'Owner'}],posts:[ownPost]}}};
+ const result=enrichNativePlace(place);
+ assert.equal(result.image,ownPhoto.url);
+ assert.ok(result.raw.photoCredits.some(photo=>photo.url===ownPhoto.url&&photo.caption===ownPhoto.caption));
+ assert.ok(result.raw.photoCredits.some(photo=>photo.url.includes('fabrika-courtyard')));
+ assert.ok(result.raw.editorial.posts.some(post=>post.id===ownPost.id));
+ assert.ok(result.raw.editorial.posts.length>1);
+ assert.equal(result.raw.editorial.description,'Owner text');
+ assert.deepEqual(enrichNativePlace(result),result);
+});
+
 test('actual loaders retain all official directory IDs and deduplicate reviewed sources without dropping tenants or branches', async t => {
   const originalFetch=globalThis.fetch;
   const requests=[];
@@ -103,7 +118,7 @@ test('actual loaders retain all official directory IDs and deduplicate reviewed 
     const byId=new Map(index.map(row=>[row.id,row]));
     assert.equal(byId.size,index.length);
     const directoryIds=index.filter(row=>row.id.startsWith('directory_')).map(row=>row.id).sort();
-    assert.deepEqual(directoryIds,VERIFIED_PLACE_SUPPLEMENT.map(definition=>definition.id).sort());
+    assert.deepEqual(directoryIds,SOURCE_DIRECTORY_DEFINITIONS.filter(definition=>!definition.matchedPlaceId).map(definition=>definition.id).sort());
     await t.test('each directory index result opens the same attributed place page',async()=>{
       for (const definition of VERIFIED_PLACE_SUPPLEMENT) {
         const row=byId.get(definition.id), place=await getImportedPlace(row.id);

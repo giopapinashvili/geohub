@@ -8,13 +8,16 @@ const directory = new URL('../public/map-brands/', import.meta.url);
 
 test('every displayed logo is a local, attributed asset with the reviewed content hash', async () => {
   const credits = JSON.parse(await readFile(new URL('credits.json', directory), 'utf8'));
-  const byId = new Map(credits.logos.map(credit => [credit.id, credit]));
+  const extra = await Promise.all(['institution-credits.json','directory-credits.json','wolt-credits.json'].map(file=>readFile(new URL(file,directory),'utf8').then(JSON.parse).catch(error=>{if(error.code==='ENOENT')return {logos:[]};throw error;})));
+  const byId = new Map([...credits.logos,...extra.flatMap(value=>value.logos || [])].map(credit => [credit.id, credit]));
   for (const [id, brand] of Object.entries(PLACE_BRANDS)) {
     assert.match(brand.file, /^[a-z0-9.-]+\.(png|svg)$/i, id);
     const credit = byId.get(id);
     assert.ok(credit, `Missing provenance: ${id}`);
     assert.equal(brand.file, credit.file, id);
-    assert.ok(new URL(credit.sourceUrl).protocol.startsWith('http'), id);
+    const sourceUrls=credit.sourceUrl ? [credit.sourceUrl] : (credit.sources || []).map(source=>source.sourceUrl);
+    assert.ok(sourceUrls.length,`Missing publisher page: ${id}`);
+    assert.ok(sourceUrls.every(url=>new URL(url).protocol.startsWith('http')),id);
     const content = await readFile(new URL(brand.file, directory));
     assert.equal(createHash('sha256').update(content).digest('hex'), credit.sha256, id);
     assert.ok(content.length > 64, id);

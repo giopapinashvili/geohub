@@ -1,0 +1,29 @@
+{
+  "sourceCheckedAt": "2026-10-19",
+  "photos": [
+    {
+      "id": "cmc",
+      "url": "/place-media/directory-cmc.jpg",
+      "caption": "კავკასიის მედიცინის ცენტრის შენობა — ოფიციალური საკონტაქტო გვერდის ფოტო",
+      "sourceUrl": "https://cmchospital.ge/ge/contact",
+      "originalUrl": "https://app.cmchospital.ge/static/media/202504080610-fasadi-small-1.webp",
+      "author": "კავკასიის მედიცინის ცენტრი",
+      "rights": "source-published",
+      "dateTaken": "",
+      "sourceCheckedAt": "2026-10-19",
+      "sha256": "6f4cf95a6ea448c57bb6c37c1c028765d3356cfc1a87b66ec2185d5ff9208470"
+    },
+    {
+      "id": "geohospitals-tbilisi",
+      "url": "/place-media/directory-geohospitals-tbilisi.jpg",
+      "caption": "ჯეო ჰოსპიტალსის თბილისის მრავალპროფილური სამედიცინო ცენტრი — ოფიციალური გვერდის ფოტო",
+      "sourceUrl": "https://gh.ge/clinic/tbilisis-mravalprofiluri-samedicino-centri/",
+      "originalUrl": "https://gh.ge/app/uploads/2022/09/DJI_0592.00_01_14_17.Still003_205.jpg",
+      "author": "Geo Hospitals",
+      "rights": "source-published",
+      "dateTaken": "",
+      "sourceCheckedAt": "2026-10-19",
+      "sha256": "9f2e117844cbb263da0bd3db8dd7c2d3953445fabefe525963ad282dd88fceca"
+    }
+  ]
+}

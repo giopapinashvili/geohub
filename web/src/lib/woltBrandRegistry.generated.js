@@ -1,0 +1,13491 @@
+/** Publisher-provided merchant logos; exact reviewed place IDs only.
+ * Provenance, local image hashes and review exclusions: /map-brands/wolt-credits.json.
+ * No fuzzy name or shared-coordinate logo attribution. */
+export const WOLT_PLACE_BRANDS = {
+  "wolt_1b0bf9e3abfc9c99e8650699": {
+    "name": "Domino's Pizza Chavchavadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6266c98c291af5a347e8db30",
+      "osm_node_11003197306",
+      "directory_wolt_62723b4d9c7856d868c7546b",
+      "osm_node_11268940969",
+      "directory_wolt_6272436df18ab22e8dcca13c",
+      "osm_node_11222897312",
+      "directory_wolt_672a1449a5cca18e1332df4a",
+      "directory_wolt_63bea2e6de61c4c033d73d26",
+      "osm_node_12766030861",
+      "directory_wolt_6272478694f326b4313941cc",
+      "osm_node_10724963047",
+      "directory_wolt_62723f54af9f08a3718d0b3c",
+      "osm_node_6315525080"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-1b0bf9e3abfc9c99e8650699.png",
+    "wide": false
+  },
+  "wolt_f8f2431e579cfb16dcade9c9": {
+    "name": "Khinkali House Rustaveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e1f2ef66e5a3030becb85f4",
+      "osm_node_3705983305",
+      "directory_wolt_5e1f33d66d3311a7d4333914",
+      "osm_node_6184533790",
+      "directory_wolt_5e1ef9d0be848f8114ead896",
+      "osm_node_12449835554",
+      "directory_wolt_5e1f36e56d3311a7d43346ea",
+      "osm_node_1363609470",
+      "directory_wolt_5e1f2aa66d3311a7d4331350",
+      "directory_wolt_5e1f38d64d2d1e3332cbc66f",
+      "osm_node_5704717493"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f8f2431e579cfb16dcade9c9.png",
+    "wide": false
+  },
+  "wolt_97fe4a26c3008baadbca6580": {
+    "name": "Kievuri Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_650ab6efd6889dce59357a54",
+      "osm_node_10285884949"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-97fe4a26c3008baadbca6580.png",
+    "wide": false
+  },
+  "wolt_a6d1fe3c5bddf76e2079afc9": {
+    "name": "Madart",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60a524ae809c601ee1db9b0b",
+      "directory_wolt_60a61a2d9ff97f94bb424e3b",
+      "osm_node_12437228397",
+      "directory_wolt_60a61b99ca8bc8913d4245c5",
+      "osm_way_79747734",
+      "directory_wolt_60a619b600684b418547956b",
+      "osm_node_6383563203"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-a6d1fe3c5bddf76e2079afc9.png",
+    "wide": false
+  },
+  "wolt_63a8cfef4e6fbb45114d0903": {
+    "name": "Pizzeria UNO",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_651d3afccfdbc6ab14a88936"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-63a8cfef4e6fbb45114d0903.png",
+    "wide": false
+  },
+  "wolt_29e6118a7a115ba45608174c": {
+    "name": "Thai Curry",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ec65e618819e0cc179a7a9f",
+      "osm_node_9096956518"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-29e6118a7a115ba45608174c.png",
+    "wide": false
+  },
+  "wolt_d7030fdbff0bf1dc977d05fa": {
+    "name": "Craft Food Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63970a7e530928f1a026bb96",
+      "osm_node_11293477118",
+      "directory_wolt_65fd59835756d0ea9623cd34",
+      "osm_node_14084028821",
+      "directory_wolt_6603fdd1fea0d4c9c6bbbf69",
+      "osm_node_12445349547",
+      "directory_wolt_65265f54f919d9f8ff4df134",
+      "osm_way_1293746124",
+      "directory_wolt_65f8397365b69f3186c84e89"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-d7030fdbff0bf1dc977d05fa.png",
+    "wide": false
+  },
+  "wolt_a1bb073b1abaa08d21bb8e89": {
+    "name": "Imperi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_618b930d7decf1532975aafb",
+      "osm_node_11013962946"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a1bb073b1abaa08d21bb8e89.png",
+    "wide": false
+  },
+  "wolt_9df0700ba832927e6b2dfce2": {
+    "name": "Yuki Yume",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682b127a3761bfe5822bd4b4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9df0700ba832927e6b2dfce2.png",
+    "wide": false
+  },
+  "wolt_759f8c14a57c60546b49c7e0": {
+    "name": "Tsiskvili Terrace",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68a2d7eb23d0d5365dfcc2c2",
+      "osm_node_12073637047"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-759f8c14a57c60546b49c7e0.png",
+    "wide": false
+  },
+  "wolt_6346c685981373f8366eab5b": {
+    "name": "Davines Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fe5d8d9286224ad08109e2d"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-6346c685981373f8366eab5b.png",
+    "wide": false
+  },
+  "wolt_0dd66b0e960af2d34f0a962e": {
+    "name": "Marge Dadiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67484d7dfaaa67d326722e15",
+      "osm_way_1308489219",
+      "directory_wolt_64367208f1624cd68ebb2b9d",
+      "osm_node_12445349548",
+      "directory_wolt_64367091968005bd25b0d9a6",
+      "osm_node_13160852419",
+      "directory_wolt_643668cccbf5133365e46c5b",
+      "osm_node_12855130177",
+      "directory_wolt_64365ef1e56f7707f1bec6b4",
+      "osm_way_385960886"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-0dd66b0e960af2d34f0a962e.png",
+    "wide": false
+  },
+  "wolt_bba0c7862c61fc468c58fbb5": {
+    "name": "Wrap Master",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_603e024b95567fef26594c53",
+      "osm_node_9568364817",
+      "directory_wolt_650d6a0d7a984a4a630f5364",
+      "directory_wolt_685b8382fe3b718e0aeaf18a",
+      "directory_wolt_66d70646939dfced12dd1994",
+      "directory_wolt_6a81ba6a7a86e2d92dc1dac5",
+      "directory_wolt_68908910d111e3367fa27051",
+      "osm_node_13397597901",
+      "directory_wolt_6347f8cbb8ed67e31b6dccf4",
+      "directory_wolt_65c603b31da517310ec4a32f",
+      "osm_node_13119245201"
+    ],
+    "categories": [
+      "fast-food",
+      "restaurant"
+    ],
+    "file": "wolt-bba0c7862c61fc468c58fbb5.png",
+    "wide": false
+  },
+  "wolt_e2ce4ea033278841be557139": {
+    "name": "Berlin Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676423bdcfe54d8653e6517f",
+      "osm_node_11358681197"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-e2ce4ea033278841be557139.png",
+    "wide": false
+  },
+  "wolt_520b42af1e4f144e8653ed24": {
+    "name": "Ramos MacShaurma Saakadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6520027560e6fb7fe046ab8a",
+      "directory_wolt_659677e5182144c0b6f0d388",
+      "directory_wolt_659677e588eb21ca4abbab2a",
+      "directory_wolt_659677e5bc092a68b6656cb2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-520b42af1e4f144e8653ed24.png",
+    "wide": false
+  },
+  "wolt_a51018e75365d9b2efc46730": {
+    "name": "Ramekai Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64748fa68caf47ebd6df9e98",
+      "osm_node_11302697843",
+      "directory_wolt_5b44823d5fdf80000c1847ca",
+      "osm_node_9181668117"
+    ],
+    "categories": [
+      "cafe",
+      "restaurant"
+    ],
+    "file": "wolt-a51018e75365d9b2efc46730.png",
+    "wide": false
+  },
+  "wolt_93a4affe9103de1e5db43f92": {
+    "name": "Khushi Indian Restaurant Pushkini",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6750441d31cfc102c03d6e20"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-93a4affe9103de1e5db43f92.png",
+    "wide": false
+  },
+  "wolt_11d1bbcf25f577893521f18b": {
+    "name": "Istanbul Döner Halal Shaurma Marjanishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_653f71077713059b8400db41"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-11d1bbcf25f577893521f18b.png",
+    "wide": false
+  },
+  "wolt_29c291768dacb8a31f82e680": {
+    "name": "33 Tantuni & Doner",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_664db302b518dec150dfd831"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-29c291768dacb8a31f82e680.png",
+    "wide": false
+  },
+  "wolt_718f44d137ed3a8dcad0942a": {
+    "name": "Laan Thai - Telegraph",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4e384704710c94e0bdf7a8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-718f44d137ed3a8dcad0942a.png",
+    "wide": false
+  },
+  "wolt_5544f2c225dd6619a5f5567f": {
+    "name": "Tamtaki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5faa5aef8db7126685f060e0",
+      "osm_node_10699506405"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-5544f2c225dd6619a5f5567f.png",
+    "wide": false
+  },
+  "wolt_67c7c5dc6d539f93aa7cdf4c": {
+    "name": "Muhudo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5df205a1489b7a7924184e31",
+      "osm_node_6705170332"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-67c7c5dc6d539f93aa7cdf4c.png",
+    "wide": false
+  },
+  "wolt_6a62848b7a97cde32c1e6f30": {
+    "name": "Wasabi Abashidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ba095f0434869000be1069d",
+      "osm_node_11005599406",
+      "directory_wolt_5f745d2b44f67b84bed76f1e",
+      "directory_wolt_66557e9f34d8ccf27b97cd97"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6a62848b7a97cde32c1e6f30.png",
+    "wide": false
+  },
+  "wolt_c21412be6de68f392bed013c": {
+    "name": "Poke Man Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_686e1b7cbfa24649c9f5ec07",
+      "directory_wolt_68db913a8e9878fb1e7444c6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c21412be6de68f392bed013c.png",
+    "wide": false
+  },
+  "wolt_fa1e80d2e06f6e91e787eadc": {
+    "name": "Oldenburg",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65099b56cf6cf454339c6f7b",
+      "directory_wolt_69d4b4924efaee9dbda0d027",
+      "directory_wolt_68ef98b53a654b5ca72b7f7f",
+      "directory_wolt_69f1fde1f454ceccd9e4adf1",
+      "directory_wolt_67cab77f143e3204af5b106e",
+      "directory_wolt_65e58404edb5095d64d122a4",
+      "osm_node_12353947703"
+    ],
+    "categories": [
+      "restaurant",
+      "fast-food"
+    ],
+    "file": "wolt-fa1e80d2e06f6e91e787eadc.png",
+    "wide": false
+  },
+  "wolt_d74e5d45a29d1662ecf2db3b": {
+    "name": "Belmart Dolidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61cd707b76c409eb8b557da6",
+      "osm_node_11048252505",
+      "directory_wolt_66163e56005e5e88fdfaf42a",
+      "osm_node_11913696866",
+      "directory_wolt_668bdcaf6113ede47c4c6481",
+      "osm_node_12638168302",
+      "directory_wolt_68ca7a5b39f17ad759d54196",
+      "osm_node_14072585164",
+      "directory_wolt_61cd704876c409eb8b557d70",
+      "osm_node_11220729461",
+      "directory_wolt_64f81e04054e0d9884865b57",
+      "osm_node_9863988188",
+      "directory_wolt_6a7d9f04467cf034ade652f2",
+      "osm_node_14150120401",
+      "directory_wolt_61cd70a8a62d5e79a477be81",
+      "osm_node_11195801408"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d74e5d45a29d1662ecf2db3b.png",
+    "wide": false
+  },
+  "wolt_15003fa8e9fe806d3bc8b3d9": {
+    "name": "Lui Coffee",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d19f72430947fe4df731961"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-15003fa8e9fe806d3bc8b3d9.png",
+    "wide": false
+  },
+  "wolt_6ba3a2f8b4f52539ee6a4b38": {
+    "name": "Gobi Georgian Restaurant",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b2c82ac2082cb70f4ad726"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6ba3a2f8b4f52539ee6a4b38.png",
+    "wide": false
+  },
+  "wolt_f1aa846289fcbfd92050ac20": {
+    "name": "HB Sanapiro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a33ccc47f634e888b70ca3f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f1aa846289fcbfd92050ac20.png",
+    "wide": false
+  },
+  "wolt_9705ec9368740c84d85f230d": {
+    "name": "Bela Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698ef035d67a9d01f2637157",
+      "directory_wolt_698ef035d67a9d01f263715b",
+      "directory_wolt_698ef035d67a9d01f2637159",
+      "directory_wolt_698ef035d67a9d01f2637161",
+      "directory_wolt_6a3cd4c4467a5b5b2e812ae5",
+      "directory_wolt_698ef035d67a9d01f263715a",
+      "directory_wolt_698ef035d67a9d01f263715f",
+      "directory_wolt_698ef035d67a9d01f2637160",
+      "directory_wolt_698ef035d67a9d01f263715d",
+      "directory_wolt_698ef035d67a9d01f263715e",
+      "directory_wolt_698ef035d67a9d01f263715c",
+      "directory_wolt_698ef035d67a9d01f2637162",
+      "directory_wolt_698ef035d67a9d01f2637158"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-9705ec9368740c84d85f230d.png",
+    "wide": false
+  },
+  "wolt_c962716fd546ac62ba1842e6": {
+    "name": "Pastachi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64e750ae5d8cb827febb3d84",
+      "osm_node_11528116069"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-c962716fd546ac62ba1842e6.png",
+    "wide": false
+  },
+  "wolt_a93bab42f7e08051498fb709": {
+    "name": "Ding Sheng",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678e315d06aa8371f376b83f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a93bab42f7e08051498fb709.png",
+    "wide": false
+  },
+  "wolt_50e9a62e714483f679a7adc0": {
+    "name": "Kiwi Vegan Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5b0e8babc39da7000e915ec7"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-50e9a62e714483f679a7adc0.png",
+    "wide": false
+  },
+  "wolt_37bb621fe2de5404c7b011d4": {
+    "name": "Nasimi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5dcab383a42cf12a4e5c9594",
+      "osm_node_4458043996"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-37bb621fe2de5404c7b011d4.png",
+    "wide": false
+  },
+  "wolt_3654f9de3e31adc20b2668be": {
+    "name": "Marjo's meqsikuri N1 Marjanishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65f976d618fff68ab1c3bea2",
+      "directory_wolt_67519e05a2cac472bba69f7a",
+      "directory_wolt_65f97a2db255ffd3033d404a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3654f9de3e31adc20b2668be.png",
+    "wide": false
+  },
+  "wolt_3dff496705963f486916011a": {
+    "name": "Food Good Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66261c5bd837136daa57a9aa",
+      "directory_wolt_6066c52252a12231cfec2a15"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3dff496705963f486916011a.png",
+    "wide": false
+  },
+  "wolt_d3d849e8ef461281cd6576c1": {
+    "name": "Qalta Bedniereba Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60f7c79666a67fdb4f61527c",
+      "directory_wolt_60f7cb5b44596ef5c7610886",
+      "directory_wolt_60d09b715f5c9e8d7415e340",
+      "osm_node_14206292370",
+      "directory_wolt_66460f1b06feeb2439e9476e"
+    ],
+    "categories": [
+      "cosmetics",
+      "hairdresser"
+    ],
+    "file": "wolt-d3d849e8ef461281cd6576c1.png",
+    "wide": false
+  },
+  "wolt_1f8a0107859ec5d336a5ee5b": {
+    "name": "Shemoikhede Marjanishvilze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5dccfff702c20261b7b1e4af"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1f8a0107859ec5d336a5ee5b.png",
+    "wide": false
+  },
+  "wolt_09c56d232669e671fdbc0ae7": {
+    "name": "Gastronome Sololaki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f084b72584f426d01549dcf",
+      "osm_node_10287775506",
+      "directory_wolt_6103ecc4f63583549efba468",
+      "osm_node_9921189073",
+      "directory_wolt_5fe32dc5ec9520b85802af80",
+      "osm_node_12070134335",
+      "directory_wolt_608ba9fe3b6592f4ee0d3868",
+      "osm_node_10799446267",
+      "directory_wolt_5e76113105dfcbcc60b6e912",
+      "osm_node_11288930023",
+      "directory_wolt_67dd12d2b038ad210a3e0eee",
+      "osm_node_12670099200"
+    ],
+    "categories": [
+      "shopping",
+      "convenience"
+    ],
+    "file": "wolt-09c56d232669e671fdbc0ae7.png",
+    "wide": false
+  },
+  "wolt_3d5e848a738964470963f4b6": {
+    "name": "Los Amigos",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6113a36d2fe078d7531102f5",
+      "osm_node_11162871707",
+      "directory_wolt_64463f159c991410bb0bf463",
+      "directory_wolt_6979a9d072468f14d9e3bfe8",
+      "osm_node_13532839278"
+    ],
+    "categories": [
+      "fast-food",
+      "restaurant"
+    ],
+    "file": "wolt-3d5e848a738964470963f4b6.png",
+    "wide": false
+  },
+  "wolt_7fd15a85f4596e7d7745acab": {
+    "name": "Supra Hummus",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6870dcac8977cf67e7f7a929",
+      "osm_node_11302789873"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-7fd15a85f4596e7d7745acab.png",
+    "wide": false
+  },
+  "wolt_d46d080cf5f3b80dbd0cabae": {
+    "name": "Farina",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65e0354837b7f9e253a5492a",
+      "osm_node_10285884955"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-d46d080cf5f3b80dbd0cabae.png",
+    "wide": false
+  },
+  "wolt_d306b9040886e01e6cf0d70d": {
+    "name": "Super",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63e9fd9b74ed485c9f36b7ed",
+      "osm_way_129820735"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-d306b9040886e01e6cf0d70d.png",
+    "wide": false
+  },
+  "wolt_75ca08e1d9a0a88d5dae0424": {
+    "name": "Georgian House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5cd130106af2d0db8517cf61"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-75ca08e1d9a0a88d5dae0424.png",
+    "wide": false
+  },
+  "wolt_4d2bb3aee0de2fec483013ee": {
+    "name": "ცეცხლი აინთო ვაკე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66e7d6e3fb801fcb0ffdae00",
+      "directory_wolt_6ab4dd6cc3a4c428a9abde14",
+      "directory_wolt_69ce0e555a5805a117747f2e",
+      "directory_wolt_65607e9f86fefa4e81516892"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4d2bb3aee0de2fec483013ee.png",
+    "wide": false
+  },
+  "wolt_1f7bc62e6192eb80cf3ea924": {
+    "name": "SushiWoki Chikobava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62961e616e58733fee9b310c",
+      "directory_wolt_6655b4a9472cf3d12e6531b1",
+      "directory_wolt_629623a639561d002bb83cd4",
+      "directory_wolt_62961e03da059e5bb23613b1",
+      "directory_wolt_629de56b131a69c5b39acede"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1f7bc62e6192eb80cf3ea924.png",
+    "wide": false
+  },
+  "wolt_74f1237a864c53d189fe309a": {
+    "name": "Ganjina",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_652d0799052972630318fbfe",
+      "osm_node_9081553617"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-74f1237a864c53d189fe309a.png",
+    "wide": false
+  },
+  "wolt_13f94abc76dcb314a0e2f6e1": {
+    "name": "Flash Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_602e3397a28d9df503c52e16"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-13f94abc76dcb314a0e2f6e1.png",
+    "wide": false
+  },
+  "wolt_bc1634c5ab96956b8b6481ae": {
+    "name": "Georgian Pub",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61c45ff7131cc81fb0775699"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-bc1634c5ab96956b8b6481ae.png",
+    "wide": false
+  },
+  "wolt_96b2ed16420dd36f5f274453": {
+    "name": "VAKE BY SPAR Ingorokva",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a009750ce1274a62209ccc9",
+      "directory_wolt_68230424f3fa93ae3238185b",
+      "directory_wolt_6a3391b504de5d75d88fc49b",
+      "directory_wolt_69a57e92991a05fe562ade2c",
+      "directory_wolt_69d51d61a7e5ff9a570c4851",
+      "directory_wolt_69eb1ea9b4e1428f7fdbd53b",
+      "directory_wolt_6960a6f9cf2c9853ddd84fa4",
+      "directory_wolt_62a310622316a602d363a3ab",
+      "directory_wolt_6a213019aa7259cd2b51b821",
+      "directory_wolt_6960a4d51569afb3857f121d",
+      "directory_wolt_69eb22eb0626a0aadc6c7401",
+      "directory_wolt_5fc616ddbe24f027d0b39c0f",
+      "directory_wolt_6a0095c6283f71173b37a04a",
+      "directory_wolt_69ef0a5cddbb9b5a5423923b",
+      "directory_wolt_682304f47f6c4403d91ed099",
+      "directory_wolt_6a0097d0333a1e8f1a4f5cdf",
+      "directory_wolt_5fc0de5199cd296d37e79384",
+      "directory_wolt_6a3103dd00fa9348b16bbd7b",
+      "directory_wolt_6a009874ab2425126fb3c16c",
+      "directory_wolt_5fc614c79c8a350efa631cec",
+      "directory_wolt_61714fb5ebdc6b3916671bf8",
+      "directory_wolt_63f4bc5f782f36bf2da92fc2",
+      "directory_wolt_5fc0daa56c595a9d2a6eec4f",
+      "directory_wolt_62a30ed0871d4049587c44b2",
+      "directory_wolt_6960a5fe4aadbd6f6557d564",
+      "directory_wolt_6960a5aeb2b72382999a82f3",
+      "directory_wolt_69df6e2dda31eb5d968f17ee",
+      "directory_wolt_69fb2d34b729ffc551b572f7",
+      "directory_wolt_5fbfb194d584c1e91a6bb02b",
+      "directory_wolt_6960a66db2b72382999a8325",
+      "directory_wolt_625d56ea7d6a178ac9f6b30e",
+      "directory_wolt_6a009682fd0dc146bf55b49e"
+    ],
+    "categories": [
+      "convenience",
+      "supermarket"
+    ],
+    "file": "wolt-96b2ed16420dd36f5f274453.png",
+    "wide": false
+  },
+  "wolt_4a68ebe3ebc3957dd539dd1a": {
+    "name": "Puri Guliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d1cbb2ac53e3955d9a37fb2",
+      "osm_node_6698908285"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-4a68ebe3ebc3957dd539dd1a.png",
+    "wide": false
+  },
+  "wolt_f5b60a51332ea328983f94ab": {
+    "name": "Tabla Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680f4044b9aa430a9c071877"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f5b60a51332ea328983f94ab.png",
+    "wide": false
+  },
+  "wolt_ae52f70366dc5b338de93ffb": {
+    "name": "Qute's Shaurma Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_620a2147db07831af0dd6d89",
+      "osm_node_13732109930",
+      "directory_wolt_621cada2426f7433be60518d",
+      "osm_node_10185497617",
+      "directory_wolt_5e313f193152ce150c93557f"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-ae52f70366dc5b338de93ffb.png",
+    "wide": false
+  },
+  "wolt_7dbc3c99a4413ed11a63f72a": {
+    "name": "Sushi Way Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6847eb402c04db0a913af817",
+      "osm_node_12989596519",
+      "directory_wolt_62d8f9292cfb89b11fe05217"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7dbc3c99a4413ed11a63f72a.png",
+    "wide": false
+  },
+  "wolt_1d4a25bda609c48c1541eb1d": {
+    "name": "Namamono By RameKai Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69312fda5432b0c2f254b410",
+      "directory_wolt_69312eafe0cc64fde9f67d7d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1d4a25bda609c48c1541eb1d.png",
+    "wide": false
+  },
+  "wolt_4f2d554dcffb70022729a53f": {
+    "name": "Valentino Beauty Supply",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6572c93450283aa518358e35"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-4f2d554dcffb70022729a53f.png",
+    "wide": false
+  },
+  "wolt_5c60a9af47b41d53da10a7b2": {
+    "name": "Teremok Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6847e9df28575f357d8330e4",
+      "osm_node_12989596520"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-5c60a9af47b41d53da10a7b2.png",
+    "wide": false
+  },
+  "wolt_41ad58c0cd9c34d334f11a2f": {
+    "name": "El Clasico Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a200988e0ffa98b763c4952"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-41ad58c0cd9c34d334f11a2f.png",
+    "wide": false
+  },
+  "wolt_b16e35c6dbb9f0fc051d233e": {
+    "name": "Kenko",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68df98ee5d5f8e33c7709e89"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b16e35c6dbb9f0fc051d233e.png",
+    "wide": false
+  },
+  "wolt_45c3143ba7f06668fa659124": {
+    "name": "Mac & Cheese",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63eb856eb09c5dc3de9dfc31"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-45c3143ba7f06668fa659124.png",
+    "wide": false
+  },
+  "wolt_a3e02525d3dccfb4ebf9337e": {
+    "name": "Borsh",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_653f6af0e2f0d9f7f1de5bc1",
+      "osm_node_669922502"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a3e02525d3dccfb4ebf9337e.png",
+    "wide": false
+  },
+  "wolt_2aab41f26e9d4a7b10d38bb7": {
+    "name": "Smart Chughureti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67dab4c9328a1098d7ab20b5",
+      "directory_wolt_6a688abbdeb44417494faca5",
+      "osm_node_10794837415",
+      "directory_wolt_65cb2f6539975570844d2163",
+      "directory_wolt_618b7d959a71d69692ad96be",
+      "osm_way_1158743122"
+    ],
+    "categories": [
+      "supermarket",
+      "convenience"
+    ],
+    "file": "wolt-2aab41f26e9d4a7b10d38bb7.png",
+    "wide": false
+  },
+  "wolt_cce146578dbf1d0ebef4e2a4": {
+    "name": "Flor Amor Flowers Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65c0c8d42a8195c28f59d41c"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-cce146578dbf1d0ebef4e2a4.png",
+    "wide": false
+  },
+  "wolt_0b702aea23fbefecad027f04": {
+    "name": "Friends Flower Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678e22caa238f12f1cc279f4"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-0b702aea23fbefecad027f04.png",
+    "wide": false
+  },
+  "wolt_7ecb8a7b9ad14f32b4b0dcb3": {
+    "name": "Dro Marjanishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66c07af069619c8c134e8dc7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7ecb8a7b9ad14f32b4b0dcb3.png",
+    "wide": false
+  },
+  "wolt_bf6c9d112cbae7f7453b1017": {
+    "name": "Black Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fb4e330867cf0dd0da0c736",
+      "osm_node_10929450805"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-bf6c9d112cbae7f7453b1017.png",
+    "wide": false
+  },
+  "wolt_aadc7405e948c1f4352c0f9e": {
+    "name": "RR Kitchen INDIAN RESTAURANT",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aabed9ba1d28d3513d64456"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-aadc7405e948c1f4352c0f9e.png",
+    "wide": false
+  },
+  "wolt_8823362f6489d9fc6798a740": {
+    "name": "Los Santos",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aabf45548b0b435cd2e8e8a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8823362f6489d9fc6798a740.png",
+    "wide": false
+  },
+  "wolt_ccf1ecbed36570c53220c6fd": {
+    "name": "Fix Price Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3cd7c83ac32b96d9ad0fa5",
+      "osm_node_13249111264",
+      "directory_wolt_6ac3a3c934966f8ea3447c8d",
+      "directory_wolt_6ac3a3ce9a9d997883e5e0be"
+    ],
+    "categories": [
+      "shopping",
+      "convenience"
+    ],
+    "file": "wolt-ccf1ecbed36570c53220c6fd.png",
+    "wide": false
+  },
+  "wolt_3fcd64ab286cd8f8c3e4bf48": {
+    "name": "Megruli Sakhli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64f702a3dd7abad2ee896714",
+      "osm_node_5681029522"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3fcd64ab286cd8f8c3e4bf48.png",
+    "wide": false
+  },
+  "wolt_5ab66bb96ec3bc4204ebb3aa": {
+    "name": "Alcorium Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6914f4423b8dc1ef6fd85f6e",
+      "osm_node_10300263722",
+      "directory_wolt_64c76b64dc2a97c09f79a328",
+      "osm_node_1204785860",
+      "directory_wolt_62604e7fa9a0a2c312ea4c10",
+      "osm_node_1690085035",
+      "directory_wolt_67597cb238f7721ba6771b2b",
+      "osm_node_12765786836",
+      "directory_wolt_6a2bd5d3a54d254e58135f8a",
+      "directory_wolt_6260fde0d8649c28ce10b12a",
+      "osm_node_12765786841",
+      "directory_wolt_67597cb1cb8033a40bfd0699",
+      "osm_node_11392590252",
+      "directory_wolt_6260fed4367bf012b4bbae4a",
+      "osm_node_5680294822",
+      "directory_wolt_64521ca958a498a552796bc3",
+      "osm_node_10817100005",
+      "directory_wolt_6a2bd4c583256608af0e6180",
+      "directory_wolt_647eee3a26b8da4460700376",
+      "osm_node_11220729441",
+      "directory_wolt_6a2bd2cb5443988c65742ebb",
+      "osm_node_12765786838",
+      "directory_wolt_6914f4431789be8420e72e20",
+      "osm_node_13236629481",
+      "directory_wolt_626040947863d0aedb3caf39",
+      "osm_node_10758861572",
+      "directory_wolt_626100072bdec4a5c7a116ab",
+      "osm_node_11135599915",
+      "directory_wolt_6a2bd0f579430d54da1aa9fa",
+      "osm_node_8133091102",
+      "directory_wolt_67597cb1114853819aaa365d",
+      "osm_node_11257758951",
+      "directory_wolt_6a2bd3e3ccfbe5b440b553ef",
+      "directory_wolt_6914f4f4b5ccd68f52c13106"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-5ab66bb96ec3bc4204ebb3aa.png",
+    "wide": false
+  },
+  "wolt_c79a426021cbf9040eec6a6a": {
+    "name": "Smash Patty",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a327d4536e1189ef5581153",
+      "osm_node_14118666541"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-c79a426021cbf9040eec6a6a.png",
+    "wide": false
+  },
+  "wolt_96a8c6961cf0c6a3ae6b97e8": {
+    "name": "I-Mobile Bakhtrioni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6346b90597d3a58834be2466",
+      "osm_node_9840191027",
+      "directory_wolt_60f56586d2782f48ada2daf0"
+    ],
+    "categories": [
+      "mobile-phone",
+      "electronics"
+    ],
+    "file": "wolt-96a8c6961cf0c6a3ae6b97e8.png",
+    "wide": false
+  },
+  "wolt_273b5ed4749e8017fc03df81": {
+    "name": "Veriko",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676b15c4b65d1fba3aad0e58",
+      "osm_node_5766226061"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-273b5ed4749e8017fc03df81.png",
+    "wide": false
+  },
+  "wolt_fe7d8469e7c7e7a9971d7a60": {
+    "name": "Zoomart Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_639844e6b885651c1d9ddbe9",
+      "osm_node_10300242396",
+      "directory_wolt_650d58f112e92236d6aaa1c6",
+      "osm_node_11494624645",
+      "directory_wolt_6398534c9ecd3ddbecfe783a",
+      "osm_node_11377685066",
+      "directory_wolt_5faaa02b03ec6383c175099f",
+      "osm_node_11831296862",
+      "directory_wolt_6049d1875e17b192228d8b22",
+      "osm_node_12434418559",
+      "directory_wolt_69bc50cde454afc00b2d3b44",
+      "directory_wolt_69bc515c9ec74eab8f9778e0",
+      "osm_node_14004848603",
+      "directory_wolt_6440f3a5f545109982d3cb6b",
+      "osm_node_10788254465",
+      "directory_wolt_63984eb12d9b7a66e9d747d5",
+      "osm_node_12031718154",
+      "directory_wolt_69bc510f0f4cb7a915f9f4ac",
+      "directory_wolt_5fa42e0753389106b82382b4",
+      "osm_node_4322749420",
+      "directory_wolt_5fa42f24edb8aa867c4f110f",
+      "osm_node_11536767654",
+      "directory_wolt_5fa43de0c369a96e20684b72",
+      "osm_node_11758032780",
+      "directory_wolt_650d5ded2db20a111a07430c",
+      "osm_node_11816628927"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-fe7d8469e7c7e7a9971d7a60.png",
+    "wide": false
+  },
+  "wolt_1c4ca6f9d7b5ac791345b0f8": {
+    "name": "Wing Star Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64219ac7804a36ceab314c6f",
+      "directory_wolt_699ec821d8bf1af1887a34ab"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1c4ca6f9d7b5ac791345b0f8.png",
+    "wide": false
+  },
+  "wolt_65410df1b4ef9e09c0fc0f24": {
+    "name": "Costa Coffee Chavchavadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_684fc019ff9338e634c3c18c",
+      "osm_node_12852988286"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-65410df1b4ef9e09c0fc0f24.png",
+    "wide": false
+  },
+  "wolt_290979f05bbf475f124c9116": {
+    "name": "პასტამანია ბაზარი ორბელიანი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671625cdeaff49395368964c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-290979f05bbf475f124c9116.png",
+    "wide": false
+  },
+  "wolt_872e03c3bae1479618743e92": {
+    "name": "Wok Spot",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65d715dc9a1b59fa1f7df23b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-872e03c3bae1479618743e92.png",
+    "wide": false
+  },
+  "wolt_fb25e3e261f6aca9e83ae2f3": {
+    "name": "DUO",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_687f5ffb66bc3fff89f11bc2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-fb25e3e261f6aca9e83ae2f3.png",
+    "wide": false
+  },
+  "wolt_0a57f8adff7862c73d12f40b": {
+    "name": "Bukas Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6033a4df801c063a7e250040",
+      "osm_node_9562498417"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-0a57f8adff7862c73d12f40b.png",
+    "wide": false
+  },
+  "wolt_9b1facc3c596c9f6f8aa79d3": {
+    "name": "Burger Space",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60c85dc2217f0acff63e8d85",
+      "osm_node_11303894569"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-9b1facc3c596c9f6f8aa79d3.png",
+    "wide": false
+  },
+  "wolt_10fcff5c325377cc8bc22c88": {
+    "name": "Grilled Chicken Bowl",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689d9970a47a4c0413d53ebf"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-10fcff5c325377cc8bc22c88.png",
+    "wide": false
+  },
+  "wolt_76353800bcb4e7961c56d863": {
+    "name": "Hurma Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6087d8575a3a7943c5a58b7f",
+      "osm_node_5221165922"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-76353800bcb4e7961c56d863.png",
+    "wide": false
+  },
+  "wolt_cd1bca5b1e5ffd4eac7ab150": {
+    "name": "Sameo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6866728ac7e8b0780cf1296d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cd1bca5b1e5ffd4eac7ab150.png",
+    "wide": false
+  },
+  "wolt_1125051125034396914ce0cf": {
+    "name": "Big Sam's Galleria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f8592ffbc4175eaf67ddab8",
+      "osm_node_10244432437",
+      "directory_wolt_698b1b2836694c9ca6021ed3",
+      "directory_wolt_5ee8d12a9e33ce27a9d9c25a",
+      "osm_node_10855867307",
+      "directory_wolt_66d5a4b95f082f8a9f3df688"
+    ],
+    "categories": [
+      "fast-food",
+      "restaurant"
+    ],
+    "file": "wolt-1125051125034396914ce0cf.png",
+    "wide": false
+  },
+  "wolt_1420b795ba63260a425bb8f4": {
+    "name": "Slavuri Ezo Vakeshi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9a85badd2ca3c4cbd39b5c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1420b795ba63260a425bb8f4.png",
+    "wide": false
+  },
+  "wolt_3e608c060a4a7c7160f9274d": {
+    "name": "1001 Nights",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682afbb33761bfe5822bd471",
+      "osm_node_4341056792"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3e608c060a4a7c7160f9274d.png",
+    "wide": false
+  },
+  "wolt_b80bba2889a6ed99a25b5e30": {
+    "name": "Puree Chikobava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab2b1e0031271749da57584"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b80bba2889a6ed99a25b5e30.png",
+    "wide": false
+  },
+  "wolt_d39c3404f7cf9e6bd961e24a": {
+    "name": "Jani  - Natural Products Dadiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6870c5d9061960c2d1f23163"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d39c3404f7cf9e6bd961e24a.png",
+    "wide": false
+  },
+  "wolt_afaa13254d947e7190daba67": {
+    "name": "Bon Apetito - Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691c525b247d61954df29b2f"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-afaa13254d947e7190daba67.png",
+    "wide": false
+  },
+  "wolt_866fdb977103c9eff8cef23c": {
+    "name": "1000 Tsvrilmani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68be89c364a20f813157c4b3"
+    ],
+    "categories": [
+      "hardware"
+    ],
+    "file": "wolt-866fdb977103c9eff8cef23c.png",
+    "wide": false
+  },
+  "wolt_c6d60e9c3515d38a9b061bb3": {
+    "name": "Fuoco Forno",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60e4257ab75bf38acb905403",
+      "osm_node_11375149169"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-c6d60e9c3515d38a9b061bb3.png",
+    "wide": false
+  },
+  "wolt_df5109a58fd95e0d6f2d447a": {
+    "name": "Toner Grill",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68fb4883bcfd2e1214f4ed21"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-df5109a58fd95e0d6f2d447a.png",
+    "wide": false
+  },
+  "wolt_91354931bdd4bfce15609d87": {
+    "name": "Mi Burrito",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_690c72ef42246ec584c4b34c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-91354931bdd4bfce15609d87.png",
+    "wide": false
+  },
+  "wolt_6747fcfa4c33cb57eedc7de0": {
+    "name": "Restaurant Varazi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5dd3baef9f2980b23b01ba9a",
+      "osm_node_11255351456"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6747fcfa4c33cb57eedc7de0.png",
+    "wide": false
+  },
+  "wolt_0132576532e15f492cc9c8b6": {
+    "name": "თემა გამსახურდია",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ca6878108f346b6140eaf1",
+      "directory_wolt_69ca6878108f346b6140eaf2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0132576532e15f492cc9c8b6.png",
+    "wide": false
+  },
+  "wolt_50e71ad024dceb4dba67bd19": {
+    "name": "Ora Pilates Social Club",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9e8f276c4244fc7b3af451"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-50e71ad024dceb4dba67bd19.png",
+    "wide": false
+  },
+  "wolt_1d05f315ae990e67dde9ad28": {
+    "name": "Shogun Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a34ea3228f78b29dea0872a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1d05f315ae990e67dde9ad28.png",
+    "wide": false
+  },
+  "wolt_3487d98bba9ee6e862e1a5f2": {
+    "name": "Shemomechama",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5b31eecc206fe0000b27980b",
+      "osm_node_4327782994",
+      "directory_wolt_622b2a2982ad5585a3e2d63c",
+      "osm_node_10992493228"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3487d98bba9ee6e862e1a5f2.png",
+    "wide": false
+  },
+  "wolt_d561a9c0c9bf692f76cf3ab3": {
+    "name": "Focacceria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f05cd64c1218b006d8026c",
+      "osm_node_14108354203"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-d561a9c0c9bf692f76cf3ab3.png",
+    "wide": false
+  },
+  "wolt_acd1997207b3f4b40f857635": {
+    "name": "Koreuli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f308003259fa885c5cf712"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-acd1997207b3f4b40f857635.png",
+    "wide": false
+  },
+  "wolt_488394f2a93167fcb5fcfff9": {
+    "name": "Arigato",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_618cddf96f555e3722ad7494"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-488394f2a93167fcb5fcfff9.png",
+    "wide": false
+  },
+  "wolt_83024d404f88fa23d92ec401": {
+    "name": "Healthy Bowl",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6790e0cc520857250a7271f6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-83024d404f88fa23d92ec401.png",
+    "wide": false
+  },
+  "wolt_bdb0a897b73735a65991fe57": {
+    "name": "Bio Shop ORGANIKA Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f16b7922cb03c4c15fca23e",
+      "directory_wolt_5f16b95e1bf339a289e7aa87"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-bdb0a897b73735a65991fe57.png",
+    "wide": false
+  },
+  "wolt_cf58390a39de19de6f28903a": {
+    "name": "Aga’s Fantastic Vegan",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_643e894f6309170f284312b9"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cf58390a39de19de6f28903a.png",
+    "wide": false
+  },
+  "wolt_afdde20d21509018ef6cfa35": {
+    "name": "Udabno Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65379ea3a253352f244d8eaa",
+      "osm_node_12094114876"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-afdde20d21509018ef6cfa35.png",
+    "wide": false
+  },
+  "wolt_122968f00c6331427cce26fe": {
+    "name": "Bake And Melt",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f058174c1218b006d80266"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-122968f00c6331427cce26fe.png",
+    "wide": false
+  },
+  "wolt_f287c6a7a972387dd2595263": {
+    "name": "Sushico Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63e49f1b41ff1ead0b4040b7",
+      "directory_wolt_63f484d3a971d19b7ac8b0d8",
+      "directory_wolt_67a9b38b007cdb47f8aa05f8",
+      "directory_wolt_609e1d58dacfb9add0f58866"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f287c6a7a972387dd2595263.png",
+    "wide": false
+  },
+  "wolt_20ba0ee0b9882abc158a1223": {
+    "name": "Ghomi Da Kveli Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e5ccaca775727bf97deeee8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-20ba0ee0b9882abc158a1223.png",
+    "wide": false
+  },
+  "wolt_93d070874e5313bcd3e792c8": {
+    "name": "Palace Kitchen",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b7de8b80a8b5f2098b46de",
+      "directory_wolt_69b7de98fd3d20332473373d",
+      "osm_node_12557786801",
+      "directory_wolt_69b7df373520a28c93b679fc",
+      "directory_wolt_6a425e072182a7ed7109530c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-93d070874e5313bcd3e792c8.png",
+    "wide": false
+  },
+  "wolt_12636a65fc66d73b7252d9dc": {
+    "name": "Bite Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6989e7adaeb20b2a1e1f74d5"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-12636a65fc66d73b7252d9dc.png",
+    "wide": false
+  },
+  "wolt_7ac80bab88b14c27942ffcaa": {
+    "name": "Pulp",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64d1eea37b97fa37b821a002"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-7ac80bab88b14c27942ffcaa.png",
+    "wide": false
+  },
+  "wolt_138c7ff501bddc2b38d9191a": {
+    "name": "Pizza Hut Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_697890eb3086eec03ebf2271",
+      "osm_node_11112647378"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-138c7ff501bddc2b38d9191a.png",
+    "wide": false
+  },
+  "wolt_86b011c1f55a61924b4aeee4": {
+    "name": "ვიტამინი ორბელიანზე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66c48697a5e669746c02174b",
+      "directory_wolt_688b488b2dea6dd0117ce773",
+      "directory_wolt_60f54d8189a4f82addf3d601",
+      "directory_wolt_66796d0e409e0e8302a3e076",
+      "directory_wolt_66796d0e8ee164777a797e77",
+      "directory_wolt_60f54bb289a4f82addf3d216",
+      "directory_wolt_66796d0ee0d20f9de48b92d3",
+      "directory_wolt_66796d0e035d00f4dfa32be6",
+      "directory_wolt_66796d0e85ece863134953fa",
+      "directory_wolt_66796d0e035d00f4dfa32be7"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-86b011c1f55a61924b4aeee4.png",
+    "wide": false
+  },
+  "wolt_48f561ed24cf78b4f7bdf7a1": {
+    "name": "Picasso",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5dd259fe5914a4834143e5bc",
+      "osm_node_6540339686",
+      "directory_wolt_5df8d5a7bb7b141aad2a6e8e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-48f561ed24cf78b4f7bdf7a1.png",
+    "wide": false
+  },
+  "wolt_cce6f5589108c3f18103d950": {
+    "name": "Beer and Craft",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62d91793f675ca9b52852222"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-cce6f5589108c3f18103d950.png",
+    "wide": false
+  },
+  "wolt_d9638339b20adf50d0b14c12": {
+    "name": "Dessert Ballet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67b2dd5437fa285e0d0dfd05",
+      "osm_node_12542406262"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-d9638339b20adf50d0b14c12.png",
+    "wide": false
+  },
+  "wolt_f0d35eb6dbc0991c57bae2e4": {
+    "name": "ABC Shop Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2ab9048f57e4f3af43b35a"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-f0d35eb6dbc0991c57bae2e4.png",
+    "wide": false
+  },
+  "wolt_1618ff4ad5a01ce16708bf3b": {
+    "name": "Ambrosiano Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_606d685b35d5488aea95d6a3",
+      "osm_node_11420560981"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1618ff4ad5a01ce16708bf3b.png",
+    "wide": false
+  },
+  "wolt_61d93e643fc102e73011391e": {
+    "name": "Wok Out",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69300abdcd1d7fbbccfe7401"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-61d93e643fc102e73011391e.png",
+    "wide": false
+  },
+  "wolt_f8b49519be8882bd8583e8d6": {
+    "name": "Chiho",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_642fe14ee63e6ccdd7acff45"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f8b49519be8882bd8583e8d6.png",
+    "wide": false
+  },
+  "wolt_228c74dd3bc428647c9a8748": {
+    "name": "RUSO'S",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a33bd2abe41ebab72e1f33a"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-228c74dd3bc428647c9a8748.png",
+    "wide": false
+  },
+  "wolt_1f717f5b1f1d67f599dc348b": {
+    "name": "Creamy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67c6dbbd902d1c35c518085e",
+      "osm_node_14166792739"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-1f717f5b1f1d67f599dc348b.png",
+    "wide": false
+  },
+  "wolt_4b9180f3f4dc7e31dd1bab2c": {
+    "name": "PHO Asian Food Bakhtrioni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63f4baa0422fd75b7444d03c",
+      "directory_wolt_63f4c76d2c07874ea16ee69b",
+      "directory_wolt_63f4bd9f5302c430c1046f0d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4b9180f3f4dc7e31dd1bab2c.png",
+    "wide": false
+  },
+  "wolt_06d0e8b013f45afb52a642f3": {
+    "name": "Sugar Free Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63dce4df6f0a83adf1023ab8",
+      "osm_node_11536792477",
+      "directory_wolt_624acda7c4e8c1da43825c8e"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-06d0e8b013f45afb52a642f3.png",
+    "wide": false
+  },
+  "wolt_b82620048b1b2cf088b5dd09": {
+    "name": "City Chicken",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f03088d242e6bb40e2a0a43",
+      "osm_node_11373991003"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-b82620048b1b2cf088b5dd09.png",
+    "wide": false
+  },
+  "wolt_6ec9ab6127b8d9ad7ad82ad5": {
+    "name": "They Said Books",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d232e4cabf0de7991054ce2",
+      "osm_node_11228024714"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-6ec9ab6127b8d9ad7ad82ad5.png",
+    "wide": false
+  },
+  "wolt_baed5299dd15a4708fccb1b7": {
+    "name": "Dolidzis Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60f14e3f1a193a32638d19d7",
+      "osm_node_11385953090"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-baed5299dd15a4708fccb1b7.png",
+    "wide": false
+  },
+  "wolt_25810d87f29f6d8b8622dcb2": {
+    "name": "The Cone Culture",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5c10d7cb867663000a468ac8",
+      "osm_node_6464366786"
+    ],
+    "categories": [
+      "ice-cream"
+    ],
+    "file": "wolt-25810d87f29f6d8b8622dcb2.png",
+    "wide": false
+  },
+  "wolt_af7b68bbe931758adcb3e4b4": {
+    "name": "Beer Georgia Beer Market Gamrekeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64b68a39a3d79213586f57c2",
+      "directory_wolt_64b68883e0fd34f05b986bfa",
+      "directory_wolt_69c2630e5a3aebc5a546e5a9",
+      "directory_wolt_69c26527ddfba77a87fb924c",
+      "directory_wolt_6895d0e6e532c8e10ac99627",
+      "directory_wolt_66ec23f16f0ed4d5145783c8",
+      "directory_wolt_64b67dc3630af0576181dec5",
+      "directory_wolt_6a96c22ca279e9f93acf3b1d"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-af7b68bbe931758adcb3e4b4.png",
+    "wide": false
+  },
+  "wolt_9a6e4e2524d75fab02e47a1c": {
+    "name": "Beer Market Beer Georgia Gogebashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66865b2d7c0b6435fd67d1a5"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9a6e4e2524d75fab02e47a1c.png",
+    "wide": false
+  },
+  "wolt_6eac2d6fac17ecc5a1986022": {
+    "name": "Vincero Dadiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d3f4df09284653be055cd2",
+      "osm_node_13325742570"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-6eac2d6fac17ecc5a1986022.png",
+    "wide": false
+  },
+  "wolt_9af8dec58948ce2992a8ec4c": {
+    "name": "Bombbar.ge Galleria Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6874b1b40d27e3c73f62814e",
+      "directory_wolt_6874b1b40d27e3c73f62814c",
+      "directory_wolt_6874b1b40d27e3c73f62814d"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-9af8dec58948ce2992a8ec4c.png",
+    "wide": false
+  },
+  "wolt_5d5a2c5bbc403e80a5018078": {
+    "name": "SushiCo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ae7124782b353000b941c26"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5d5a2c5bbc403e80a5018078.png",
+    "wide": false
+  },
+  "wolt_c75127b602731ccc69f48838": {
+    "name": "Popolo Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67657a3fcec55ae0b2666ce4",
+      "osm_node_11361646709"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c75127b602731ccc69f48838.png",
+    "wide": false
+  },
+  "wolt_5b82acf31f0c395ecf28b2e2": {
+    "name": "Chef Sushi Abashidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_617907c7107346e733dd0673",
+      "directory_wolt_617911ca1439fac3575427ed",
+      "directory_wolt_6655825fc8b9a66148d74d9b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5b82acf31f0c395ecf28b2e2.png",
+    "wide": false
+  },
+  "wolt_4a537efdf1a62eae9c570b4c": {
+    "name": "Varazi Beer House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60508c81d85f4c8cd419780b",
+      "osm_node_4054913551"
+    ],
+    "categories": [
+      "pub"
+    ],
+    "file": "wolt-4a537efdf1a62eae9c570b4c.png",
+    "wide": false
+  },
+  "wolt_033a141af845bedbb72eb843": {
+    "name": "La Gamba",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61d6d62eb4e6ef3be50ec19f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-033a141af845bedbb72eb843.png",
+    "wide": false
+  },
+  "wolt_d303e76665d8969faf34a168": {
+    "name": "Ashkara Falafel",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66265377ba5c2b55c3bc7061",
+      "osm_node_11697644769",
+      "directory_wolt_6a10528b19db99c366376682",
+      "directory_wolt_67d175cfeb97293c38ec6e1b",
+      "osm_node_13665708269"
+    ],
+    "categories": [
+      "fast-food",
+      "cafe"
+    ],
+    "file": "wolt-d303e76665d8969faf34a168.png",
+    "wide": false
+  },
+  "wolt_6f10620dc59dca7c88019a8b": {
+    "name": "Aria Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682b6c7d0e001968d458c0b4",
+      "directory_wolt_634405ba04bba63f4d4df0cc",
+      "osm_node_11536792546"
+    ],
+    "categories": [
+      "convenience",
+      "dairy"
+    ],
+    "file": "wolt-6f10620dc59dca7c88019a8b.png",
+    "wide": false
+  },
+  "wolt_4a4341a882778f3dbdadb09a": {
+    "name": "სმეში",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f7c5e6dadd0a885df7717d3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4a4341a882778f3dbdadb09a.png",
+    "wide": false
+  },
+  "wolt_75e70a6f5768ee61d24aac67": {
+    "name": "Good Choice Sololaki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fa00d3fc137ad404f8c3010",
+      "osm_node_11176379444",
+      "directory_wolt_5eb46dfdc24efdfc0076c4c3",
+      "osm_node_11014869708"
+    ],
+    "categories": [
+      "restaurant",
+      "cafe"
+    ],
+    "file": "wolt-75e70a6f5768ee61d24aac67.png",
+    "wide": false
+  },
+  "wolt_2329114ebfee9bea69d957eb": {
+    "name": "Champ's Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65a78ab51ca5d3f1fa77f688"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-2329114ebfee9bea69d957eb.png",
+    "wide": false
+  },
+  "wolt_9a8ef213a62d9c427416d6f3": {
+    "name": "Milroy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67459257b3d4d0a1902b1a13",
+      "directory_wolt_67c6c6e62424537e3c490a41",
+      "directory_wolt_67c6c6e62424537e3c490a42",
+      "directory_wolt_6759413479107c66e9150194",
+      "directory_wolt_67c6c6e62424537e3c490a43"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9a8ef213a62d9c427416d6f3.png",
+    "wide": false
+  },
+  "wolt_1c7272588bca36e2c36f7520": {
+    "name": "Supta Sakhli Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ef0657c140a3fadbaac2481",
+      "osm_node_11307849434",
+      "directory_wolt_5fd3254a3c6ead04b9f510eb",
+      "osm_node_10949007605",
+      "directory_wolt_5ef06c7a63e44ce09e656eb6",
+      "osm_node_11218066097",
+      "directory_wolt_67e09ef8eb7e424b02996c7e",
+      "osm_node_5898451032",
+      "directory_wolt_5ef069030e754c2c2c996fe3",
+      "directory_wolt_5fd323ae7b2f04151aba5b9d",
+      "osm_node_11891519993",
+      "directory_wolt_60debe5110331849ff9f7a07",
+      "osm_node_10578918380",
+      "directory_wolt_60dec5b65d1f91e4c3bcf78a",
+      "osm_node_11220729465",
+      "directory_wolt_5ef06725335406cc0bed1df1",
+      "osm_node_11758032798",
+      "directory_wolt_60952dbbd3f8a0903b3c06a5"
+    ],
+    "categories": [
+      "shopping",
+      "houseware"
+    ],
+    "file": "wolt-1c7272588bca36e2c36f7520.png",
+    "wide": false
+  },
+  "wolt_b7988950119a6c212bf0b9c4": {
+    "name": "iPhoneservice.GE",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6270d54d5cd208823f0e4d6c"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-b7988950119a6c212bf0b9c4.png",
+    "wide": false
+  },
+  "wolt_80600bb09872030339a8ffb0": {
+    "name": "Dzin Chao",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d7b37814880c7983548eb2a",
+      "osm_node_12393649698"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-80600bb09872030339a8ffb0.png",
+    "wide": false
+  },
+  "wolt_a701a681b98ab801cb66896d": {
+    "name": "Zoolife Kostava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6226054dc328e419c1c4b832",
+      "osm_node_10285884973",
+      "directory_wolt_681a847351af71607662b8e5",
+      "osm_node_12897016728",
+      "directory_wolt_64d60a257c0e4e66d47c8824",
+      "osm_node_11536792581",
+      "directory_wolt_68c2acf7cbf9168d084da0b3",
+      "osm_node_11556711860",
+      "directory_wolt_62260bf9a18f14c02504e125",
+      "osm_node_11358681232",
+      "directory_wolt_66dad71c03cd2dd609c7d175",
+      "directory_wolt_67bee676b9e6b6fde81f0097",
+      "osm_node_4385478393",
+      "directory_wolt_67163942f83cabc748723520",
+      "directory_wolt_664c982f19125c8b9121124d",
+      "osm_node_11891520020",
+      "directory_wolt_69161375b4b6da635c0d2996",
+      "directory_wolt_694e7d4b6e4d6e6117a363c5",
+      "directory_wolt_62260e99d6d7f79dff6a9f7b",
+      "osm_node_11113150719",
+      "directory_wolt_678e26d1c234aeae5ccba168",
+      "osm_node_13426123501",
+      "directory_wolt_62260cd1d6d7f79dff6a9a30",
+      "directory_wolt_65440a8eb862cc0d450b3926"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-a701a681b98ab801cb66896d.png",
+    "wide": false
+  },
+  "wolt_1ed244a040acc8c302c4a056": {
+    "name": "Chicolli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5cd1e95b3c10bffd7c82b07c",
+      "osm_node_11428699069"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-1ed244a040acc8c302c4a056.png",
+    "wide": false
+  },
+  "wolt_872727e40ae254e52b624d37": {
+    "name": "Dipstrip",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6628d08ef459aea6d25659e7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-872727e40ae254e52b624d37.png",
+    "wide": false
+  },
+  "wolt_9e7e917d38257a5c6c341000": {
+    "name": "Cherry Land",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6992c8ac92a7032ac15f15fb"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9e7e917d38257a5c6c341000.png",
+    "wide": false
+  },
+  "wolt_1458b0a1c9afc1e109efe191": {
+    "name": "Sweet Lab",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_677e51cbc39329f0e1835d7a",
+      "osm_node_12954796601",
+      "directory_wolt_690b2d7ba65ff110701d57e3"
+    ],
+    "categories": [
+      "fast-food",
+      "bakery"
+    ],
+    "file": "wolt-1458b0a1c9afc1e109efe191.png",
+    "wide": false
+  },
+  "wolt_27340d2443209f52d5e43230": {
+    "name": "Chikito",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_692976dc31defd1fd7f429b8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-27340d2443209f52d5e43230.png",
+    "wide": false
+  },
+  "wolt_6ec8af331f1831718942fc02": {
+    "name": "De Gusti Didube",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6038b663933d9f62fab4d066",
+      "osm_node_11883878782",
+      "directory_wolt_6038b4ec000d6d296bb4cd24",
+      "osm_node_11795321046"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-6ec8af331f1831718942fc02.png",
+    "wide": false
+  },
+  "wolt_46863ef40ac48f75c2853e14": {
+    "name": "Best Pharma Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66966591f12167b8d5844893"
+    ],
+    "categories": [
+      "pharmacy"
+    ],
+    "file": "wolt-46863ef40ac48f75c2853e14.png",
+    "wide": false
+  },
+  "wolt_223e55503d2fb51c146bd8f3": {
+    "name": "Just Burgers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63761a3ce7a7b78b68270281",
+      "osm_node_10285884950"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-223e55503d2fb51c146bd8f3.png",
+    "wide": false
+  },
+  "wolt_d0ad4d19ea9a722fb43c73ce": {
+    "name": "⁠Kiki Pet Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2a82492d61ac1543be156a"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-d0ad4d19ea9a722fb43c73ce.png",
+    "wide": false
+  },
+  "wolt_d1b1506d53f21319f3b08191": {
+    "name": "Pet Pick",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6accba97e574c2c9ac513114"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-d1b1506d53f21319f3b08191.png",
+    "wide": false
+  },
+  "wolt_e8561aaa1bc2fd659f8e2bfb": {
+    "name": "Japanese Poke Bowl",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_687deed469f464ebf2f50b26"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e8561aaa1bc2fd659f8e2bfb.png",
+    "wide": false
+  },
+  "wolt_63f7f266e124c496c35e1311": {
+    "name": "Chika Laghidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a7fd9bf1856552b18e42c2",
+      "osm_node_13727455733"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-63f7f266e124c496c35e1311.png",
+    "wide": false
+  },
+  "wolt_fbf1c0942fca7b1dccca4ae9": {
+    "name": "Vinorium",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65843eb1488bfce2cd80f42a"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-fbf1c0942fca7b1dccca4ae9.png",
+    "wide": false
+  },
+  "wolt_d5ca06cdbc7e3b8ff0e4e417": {
+    "name": "Alubali Cash & Carry Didube",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_662a42e89da2bc6f3801a2a8",
+      "directory_wolt_687646e33cf7b6c1337eb92c"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d5ca06cdbc7e3b8ff0e4e417.png",
+    "wide": false
+  },
+  "wolt_23f32eca8894847daec77448": {
+    "name": "Mary Jos",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_618e2fc27dbced806600fdec",
+      "osm_node_11290346369"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-23f32eca8894847daec77448.png",
+    "wide": false
+  },
+  "wolt_664c6ef511521907eaf9e8fc": {
+    "name": "Merdini Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e1dc5782ef7b0ad8b2849d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-664c6ef511521907eaf9e8fc.png",
+    "wide": false
+  },
+  "wolt_608831494c97b0da1311b5f1": {
+    "name": "Vardo Boulangerie",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6852cce1cfffd62369454414"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-608831494c97b0da1311b5f1.png",
+    "wide": false
+  },
+  "wolt_96b618b6692c170dceb7f9b8": {
+    "name": "Tiffany Express",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ee88a9ecae61c3dc19e494f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-96b618b6692c170dceb7f9b8.png",
+    "wide": false
+  },
+  "wolt_a1b7dc6e24dca5cd621c2872": {
+    "name": "Susheria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_662f4e7235ffcf2543c984e4",
+      "directory_wolt_67876f21342fd6158a284d6b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a1b7dc6e24dca5cd621c2872.png",
+    "wide": false
+  },
+  "wolt_55091f2255b0d4f9e5cdaccd": {
+    "name": "Mailo Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_633c390d9037e0a6985a8e4a",
+      "directory_wolt_63a03df01fb5d89e76e3f7f8",
+      "directory_wolt_65438a9ed7e83935a75bafb9",
+      "directory_wolt_633c39afb47e37af4bc80b37"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-55091f2255b0d4f9e5cdaccd.png",
+    "wide": false
+  },
+  "wolt_fe5367b1f252a134a1f822d6": {
+    "name": "სმარტ ფეთ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64ad4ee177ff639376e492a7",
+      "directory_wolt_68a2dbde6a91df55a8cf9d1f",
+      "directory_wolt_64ad4f95b0be82621ca477b8",
+      "directory_wolt_64ad4ff9e0c8b28dc0cd9997",
+      "directory_wolt_6687f04565bbb2a6d5535808"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-fe5367b1f252a134a1f822d6.png",
+    "wide": false
+  },
+  "wolt_ff79927322997b5a6cbf6faa": {
+    "name": "Fries & More",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f7d76484d727018cff0bc33",
+      "osm_node_13907937925"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-ff79927322997b5a6cbf6faa.png",
+    "wide": false
+  },
+  "wolt_a3daa221ed10f5a01fcdd63c": {
+    "name": "PIZZA24.GE Chugureti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62a1f4268a495c8c522024da",
+      "directory_wolt_6655ba361097bbd99c53d82b",
+      "directory_wolt_63515180e98837918b358a8c",
+      "directory_wolt_62a1f6a1ab7d8905152265b8",
+      "directory_wolt_66ffe66c4c7f91ff972eb15a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a3daa221ed10f5a01fcdd63c.png",
+    "wide": false
+  },
+  "wolt_f89592b215a8637a1d8af03c": {
+    "name": "Zoo KiKi Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4b62392f5bf8e104ccc168"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-f89592b215a8637a1d8af03c.png",
+    "wide": false
+  },
+  "wolt_09dbe461bb9c4b13106283a3": {
+    "name": "PetGo Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69203397a24b64c3cf88bed1",
+      "directory_wolt_69203409c34cc8a9276a8bce"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-09dbe461bb9c4b13106283a3.png",
+    "wide": false
+  },
+  "wolt_dbfe245856dc5d6a6f4c568d": {
+    "name": "Jumanji",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_641469ef8a58b0a657171b7c",
+      "osm_node_14155455203",
+      "directory_wolt_65e1d48f0831c7a5c5c2a877"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-dbfe245856dc5d6a6f4c568d.png",
+    "wide": false
+  },
+  "wolt_bf4851479c8e01acf0048a08": {
+    "name": "Animal Planet Kostava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685015d0e91a0fdfa28e7938",
+      "osm_node_10285884969",
+      "directory_wolt_685015d0e91a0fdfa28e7939",
+      "directory_wolt_685015d0e91a0fdfa28e793a"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-bf4851479c8e01acf0048a08.png",
+    "wide": false
+  },
+  "wolt_70ab2f9b5a99e48f56125758": {
+    "name": "Flat Out Burgers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69fd847d47ab0e40625b7440"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-70ab2f9b5a99e48f56125758.png",
+    "wide": false
+  },
+  "wolt_725bdfe6ed7b706c5c905f09": {
+    "name": "Agro Masa",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a43834834cd5806c1ce39de"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-725bdfe6ed7b706c5c905f09.png",
+    "wide": false
+  },
+  "wolt_f6fbd8efce03bd89e9337dfa": {
+    "name": "Balance Express",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680f28e3c57d3865b3324052",
+      "osm_node_13072581145"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-f6fbd8efce03bd89e9337dfa.png",
+    "wide": false
+  },
+  "wolt_a22a65edb669731130971453": {
+    "name": "Agronomia Veraze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef4ffa49a4298265c8e2f9",
+      "osm_node_13805825601"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-a22a65edb669731130971453.png",
+    "wide": false
+  },
+  "wolt_43af602bb001b045e20486d0": {
+    "name": "Beer Store P.Kakabadzeze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2ba9664efa281d76f7c636"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-43af602bb001b045e20486d0.png",
+    "wide": false
+  },
+  "wolt_bb1329ca656d5fdd42c32aa7": {
+    "name": "Farmers Market Mtatsminda",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a425605e135ff9002347c98",
+      "directory_wolt_6a4254f2e135ff9002347c4c"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-bb1329ca656d5fdd42c32aa7.png",
+    "wide": false
+  },
+  "wolt_e0348f0c1079e0ef575a5a2e": {
+    "name": "ლუნა პიცა ბარი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66ab4f0a4e18c46101d84a25",
+      "osm_node_12073649933"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-e0348f0c1079e0ef575a5a2e.png",
+    "wide": false
+  },
+  "wolt_afa9fba538c98f04deac910c": {
+    "name": "Kranchy By Dipstrip Kostava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6880cf4e46c4278a97069f93"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-afa9fba538c98f04deac910c.png",
+    "wide": false
+  },
+  "wolt_76394e68173ba74409816563": {
+    "name": "Agro Box",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a706927170243d9f90ce0b3"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-76394e68173ba74409816563.png",
+    "wide": false
+  },
+  "wolt_dfd9524d2ee42770507f9345": {
+    "name": "Steakhouse By Gastronome",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3a2e2c7cb3691fe359a7ea"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-dfd9524d2ee42770507f9345.png",
+    "wide": false
+  },
+  "wolt_cb882dcfcb9be8981e856708": {
+    "name": "Fishka Kazbegi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a884c26e04c924bf9ef40cc",
+      "directory_wolt_6a8308f635ae11f0b9a5efad"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-cb882dcfcb9be8981e856708.png",
+    "wide": false
+  },
+  "wolt_2fb2d66ee9a3ba5fc5bf32a4": {
+    "name": "Craft Neapolitan Pizza Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695267d7bd799717694ea75d"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2fb2d66ee9a3ba5fc5bf32a4.png",
+    "wide": false
+  },
+  "wolt_1cb94d8680ef2f192939f6ba": {
+    "name": "საცხობის სახლი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cb86628f017f6f4fc8264b",
+      "osm_node_12669907061"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-1cb94d8680ef2f192939f6ba.png",
+    "wide": false
+  },
+  "wolt_ca222f664536ccb6d6e4447c": {
+    "name": "Tasty",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f6c516b0efbe983b323c794"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ca222f664536ccb6d6e4447c.png",
+    "wide": false
+  },
+  "wolt_5dd0cefa39d817f7e975776f": {
+    "name": "Premium Sandwich",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62d91e35443717677bc77c8c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5dd0cefa39d817f7e975776f.png",
+    "wide": false
+  },
+  "wolt_99851afb1b351a44ee66fe04": {
+    "name": "Fermart",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60b9f9e0d4fd04ef02e88a9b",
+      "osm_node_11637582169"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-99851afb1b351a44ee66fe04.png",
+    "wide": false
+  },
+  "wolt_d52fd4d712df4bfe3125396b": {
+    "name": "Saramene Onimusha Gamrekeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_669fa57cce8954c3d4e5f6d2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d52fd4d712df4bfe3125396b.png",
+    "wide": false
+  },
+  "wolt_43f4105777f3e56944a53bd0": {
+    "name": "MOB",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef4311cc73ada5c0ff7f37"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-43f4105777f3e56944a53bd0.png",
+    "wide": false
+  },
+  "wolt_ceb44af4d59a818f9d72e97d": {
+    "name": "Dzmebis",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_612647f3281a69d6ff24a45a"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-ceb44af4d59a818f9d72e97d.png",
+    "wide": false
+  },
+  "wolt_06c890def8b069f985909db2": {
+    "name": "Umamia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67f39b99edfc30bc6f36028a",
+      "osm_node_13169447929"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-06c890def8b069f985909db2.png",
+    "wide": false
+  },
+  "wolt_fd8975785a1692dbd71dfeef": {
+    "name": "PetFood Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63b6737f34d3e6e5c6325e20",
+      "directory_wolt_62319bf378da548bafaa89be",
+      "directory_wolt_64b64e08774ca2b48977f8f7"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-fd8975785a1692dbd71dfeef.png",
+    "wide": false
+  },
+  "wolt_17c239fb4ff2c2e19ac7bb5e": {
+    "name": "Asian Cafe Yang",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694a6ca42e100e80f3f7b09f"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-17c239fb4ff2c2e19ac7bb5e.png",
+    "wide": false
+  },
+  "wolt_2750fb8fc8e4da7fbc84eb65": {
+    "name": "Old Baraqa",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61bb1f6ffd7af1f97bab3978"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2750fb8fc8e4da7fbc84eb65.png",
+    "wide": false
+  },
+  "wolt_5439aa438a9eef7fb9aa17a4": {
+    "name": "Kaiten Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69943ae626a9945e1c1029e7",
+      "osm_node_11727859926"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-5439aa438a9eef7fb9aa17a4.png",
+    "wide": false
+  },
+  "wolt_bee6cd6a0b1c7ac985a973e2": {
+    "name": "NOMZ Shawarma &  Bowls",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aba305961fb70944814d696"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-bee6cd6a0b1c7ac985a973e2.png",
+    "wide": false
+  },
+  "wolt_faac9dbbc00699c2a67c494a": {
+    "name": "Mezze By Alfredo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61641c720598e524e4055247"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-faac9dbbc00699c2a67c494a.png",
+    "wide": false
+  },
+  "wolt_22548fc65c1b2c7ee0d75217": {
+    "name": "Agara Brewery Beer Chugureti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aec38f98b8914a896a6e22"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-22548fc65c1b2c7ee0d75217.png",
+    "wide": false
+  },
+  "wolt_89dfff5a9a0409513fe716f7": {
+    "name": "Happy Kids Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a057d483496613800c7a208"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-89dfff5a9a0409513fe716f7.png",
+    "wide": false
+  },
+  "wolt_80281b6c270cd5b368c64388": {
+    "name": "Livin Café Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_692d51402064cafe82b71608"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-80281b6c270cd5b368c64388.png",
+    "wide": false
+  },
+  "wolt_746383867b0fa2c247d3000e": {
+    "name": "Accio Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac388ff61746ac4d41d2a4d"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-746383867b0fa2c247d3000e.png",
+    "wide": false
+  },
+  "wolt_a2f763c2ee4d2e1dbc7daa8c": {
+    "name": "Wok-shia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_633318de0e7defdf78c2492c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a2f763c2ee4d2e1dbc7daa8c.png",
+    "wide": false
+  },
+  "wolt_7e52e843a77a499f0325d503": {
+    "name": "Maspindzelo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d9c70a05d88e9130fc2f85f",
+      "osm_node_1466683605"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7e52e843a77a499f0325d503.png",
+    "wide": false
+  },
+  "wolt_330686060c4c8e2ff1f2bb8e": {
+    "name": "Vetagro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a870d1adcf4b93a57415e22",
+      "osm_node_11392590248",
+      "directory_wolt_6a8c1d5d2821aac48c4d84a1"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-330686060c4c8e2ff1f2bb8e.png",
+    "wide": false
+  },
+  "wolt_809f9e1e51c6448a15a7e72d": {
+    "name": "Pirosmanis Dukani Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_658eaee3aafc774d15caf0d9",
+      "osm_node_5447298221"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-809f9e1e51c6448a15a7e72d.png",
+    "wide": false
+  },
+  "wolt_958e2233a01af24ed25628be": {
+    "name": "Meat&More",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ba924a12b6293d343bc25c",
+      "osm_node_12101102903"
+    ],
+    "categories": [
+      "butcher"
+    ],
+    "file": "wolt-958e2233a01af24ed25628be.png",
+    "wide": false
+  },
+  "wolt_5c7886c04c7ca0db8f5f7409": {
+    "name": "PC Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66e958b044153da01cd30498"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-5c7886c04c7ca0db8f5f7409.png",
+    "wide": false
+  },
+  "wolt_de2d5f4e3f74e191453704f1": {
+    "name": "Agrohob",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66fe4dd9071bf8d4c70172a6"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-de2d5f4e3f74e191453704f1.png",
+    "wide": false
+  },
+  "wolt_119fac3c0f0e639ab1bde5e6": {
+    "name": "Few",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6952450c123e4ece77a47621"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-119fac3c0f0e639ab1bde5e6.png",
+    "wide": false
+  },
+  "wolt_03566ede5d0bb21caa063ecb": {
+    "name": "Burger By Big Galleria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67efb9696d9ebf235a9eb30a",
+      "directory_wolt_67efba50a241f21530c31215",
+      "directory_wolt_67efb9e7dbaf0407cb4c2e35"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-03566ede5d0bb21caa063ecb.png",
+    "wide": false
+  },
+  "wolt_be64d7801f48569d8adf4b00": {
+    "name": "Alco Outlet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69afe7666617d601b16534cc"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-be64d7801f48569d8adf4b00.png",
+    "wide": false
+  },
+  "wolt_95ce5b14dc6c324fe9747118": {
+    "name": "Tzatziki Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_654b60483375c852af3a9862",
+      "osm_node_10681727901"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-95ce5b14dc6c324fe9747118.png",
+    "wide": false
+  },
+  "wolt_3631334648feef862d20a538": {
+    "name": "Ukrainian Taste",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a587f92096659215ae14313"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3631334648feef862d20a538.png",
+    "wide": false
+  },
+  "wolt_c58855d82cc3fee6fb5301ce": {
+    "name": "Petko8Maia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a7da47f7e22d9119ca66f1c"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-c58855d82cc3fee6fb5301ce.png",
+    "wide": false
+  },
+  "wolt_333aa77155314035a0b1e2b1": {
+    "name": "კაფე ლა ლა ლა",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4d140c8d6138274d6e121e",
+      "osm_node_12303611901"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-333aa77155314035a0b1e2b1.png",
+    "wide": false
+  },
+  "wolt_877a7dc9b6da692b8e186bbe": {
+    "name": "Green Hamster Vegan Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65cc8768917e25e50c6be925"
+    ],
+    "categories": [
+      "supermarket"
+    ],
+    "file": "wolt-877a7dc9b6da692b8e186bbe.png",
+    "wide": false
+  },
+  "wolt_7a02b53abfa93a7827b944ed": {
+    "name": "Shaurma Gemo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a33f9edc95179f4b567bae4"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-7a02b53abfa93a7827b944ed.png",
+    "wide": false
+  },
+  "wolt_ebf6241ab0667dd0dadec867": {
+    "name": "ZEITUNI",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a60940d7377aa5773b5a196"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ebf6241ab0667dd0dadec867.png",
+    "wide": false
+  },
+  "wolt_81014c8eb07b445b906172b1": {
+    "name": "Nana's Kitchen",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aad03dd0d3041cd1df3aca1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-81014c8eb07b445b906172b1.png",
+    "wide": false
+  },
+  "wolt_bced3561f94df2d60fd18e1d": {
+    "name": "Brisk By Alfredo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fe1923aadc0c85a88980e7b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-bced3561f94df2d60fd18e1d.png",
+    "wide": false
+  },
+  "wolt_1431b97c9490c020f25ed112": {
+    "name": "Pasta Osteria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6874e9e6a8de4b4e2650fbc7",
+      "osm_node_12071125312"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1431b97c9490c020f25ed112.png",
+    "wide": false
+  },
+  "wolt_b86ea731b7cf6fc4017a58d4": {
+    "name": "Best Friends Tsagareli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_622f1272bd1ef5edd8d60a99",
+      "osm_node_12877395040"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-b86ea731b7cf6fc4017a58d4.png",
+    "wide": false
+  },
+  "wolt_be5aab104ccbaf1de4f01afc": {
+    "name": "Asi Khinkali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61c1902f74ea841270f19fbe",
+      "directory_wolt_662a2dc71320085d2f663c27",
+      "osm_node_14084028815",
+      "directory_wolt_6971e57f356e836bccacf1d8",
+      "osm_node_6601879528"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-be5aab104ccbaf1de4f01afc.png",
+    "wide": false
+  },
+  "wolt_9160dd519b632d3b9c2f38ad": {
+    "name": "Another Valley",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6659a504c0c3214a9e6ed16b"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9160dd519b632d3b9c2f38ad.png",
+    "wide": false
+  },
+  "wolt_9d3d03f71d89bb8e521b37e5": {
+    "name": "Tbili Sio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5dedfbe1d9158b7347859321"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9d3d03f71d89bb8e521b37e5.png",
+    "wide": false
+  },
+  "wolt_5f099e32f134db54e6576c4f": {
+    "name": "Atsma Cooked By Shemomechama Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_683daf2bdff5086bbe9239b8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5f099e32f134db54e6576c4f.png",
+    "wide": false
+  },
+  "wolt_d9610590eb53faf78116598d": {
+    "name": "LUXOR Alco Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676d0c8f0ca5fd94740d024e"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-d9610590eb53faf78116598d.png",
+    "wide": false
+  },
+  "wolt_d7ab30b3cef0f03d4ae88224": {
+    "name": "Agro GEO Fruits &\nVegetables",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66740ed854a938ef467d040c"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-d7ab30b3cef0f03d4ae88224.png",
+    "wide": false
+  },
+  "wolt_8c6ae05006a6d87dd2204735": {
+    "name": "Device",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6839984351e15d27f6855a65",
+      "directory_wolt_683997ee51e15d27f6855a64"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-8c6ae05006a6d87dd2204735.png",
+    "wide": false
+  },
+  "wolt_76b7fc492e1fc50dcf1dcb24": {
+    "name": "Tsvniani Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6847ec41c52dbb7c340b4cdb"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-76b7fc492e1fc50dcf1dcb24.png",
+    "wide": false
+  },
+  "wolt_c6803e59449e2ebd88699fec": {
+    "name": "Mochi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5c90e156d0b986000b2c522e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c6803e59449e2ebd88699fec.png",
+    "wide": false
+  },
+  "wolt_0601a938c46188806f52a84e": {
+    "name": "Flying Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69721c4c356e836bccacf373",
+      "osm_node_13304784022"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-0601a938c46188806f52a84e.png",
+    "wide": false
+  },
+  "wolt_1ef4cc0e36a5ce0d4a97437b": {
+    "name": "Mobitime Arakishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68a64baaa010e5a5a8b6bc21"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-1ef4cc0e36a5ce0d4a97437b.png",
+    "wide": false
+  },
+  "wolt_d9efbb1219e4fdc4aa57e9da": {
+    "name": "Augustus",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668be122098286ecd310b0cd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d9efbb1219e4fdc4aa57e9da.png",
+    "wide": false
+  },
+  "wolt_992eba5297890220c738ef73": {
+    "name": "Flower House Kekelidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a339f53583f70dff4779c78"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-992eba5297890220c738ef73.png",
+    "wide": false
+  },
+  "wolt_0805bf1598810b7f7ac476eb": {
+    "name": "Teamania Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4e4849fcc288c7264a320a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0805bf1598810b7f7ac476eb.png",
+    "wide": false
+  },
+  "wolt_8c6df6aa888c0e6d50e351e1": {
+    "name": "Lolita",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676aa09e68ede1f41faff911",
+      "osm_node_6653160546"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8c6df6aa888c0e6d50e351e1.png",
+    "wide": false
+  },
+  "wolt_9092d5f7d9cb6cd7ec4f3088": {
+    "name": "Brunch & Dine",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_638491149c8f907e744e30e3",
+      "osm_node_11323211272"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9092d5f7d9cb6cd7ec4f3088.png",
+    "wide": false
+  },
+  "wolt_f7df4801bdec926e222c80e8": {
+    "name": "Asian Food Aragveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6995c159bde2f97d23329f53",
+      "directory_wolt_6995c159bde2f97d23329f54"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f7df4801bdec926e222c80e8.png",
+    "wide": false
+  },
+  "wolt_f29f2fadb9b63d0b85a2d92a": {
+    "name": "Hokkaido",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66e018533cfd46f1cb9dceca",
+      "directory_wolt_67876f8dba774117ffb8e488"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f29f2fadb9b63d0b85a2d92a.png",
+    "wide": false
+  },
+  "wolt_2b9f8a7a6c55c9a87f2e60ca": {
+    "name": "Confeta Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b7c2fb150826434eacdfa6"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-2b9f8a7a6c55c9a87f2e60ca.png",
+    "wide": false
+  },
+  "wolt_ce4f99aabd42890db1b8dba7": {
+    "name": "Swedish Candy Pick And Mix",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c122135906d9541c9b0fd2"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-ce4f99aabd42890db1b8dba7.png",
+    "wide": false
+  },
+  "wolt_26a859f0760f0c2c1534658b": {
+    "name": "Las Flores",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e427b88c1f9a7d9c9ae07f1"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-26a859f0760f0c2c1534658b.png",
+    "wide": false
+  },
+  "wolt_9a4eccec73afb59aed12fff7": {
+    "name": "B&M",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69eb440104fd2254bf5b4e9c"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-9a4eccec73afb59aed12fff7.png",
+    "wide": false
+  },
+  "wolt_881329ef6b03acdad459d31e": {
+    "name": "Weller",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60acc480f093904402910174",
+      "osm_node_12573953667"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-881329ef6b03acdad459d31e.png",
+    "wide": false
+  },
+  "wolt_6d5a04d8a031e331609a841c": {
+    "name": "Crepe Carpentier Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6847ebbe50b4a905a279bfc4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6d5a04d8a031e331609a841c.png",
+    "wide": false
+  },
+  "wolt_eb03eb72d3f1e673184a79f2": {
+    "name": "Pets Zone",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68776ddb87ea8fcb18818a19",
+      "osm_node_13074143501",
+      "directory_wolt_69033ad1a0e6d83e7818fb49"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-eb03eb72d3f1e673184a79f2.png",
+    "wide": false
+  },
+  "wolt_fd4b36adf63859a7a2d7660a": {
+    "name": "Planty",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67174ccbf2e58424b24c074c",
+      "osm_node_13989752003"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-fd4b36adf63859a7a2d7660a.png",
+    "wide": false
+  },
+  "wolt_42803c3209d904e1204f0274": {
+    "name": "Budbe Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67ac697869533d02397f5d50"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-42803c3209d904e1204f0274.png",
+    "wide": false
+  },
+  "wolt_4b3f7ac3de0561b3c66923bb": {
+    "name": "Petalia Flower Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1d3268d3a6617ea4adb9c6"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-4b3f7ac3de0561b3c66923bb.png",
+    "wide": false
+  },
+  "wolt_b5f724bb4f24db27323cb46d": {
+    "name": "Zoomarketgroom Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2a9a2036dd1340748c1dfb"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-b5f724bb4f24db27323cb46d.png",
+    "wide": false
+  },
+  "wolt_2e97c765b74fb8892dd375c7": {
+    "name": "BRB Café-Restaurant",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ce421b844ce44e47771ebd",
+      "osm_node_13240844101"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2e97c765b74fb8892dd375c7.png",
+    "wide": false
+  },
+  "wolt_716a5abd9a342039cd3fe934": {
+    "name": "Fresh Flowers Chitaia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa1218de0f6434814a41c19"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-716a5abd9a342039cd3fe934.png",
+    "wide": false
+  },
+  "wolt_7fe698316d4355016d236141": {
+    "name": "Burger  Platform",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aad24a69235ba936d8cde91"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-7fe698316d4355016d236141.png",
+    "wide": false
+  },
+  "wolt_f4a73c8806e79841e6028a93": {
+    "name": "ZooPlus",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6abb7f1e47e82f3797285a89",
+      "osm_node_12892233726"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-f4a73c8806e79841e6028a93.png",
+    "wide": false
+  },
+  "wolt_4374def72e8c787f9aacd0d0": {
+    "name": "Odabade",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698b0e82c122ca8074ac0abd"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-4374def72e8c787f9aacd0d0.png",
+    "wide": false
+  },
+  "wolt_a1ab8dea55442585101e6341": {
+    "name": "Amai Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668f9c2ec6854da82608b971"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a1ab8dea55442585101e6341.png",
+    "wide": false
+  },
+  "wolt_de57b09c52eb0e0d9513faae": {
+    "name": "მსოფლიო ზოოში მრგვალ ბაღთან",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67163faa29a945f63d46642c",
+      "directory_wolt_67da69659b9f4ddb395aa654"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-de57b09c52eb0e0d9513faae.png",
+    "wide": false
+  },
+  "wolt_1eba74b1e252f4dac113d8c1": {
+    "name": "Poke Bar Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_664b5240e79e223d28208557",
+      "osm_node_14155455230"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-1eba74b1e252f4dac113d8c1.png",
+    "wide": false
+  },
+  "wolt_9161403f87442a807850ccda": {
+    "name": "Assorti Nikoladze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67e1997be62a3feff561ca30",
+      "osm_node_4576301089",
+      "directory_wolt_6406f36cfc13fe86d77c8a23",
+      "osm_node_5075618333",
+      "directory_wolt_6406f94ee51cc88966c117f1",
+      "directory_wolt_6406de96c85f21c23d79e0f8",
+      "directory_wolt_6406f680d3dfa3907d255a37",
+      "directory_wolt_67e199fe677abbfb855ff8d5",
+      "osm_node_13960789975",
+      "directory_wolt_68652e05f83f8363238f4214",
+      "osm_node_12965483801",
+      "directory_wolt_6abe1dd588623dedd03ee3ea",
+      "directory_wolt_676bfadf14ae34634f2ad955",
+      "osm_node_10897234537"
+    ],
+    "categories": [
+      "confectionery",
+      "cafe",
+      "bakery"
+    ],
+    "file": "wolt-9161403f87442a807850ccda.png",
+    "wide": false
+  },
+  "wolt_d510aeb7bce3df5b198c158c": {
+    "name": "Papa Syrnyk",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6756e80e3cfa8cb7642a3f00"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d510aeb7bce3df5b198c158c.png",
+    "wide": false
+  },
+  "wolt_c9a8351637a94552b895dc5c": {
+    "name": "Ardi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69985416d2beb1041b0ecd56"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-c9a8351637a94552b895dc5c.png",
+    "wide": false
+  },
+  "wolt_db2a06d4de9572babfb9af35": {
+    "name": "Keria Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_647f14bc2dd97bd5c205abbd",
+      "osm_node_11813767424",
+      "directory_wolt_647f11f8933d7a48303eaefb",
+      "directory_wolt_654cb419f576fe4854892009",
+      "directory_wolt_647f18bb99edb3e78b9e3cf6",
+      "osm_node_11804738246",
+      "directory_wolt_647f13ed8e958267466efd6f",
+      "directory_wolt_6490253b79a6141ae2f5494e",
+      "osm_node_12238656602"
+    ],
+    "categories": [
+      "cafe",
+      "confectionery"
+    ],
+    "file": "wolt-db2a06d4de9572babfb9af35.png",
+    "wide": false
+  },
+  "wolt_7f2c3c7fb4cfcf24e7d7d634": {
+    "name": "Nekni Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698ef44e9ecd33397a378a35"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7f2c3c7fb4cfcf24e7d7d634.png",
+    "wide": false
+  },
+  "wolt_7f912ba2241d86a681373088": {
+    "name": "Gloria Flowers & Gifts Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64356141c76281a41b19b61b",
+      "directory_wolt_63d787e5d3a654079a497a4f"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-7f912ba2241d86a681373088.png",
+    "wide": false
+  },
+  "wolt_83be306034771dac92063ca1": {
+    "name": "Honey",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67dd3da873d1253c7676b9ab"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-83be306034771dac92063ca1.png",
+    "wide": false
+  },
+  "wolt_7307a708459c3552ef0907a8": {
+    "name": "Saffron",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_670e5354139e287775971c53"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7307a708459c3552ef0907a8.png",
+    "wide": false
+  },
+  "wolt_e8ba04534ed67b82b8be064a": {
+    "name": "Niche Flower Service",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6799f79fd7d8f6116f693fe0"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-e8ba04534ed67b82b8be064a.png",
+    "wide": false
+  },
+  "wolt_a9bebcea61a26788947fe019": {
+    "name": "Growlab",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67e10b5ea96f825088b8deed",
+      "osm_node_12881375506"
+    ],
+    "categories": [
+      "shopping"
+    ],
+    "file": "wolt-a9bebcea61a26788947fe019.png",
+    "wide": false
+  },
+  "wolt_5b56cd0146cfe7556d76658d": {
+    "name": "Solo Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6853c30c46128ed62584ddb5",
+      "osm_node_12916952721"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-5b56cd0146cfe7556d76658d.png",
+    "wide": false
+  },
+  "wolt_65a7c7932c034f5c7636f52e": {
+    "name": "Edelweiss Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68b6c22373730ee885e66064"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-65a7c7932c034f5c7636f52e.png",
+    "wide": false
+  },
+  "wolt_1bc0807ab64881196b033ee9": {
+    "name": "Honey Bowls",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a97e27729e8aa056f0abd24"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1bc0807ab64881196b033ee9.png",
+    "wide": false
+  },
+  "wolt_a36162683a67be601fffa5ea": {
+    "name": "Flowers Delux",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691c3214b8a0b1fd58d8fe94",
+      "directory_wolt_698edd4ffa8a055bd31d04cd",
+      "directory_wolt_69f481bd23d85e057d0dd572",
+      "directory_wolt_6979e0bef67844e021053288"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-a36162683a67be601fffa5ea.png",
+    "wide": false
+  },
+  "wolt_268b6eb3cdd06310d1456eea": {
+    "name": "Chick'chi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69bd02fad1a33cfcce0a3a6b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-268b6eb3cdd06310d1456eea.png",
+    "wide": false
+  },
+  "wolt_469b8376a8912ae1d0ba621f": {
+    "name": "BeeGarden Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694a404e11aa865ce60fe580"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-469b8376a8912ae1d0ba621f.png",
+    "wide": false
+  },
+  "wolt_86ed367f02fb60589bae4bc4": {
+    "name": "Aroma Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aaab9e50ded33c33d619d0"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-86ed367f02fb60589bae4bc4.png",
+    "wide": false
+  },
+  "wolt_0e486126dc6aa2e4e61c41e3": {
+    "name": "Piso.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69eb16a37b13892dd1eb6e34",
+      "osm_node_13836824406"
+    ],
+    "categories": [
+      "shopping"
+    ],
+    "file": "wolt-0e486126dc6aa2e4e61c41e3.png",
+    "wide": false
+  },
+  "wolt_897de4e89242205035e79806": {
+    "name": "Cupy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0ee72bd17b148b9d19fecc",
+      "osm_node_14108319595"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-897de4e89242205035e79806.png",
+    "wide": false
+  },
+  "wolt_9e996b49f77938e4cfa75767": {
+    "name": "FlowerShop73",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef1699cc73ada5c0ff7b63",
+      "osm_node_11511474396"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-9e996b49f77938e4cfa75767.png",
+    "wide": false
+  },
+  "wolt_f30581012c4da6b2168d350f": {
+    "name": "Belisimo Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f08bd123e6ce5ec7d171b8"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-f30581012c4da6b2168d350f.png",
+    "wide": false
+  },
+  "wolt_7184ba06ebfa47f06039503c": {
+    "name": "ვრაპ ნექტარია",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a195f1098c5e5434230132a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7184ba06ebfa47f06039503c.png",
+    "wide": false
+  },
+  "wolt_52c77882b908c1e70d3eb701": {
+    "name": "Wok Station",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a01bcaacceedd57752d9fdc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-52c77882b908c1e70d3eb701.png",
+    "wide": false
+  },
+  "wolt_ceec18609f3b3edc03ed9458": {
+    "name": "Otino Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a05b010a93b66e076386938"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-ceec18609f3b3edc03ed9458.png",
+    "wide": false
+  },
+  "wolt_8510df32ef20fc6d7746dfb8": {
+    "name": "Pocito",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a35444472120f456f0e0ecf"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-8510df32ef20fc6d7746dfb8.png",
+    "wide": false
+  },
+  "wolt_88f3406dde18a7e98c18647a": {
+    "name": "Alco Brand Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_672b0ec9c3a7054bc6940dc7",
+      "osm_node_11704259331"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-88f3406dde18a7e98c18647a.png",
+    "wide": false
+  },
+  "wolt_8c70300f021c31a743f06d7b": {
+    "name": "Foot Care Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668e316935a7dcef3f7669a6"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-8c70300f021c31a743f06d7b.png",
+    "wide": false
+  },
+  "wolt_caadeb547c27f96ff636345d": {
+    "name": "Kikodze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676aa0d7da18a299903756dc",
+      "osm_node_6743921886"
+    ],
+    "categories": [
+      "bar"
+    ],
+    "file": "wolt-caadeb547c27f96ff636345d.png",
+    "wide": false
+  },
+  "wolt_b9809a93eabac0332e2ce52c": {
+    "name": "Candy Verse",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6930032c682e531ba353676e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-b9809a93eabac0332e2ce52c.png",
+    "wide": false
+  },
+  "wolt_16955e1d2844b395fd83d6a7": {
+    "name": "Pet Corner Tsagareli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685a920eb7354abcccdf70be",
+      "directory_wolt_685a920eb7354abcccdf70bd"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-16955e1d2844b395fd83d6a7.png",
+    "wide": false
+  },
+  "wolt_e42fb5f2fee16e73a3d9516d": {
+    "name": "Bell and Gray Telegraph",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a8c3c9f33d5d99cd693915e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e42fb5f2fee16e73a3d9516d.png",
+    "wide": false
+  },
+  "wolt_adf45debbd3739cc6a4330c3": {
+    "name": "Snack It",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6900924546558d3361a2fe90"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-adf45debbd3739cc6a4330c3.png",
+    "wide": false
+  },
+  "wolt_372b27ddc8e3d9b8c4a84c62": {
+    "name": "Rachvelebi Gamrekeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6712317d51e745d321dcd31b"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-372b27ddc8e3d9b8c4a84c62.png",
+    "wide": false
+  },
+  "wolt_5a87faa3eefba4dfcc32069a": {
+    "name": "Sushi Gourmet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6938177c9aee0c1594d90d10"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5a87faa3eefba4dfcc32069a.png",
+    "wide": false
+  },
+  "wolt_50c344610ed5fc9b132e0639": {
+    "name": "Beauty Flowers Paliashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63567efcbc07389ab63489d5",
+      "directory_wolt_6790f6509e842446b650d9ca",
+      "directory_wolt_604f678869d4670ce291daff",
+      "osm_node_13790184759",
+      "directory_wolt_6790f6509e842446b650d9c9"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-50c344610ed5fc9b132e0639.png",
+    "wide": false
+  },
+  "wolt_d6f353a54952808931587d22": {
+    "name": "Pizza Dou",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a672f1a2cc9dc8f330d0d58"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-d6f353a54952808931587d22.png",
+    "wide": false
+  },
+  "wolt_91b9f2bbdcd24b089de58c95": {
+    "name": "Taiguli.ge - Flowers Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_641c2faafada0d6b53460ebb"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-91b9f2bbdcd24b089de58c95.png",
+    "wide": false
+  },
+  "wolt_380b9c36254126efe5e18265": {
+    "name": "დრაკაი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d3fb229ab9c837fc9da220"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-380b9c36254126efe5e18265.png",
+    "wide": false
+  },
+  "wolt_a7bef5430ff2ee0a93712021": {
+    "name": "Fresh Mania",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_667be62dad0e8d813ada6b36"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-a7bef5430ff2ee0a93712021.png",
+    "wide": false
+  },
+  "wolt_4287090f363dcd8f3699a09f": {
+    "name": "Lilat Flowers Ninoshvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66051cbf3f85e40687dff822",
+      "directory_wolt_640f0464d858a39c4c77296d",
+      "directory_wolt_61b9a1da7802af0181b8516b"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-4287090f363dcd8f3699a09f.png",
+    "wide": false
+  },
+  "wolt_885e4225f1691f58e94effc2": {
+    "name": "Maua Concept",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69147b90f737603545c11861"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-885e4225f1691f58e94effc2.png",
+    "wide": false
+  },
+  "wolt_e2520cd193a0370316f510c0": {
+    "name": "Maspindzelo Express",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62501e2665d98b8f941a5ca9",
+      "osm_node_5110430721"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e2520cd193a0370316f510c0.png",
+    "wide": false
+  },
+  "wolt_d4f7522fcfe65f23b0ed46c8": {
+    "name": "Viviennes Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_633fe6e53f45a18d10e8cf3a"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-d4f7522fcfe65f23b0ed46c8.png",
+    "wide": false
+  },
+  "wolt_42120c65877224ff5484c99a": {
+    "name": "Izbushka Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6847ea75678e45d6d4fc7cc7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-42120c65877224ff5484c99a.png",
+    "wide": false
+  },
+  "wolt_545d1c171f8dd5f933bf27c8": {
+    "name": "Leno Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6952817e66bd8777d9ec3b17"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-545d1c171f8dd5f933bf27c8.png",
+    "wide": false
+  },
+  "wolt_061879273d61f6775d763236": {
+    "name": "Akhali Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa8f16e79480f81323a4a22"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-061879273d61f6775d763236.png",
+    "wide": false
+  },
+  "wolt_e82d4c4afaaaaf213b3ea846": {
+    "name": "SOL",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_628b7656c56535030e85643e",
+      "osm_node_9620522317"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-e82d4c4afaaaaf213b3ea846.png",
+    "wide": false
+  },
+  "wolt_6add11e5263870fdd114223d": {
+    "name": "Buona Sera Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691ed4259cc8170957b6aee0",
+      "directory_wolt_691ed4259cc8170957b6aee1",
+      "osm_node_12101077136",
+      "directory_wolt_691ed4259cc8170957b6aedf"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-6add11e5263870fdd114223d.png",
+    "wide": false
+  },
+  "wolt_13badb71e835fd540e7a5958": {
+    "name": "Apkhazuri Sakhli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a042c1735dc71ba94b31e06"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-13badb71e835fd540e7a5958.png",
+    "wide": false
+  },
+  "wolt_2632c597a341dfe52f53134a": {
+    "name": "Shaurma 300",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6931302d1ff8b288b0b402bf"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2632c597a341dfe52f53134a.png",
+    "wide": false
+  },
+  "wolt_ed421c5bbf563b6856b39d46": {
+    "name": "JUJIKA by Pazza Sololaki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c511796f62de404ddf65ef"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ed421c5bbf563b6856b39d46.png",
+    "wide": false
+  },
+  "wolt_ce83131b8f8f322f0a421f13": {
+    "name": "Tabstore",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6863c986b67d896fdd6c7996",
+      "osm_node_10748977390"
+    ],
+    "categories": [
+      "mobile-phone"
+    ],
+    "file": "wolt-ce83131b8f8f322f0a421f13.png",
+    "wide": false
+  },
+  "wolt_34a38dbf68b931345f05c098": {
+    "name": "Homla",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2a7480941c0d5a826633ba"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-34a38dbf68b931345f05c098.png",
+    "wide": false
+  },
+  "wolt_59a3892045fc8fac4a0bbeec": {
+    "name": "Archive",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4cf140cbe9ffddb94f1e17"
+    ],
+    "categories": [
+      "furniture"
+    ],
+    "file": "wolt-59a3892045fc8fac4a0bbeec.png",
+    "wide": false
+  },
+  "wolt_ce82df8ed82e87193dcb251d": {
+    "name": "მიმინო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671625e7b7914f5714baa809",
+      "osm_node_4913512121"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ce82df8ed82e87193dcb251d.png",
+    "wide": false
+  },
+  "wolt_bd3ab9fd97c27ca3cbcabf3c": {
+    "name": "Tavaduri",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62bc4cd2061510fd763a8371",
+      "osm_node_5235030023"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-bd3ab9fd97c27ca3cbcabf3c.png",
+    "wide": false
+  },
+  "wolt_583b5fce56aa7f515a29f8d8": {
+    "name": "Kubiki.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a7ade4c46f79182c3203445"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-583b5fce56aa7f515a29f8d8.png",
+    "wide": false
+  },
+  "wolt_9112962a7fd5ed547205bc56": {
+    "name": "Hot-Dog Room Tsintsadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_603dfa092f7f2b7de7593ba0",
+      "directory_wolt_61029dcf87ddae63b70f5205",
+      "directory_wolt_5b9f7c3b1082e0000bf26565",
+      "osm_node_10799500583"
+    ],
+    "categories": [
+      "restaurant",
+      "fast-food"
+    ],
+    "file": "wolt-9112962a7fd5ed547205bc56.png",
+    "wide": false
+  },
+  "wolt_53100214e0a7d870460b612f": {
+    "name": "Ronix Eliava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676ab182116492d63e00f997",
+      "directory_wolt_67446ddd93c356c7259c32d2",
+      "osm_node_12116500699",
+      "directory_wolt_67446ca59405db0cbb91ee5a",
+      "osm_node_12919588519"
+    ],
+    "categories": [
+      "houseware",
+      "hardware"
+    ],
+    "file": "wolt-53100214e0a7d870460b612f.png",
+    "wide": false
+  },
+  "wolt_e13a40e1e5036827d803d96a": {
+    "name": "La Bonita",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a96bc1fe3a1b0143110578d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e13a40e1e5036827d803d96a.png",
+    "wide": false
+  },
+  "wolt_e0765eee6f422fd5e110f339": {
+    "name": "Hand Made Bazari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_686b99ee5406f11bf7413d66"
+    ],
+    "categories": [
+      "gifts"
+    ],
+    "file": "wolt-e0765eee6f422fd5e110f339.png",
+    "wide": false
+  },
+  "wolt_fa257e21954bfa267f2a8536": {
+    "name": "Mobiland Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693815449aee0c1594d90d05",
+      "directory_wolt_691d9ceb2f95910c1618e39c",
+      "directory_wolt_6938142a84030abe56a8f477",
+      "directory_wolt_691d9c03d4f49996385fab17",
+      "directory_wolt_691da950daf942479816d761"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-fa257e21954bfa267f2a8536.png",
+    "wide": false
+  },
+  "wolt_a81ad556ed10bec3dc0bfdb4": {
+    "name": "Tone",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ea69dee66e197afbb30490e",
+      "osm_node_5357321719"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-a81ad556ed10bec3dc0bfdb4.png",
+    "wide": false
+  },
+  "wolt_a74434eaaa10ddcdb14edd46": {
+    "name": "MYIMEI Just Original",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6968eb058d887650ea6f2e2e"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-a74434eaaa10ddcdb14edd46.png",
+    "wide": false
+  },
+  "wolt_fa315e17eb33f917f99ec944": {
+    "name": "Mzhauna",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_697899eff181fbd1353f04f8",
+      "osm_node_14216338117"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-fa315e17eb33f917f99ec944.png",
+    "wide": false
+  },
+  "wolt_cdfebd4ec7d40abc9b9e15a2": {
+    "name": "Eleve11",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_648c0b36c4616b94f7f807cf"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-cdfebd4ec7d40abc9b9e15a2.png",
+    "wide": false
+  },
+  "wolt_740778bf0838c8dd1c0088dc": {
+    "name": "Guda Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65f432e9bbf40411eda2832f"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-740778bf0838c8dd1c0088dc.png",
+    "wide": false
+  },
+  "wolt_cf67f7d5953893726eb8c930": {
+    "name": "Dragon Pot",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699c0dd00113044d24861903"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cf67f7d5953893726eb8c930.png",
+    "wide": false
+  },
+  "wolt_095a57df5180c12a0788e65d": {
+    "name": "Chuki Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_674042905cdd8e1ba62ca84c"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-095a57df5180c12a0788e65d.png",
+    "wide": false
+  },
+  "wolt_4ad2ed3d5efae41c1cfb234b": {
+    "name": "Monday Greens",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61f8decf31942f0e02b1c1dc",
+      "osm_node_11005627205"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-4ad2ed3d5efae41c1cfb234b.png",
+    "wide": false
+  },
+  "wolt_4c0c12e06f7e165115fd3682": {
+    "name": "Cafés Richard",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676ddf80ecf2e84c491b59bb"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-4c0c12e06f7e165115fd3682.png",
+    "wide": false
+  },
+  "wolt_aacaf842224f79b8115e4e28": {
+    "name": "Chicago Style",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_662f6e351a954fd9935babdb"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-aacaf842224f79b8115e4e28.png",
+    "wide": false
+  },
+  "wolt_100ba76144c1927865f42f9a": {
+    "name": "Rossmax",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d332bd9ab9c837fc9da1ef"
+    ],
+    "categories": [
+      "pharmacy"
+    ],
+    "file": "wolt-100ba76144c1927865f42f9a.png",
+    "wide": false
+  },
+  "wolt_0a2f645dbc81ba8c04ff890b": {
+    "name": "Frida’s Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6928056772e3529cc48280d0"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-0a2f645dbc81ba8c04ff890b.png",
+    "wide": false
+  },
+  "wolt_3c144170062c677748fdd931": {
+    "name": "Buratino Toys Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68259253f65ecfb9842923ec",
+      "directory_wolt_68259253f65ecfb9842923e9",
+      "directory_wolt_68259253f65ecfb9842923eb"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-3c144170062c677748fdd931.png",
+    "wide": false
+  },
+  "wolt_a31258832c215c8cbfecc559": {
+    "name": "WAREHOUSE at Stamba",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_683d7f4176b6e4542631c02e"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-a31258832c215c8cbfecc559.png",
+    "wide": false
+  },
+  "wolt_ead68268de6117ead88304cc": {
+    "name": "Anker",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_683d992094b9f5800728ad85"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-ead68268de6117ead88304cc.png",
+    "wide": false
+  },
+  "wolt_ad46d7c34f5bdcfd010ee964": {
+    "name": "Pancaviar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_687e37a25ee70cd7d305543e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-ad46d7c34f5bdcfd010ee964.png",
+    "wide": false
+  },
+  "wolt_8ffae6214e815a6444debaff": {
+    "name": "Whisky & More",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6891e5596786e7bf01d94031"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-8ffae6214e815a6444debaff.png",
+    "wide": false
+  },
+  "wolt_415d66849cc7287b733eaf38": {
+    "name": "Kubdari Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68fb63703806437040055271"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-415d66849cc7287b733eaf38.png",
+    "wide": false
+  },
+  "wolt_28d2703010b5af5b0f2708dd": {
+    "name": "Chateau Mukhrani Wine Bar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689384569c651c7df3c19de9"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-28d2703010b5af5b0f2708dd.png",
+    "wide": false
+  },
+  "wolt_ee59a2c0a6ae49951eb49007": {
+    "name": "Kids Toys & Accessories",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f749ad7e34ed7018758640"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-ee59a2c0a6ae49951eb49007.png",
+    "wide": false
+  },
+  "wolt_900e3bbe2224ef7b3703fd42": {
+    "name": "Prologue 1709",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68639d85cc9077266e35fb33"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-900e3bbe2224ef7b3703fd42.png",
+    "wide": false
+  },
+  "wolt_ec0a25eeed76e24c4de4b490": {
+    "name": "Tasty Town",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_677b7e295286bbf3741651e8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ec0a25eeed76e24c4de4b490.png",
+    "wide": false
+  },
+  "wolt_a1ca20357553e7e7138b35c6": {
+    "name": "Bamba Mamba",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69396af6c822575d2262cf72",
+      "osm_node_13136589257"
+    ],
+    "categories": [
+      "clothes"
+    ],
+    "file": "wolt-a1ca20357553e7e7138b35c6.png",
+    "wide": false
+  },
+  "wolt_791f74205a1b77dea4e412ca": {
+    "name": "Apple Home Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6966110e804b01e87f922c13"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-791f74205a1b77dea4e412ca.png",
+    "wide": false
+  },
+  "wolt_796fc9b51937a0351d4b5b47": {
+    "name": "Dim Kava",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698b577aeecb7a3516116fcd",
+      "osm_node_4332033693",
+      "directory_wolt_6989bf939c7d015f7c8114ff"
+    ],
+    "categories": [
+      "cafe",
+      "convenience"
+    ],
+    "file": "wolt-796fc9b51937a0351d4b5b47.png",
+    "wide": false
+  },
+  "wolt_08fb730e6376d3e5d5f7b966": {
+    "name": "Wine Hub Sadzvele",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aaa29538676bcd8f2eb00c"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-08fb730e6376d3e5d5f7b966.png",
+    "wide": false
+  },
+  "wolt_56b79f129230fa7c12c4a2db": {
+    "name": "Drunks.store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b942d8009d0cfc816c5a1d"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-56b79f129230fa7c12c4a2db.png",
+    "wide": false
+  },
+  "wolt_1b09590a313add53527f7d9e": {
+    "name": "Coffee Academy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ca6e48108f346b6140eb23"
+    ],
+    "categories": [
+      "coffee-shop"
+    ],
+    "file": "wolt-1b09590a313add53527f7d9e.png",
+    "wide": false
+  },
+  "wolt_1d5521d2f1be63f4bed81749": {
+    "name": "EXPRESS COFFEE MALL",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ccfc69c2cdbde6787d45ac",
+      "directory_wolt_6239883f3e446b9677abc314",
+      "directory_wolt_622ee5d1d1955772982b6ea7",
+      "osm_node_11257958740"
+    ],
+    "categories": [
+      "convenience",
+      "coffee-shop"
+    ],
+    "file": "wolt-1d5521d2f1be63f4bed81749.png",
+    "wide": false
+  },
+  "wolt_2beb3078f36512f90d2cb3f9": {
+    "name": "Holiday Inn",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67c19f423817d6ca0f7ae1d2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2beb3078f36512f90d2cb3f9.png",
+    "wide": false
+  },
+  "wolt_3085ffcfc9ae73064939d639": {
+    "name": "Petit Bazar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ce7276ace412110ce00c9b",
+      "osm_node_11536792475"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-3085ffcfc9ae73064939d639.png",
+    "wide": false
+  },
+  "wolt_360859ba647ded6f105f4e80": {
+    "name": "Tene Tsereteli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6257c4822f16e3cd811c2700"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-360859ba647ded6f105f4e80.png",
+    "wide": false
+  },
+  "wolt_30343113a3fece064d58a11a": {
+    "name": "O Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c66eeacd15bfe9494316e1",
+      "osm_node_10743555001"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-30343113a3fece064d58a11a.png",
+    "wide": false
+  },
+  "wolt_da12d0deac65c74d31faf67d": {
+    "name": "Aroma Lab",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66f302d2fb791d9031b0be77"
+    ],
+    "categories": [
+      "gifts"
+    ],
+    "file": "wolt-da12d0deac65c74d31faf67d.png",
+    "wide": false
+  },
+  "wolt_25e53b6df29c3f84c6cabc51": {
+    "name": "Beruka Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67a5cbb1479e2a639bbe61f3"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-25e53b6df29c3f84c6cabc51.png",
+    "wide": false
+  },
+  "wolt_1567232c423493262742b853": {
+    "name": "Fast Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682c5ba4349645e24fe6d012"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-1567232c423493262742b853.png",
+    "wide": false
+  },
+  "wolt_0e31bae08aa3f6a79debc388": {
+    "name": "Vigneron",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_632d72b86c56eabcf901646a"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-0e31bae08aa3f6a79debc388.png",
+    "wide": false
+  },
+  "wolt_82c4354153eb596431f89c8f": {
+    "name": "Cuisinart",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61dc2fcc254fbe751fe71e52"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-82c4354153eb596431f89c8f.png",
+    "wide": false
+  },
+  "wolt_eb246696f99431466c88eb50": {
+    "name": "Cloud’s Restaurant Terrace",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69971c4c304220c5074ebbe2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-eb246696f99431466c88eb50.png",
+    "wide": false
+  },
+  "wolt_b3b77076ca65b515177f8ae7": {
+    "name": "Miniland Uznadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_624d7d6ee5749185eed61df3",
+      "directory_wolt_616ebe372483ce1bfbde9b51"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-b3b77076ca65b515177f8ae7.png",
+    "wide": false
+  },
+  "wolt_6f6a67beea05d07c6056ac12": {
+    "name": "ვიენა ქორნერი • იულიუს მაინლი თბილისი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_628b8abf296c7791ba77bd52"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-6f6a67beea05d07c6056ac12.png",
+    "wide": false
+  },
+  "wolt_b1611ee82ee0541e44daf549": {
+    "name": "Kona Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5ddbe8be3976f6aa97a095"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-b1611ee82ee0541e44daf549.png",
+    "wide": false
+  },
+  "wolt_1b85d32acd755af2934cad27": {
+    "name": "Taboush Sweet & Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68d101d62b4468a5f486bdc8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1b85d32acd755af2934cad27.png",
+    "wide": false
+  },
+  "wolt_9f7cbff20fb397a94022ef74": {
+    "name": "Whisky House Javakhishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62b5ab5cfe34d2e44a2d55d3",
+      "osm_node_838005189",
+      "directory_wolt_62b5a99a6abb32fb2bdaa906",
+      "osm_node_10811182291"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9f7cbff20fb397a94022ef74.png",
+    "wide": false
+  },
+  "wolt_fc26a9ca23c0b872c69665c0": {
+    "name": "Seropyan",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5f59ff07f0506fc6bd6f3f"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-fc26a9ca23c0b872c69665c0.png",
+    "wide": false
+  },
+  "wolt_7c2e6e275c7a79c11950fcc1": {
+    "name": "Nami Vels",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689085285bc98683d55b28da",
+      "osm_node_13189250502"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7c2e6e275c7a79c11950fcc1.png",
+    "wide": false
+  },
+  "wolt_2cc65cb554b7f0f5ce453505": {
+    "name": "Bu&Khari Rustaveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65fd62b1243fdd18ab0ec958"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-2cc65cb554b7f0f5ce453505.png",
+    "wide": false
+  },
+  "wolt_10bbfac637d6a385d1e9bd20": {
+    "name": "Seidabadi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61f26eacc54492e6f8daf504",
+      "osm_node_2989376677"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-10bbfac637d6a385d1e9bd20.png",
+    "wide": false
+  },
+  "wolt_734a3deebdc00284ce42964e": {
+    "name": "Bacteriophage Autorized Pharmacy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676961991354e20120b92d3b"
+    ],
+    "categories": [
+      "pharmacy"
+    ],
+    "file": "wolt-734a3deebdc00284ce42964e.png",
+    "wide": false
+  },
+  "wolt_68bec2bded5bc8d2b3410dd0": {
+    "name": "Aroma Light",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_679749815abf830d1bf580ef"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-68bec2bded5bc8d2b3410dd0.png",
+    "wide": false
+  },
+  "wolt_9cb92eeca57ebef78ed7dee5": {
+    "name": "Cafe Mellow",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691c76558d3bb5e0cffa62e9",
+      "osm_node_13954652987"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-9cb92eeca57ebef78ed7dee5.png",
+    "wide": false
+  },
+  "wolt_08cdcff8bc60665d193697c1": {
+    "name": "Badagoni Wine Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67e3df69bbde8478467576fc"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-08cdcff8bc60665d193697c1.png",
+    "wide": false
+  },
+  "wolt_ea3729c677cfc31339049cfd": {
+    "name": "Geolive Abashidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68496aec140646bafb3dd32c",
+      "directory_wolt_68496aec140646bafb3dd32b"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-ea3729c677cfc31339049cfd.png",
+    "wide": false
+  },
+  "wolt_a84a5060886ade69630f1b6b": {
+    "name": "Deda & Chvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_686e2e7331a7b3fe2cc4e7af"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-a84a5060886ade69630f1b6b.png",
+    "wide": false
+  },
+  "wolt_5cfbc5384ef5c53f6662419a": {
+    "name": "Chame Chame",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ed266dca0d27e03d3093bf"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-5cfbc5384ef5c53f6662419a.png",
+    "wide": false
+  },
+  "wolt_113079f377f0faa4296926ad": {
+    "name": "Zona 14",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f625438f9789569bc3bc16"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-113079f377f0faa4296926ad.png",
+    "wide": false
+  },
+  "wolt_350927711302b3dcbd166081": {
+    "name": "Ambori",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2f9e75b6900cf76386f7dc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-350927711302b3dcbd166081.png",
+    "wide": false
+  },
+  "wolt_892b649f752ce7f10df01788": {
+    "name": "Qugale Megrelian Kitchen",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69dde4796dd57f08bc0c300f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-892b649f752ce7f10df01788.png",
+    "wide": false
+  },
+  "wolt_2910b69cb259b3c438e8e7a1": {
+    "name": "GD Alco",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ea800348ddc4f12e478fd17"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-2910b69cb259b3c438e8e7a1.png",
+    "wide": false
+  },
+  "wolt_0eb5e7d8170ea9df02676dbf": {
+    "name": "შუქურა კაფე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_644a49470cf7ffcc6bb25072",
+      "osm_node_9561013617"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-0eb5e7d8170ea9df02676dbf.png",
+    "wide": false
+  },
+  "wolt_9cfe65f2fb543a3fa2d8956a": {
+    "name": "palette.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4f779b67a2d85648eada4a"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-9cfe65f2fb543a3fa2d8956a.png",
+    "wide": false
+  },
+  "wolt_5c905bfbc6a66a3b41f646db": {
+    "name": "Margaliti Collection",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67ffa6ab853e856d93bd845a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5c905bfbc6a66a3b41f646db.png",
+    "wide": false
+  },
+  "wolt_e6dbc4f4539c329bac19504f": {
+    "name": "Badagi Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cd1697a802b687218a5a9a",
+      "osm_node_9821602743",
+      "directory_wolt_69cd170524bdbffc9dc82b9c",
+      "osm_way_1074328771",
+      "directory_wolt_69cd18a4c2cdbde6787d4d95",
+      "directory_wolt_69ccf926c2cdbde6787d45a4",
+      "directory_wolt_69cd17731c4144c550b76b6d",
+      "osm_node_4129647884"
+    ],
+    "categories": [
+      "confectionery",
+      "shopping",
+      "convenience"
+    ],
+    "file": "wolt-e6dbc4f4539c329bac19504f.png",
+    "wide": false
+  },
+  "wolt_ad0385cd72962ece236fcb08": {
+    "name": "Jackie Chan Sushi Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680772ff3166c4f62276f478",
+      "directory_wolt_68053a101bc3a5d5ea55e7e7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ad0385cd72962ece236fcb08.png",
+    "wide": false
+  },
+  "wolt_89e7c51fe8505f0b8c7ba48b": {
+    "name": "Beautycharm.ge Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699c5369ee9f3a584b541dc0"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-89e7c51fe8505f0b8c7ba48b.png",
+    "wide": false
+  },
+  "wolt_fe4a5f621f2b0a3330fbf81a": {
+    "name": "Mamber",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680a312e41d16bc0bf3fefbf",
+      "osm_node_12731444129"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-fe4a5f621f2b0a3330fbf81a.png",
+    "wide": false
+  },
+  "wolt_748ef5598cd28ecbe6d9e135": {
+    "name": "ფრანუი ვაკე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66b4b971e44eab14cf0d8ba5",
+      "directory_wolt_66b4bcf1f18c7ede03b70675"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-748ef5598cd28ecbe6d9e135.png",
+    "wide": false
+  },
+  "wolt_d1a64a8945499d0707b058de": {
+    "name": "გოლიათი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66fe8a43c8b35e1ff76341da"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-d1a64a8945499d0707b058de.png",
+    "wide": false
+  },
+  "wolt_9ac3c27a303178b596bd2625": {
+    "name": "Wrap And Go",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685c007d8a08e78a5ce5bd26"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9ac3c27a303178b596bd2625.png",
+    "wide": false
+  },
+  "wolt_6a2d0bc1cfa8ffcb3c4cd2e8": {
+    "name": "Eos Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e5f20afccb4903183aec01"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-6a2d0bc1cfa8ffcb3c4cd2e8.png",
+    "wide": false
+  },
+  "wolt_357066572230d699a1b87d77": {
+    "name": "My Boutique",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6920485b3d624551b401bc06"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-357066572230d699a1b87d77.png",
+    "wide": false
+  },
+  "wolt_e031287cf0aa9dc759dcb581": {
+    "name": "მიკელ ქოფი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66d99748a9310080180fe245",
+      "osm_node_13105542004"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-e031287cf0aa9dc759dcb581.png",
+    "wide": false
+  },
+  "wolt_2b2a0f8aaea6b11405fdb1ab": {
+    "name": "Feauless Pastry House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d145b32e3a9659cdd0bd43"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-2b2a0f8aaea6b11405fdb1ab.png",
+    "wide": false
+  },
+  "wolt_ebbe15afd041e26da21b7705": {
+    "name": "Dukani Racha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678a59e63e9d5412ea4a5c9c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ebbe15afd041e26da21b7705.png",
+    "wide": false
+  },
+  "wolt_c8c5d78fb44781a0729a0bd8": {
+    "name": "Grafika",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_690c4ea11bfcea1cb44885fe",
+      "osm_node_9182890154"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c8c5d78fb44781a0729a0bd8.png",
+    "wide": false
+  },
+  "wolt_9e31f0abc57e9ffb43f1c129": {
+    "name": "Machakhela Meidanze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac74131eaeed5d8b466cbdd"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-9e31f0abc57e9ffb43f1c129.png",
+    "wide": false
+  },
+  "wolt_986f9fd406fc42ffe5b31130": {
+    "name": "Sunflowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60c1d4575858e0e5d4543b9e",
+      "osm_node_13932243401"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-986f9fd406fc42ffe5b31130.png",
+    "wide": false
+  },
+  "wolt_42f8b7896b0798c78cf64f1d": {
+    "name": "Lovely Roses Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_617a7b68a519e0a484348ce4"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-42f8b7896b0798c78cf64f1d.png",
+    "wide": false
+  },
+  "wolt_f0b643b62e8e833e5491094c": {
+    "name": "Kona Flower and coffee",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61a0ceadb9b829f1df7d9dba"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-f0b643b62e8e833e5491094c.png",
+    "wide": false
+  },
+  "wolt_a5811e3e94469570954d435c": {
+    "name": "Ginventor Tsereteli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_607699df4cb9ca6f2759058b"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-a5811e3e94469570954d435c.png",
+    "wide": false
+  },
+  "wolt_171c51a9971acffcf15d37ac": {
+    "name": "iCity Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fd081c49cd5161b6db6d0d2",
+      "osm_node_4230870999",
+      "directory_wolt_5fd1dde7fb94105d65708917",
+      "osm_node_13790184748",
+      "directory_wolt_67bed1bf54a81de4901ef93d"
+    ],
+    "categories": [
+      "mobile-phone",
+      "electronics"
+    ],
+    "file": "wolt-171c51a9971acffcf15d37ac.png",
+    "wide": false
+  },
+  "wolt_f98656f2826eef9e6efc4a50": {
+    "name": "Lucky Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61121f8ea9ad71cfe01ba72e"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-f98656f2826eef9e6efc4a50.png",
+    "wide": false
+  },
+  "wolt_46b4db8757aa0f6ded617f8d": {
+    "name": "ჩირო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a82fb054a0c6da6d3b3197a"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-46b4db8757aa0f6ded617f8d.png",
+    "wide": false
+  },
+  "wolt_8f4cfe0b8bc790711fb520da": {
+    "name": "Gadget",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6013b9a70c7e26da074e6202",
+      "directory_wolt_6013b50bf7d5a5a03bb6eaff"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-8f4cfe0b8bc790711fb520da.png",
+    "wide": false
+  },
+  "wolt_313b6db13a8038740ad4b5bd": {
+    "name": "Pirveli Koreuli Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61efe1b261bbdf86b30ce456",
+      "directory_wolt_61efe47b700e83273085b447"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-313b6db13a8038740ad4b5bd.png",
+    "wide": false
+  },
+  "wolt_40ebcdfe9c46babe341b86d4": {
+    "name": "Unique Boutique",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a607d399baa0450ce10443d"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-40ebcdfe9c46babe341b86d4.png",
+    "wide": false
+  },
+  "wolt_67306c8c068d8abd1ed2e8da": {
+    "name": "სოლ დე ჟანეირო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab39f3febd747741f455270",
+      "directory_wolt_6ab2668b52ef2278d81bd110"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-67306c8c068d8abd1ed2e8da.png",
+    "wide": false
+  },
+  "wolt_3a6bc09413b5b7c7fb8805ef": {
+    "name": "Saguleti and Bude Farm",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676bc4b14fd6fb1643169b30"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-3a6bc09413b5b7c7fb8805ef.png",
+    "wide": false
+  },
+  "wolt_a8e60360eeaba37971d561ec": {
+    "name": "ველვეტ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685e5ccdfb2c8e2bf923a97f",
+      "directory_wolt_67f4cbc1bcfeecfab68d12db"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-a8e60360eeaba37971d561ec.png",
+    "wide": false
+  },
+  "wolt_d9e10700261eca76c650f5aa": {
+    "name": "Foreo Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69830504ae7b768aa2dd7ed9"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-d9e10700261eca76c650f5aa.png",
+    "wide": false
+  },
+  "wolt_fbca7f0b7bf1d989c38a6bd1": {
+    "name": "Amadeo Perfume Rustaveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6996ed9df020461792457ae6",
+      "directory_wolt_6a5733d55c6f6f48a69b3ef1",
+      "directory_wolt_6ac35c791ce1a5327964848b"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-fbca7f0b7bf1d989c38a6bd1.png",
+    "wide": false
+  },
+  "wolt_12e1a20a70f6e1560b1a4521": {
+    "name": "TAMOSKIN Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699d8b80b8fecfeea4bcf56d",
+      "directory_wolt_699d8b80b8fecfeea4bcf56f",
+      "directory_wolt_699d8b80b8fecfeea4bcf56b",
+      "osm_node_12709775230",
+      "directory_wolt_699d8b80b8fecfeea4bcf56c"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-12e1a20a70f6e1560b1a4521.png",
+    "wide": false
+  },
+  "wolt_de3e236bb05883c0768d61d6": {
+    "name": "CHI Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c53ce23366939c6a819b23"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-de3e236bb05883c0768d61d6.png",
+    "wide": false
+  },
+  "wolt_440c0cfbda8a42fa69677c14": {
+    "name": "Eropharm",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e096c51d558196bd718515"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-440c0cfbda8a42fa69677c14.png",
+    "wide": false
+  },
+  "wolt_64f819a543a0adb5694c9cdb": {
+    "name": "Freeza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f05ef99f9bc735bb0deadb"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-64f819a543a0adb5694c9cdb.png",
+    "wide": false
+  },
+  "wolt_784c2fdd9d06eca0fdfa33b0": {
+    "name": "KoCos Galleria Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6089be666c9f8c5049fc1461",
+      "directory_wolt_682ee6db553b0fc83480e664",
+      "directory_wolt_6089bd9a57637c2b1b35a576",
+      "directory_wolt_66bcb0b453fd30510063013a"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-784c2fdd9d06eca0fdfa33b0.png",
+    "wide": false
+  },
+  "wolt_81498fa43648b2edae520470": {
+    "name": "Mist Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68dd1e5c012b9eb5f6f6ce5a"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-81498fa43648b2edae520470.png",
+    "wide": false
+  },
+  "wolt_f5f43d18bbf5620bfcd75ec1": {
+    "name": "Holland & Barrett Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_619f87490b85fbe7a3c5c61c",
+      "directory_wolt_619f95d344ac89e11906800d",
+      "osm_node_9834057237",
+      "directory_wolt_6389d7b0569f08433be1646d"
+    ],
+    "categories": [
+      "cosmetics",
+      "shopping"
+    ],
+    "file": "wolt-f5f43d18bbf5620bfcd75ec1.png",
+    "wide": false
+  },
+  "wolt_7770126967a0ec926dcf0d88": {
+    "name": "Artistic Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac3741107fe370ea7bfad1a"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-7770126967a0ec926dcf0d88.png",
+    "wide": false
+  },
+  "wolt_37c5737082e0c66b77060bc9": {
+    "name": "Wine Well - Family Winery Aghmashenebeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6852ce209fe1f5e6c0b56231"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-37c5737082e0c66b77060bc9.png",
+    "wide": false
+  },
+  "wolt_8b9fb5d4ca9952116737a37a": {
+    "name": "Mouare",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac6122be5a47be75b6b2b00"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-8b9fb5d4ca9952116737a37a.png",
+    "wide": false
+  },
+  "wolt_b4a46c524eb9688af068a51d": {
+    "name": "Blueb",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1988d713b6075e62b92d7e"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-b4a46c524eb9688af068a51d.png",
+    "wide": false
+  },
+  "wolt_14c31bd44e64a6ea78fc167c": {
+    "name": "Mone",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6abb81ebc9b5ce7c5dc27a27"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-14c31bd44e64a6ea78fc167c.png",
+    "wide": false
+  },
+  "wolt_5fb4ff336ae48f13f86a9bec": {
+    "name": "Keramos Studio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b3f3bf35a1f11e329fbbc5"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-5fb4ff336ae48f13f86a9bec.png",
+    "wide": false
+  },
+  "wolt_2ee507281f313a6d0126a606": {
+    "name": "Sanse",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a882626e8abf4467baea378"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-2ee507281f313a6d0126a606.png",
+    "wide": false
+  },
+  "wolt_c85d86d1cde02a84e2be9d91": {
+    "name": "Sherma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6960bf0429ddb82989a03cf3"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-c85d86d1cde02a84e2be9d91.png",
+    "wide": false
+  },
+  "wolt_c6b644e7d770590d4cd0dbc5": {
+    "name": "ELVO",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c41c0cc879df33b46b2b4"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-c6b644e7d770590d4cd0dbc5.png",
+    "wide": false
+  },
+  "wolt_55b05463368a89d8777f3f96": {
+    "name": "Concept Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f300eb5164da6056b3628f"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-55b05463368a89d8777f3f96.png",
+    "wide": false
+  },
+  "wolt_be2a7b64d4ac4944a45ce17e": {
+    "name": "Rosalie Flowers Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2d81aa6f43d59fe5b199a5"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-be2a7b64d4ac4944a45ce17e.png",
+    "wide": false
+  },
+  "wolt_eb8a0e61c42fe62d39266ad5": {
+    "name": "N&N Flowers Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a216a7c08525672a1459432"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-eb8a0e61c42fe62d39266ad5.png",
+    "wide": false
+  },
+  "wolt_bfae3734cc87d3dbc1629df6": {
+    "name": "Istanbul Döner Halal Shaurma Liberty Square",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64215ec91a711c688febb6a2"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-bfae3734cc87d3dbc1629df6.png",
+    "wide": false
+  },
+  "wolt_e3aa427acf036143e004c2aa": {
+    "name": "Pasanauri Leonidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5ba8a34b2344a2000bf2d60e",
+      "osm_node_6537492285",
+      "directory_wolt_5ece3799f96af7473305bcd3",
+      "osm_node_11112991905",
+      "directory_wolt_6a461f6fe673703726547c85"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e3aa427acf036143e004c2aa.png",
+    "wide": false
+  },
+  "wolt_22eb846fb8cabdd53f7f2ee8": {
+    "name": "Chika",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63d7a076fdf0e13b95b1a4a3",
+      "osm_node_10285884966",
+      "directory_wolt_63d7ca06f3c757c7bb35067b",
+      "osm_node_11293429511"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-22eb846fb8cabdd53f7f2ee8.png",
+    "wide": false
+  },
+  "wolt_2fdedcf7cdff423d5128740e": {
+    "name": "KITAYKA",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_648820064156086637803e34"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2fdedcf7cdff423d5128740e.png",
+    "wide": false
+  },
+  "wolt_4e3b8791f5522513b097f5f6": {
+    "name": "iSushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_606430431c160edbb031da8d",
+      "osm_node_11497113299"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4e3b8791f5522513b097f5f6.png",
+    "wide": false
+  },
+  "wolt_df6cbadc4cbf5c4b00a2b421": {
+    "name": "Vincero Bakhtrioni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698c46ad506d3bf3f88bbc9f"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-df6cbadc4cbf5c4b00a2b421.png",
+    "wide": false
+  },
+  "wolt_a9a551526fca1d25c4aee03b": {
+    "name": "Kado",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65f970cb4de8673e0a2e4821",
+      "osm_node_13902751501",
+      "directory_wolt_66a21a8af539e3547c4881ec"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a9a551526fca1d25c4aee03b.png",
+    "wide": false
+  },
+  "wolt_0cb4abc5699baf07238cdf7f": {
+    "name": "Umami Asian Fusion",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e84c65e21fed6d776628429"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0cb4abc5699baf07238cdf7f.png",
+    "wide": false
+  },
+  "wolt_a998e94af7a63e3545634568": {
+    "name": "Bruno Burger Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6720ae19b2c0d85d479846ed",
+      "osm_node_11405360674"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-a998e94af7a63e3545634568.png",
+    "wide": false
+  },
+  "wolt_8e77c5d138e4b94da1e8aff5": {
+    "name": "ZooArea Chitaia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_654a3fa87233abeeb254db7c",
+      "osm_node_11368918430",
+      "directory_wolt_654a3fa8b1c55f577e27bff9",
+      "directory_wolt_654a3fa95cd694ed8620c7f8",
+      "osm_node_11412515369",
+      "directory_wolt_654a3fa9ff0e15cca226183c",
+      "osm_node_10676780718",
+      "directory_wolt_654a3fa838109fbf415fabc4",
+      "osm_node_11215569978",
+      "directory_wolt_654a3fa8f3ac9796110a6cb7",
+      "directory_wolt_654a3fa8e5508a91918af0b3",
+      "osm_node_11999328402",
+      "directory_wolt_654a3fa81a09a8169aa3ada6",
+      "directory_wolt_654a3fa8fcec160331abfc56",
+      "directory_wolt_654a3fa9663327c5c912c9b8",
+      "directory_wolt_654a3fa9984cd3797a947e1c"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-8e77c5d138e4b94da1e8aff5.png",
+    "wide": false
+  },
+  "wolt_cb390ce24b0e37f39162bd5d": {
+    "name": "ZooArea Chovelidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65d85e92fc75352bd1b51c4b",
+      "osm_node_6856897485"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-cb390ce24b0e37f39162bd5d.png",
+    "wide": false
+  },
+  "wolt_cba327f8d27bc7c43525d54d": {
+    "name": "Wine Outlet By Winedelivery.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699eedbcf277d622b21794fb"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-cba327f8d27bc7c43525d54d.png",
+    "wide": false
+  },
+  "wolt_975ef787bc21e2af0374e7f0": {
+    "name": "Sushiman",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6481b03b747db225dead08be",
+      "osm_node_11809978994"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-975ef787bc21e2af0374e7f0.png",
+    "wide": false
+  },
+  "wolt_89cf7c39094d8033bb98b973": {
+    "name": "Mono Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e22cc9ec1d5f43c217eb48"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-89cf7c39094d8033bb98b973.png",
+    "wide": false
+  },
+  "wolt_34533a98985ed31e8854e36b": {
+    "name": "Puri Guliani Express",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60a664d42d8552f0118898db",
+      "osm_node_11536792532"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-34533a98985ed31e8854e36b.png",
+    "wide": false
+  },
+  "wolt_1a506e46f6ca5dc5e9be1137": {
+    "name": "Tema Dolabauri",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a994d56eeb9b13cc11a049d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1a506e46f6ca5dc5e9be1137.png",
+    "wide": false
+  },
+  "wolt_8838016189e15114051212c7": {
+    "name": "Cafe Daphna Meidan",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c63b6109f5f2c9164486ac"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-8838016189e15114051212c7.png",
+    "wide": false
+  },
+  "wolt_edac9a606a81136399501c38": {
+    "name": "New Asia Paliashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68de754f26062e01f1d88173",
+      "osm_node_11108019247",
+      "directory_wolt_68de734cee5898b794794088",
+      "osm_node_6850857020",
+      "directory_wolt_68de68cf83cbc763ee142c40",
+      "osm_node_4876471924"
+    ],
+    "categories": [
+      "restaurant",
+      "fast-food"
+    ],
+    "file": "wolt-edac9a606a81136399501c38.png",
+    "wide": false
+  },
+  "wolt_e8e44bf820e88a6033398a67": {
+    "name": "1973 Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67aaeaeaf638d43e4537ab9b"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-e8e44bf820e88a6033398a67.png",
+    "wide": false
+  },
+  "wolt_ae26a3886c4db971548124c5": {
+    "name": "DipStrip Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6953ab04123e4ece77a47752"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ae26a3886c4db971548124c5.png",
+    "wide": false
+  },
+  "wolt_4a283585a4e277abae40af75": {
+    "name": "ZooArea Sololaki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67b8790a09d70203f093e109",
+      "osm_node_13075485473"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-4a283585a4e277abae40af75.png",
+    "wide": false
+  },
+  "wolt_aecd5135d67cd6671aa79230": {
+    "name": "Slow Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_692ff0c0d2b7657be5b2f79c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-aecd5135d67cd6671aa79230.png",
+    "wide": false
+  },
+  "wolt_3c0391de5abea3eec417be88": {
+    "name": "Creperie - Le Biscuit",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fc5f70957b9b63afe530c19"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3c0391de5abea3eec417be88.png",
+    "wide": false
+  },
+  "wolt_43135a05714a49b97a2d0768": {
+    "name": "Kranchy By Dipstrip Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6953a73870509f48428bd5b0"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-43135a05714a49b97a2d0768.png",
+    "wide": false
+  },
+  "wolt_4eabf53ab2593cf28c2d2e13": {
+    "name": "Shaurma Club Dadiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65f8288dcc8b90bd18281b6e",
+      "osm_node_11831337270",
+      "directory_wolt_5b601d184ff965000cd12aed",
+      "directory_wolt_61e156bef74735ce63a3f4f4",
+      "osm_node_11795556671",
+      "directory_wolt_5c1a1ec822d64a000acf522e",
+      "osm_node_13154226036"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-4eabf53ab2593cf28c2d2e13.png",
+    "wide": false
+  },
+  "wolt_fe1a77071f9446049e4a75a9": {
+    "name": "Agro Eco Boutique",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_660a6afa29899dd509dd5ac2"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-fe1a77071f9446049e4a75a9.png",
+    "wide": false
+  },
+  "wolt_cecce3f0607a53b689860915": {
+    "name": "ჯეჯელატო მელიქიშვილი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671b6111ab60287b16fd5ee0"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-cecce3f0607a53b689860915.png",
+    "wide": false
+  },
+  "wolt_21bc921830c22604a1cb8e8d": {
+    "name": "DRO Abashidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63be6f1048ff71bfb74223ca"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-21bc921830c22604a1cb8e8d.png",
+    "wide": false
+  },
+  "wolt_35cd9925b6c83d5cbc7284b7": {
+    "name": "Farmers Market Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a8597f14f92d57d13f9cfaa"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-35cd9925b6c83d5cbc7284b7.png",
+    "wide": false
+  },
+  "wolt_770727fb6e0a530b34cf63d6": {
+    "name": "Emperor",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63f4b098422fd75b744483b9"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-770727fb6e0a530b34cf63d6.png",
+    "wide": false
+  },
+  "wolt_77661f86298b1f2c832ec1d7": {
+    "name": "Teamania Krtsanisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa0062c1062308aa1f77fe9",
+      "directory_wolt_65893d05de3126b94690028e",
+      "osm_node_13470602301",
+      "directory_wolt_658940566c4a53474c6b7498",
+      "directory_wolt_6708e4df9ed5bd941c675aa4",
+      "directory_wolt_615bfb1f2b9daa8577a4a54d"
+    ],
+    "categories": [
+      "convenience",
+      "tea"
+    ],
+    "file": "wolt-77661f86298b1f2c832ec1d7.png",
+    "wide": false
+  },
+  "wolt_233df96489078585a5cf3707": {
+    "name": "Mystery Wine Box",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ccfe461135ed5d17715cac"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-233df96489078585a5cf3707.png",
+    "wide": false
+  },
+  "wolt_fb5f33c2da0f36aeeabf3b9c": {
+    "name": "Technolab Kids Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4f5d10eacfc593776575dc",
+      "osm_node_13760632219",
+      "directory_wolt_6a4f5cd7ad0e7c49b319957d",
+      "directory_wolt_6a4f70170eed0f5059261e0d",
+      "directory_wolt_6a4f6f927687b95f792b8f44"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-fb5f33c2da0f36aeeabf3b9c.png",
+    "wide": false
+  },
+  "wolt_dc5dc29e70b56c6d0524e341": {
+    "name": "აიდივაისი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66c33cda3b10515405ee2642",
+      "directory_wolt_67ceb3e406d68d90eeb7da46"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-dc5dc29e70b56c6d0524e341.png",
+    "wide": false
+  },
+  "wolt_0309cf9aad403992ca7a5994": {
+    "name": "Mi Store Pekini",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6290aacbb18770b25e9223a9",
+      "osm_node_10303542848",
+      "directory_wolt_6290ad8758cb6d205ac99297",
+      "osm_node_10303614755"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-0309cf9aad403992ca7a5994.png",
+    "wide": false
+  },
+  "wolt_06ff4582bcb334110e5acd0c": {
+    "name": "Plov House Leyla",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68245c85d2a79b3f50f81a62"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-06ff4582bcb334110e5acd0c.png",
+    "wide": false
+  },
+  "wolt_e526a7ec160bd2c5a503b31a": {
+    "name": "Fiesta",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64774d17e75abff1d5cc70fe",
+      "osm_node_10928781698"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e526a7ec160bd2c5a503b31a.png",
+    "wide": false
+  },
+  "wolt_9048a77900d422588373952c": {
+    "name": "Golden Chicken",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a75c3d61a70d9c94b3be1e1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9048a77900d422588373952c.png",
+    "wide": false
+  },
+  "wolt_86bdcea6c0c313ec413e5a58": {
+    "name": "Madre",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6433d22009b9a3a4e153f9ad",
+      "osm_node_11646839069"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-86bdcea6c0c313ec413e5a58.png",
+    "wide": false
+  },
+  "wolt_b9c0e60321213b3074520827": {
+    "name": "Emmpanadas",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6878c5171c384c5e866a69b4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b9c0e60321213b3074520827.png",
+    "wide": false
+  },
+  "wolt_40871c8574c355a2ab4dbcd7": {
+    "name": "Sweet Shake Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ae990698b8914a896a6cd8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-40871c8574c355a2ab4dbcd7.png",
+    "wide": false
+  },
+  "wolt_b9714644eb57988509b2866f": {
+    "name": "Casa de Nata",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_696f298320eadb417d43daf8",
+      "osm_node_14096128001"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-b9714644eb57988509b2866f.png",
+    "wide": false
+  },
+  "wolt_3a8c70cd6746a34980a459ee": {
+    "name": "Grind",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694bfb3e11aa865ce60fe6db",
+      "osm_node_13936840135"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-3a8c70cd6746a34980a459ee.png",
+    "wide": false
+  },
+  "wolt_c230cce8e55e933c5981d790": {
+    "name": "Yumfeel",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67a1ef01e9f5ce06533d4286"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c230cce8e55e933c5981d790.png",
+    "wide": false
+  },
+  "wolt_cd7aec96cf4710c1805b8bc2": {
+    "name": "მედიჩი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac3a9f847331f6f141ef358"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cd7aec96cf4710c1805b8bc2.png",
+    "wide": false
+  },
+  "wolt_31c0f29e325546a3278be68d": {
+    "name": "AM_PM Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c65d088ebc879f7291c258"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-31c0f29e325546a3278be68d.png",
+    "wide": false
+  },
+  "wolt_c082af3dace304182f3454ae": {
+    "name": "Wrapi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ddf8f303d97b010990aed3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c082af3dace304182f3454ae.png",
+    "wide": false
+  },
+  "wolt_7c13032d332ec6c81c0bcecf": {
+    "name": "Buro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6842a6038c2561bb2fd43086",
+      "osm_node_12802203897"
+    ],
+    "categories": [
+      "bar"
+    ],
+    "file": "wolt-7c13032d332ec6c81c0bcecf.png",
+    "wide": false
+  },
+  "wolt_a67e163dc9d185fd213b95dd": {
+    "name": "Andza Branch",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68d10f5b9d024147260ff958"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a67e163dc9d185fd213b95dd.png",
+    "wide": false
+  },
+  "wolt_413ea11a7078b8aba9a431c1": {
+    "name": "Joys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c0ff8314cef4984a0bdb83"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-413ea11a7078b8aba9a431c1.png",
+    "wide": false
+  },
+  "wolt_462e27d577dbe57c6187e2ac": {
+    "name": "Cafe Calendar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4fa8de51ec68d6b7096ca2",
+      "osm_node_14108319584"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-462e27d577dbe57c6187e2ac.png",
+    "wide": false
+  },
+  "wolt_bea20fbf46019157762bb36a": {
+    "name": "Black Boars Den",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4b8a26b0a3ffc816bf7de7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-bea20fbf46019157762bb36a.png",
+    "wide": false
+  },
+  "wolt_abf847a45e2bf3bd1d26521c": {
+    "name": "Turbo Burgers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c25c9a0a4713036fb27e31"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-abf847a45e2bf3bd1d26521c.png",
+    "wide": false
+  },
+  "wolt_deaa9be32486a1752af62106": {
+    "name": "Riser",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c423de5ae1f6004de1ac5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-deaa9be32486a1752af62106.png",
+    "wide": false
+  },
+  "wolt_c77b08541873fa697b171738": {
+    "name": "White Rabbit Bar Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a218f3708525672a14595bc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c77b08541873fa697b171738.png",
+    "wide": false
+  },
+  "wolt_2c5807dc58f08300f61465a1": {
+    "name": "Dopamine Concept",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69898c04c729d1702d674997",
+      "osm_node_13727814591"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-2c5807dc58f08300f61465a1.png",
+    "wide": false
+  },
+  "wolt_549e8954ecc83a30a949866d": {
+    "name": "Make Food Gang",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68e8e1cfd24f024a4bd44baa"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-549e8954ecc83a30a949866d.png",
+    "wide": false
+  },
+  "wolt_938197edcc525c6ffc5a49f7": {
+    "name": "Ajumma Doyeong Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68b8429b7998cdcf71f2c140"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-938197edcc525c6ffc5a49f7.png",
+    "wide": false
+  },
+  "wolt_a35f6848cda45bfc870728e0": {
+    "name": "Blink Tabidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef205ed45c860bff0ce6f1"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-a35f6848cda45bfc870728e0.png",
+    "wide": false
+  },
+  "wolt_beebb7f9879c871a96145865": {
+    "name": "Croffle Vera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aec6a76fd07500f2dbc70d"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-beebb7f9879c871a96145865.png",
+    "wide": false
+  },
+  "wolt_f3f890a94b90c926ba4f8c2b": {
+    "name": "Dushetis Katami",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65b0dd1ee59991813cfaf329"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-f3f890a94b90c926ba4f8c2b.png",
+    "wide": false
+  },
+  "wolt_599687093df7b81ec27ecb92": {
+    "name": "Bar Happens",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a69c7651368e44c0a4ed1a7"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-599687093df7b81ec27ecb92.png",
+    "wide": false
+  },
+  "wolt_7c547f5bd5c4972bda5e5a63": {
+    "name": "Fleur De Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_697b19e766ab79447597416c"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-7c547f5bd5c4972bda5e5a63.png",
+    "wide": false
+  },
+  "wolt_c8685bcea2a4e980ff379aa9": {
+    "name": "Botanica Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69bd2d7681ea30b99ffec0fd"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-c8685bcea2a4e980ff379aa9.png",
+    "wide": false
+  },
+  "wolt_27f6a48301b95865be75bd09": {
+    "name": "ზერობარი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66c5e33a5bba9fdbd34b369b",
+      "osm_node_12741206846"
+    ],
+    "categories": [
+      "shopping"
+    ],
+    "file": "wolt-27f6a48301b95865be75bd09.png",
+    "wide": false
+  },
+  "wolt_cf8a393cabca3cda28ba62f3": {
+    "name": "Blue Tie Wine Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689482455b738d14b8234dd5"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-cf8a393cabca3cda28ba62f3.png",
+    "wide": false
+  },
+  "wolt_cb9dee38a3f80b5375aa4690": {
+    "name": "Kids Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66967239cd3a148d7ef352ca"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-cb9dee38a3f80b5375aa4690.png",
+    "wide": false
+  },
+  "wolt_8a91a35251740ce5121a8510": {
+    "name": "წერტი გამრეკელი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e1f8cb2b37da0bad210b86",
+      "directory_wolt_686bb244f1aaa40c3cf47a59",
+      "osm_node_13002205166",
+      "directory_wolt_658ee4c335771ae2b69ec5c6",
+      "osm_node_12488197800"
+    ],
+    "categories": [
+      "convenience",
+      "shopping"
+    ],
+    "file": "wolt-8a91a35251740ce5121a8510.png",
+    "wide": false
+  },
+  "wolt_9e794fb7bfcc853d075ae805": {
+    "name": "27 Wine Cellar & Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0eea868cdee5e303078211"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9e794fb7bfcc853d075ae805.png",
+    "wide": false
+  },
+  "wolt_61c226bd8f7ca3e512c82513": {
+    "name": "Grizzly Beer & Meat",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6814ba8b399a550dfae76bf9"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-61c226bd8f7ca3e512c82513.png",
+    "wide": false
+  },
+  "wolt_d6bfc26bfcee0b55f19315e2": {
+    "name": "BABY DECO",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_623830049a5050b4133687a5"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-d6bfc26bfcee0b55f19315e2.png",
+    "wide": false
+  },
+  "wolt_0911c66d0f57047c36671a2b": {
+    "name": "Cosmetics.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69130414a840506fef73be57"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-0911c66d0f57047c36671a2b.png",
+    "wide": false
+  },
+  "wolt_b66b0c221bc399ea50f7d960": {
+    "name": "Wine Bazari at Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6995b7a9cf726c3b4fb3c5b0"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-b66b0c221bc399ea50f7d960.png",
+    "wide": false
+  },
+  "wolt_99bd313bdf0a7abb45f9ac41": {
+    "name": "Dopamine Shop Tabidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a784bb667ba72467c292219",
+      "directory_wolt_6a71c9102c4b0028d09cebff"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-99bd313bdf0a7abb45f9ac41.png",
+    "wide": false
+  },
+  "wolt_65f10e4782409ec31645ad87": {
+    "name": "Limoni Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a325e50a4462428de14b3cd"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-65f10e4782409ec31645ad87.png",
+    "wide": false
+  },
+  "wolt_6e2bd64c9fed8d1d475f4ca1": {
+    "name": "Easy Alco • Drinks & Spirits",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac60bb0415b61e0b872c3c5"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-6e2bd64c9fed8d1d475f4ca1.png",
+    "wide": false
+  },
+  "wolt_ce4cf8f5aabee7c05eca6c4a": {
+    "name": "Station 1984's",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69d363d9651b0c9240af97d5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ce4cf8f5aabee7c05eca6c4a.png",
+    "wide": false
+  },
+  "wolt_b0bac8e0afd5a1c7604cd423": {
+    "name": "Giraffe Home",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_697756f7edc80cf3431bb0a0"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-b0bac8e0afd5a1c7604cd423.png",
+    "wide": false
+  },
+  "wolt_1d57cb2940d37441e4f5daf2": {
+    "name": "GizGizi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3e79d8e128433f7479bef1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1d57cb2940d37441e4f5daf2.png",
+    "wide": false
+  },
+  "wolt_283ccb50e04723192200a750": {
+    "name": "Brioche",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c24e62e48b8ba8dd498986"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-283ccb50e04723192200a750.png",
+    "wide": false
+  },
+  "wolt_702c54dd41036b371ba4a633": {
+    "name": "Thai Foodi Hub",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69525ccf4000117837c00796"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-702c54dd41036b371ba4a633.png",
+    "wide": false
+  },
+  "wolt_b427d8bbaa0246ad98651cd0": {
+    "name": "Madam Brioche",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab235abea547a309a2ba64c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b427d8bbaa0246ad98651cd0.png",
+    "wide": false
+  },
+  "wolt_615e8ea765e0e3a4af15401d": {
+    "name": "Pub 44",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_658bf084f038961a7a6e6f47",
+      "osm_node_11240967345"
+    ],
+    "categories": [
+      "bar"
+    ],
+    "file": "wolt-615e8ea765e0e3a4af15401d.png",
+    "wide": false
+  },
+  "wolt_7471c776507597e23a09fd58": {
+    "name": "Dalood Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_675de465452350092977be2c",
+      "osm_node_12748694337"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-7471c776507597e23a09fd58.png",
+    "wide": false
+  },
+  "wolt_6e3b611733747e21abf3c9d1": {
+    "name": "Flavor",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b92a5374eb0d82b23b989e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6e3b611733747e21abf3c9d1.png",
+    "wide": false
+  },
+  "wolt_d9ab387b2c671e87735ee73e": {
+    "name": "La Foccaceria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a44c9f8620a0f596cd5feb4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d9ab387b2c671e87735ee73e.png",
+    "wide": false
+  },
+  "wolt_40e6db8c51a20b4a54e1a23f": {
+    "name": "Minda Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6842b2bd6659e43c2d278c0c",
+      "osm_node_11377751481"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-40e6db8c51a20b4a54e1a23f.png",
+    "wide": false
+  },
+  "wolt_18ed87572aa8d0d643e7d130": {
+    "name": "No More Mondays",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678656156462d42dc9c8d9b1",
+      "osm_node_10285884957"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-18ed87572aa8d0d643e7d130.png",
+    "wide": false
+  },
+  "wolt_e1ccdfaf900cdf13295cce10": {
+    "name": "Casa Cuba",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a59e396b1ae60ee0d564cb2",
+      "osm_node_6321499985"
+    ],
+    "categories": [
+      "bar"
+    ],
+    "file": "wolt-e1ccdfaf900cdf13295cce10.png",
+    "wide": false
+  },
+  "wolt_14fad69b6d298b0723944d37": {
+    "name": "Golden Wrap",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a6b397daf2b67edee6e7616"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-14fad69b6d298b0723944d37.png",
+    "wide": false
+  },
+  "wolt_a095bb5f02ab27442f9a76ba": {
+    "name": "Healthy Asian Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695fe9c1c827d6a5941242d0"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a095bb5f02ab27442f9a76ba.png",
+    "wide": false
+  },
+  "wolt_f87f5aceaa435c3c1d55aaf5": {
+    "name": "Way Mart Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e81dfe1a8f03745f6e391cc",
+      "directory_wolt_68c92a0f84cceba0a4ba3dd2",
+      "directory_wolt_67f4df2b31bce90fec516346",
+      "osm_node_4490119391"
+    ],
+    "categories": [
+      "convenience",
+      "confectionery"
+    ],
+    "file": "wolt-f87f5aceaa435c3c1d55aaf5.png",
+    "wide": false
+  },
+  "wolt_86175acb0318cdc78d5aa495": {
+    "name": "Mamma Italia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3a3702008147146c387b72"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-86175acb0318cdc78d5aa495.png",
+    "wide": false
+  },
+  "wolt_4ccf7fac38ba1fd93e677d55": {
+    "name": "Burgelato",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1abd25a409693176459dfd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4ccf7fac38ba1fd93e677d55.png",
+    "wide": false
+  },
+  "wolt_9dc61068a1149a70d944dac1": {
+    "name": "Mama's Lunch",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6973162b41aa5edee336e91e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9dc61068a1149a70d944dac1.png",
+    "wide": false
+  },
+  "wolt_589bd381a40738a1ef11f523": {
+    "name": "Best Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67caa9e9ce89562d82c8920e"
+    ],
+    "categories": [
+      "supermarket"
+    ],
+    "file": "wolt-589bd381a40738a1ef11f523.png",
+    "wide": false
+  },
+  "wolt_4785064363382ee136ddf6b6": {
+    "name": "Mama's Burgers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1698cb836ea70d41d1d7ad"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4785064363382ee136ddf6b6.png",
+    "wide": false
+  },
+  "wolt_7cd0c27f421b23614e05a65a": {
+    "name": "Nutsa's Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693fd9e15feaec1045f3d3e0"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-7cd0c27f421b23614e05a65a.png",
+    "wide": false
+  },
+  "wolt_f7fe0b5d97fd4f77025bd7c3": {
+    "name": "Eurogarden",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67ac9687a1f4507ec74486c4"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-f7fe0b5d97fd4f77025bd7c3.png",
+    "wide": false
+  },
+  "wolt_eb512ef82b9d5e8d9d1aa416": {
+    "name": "ლუდის სადგური",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682b14dbf910016d715f7404"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-eb512ef82b9d5e8d9d1aa416.png",
+    "wide": false
+  },
+  "wolt_72213d05ba7ac6bae88bf7ea": {
+    "name": "Chais Sakhli Veris Bagshi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68710e93430348386ae0942d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-72213d05ba7ac6bae88bf7ea.png",
+    "wide": false
+  },
+  "wolt_82bc9cb06d445744a5f5512e": {
+    "name": "Mama's Potato",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f085fa63317e4591d761a8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-82bc9cb06d445744a5f5512e.png",
+    "wide": false
+  },
+  "wolt_1d4317ad6cdc5d7a8c118687": {
+    "name": "Simple kitchen",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6989d5de8fdf4c786afdec29"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-1d4317ad6cdc5d7a8c118687.png",
+    "wide": false
+  },
+  "wolt_6cdbec74a6d4bdd6f1dfb283": {
+    "name": "PAN Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a934c104ccbfd78f428741"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6cdbec74a6d4bdd6f1dfb283.png",
+    "wide": false
+  },
+  "wolt_95b6c86a9e7a5326d68d9fe8": {
+    "name": "Tamashobana",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6acca9f8c316f2424ae6bed1"
+    ],
+    "categories": [
+      "books"
+    ],
+    "file": "wolt-95b6c86a9e7a5326d68d9fe8.png",
+    "wide": false
+  },
+  "wolt_41f9341f2c60505e967c4f91": {
+    "name": "Puer Rangers Tea Shop - Technical University",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c1fa8cc879df33b46b10f"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-41f9341f2c60505e967c4f91.png",
+    "wide": false
+  },
+  "wolt_1c7ceb85394acf0227eb71ae": {
+    "name": "TOK'S Berlin Doner",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0ef15a68f67377605e296b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1c7ceb85394acf0227eb71ae.png",
+    "wide": false
+  },
+  "wolt_2566b4a0cde791f1fee131c2": {
+    "name": "ლილე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a54d0aa8cdc6f9d98038a04"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2566b4a0cde791f1fee131c2.png",
+    "wide": false
+  },
+  "wolt_68fc3954c47bba63a6128d7c": {
+    "name": "Duna café",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5f44dc8e018489f6249685"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-68fc3954c47bba63a6128d7c.png",
+    "wide": false
+  },
+  "wolt_be113844ad0e2da603766686": {
+    "name": "Golden Grill",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694b8d3011aa865ce60fe68c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-be113844ad0e2da603766686.png",
+    "wide": false
+  },
+  "wolt_8578718153de7892d1ed8ae1": {
+    "name": "Doodles",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ae941665ba543dab127f54"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8578718153de7892d1ed8ae1.png",
+    "wide": false
+  },
+  "wolt_dc3aa60866fdbdd26a088533": {
+    "name": "Vakis Sardafi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e9cdb873853c8f11f7aa4e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-dc3aa60866fdbdd26a088533.png",
+    "wide": false
+  },
+  "wolt_2fc074daa84d8767fc7aef78": {
+    "name": "⁠⁠CHANO’S BURGER",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f9b478044d5d5c658a5394"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2fc074daa84d8767fc7aef78.png",
+    "wide": false
+  },
+  "wolt_3e5e5e9fcb311db854041cd0": {
+    "name": "Piro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a01a61738776b639af7cef2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3e5e5e9fcb311db854041cd0.png",
+    "wide": false
+  },
+  "wolt_d5bb3eb21d227986d26fa45e": {
+    "name": "Creperie Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68492da055896fafc4843255",
+      "osm_node_13452174301"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-d5bb3eb21d227986d26fa45e.png",
+    "wide": false
+  },
+  "wolt_1659c0959629b377aa1d9850": {
+    "name": "El Matador Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69663575c32aecb57fd41169"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-1659c0959629b377aa1d9850.png",
+    "wide": false
+  },
+  "wolt_53827748488c4075a4a00636": {
+    "name": "Burgerebis Saministro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6214d5900fc5850b49beaaa2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-53827748488c4075a4a00636.png",
+    "wide": false
+  },
+  "wolt_37764564de384c78818d7c01": {
+    "name": "Chveneburi Bazari Orbeliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aabe7af2189baf3bf390453"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-37764564de384c78818d7c01.png",
+    "wide": false
+  },
+  "wolt_720a89e8489dbce5297770d7": {
+    "name": "ikigai.sushiroom",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a955a8b03a6ec6435954326"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-720a89e8489dbce5297770d7.png",
+    "wide": false
+  },
+  "wolt_10dca711d4e7d925b21eda91": {
+    "name": "Le Figaro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f8d3c355f7a40acbe580d2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-10dca711d4e7d925b21eda91.png",
+    "wide": false
+  },
+  "wolt_92148ebc496faa9839ef6b4b": {
+    "name": "Tata's Lunch",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a165f3d53374b6da2547da"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-92148ebc496faa9839ef6b4b.png",
+    "wide": false
+  },
+  "wolt_66991b0315bd4f0d666f72a4": {
+    "name": "MoRRa Sandwich Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6899c909090924c07ebb087a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-66991b0315bd4f0d666f72a4.png",
+    "wide": false
+  },
+  "wolt_31a755c034f25034eb0aea7b": {
+    "name": "Royal Rolls Bakhtrioni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_692452cc56fbb7139945d994",
+      "directory_wolt_69245022b40a0a9f91ecfdbf",
+      "directory_wolt_692451e89d287678fffd2cc4",
+      "directory_wolt_6924510d2a74413004020afd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-31a755c034f25034eb0aea7b.png",
+    "wide": false
+  },
+  "wolt_3c57ff9aa3fae61b82116445": {
+    "name": "Bistro Conili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6932c1aba8d6546c7b8ca36e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3c57ff9aa3fae61b82116445.png",
+    "wide": false
+  },
+  "wolt_4f77819b9d1d5a6fe71c7a8d": {
+    "name": "SesCafe 22",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e76946ec1d5f43c2180a9c"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-4f77819b9d1d5a6fe71c7a8d.png",
+    "wide": false
+  },
+  "wolt_c102c195ffa86aa89a18cd55": {
+    "name": "Rostam Palace",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69fdd3dd47935d26a075caf5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c102c195ffa86aa89a18cd55.png",
+    "wide": false
+  },
+  "wolt_e00e279ffb83d3e073adfa32": {
+    "name": "Wine Square & Kitchen Gudiashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3e539d8689ca83f7f8ab38"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e00e279ffb83d3e073adfa32.png",
+    "wide": false
+  },
+  "wolt_cc6df88ca348eb79d57cfdab": {
+    "name": "Nakra",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1d46873aead48433a63b52"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-cc6df88ca348eb79d57cfdab.png",
+    "wide": false
+  },
+  "wolt_328620d2c2aa20c09b04d790": {
+    "name": "Pizza Hut Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_676d33a2858c6840cd2bdda8",
+      "osm_node_11513717033",
+      "directory_wolt_69429ea7e3c975f1aa89ba93"
+    ],
+    "categories": [
+      "restaurant",
+      "fast-food"
+    ],
+    "file": "wolt-328620d2c2aa20c09b04d790.png",
+    "wide": false
+  },
+  "wolt_59be978f90c5708df600aaf3": {
+    "name": "Pastachi Rustaveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6673cb889d47d45d342ec5bc",
+      "osm_node_12073571792"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-59be978f90c5708df600aaf3.png",
+    "wide": false
+  },
+  "wolt_49efbc95073bafdf9f6c42a3": {
+    "name": "LafshiCo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62b5671fc36d2cde862a9972"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-49efbc95073bafdf9f6c42a3.png",
+    "wide": false
+  },
+  "wolt_6025b905fefcb0d5c8fd8b3e": {
+    "name": "IOLI Supermarket Avlabari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60c0aac49b71bbba29c3103e",
+      "directory_wolt_62ea38900875d469070eb9ba",
+      "directory_wolt_61f3cac47aa1ede28afd3e0f",
+      "directory_wolt_61b1d05de36e841dce4a7deb"
+    ],
+    "categories": [
+      "supermarket"
+    ],
+    "file": "wolt-6025b905fefcb0d5c8fd8b3e.png",
+    "wide": false
+  },
+  "wolt_0c62237ece9d9515efaabb43": {
+    "name": "Qute's Shaurma Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a06db967f29a3e4d7b8da74"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-0c62237ece9d9515efaabb43.png",
+    "wide": false
+  },
+  "wolt_2df033d9223f3e3e60f44d0a": {
+    "name": "Tiflis Fast Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63d11025b95a37f8f00fd839"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2df033d9223f3e3e60f44d0a.png",
+    "wide": false
+  },
+  "wolt_af9180803667dbe690f9fc58": {
+    "name": "Tsiskvili Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689f1c87a1925b6aaa66c0cf",
+      "directory_wolt_69cce124e34e7383a7ed922e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-af9180803667dbe690f9fc58.png",
+    "wide": false
+  },
+  "wolt_3ec92ae5d309add92bdd3cce": {
+    "name": "Gldani Express Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63639074d16f4c2be7f96160",
+      "directory_wolt_602cefe26c3a671949373df9"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3ec92ae5d309add92bdd3cce.png",
+    "wide": false
+  },
+  "wolt_b0fb5b0d65be26126a393b9f": {
+    "name": "Tseretlis Mexican Beliashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62bedaff083c682480740d78",
+      "directory_wolt_62beeccca3ebb3c38d932311"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b0fb5b0d65be26126a393b9f.png",
+    "wide": false
+  },
+  "wolt_269e1db4f87cacb82206732d": {
+    "name": "Marjo's Meqsikuri Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68e79669fe605bb31df0e0d4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-269e1db4f87cacb82206732d.png",
+    "wide": false
+  },
+  "wolt_ab4da17b3e4262216296f1a9": {
+    "name": "Royal Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6abb76d418764040ea18bc3b"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-ab4da17b3e4262216296f1a9.png",
+    "wide": false
+  },
+  "wolt_274c2fb2de8307625834bff1": {
+    "name": "Ronny's Pizza Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5c110251619ec7000a771925",
+      "directory_wolt_5c122f9f96eb24000c2b52b8"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-274c2fb2de8307625834bff1.png",
+    "wide": false
+  },
+  "wolt_97d3d4943b4fbfc6e0e5fda6": {
+    "name": "Shaurma Madliani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d5bbfbb4bdfefa3b42a0763",
+      "osm_node_7613359385"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-97d3d4943b4fbfc6e0e5fda6.png",
+    "wide": false
+  },
+  "wolt_e92eba092f7eda6eae5731f3": {
+    "name": "Tsitsila Bistro Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a856f1d9e8223076551e859"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e92eba092f7eda6eae5731f3.png",
+    "wide": false
+  },
+  "wolt_62b6a123a48317381c9e3159": {
+    "name": "Mr. Gusto",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f8d02255f7a40acbe580a7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-62b6a123a48317381c9e3159.png",
+    "wide": false
+  },
+  "wolt_634cff2e5e75cc0c7672e98c": {
+    "name": "Tursa",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62d7b1f18b10fe91ec210161",
+      "osm_node_11896979368"
+    ],
+    "categories": [
+      "supermarket"
+    ],
+    "file": "wolt-634cff2e5e75cc0c7672e98c.png",
+    "wide": false
+  },
+  "wolt_21366106fbc16eee651b5680": {
+    "name": "3 Shaurma Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6548a4b96dfab4bf47534143"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-21366106fbc16eee651b5680.png",
+    "wide": false
+  },
+  "wolt_3b20b2c1cbffba41469e7947": {
+    "name": "Shaurma De Paris",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e9d2ef33e8b9a3900dd907"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-3b20b2c1cbffba41469e7947.png",
+    "wide": false
+  },
+  "wolt_0d88f4f985b688b17e19ae2a": {
+    "name": "Napertskali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1d3c9baef069ab9404bed6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0d88f4f985b688b17e19ae2a.png",
+    "wide": false
+  },
+  "wolt_f257c64410e3db0a04ecd295": {
+    "name": "იქს დოგს -გლდანი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67e992f7bf82aae7e8a4f03f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f257c64410e3db0a04ecd295.png",
+    "wide": false
+  },
+  "wolt_e7c3fc5a98cdd7dcf8a480b7": {
+    "name": "City Chicken Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a461056345c386fc0abbdc4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e7c3fc5a98cdd7dcf8a480b7.png",
+    "wide": false
+  },
+  "wolt_c246c943974f0113cbe48173": {
+    "name": "Area NY Pizza Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_660401b280c6e0161c9dbddc",
+      "directory_wolt_61b70ea2d60b7ef9a4dbde8b"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-c246c943974f0113cbe48173.png",
+    "wide": false
+  },
+  "wolt_3b659e347e5ad4a5156a5701": {
+    "name": "Dimsumin",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60338d3d1766ab461d72c219",
+      "osm_node_11795456878",
+      "directory_wolt_63cfcc4f2a12641d6d07012b",
+      "osm_node_12534022902"
+    ],
+    "categories": [
+      "fast-food",
+      "restaurant"
+    ],
+    "file": "wolt-3b659e347e5ad4a5156a5701.png",
+    "wide": false
+  },
+  "wolt_c0bad8e3f964c4626f607753": {
+    "name": "Jackie Chan Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6283a5607ac1fe70e135b55d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c0bad8e3f964c4626f607753.png",
+    "wide": false
+  },
+  "wolt_c80a3c96a997140407534b06": {
+    "name": "Chokh-Dog",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a97e9589540d7a2b1cf633b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c80a3c96a997140407534b06.png",
+    "wide": false
+  },
+  "wolt_1425bde6c2c27fabacbd1d36": {
+    "name": "Gochit's Burger Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6516bef838fdfc58fee7eaf5"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-1425bde6c2c27fabacbd1d36.png",
+    "wide": false
+  },
+  "wolt_f4ba0828bbe0e76b3f3e6009": {
+    "name": "Pizza Paragone Guramishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6569e131db9a83de05cfafb3"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-f4ba0828bbe0e76b3f3e6009.png",
+    "wide": false
+  },
+  "wolt_a84db0ed16e4da7eccf69d9f": {
+    "name": "Machakhela Samikitno Khizanishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5c75574d57b60e000a14d379",
+      "directory_wolt_5c766e1c57b60e000a17dacd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a84db0ed16e4da7eccf69d9f.png",
+    "wide": false
+  },
+  "wolt_b43fc8dd652cd9f664d65ed2": {
+    "name": "Teremok Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6172ae10c4dd492866e6b87b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b43fc8dd652cd9f664d65ed2.png",
+    "wide": false
+  },
+  "wolt_e736f3cca7df562c48d41bba": {
+    "name": "Tortilla Guramishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65a4f3d81f1d23800254964b",
+      "directory_wolt_665584e33ef750614c86d75f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e736f3cca7df562c48d41bba.png",
+    "wide": false
+  },
+  "wolt_5d51641dc7d8bb8dd4ccf038": {
+    "name": "Tabla Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67ca97e256132d19d12e03ee"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5d51641dc7d8bb8dd4ccf038.png",
+    "wide": false
+  },
+  "wolt_38b73178670d91f8f0465012": {
+    "name": "Slavuri Ezo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67f3b86a50a4bcb47ec55e44"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-38b73178670d91f8f0465012.png",
+    "wide": false
+  },
+  "wolt_6c803825ba1d0030ec22b141": {
+    "name": "Msunagi Piso",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_690c44931a75a73bec60a8cf"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6c803825ba1d0030ec22b141.png",
+    "wide": false
+  },
+  "wolt_d270d43c4efa6cc4640c9bf0": {
+    "name": "Almuri - Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a73384b33c2b6b8a9a75cad"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-d270d43c4efa6cc4640c9bf0.png",
+    "wide": false
+  },
+  "wolt_d4fe7f19f81a55182cd37cac": {
+    "name": "ჩიკო’ს დიღომი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a8c08bf613f1d30d2a3a550"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d4fe7f19f81a55182cd37cac.png",
+    "wide": false
+  },
+  "wolt_f2b225f65f21347e8e4b215d": {
+    "name": "Shaurman",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_616e6418b1aa6f0c0a869520",
+      "osm_node_10738051849"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-f2b225f65f21347e8e4b215d.png",
+    "wide": false
+  },
+  "wolt_2946bccdb16e254c9b0958e8": {
+    "name": "გურშაურმა",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6870b2783699a7059959e4dc"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2946bccdb16e254c9b0958e8.png",
+    "wide": false
+  },
+  "wolt_847ca9fad3db31a9ddbd0d20": {
+    "name": "Ethnographer",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e4e7a1e9a8e958b91e3809c",
+      "osm_node_4848037922"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-847ca9fad3db31a9ddbd0d20.png",
+    "wide": false
+  },
+  "wolt_2c7699b41dc5b454f22d7a48": {
+    "name": "Balance Express Didi Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ba8ddbb4c186bf930eeec6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2c7699b41dc5b454f22d7a48.png",
+    "wide": false
+  },
+  "wolt_f229ef05f0ef802f3393fb83": {
+    "name": "Manti House Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f47121e0b6a2dd009a30e9"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f229ef05f0ef802f3393fb83.png",
+    "wide": false
+  },
+  "wolt_d7a461db599528ad4d8b9352": {
+    "name": "Merdini Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6188f5a7b254f41ff49a1fec",
+      "directory_wolt_61f132443fd3ea35a12fb1a0",
+      "directory_wolt_6188f8774b9c2983c69a1fad"
+    ],
+    "categories": [
+      "confectionery",
+      "bakery"
+    ],
+    "file": "wolt-d7a461db599528ad4d8b9352.png",
+    "wide": false
+  },
+  "wolt_c388667b65aa9aac9c1c3762": {
+    "name": "Tsvniani Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61e026483ba6c0851b7fe62b",
+      "directory_wolt_61e0253a9b9da312cab777c5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c388667b65aa9aac9c1c3762.png",
+    "wide": false
+  },
+  "wolt_887d629dd3533d0f7cb3f843": {
+    "name": "Fit and fresh",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab3a30a029b46cb3df0fa3c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-887d629dd3533d0f7cb3f843.png",
+    "wide": false
+  },
+  "wolt_835b8c0dfb6ecaa96a54428f": {
+    "name": "WABISABI",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab65b4442c11cae25f1b272"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-835b8c0dfb6ecaa96a54428f.png",
+    "wide": false
+  },
+  "wolt_3f8d722c69a1e620f0b48fd3": {
+    "name": "Sam's Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6062dd427ee611ec400713d3",
+      "osm_node_10578899447"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-3f8d722c69a1e620f0b48fd3.png",
+    "wide": false
+  },
+  "wolt_9621349d8a596372bc69428c": {
+    "name": "Momo Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aabeb5b0d3041cd1df37bde"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-9621349d8a596372bc69428c.png",
+    "wide": false
+  },
+  "wolt_405aec8e6364e67f60d78263": {
+    "name": "ნიუ მარკეტი სანნი გრუპი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6720af94f73cb691997966ce"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-405aec8e6364e67f60d78263.png",
+    "wide": false
+  },
+  "wolt_82632cd77f5d6028802b570f": {
+    "name": "Ubnis Khinkali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67b57c2e1255cd10e2e48cac"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-82632cd77f5d6028802b570f.png",
+    "wide": false
+  },
+  "wolt_22845ef6a4b07d1f71a5455a": {
+    "name": "Geamo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65eece3beefb55d3c3343f71"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-22845ef6a4b07d1f71a5455a.png",
+    "wide": false
+  },
+  "wolt_bda105f76f91a8c24fd33703": {
+    "name": "Better Skin Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61efa574a4c46df33866f158",
+      "osm_node_13102910301"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-bda105f76f91a8c24fd33703.png",
+    "wide": false
+  },
+  "wolt_f46db66e8ccd305fc9eb3d0b": {
+    "name": "Helmetarium",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62c6ae93918c805328cbf942"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f46db66e8ccd305fc9eb3d0b.png",
+    "wide": false
+  },
+  "wolt_d74d6eddb6cbc192bf824307": {
+    "name": "Beer Pub Bavaria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f61cc0a0dacac3263c894f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d74d6eddb6cbc192bf824307.png",
+    "wide": false
+  },
+  "wolt_a5b7bd93176e515819761a75": {
+    "name": "Sayo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691301a993ddf353c4b1b26a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a5b7bd93176e515819761a75.png",
+    "wide": false
+  },
+  "wolt_52666a5782934051755b96b5": {
+    "name": "Paulaner Beer Garden",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65366e9e02bca2132ec83cb6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-52666a5782934051755b96b5.png",
+    "wide": false
+  },
+  "wolt_7e52a97b9c4cfb723fd4eb5b": {
+    "name": "Qard Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_684fe0bb9f785f713b696cd3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7e52a97b9c4cfb723fd4eb5b.png",
+    "wide": false
+  },
+  "wolt_93866ae25379f19771d590cd": {
+    "name": "Poke Bar Didi Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65d30189e7d008660158042c"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-93866ae25379f19771d590cd.png",
+    "wide": false
+  },
+  "wolt_408a2d01e012cc1d121ca82c": {
+    "name": "პიცა ტრენტინო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_670929d32820333397d4f3ac"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-408a2d01e012cc1d121ca82c.png",
+    "wide": false
+  },
+  "wolt_4ec3616f2ef9dcf739c0d3bb": {
+    "name": "Café Sorelle",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_684722c8391f3ad859ada110"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4ec3616f2ef9dcf739c0d3bb.png",
+    "wide": false
+  },
+  "wolt_e6344422e44de1cb951a9d6b": {
+    "name": "GNG Pharma Avchala Libani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6752b72d87118fcd2473337b",
+      "directory_wolt_624c010c68812f79bbd2738b",
+      "directory_wolt_63ce52e3b634464c9aa8b526",
+      "directory_wolt_624adb4cfb274c5ae221cf45",
+      "directory_wolt_62aad464248818b09e59a74d",
+      "directory_wolt_624ae1332186421c3431f585",
+      "directory_wolt_625e539950c7bac3041f9766",
+      "directory_wolt_624ad9737a524f3f48e0d339"
+    ],
+    "categories": [
+      "pharmacy"
+    ],
+    "file": "wolt-e6344422e44de1cb951a9d6b.png",
+    "wide": false
+  },
+  "wolt_14593734dee5fb31d9279312": {
+    "name": "Fuego Burgers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a13f7c99bd0e9ba5875b9bf"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-14593734dee5fb31d9279312.png",
+    "wide": false
+  },
+  "wolt_dbe89c5a823d7aacb7909cbf": {
+    "name": "LafshiCo Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_686b6964ac5180b30348bc24",
+      "directory_wolt_686b68745406f11bf7413d19",
+      "directory_wolt_686b69f2b2a41fd01c776641"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-dbe89c5a823d7aacb7909cbf.png",
+    "wide": false
+  },
+  "wolt_9f28c5c337a26008e29e4f3d": {
+    "name": "Ginger’s Sweet Home",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69d35e828de30dcaf816fd09"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9f28c5c337a26008e29e4f3d.png",
+    "wide": false
+  },
+  "wolt_61af529e1f3ccd64125e1680": {
+    "name": "ანას საცხობი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66e402e8e4fcf844707d5120"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-61af529e1f3ccd64125e1680.png",
+    "wide": false
+  },
+  "wolt_1360f9681b59b3cd72c90bf3": {
+    "name": "Bioderma Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68de6ef3bcdd2f12ee4b86fa"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-1360f9681b59b3cd72c90bf3.png",
+    "wide": false
+  },
+  "wolt_2f78270c397ba247b7013153": {
+    "name": "Sumire Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c4dc4bc54c711592f111a8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2f78270c397ba247b7013153.png",
+    "wide": false
+  },
+  "wolt_01ea5348f6c6cce776403175": {
+    "name": "Mari Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64539a83304907ac9da1b95f"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-01ea5348f6c6cce776403175.png",
+    "wide": false
+  },
+  "wolt_3565e53f0823ebff90a10a4b": {
+    "name": "Craft Grill and Beer",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689b0e8aa56834841a9a85fc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3565e53f0823ebff90a10a4b.png",
+    "wide": false
+  },
+  "wolt_843a4259f3599311c1c4d706": {
+    "name": "Puree Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6926f334f60cfd6379c6982b",
+      "directory_wolt_6926f5e01ce352e433431549",
+      "directory_wolt_691ad137a4027550c149983d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-843a4259f3599311c1c4d706.png",
+    "wide": false
+  },
+  "wolt_f4611de1caeb83b079cb1815": {
+    "name": "Win-Win",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6759582ac3ef0e64818a6f24"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-f4611de1caeb83b079cb1815.png",
+    "wide": false
+  },
+  "wolt_00476fd477e0bea344878773": {
+    "name": "3APizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1994f298c5e54342301559"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-00476fd477e0bea344878773.png",
+    "wide": false
+  },
+  "wolt_e3d122b0b9839ef4d5b438c5": {
+    "name": "Chemo Kargo Nadzaladevi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d8c8d938a894c01089e5e82",
+      "osm_node_5018037524"
+    ],
+    "categories": [
+      "bar"
+    ],
+    "file": "wolt-e3d122b0b9839ef4d5b438c5.png",
+    "wide": false
+  },
+  "wolt_ca5dfea511360ff1f3341049": {
+    "name": "Qartuli Gemo Dadianze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2a79a87a5fafdcfdfc2014"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ca5dfea511360ff1f3341049.png",
+    "wide": false
+  },
+  "wolt_87a2ea352dba9cc67531917a": {
+    "name": "Dakhli • Tbilisi Mall",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6819d7beed16167f5cef118c"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-87a2ea352dba9cc67531917a.png",
+    "wide": false
+  },
+  "wolt_1d82852b879e837fa5d728c2": {
+    "name": "ქვე ჭამე და ქვე წადი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69df5d53ddca9c404c97dcfd"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-1d82852b879e837fa5d728c2.png",
+    "wide": false
+  },
+  "wolt_7a9e8101341a226b599da0c7": {
+    "name": "JUJIKA by Pazza Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c6259bfc2987c32bddd822"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7a9e8101341a226b599da0c7.png",
+    "wide": false
+  },
+  "wolt_8f76b9dd37fa70b63506cafa": {
+    "name": "Crêpe Carpentier Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6172b09095953860185c83d5",
+      "directory_wolt_606b0b6e331bb76c92126cba"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8f76b9dd37fa70b63506cafa.png",
+    "wide": false
+  },
+  "wolt_d5dbdc971e6a0a6d6405115c": {
+    "name": "Blink",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_696f3e26120ace5b4f1f5c41"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d5dbdc971e6a0a6d6405115c.png",
+    "wide": false
+  },
+  "wolt_634e14cd5c7cad9698a7fad1": {
+    "name": "Puriko",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a27d9e1698e8e84c6137094",
+      "osm_node_13395308395"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-634e14cd5c7cad9698a7fad1.png",
+    "wide": false
+  },
+  "wolt_9cc1ec12792d722ac292671a": {
+    "name": "Izbushka Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63f72511458a746bcc53db66",
+      "directory_wolt_5c5be0f1230a1e000be853fa"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9cc1ec12792d722ac292671a.png",
+    "wide": false
+  },
+  "wolt_950c6d3a767a21d7209ef215": {
+    "name": "Tauk Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6899dd55255a92f74a448388",
+      "directory_wolt_6a0c1beccc879df33b46b10c"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-950c6d3a767a21d7209ef215.png",
+    "wide": false
+  },
+  "wolt_a5634d70a80107917ac2fd96": {
+    "name": "Magic Toy Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a54c377e4ea356be38af7a"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-a5634d70a80107917ac2fd96.png",
+    "wide": false
+  },
+  "wolt_883615fb631e8c9167b51b2f": {
+    "name": "StaroPub",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6979bff3edc80cf3431bb5e1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-883615fb631e8c9167b51b2f.png",
+    "wide": false
+  },
+  "wolt_1374e280b7e04553f4a257a0": {
+    "name": "Sabatone",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68274aab51ff1d9c2715c1f2"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-1374e280b7e04553f4a257a0.png",
+    "wide": false
+  },
+  "wolt_55c8cc54de4076163368fc6a": {
+    "name": "Allmarket.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67dd5eb073d1253c7676b9cd"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-55c8cc54de4076163368fc6a.png",
+    "wide": false
+  },
+  "wolt_c22ab1460b976350544386e4": {
+    "name": "Sekai Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_696790934ec90bc1f27c33b4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c22ab1460b976350544386e4.png",
+    "wide": false
+  },
+  "wolt_3916ab792a80a5c18717d172": {
+    "name": "Restaurant Gyenos",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6532547eb83f6eb8e0534727"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3916ab792a80a5c18717d172.png",
+    "wide": false
+  },
+  "wolt_2dfe56d049e1179cf932fe02": {
+    "name": "ZGVA LUDI SARAJISHVILI",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2011af8d0030b01a93b57e",
+      "directory_wolt_68516394282b2b8b7c6be6a6",
+      "osm_node_11513895457",
+      "directory_wolt_632448475586fbd736a9edec",
+      "directory_wolt_62de94ddbba2b561d58ab28e",
+      "directory_wolt_62de95eef1727396b9d6215b",
+      "osm_node_12382653101",
+      "directory_wolt_650d973cb2d07aa4a3a6619a",
+      "directory_wolt_62de9f03bba2b561d58ac47e",
+      "directory_wolt_62de9598d9a5bae8206ffeab"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-2dfe56d049e1179cf932fe02.png",
+    "wide": false
+  },
+  "wolt_1092074de66912ae120ea111": {
+    "name": "Costa Coffee Gelovani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69eb6ae1478b6e5db60e44d8",
+      "osm_node_14156278201"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-1092074de66912ae120ea111.png",
+    "wide": false
+  },
+  "wolt_79a2c076fdc3c3a811883e20": {
+    "name": "JF Georgia Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68fb7f20e12cb02c65601483",
+      "directory_wolt_69983a88984db1d3c7d7e7f1",
+      "directory_wolt_68fb7f20e12cb02c65601482"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-79a2c076fdc3c3a811883e20.png",
+    "wide": false
+  },
+  "wolt_e1daff96fb12616d3c0606b1": {
+    "name": "Pokemon",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_642d6271d5c6f137860cd8c8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e1daff96fb12616d3c0606b1.png",
+    "wide": false
+  },
+  "wolt_a2f6f66e745f7c636ea48409": {
+    "name": "Joekvara",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a69c5345da24a8d5f395136"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a2f6f66e745f7c636ea48409.png",
+    "wide": false
+  },
+  "wolt_c7aaf5ee4b16a467035ba1f8": {
+    "name": "Pizza Pomodoro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668bce5270ccc2727fb7435d"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-c7aaf5ee4b16a467035ba1f8.png",
+    "wide": false
+  },
+  "wolt_adb27a9a3eab39ee83bca7b3": {
+    "name": "Breadbar Eristavi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62b176d70e95647b2c434e95",
+      "osm_node_10557695813"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-adb27a9a3eab39ee83bca7b3.png",
+    "wide": false
+  },
+  "wolt_3ba0e05c9687ba45eac7c6ad": {
+    "name": "ZooShop Bubu",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68c7f7a8aa36be908b41e6d5"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-3ba0e05c9687ba45eac7c6ad.png",
+    "wide": false
+  },
+  "wolt_260a45256e70e01783dfd580": {
+    "name": "Khinka Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69de174fcad471abf1fdc27d",
+      "directory_wolt_66f65de70c46d6688a5ecd2d"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-260a45256e70e01783dfd580.png",
+    "wide": false
+  },
+  "wolt_7a2ee708aa90bed85f92987b": {
+    "name": "Boncafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60b9e5b412a9f68615f4fdd7",
+      "osm_node_12696599722"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-7a2ee708aa90bed85f92987b.png",
+    "wide": false
+  },
+  "wolt_98a8f079e2157236918d4940": {
+    "name": "PetLab",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69946352b9a15cb8b3936772"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-98a8f079e2157236918d4940.png",
+    "wide": false
+  },
+  "wolt_59b0899763a874e7a93cf40e": {
+    "name": "Restaurant Cruise",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1d6e41242d2ac0a42bf943"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-59b0899763a874e7a93cf40e.png",
+    "wide": false
+  },
+  "wolt_158ca3c5b9a9fb1e5c2e1605": {
+    "name": "Radio Diner",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67c00fca7d082d8fc8991a4d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-158ca3c5b9a9fb1e5c2e1605.png",
+    "wide": false
+  },
+  "wolt_387d5b84c97f8048466cb01b": {
+    "name": "Restaurant Gaga Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5a1c69790bcc6b6c41f338"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-387d5b84c97f8048466cb01b.png",
+    "wide": false
+  },
+  "wolt_0ee0cdd696b0894e080a1ce2": {
+    "name": "Craft Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668f8e181a9916eaa63f09fd"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-0ee0cdd696b0894e080a1ce2.png",
+    "wide": false
+  },
+  "wolt_5e8d95ea2d538f1ed1396813": {
+    "name": "Best Friends Mukhiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67caeb2f8a0eac2813985e1a"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-5e8d95ea2d538f1ed1396813.png",
+    "wide": false
+  },
+  "wolt_7a7ceace3e3b544942bf7efb": {
+    "name": "Namai",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69bd1d39d50ef619a9970936"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-7a7ceace3e3b544942bf7efb.png",
+    "wide": false
+  },
+  "wolt_d54c3af9278bc4ef46dc2f0f": {
+    "name": "Kado Shankhai",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aab921ab6fa650bc7b6e133"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d54c3af9278bc4ef46dc2f0f.png",
+    "wide": false
+  },
+  "wolt_b01d047230c1c66030ee0051": {
+    "name": "Beer Market Krtsanisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aaa6d5b88912afb9ddff06"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-b01d047230c1c66030ee0051.png",
+    "wide": false
+  },
+  "wolt_398068993285530910181b5b": {
+    "name": "Zgapari Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_609a6f75a704420c8cd1fe61",
+      "osm_node_12168378276",
+      "directory_wolt_609a6d3a7c8b57c8c0ff7a6c",
+      "osm_node_13167575902",
+      "directory_wolt_609a69aed5792d16d1df544a",
+      "osm_node_9840183098"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-398068993285530910181b5b.png",
+    "wide": false
+  },
+  "wolt_55f4d7dc732a1a92e11ef361": {
+    "name": "Beer Market Beer Georgia Vazha-Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62a872c8797662e9faf4d81c"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-55f4d7dc732a1a92e11ef361.png",
+    "wide": false
+  },
+  "wolt_1ccff6953cabe794d4a30de4": {
+    "name": "Zoo Positive",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6996ebe31285acb3fa1fd5a9"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-1ccff6953cabe794d4a30de4.png",
+    "wide": false
+  },
+  "wolt_497f2d0fa448262c908ed71b": {
+    "name": "LeTechno",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_660ea422819a6cca53619558"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-497f2d0fa448262c908ed71b.png",
+    "wide": false
+  },
+  "wolt_a2ec97b9223bb5af2fd5965c": {
+    "name": "Pet Joy Home",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4b83a1b0a3ffc816bf7dc9"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-a2ec97b9223bb5af2fd5965c.png",
+    "wide": false
+  },
+  "wolt_239061a203c54348e5e440a0": {
+    "name": "Vovo Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_684feb7f1b2837830948187a",
+      "osm_node_12488197793"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-239061a203c54348e5e440a0.png",
+    "wide": false
+  },
+  "wolt_bc98abb48de103762a3b2b04": {
+    "name": "Lavenderia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63fc6a80f1a8379b35b4711d"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-bc98abb48de103762a3b2b04.png",
+    "wide": false
+  },
+  "wolt_1de8fa7f24d8fbd3d24b7ee9": {
+    "name": "Gala Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68da7013966bd6d23c38a372"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-1de8fa7f24d8fbd3d24b7ee9.png",
+    "wide": false
+  },
+  "wolt_6ba2d754c45d59d8a12226fa": {
+    "name": "SUMMUG Beer Garden",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6985fe9fb02f3b73b2c37598"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-6ba2d754c45d59d8a12226fa.png",
+    "wide": false
+  },
+  "wolt_29ebe3727e841915bd006fae": {
+    "name": "Alco Hall - Vape Room",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_679c9019f4a83300e5169d7c"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-29ebe3727e841915bd006fae.png",
+    "wide": false
+  },
+  "wolt_cba7ae2b6a81738952d0504d": {
+    "name": "Me and August",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6602898857c1a8a97458fe87",
+      "osm_node_11778574269"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-cba7ae2b6a81738952d0504d.png",
+    "wide": false
+  },
+  "wolt_69648a324da209f8a6af5cd5": {
+    "name": "Device Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6963a5a3a8f34e5794f5503b"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-69648a324da209f8a6af5cd5.png",
+    "wide": false
+  },
+  "wolt_b179a6c0408d01a44fe6b0de": {
+    "name": "Tidy House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66a0d4e77c92c46440f41d82"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-b179a6c0408d01a44fe6b0de.png",
+    "wide": false
+  },
+  "wolt_91cc2f2f1cb6663618254ef2": {
+    "name": "მეღვინეობა ჯობავა",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6825f97ed915532ea2ec4ace"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-91cc2f2f1cb6663618254ef2.png",
+    "wide": false
+  },
+  "wolt_111e6795957816fbbe408695": {
+    "name": "Khinkalito",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ed04f4ca0d27e03d309368"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-111e6795957816fbbe408695.png",
+    "wide": false
+  },
+  "wolt_273d291559d6b68bf85f3eff": {
+    "name": "Luxprint 3D Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6901cbf8db987db19cf0593a"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-273d291559d6b68bf85f3eff.png",
+    "wide": false
+  },
+  "wolt_bc4f3acc179bd31dd3b31e96": {
+    "name": "Granella",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6964ba58a8f34e5794f55101"
+    ],
+    "categories": [
+      "coffee-shop"
+    ],
+    "file": "wolt-bc4f3acc179bd31dd3b31e96.png",
+    "wide": false
+  },
+  "wolt_82e0fd51f0ce2f235dd79a49": {
+    "name": "Saporia Mindeli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a001c23a2aa89a9e1b7490"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-82e0fd51f0ce2f235dd79a49.png",
+    "wide": false
+  },
+  "wolt_1cf73704144f82da4ebd2930": {
+    "name": "Kuch- Kuchi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69bd1e235c8f98ebda60edf8"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-1cf73704144f82da4ebd2930.png",
+    "wide": false
+  },
+  "wolt_6a35dd715514351894b80b26": {
+    "name": "Farmers Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cb7375e54d9fffa37d58c2"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-6a35dd715514351894b80b26.png",
+    "wide": false
+  },
+  "wolt_e6ad81650b0b1e1850c86020": {
+    "name": "Pea.nut Store Tamarashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69df5832f3e7daf965b1f7af"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-e6ad81650b0b1e1850c86020.png",
+    "wide": false
+  },
+  "wolt_9216b3055c4dbfdf070e0990": {
+    "name": "ლუდის სოფელი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f4606e9112fc288419ebfe"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9216b3055c4dbfdf070e0990.png",
+    "wide": false
+  },
+  "wolt_3b3eafe4b0782e109aee43d3": {
+    "name": "Monge Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62319ed984e4375a24ca8eb6"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-3b3eafe4b0782e109aee43d3.png",
+    "wide": false
+  },
+  "wolt_87c43f1cedbae31844f8a697": {
+    "name": "Salude Beer Store [SBS]",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a228be787af2af16f8edaac"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-87c43f1cedbae31844f8a697.png",
+    "wide": false
+  },
+  "wolt_a31f36bc291f0054d77b3eed": {
+    "name": "ენზო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67125588e2a2f37ec05639cd",
+      "osm_node_11772444793"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-a31f36bc291f0054d77b3eed.png",
+    "wide": false
+  },
+  "wolt_25cf9b9819701d238516d599": {
+    "name": "The House of Pets",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6915898d024aae17b44f22b8"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-25cf9b9819701d238516d599.png",
+    "wide": false
+  },
+  "wolt_fbf201d8484eb7e3eb390a3e": {
+    "name": "Croffle",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6909d49e53b668d3fbc2a2cd"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-fbf201d8484eb7e3eb390a3e.png",
+    "wide": false
+  },
+  "wolt_1c4be8f60968acc897c4e734": {
+    "name": "KEG",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699c4b56dd3a1815d0baf7ff"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-1c4be8f60968acc897c4e734.png",
+    "wide": false
+  },
+  "wolt_120fda3b657f3620a55c09ff": {
+    "name": "Beer Space & Hot Dog",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ad6837f951b2828ccc1f18"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-120fda3b657f3620a55c09ff.png",
+    "wide": false
+  },
+  "wolt_48c1ec320dd02f2bd4b66307": {
+    "name": "Alvani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67da86c51dad6a09b48c3428"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-48c1ec320dd02f2bd4b66307.png",
+    "wide": false
+  },
+  "wolt_460e3c6e252781e94ca40201": {
+    "name": "NJoy Aroma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682d8603867dad6d2d9785f1"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-460e3c6e252781e94ca40201.png",
+    "wide": false
+  },
+  "wolt_641a6ad146676c1d98da793a": {
+    "name": "Larnaki Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699f3c22d53374b6da251a49"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-641a6ad146676c1d98da793a.png",
+    "wide": false
+  },
+  "wolt_7dc7e2fc86d89f815c3d3c21": {
+    "name": "Aris Ludi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f2081132cd943b383d458c",
+      "osm_node_10997902405"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-7dc7e2fc86d89f815c3d3c21.png",
+    "wide": false
+  },
+  "wolt_4b56d351a238abf3588ddcbd": {
+    "name": "გასაღების სეიფები",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671788dc144bf44e19c2bd89"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-4b56d351a238abf3588ddcbd.png",
+    "wide": false
+  },
+  "wolt_9ec6fe33a5cbae16def37822": {
+    "name": "Poesia Floral Studio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ce7140eb05a74d832cb5e4"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-9ec6fe33a5cbae16def37822.png",
+    "wide": false
+  },
+  "wolt_79114ae0229eeb758f25e236": {
+    "name": "Tpet Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680e36c6342944dc49ec2a3f"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-79114ae0229eeb758f25e236.png",
+    "wide": false
+  },
+  "wolt_9c5ab44cd3ca072e23b5cc25": {
+    "name": "PET FAMILY",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab1022b4a88d4f72099a2af"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-9c5ab44cd3ca072e23b5cc25.png",
+    "wide": false
+  },
+  "wolt_1cc5cdd1401ea0534ead53e6": {
+    "name": "Pet Corner",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6818c31ddff98f7b7b8865d7"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-1cc5cdd1401ea0534ead53e6.png",
+    "wide": false
+  },
+  "wolt_8d452656abb91cb55c02c15b": {
+    "name": "Lile's Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6874f53913a4844b06e15afb"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-8d452656abb91cb55c02c15b.png",
+    "wide": false
+  },
+  "wolt_758ac298de4af1c4ad095973": {
+    "name": "Flowers Shop Sofia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68d10af616ed52cc543c82eb"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-758ac298de4af1c4ad095973.png",
+    "wide": false
+  },
+  "wolt_3a634d967b194379220ebb3f": {
+    "name": "Fairy Pets",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ecfeafdd8e4759a654adb9"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-3a634d967b194379220ebb3f.png",
+    "wide": false
+  },
+  "wolt_53a35ec7083b9d39fdebfe0f": {
+    "name": "My Pet Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694563b4f10f0d89036a5a93"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-53a35ec7083b9d39fdebfe0f.png",
+    "wide": false
+  },
+  "wolt_dd2cf09b103b60588aecc73c": {
+    "name": "Weekly Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cbc9457240355821bb0fde",
+      "osm_node_14280080001"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-dd2cf09b103b60588aecc73c.png",
+    "wide": false
+  },
+  "wolt_355f9cb86680dd0911092808": {
+    "name": "Zoo Party Chkhikvadze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68226534031285a284b3114b"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-355f9cb86680dd0911092808.png",
+    "wide": false
+  },
+  "wolt_fc36ec1ae3c928e3d09e9441": {
+    "name": "Osuri Ludi Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_689b1dbfa7c10149d628079a"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-fc36ec1ae3c928e3d09e9441.png",
+    "wide": false
+  },
+  "wolt_923405f02ad679d695966b6f": {
+    "name": "Cattleya",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a22c0e1a03510233ae02fc0"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-923405f02ad679d695966b6f.png",
+    "wide": false
+  },
+  "wolt_7248669f59fc7507bfded712": {
+    "name": "Petspot Debi Ishkhnelebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67026ad7316e90c34e125276",
+      "directory_wolt_668fbde202190c2f560aceac"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-7248669f59fc7507bfded712.png",
+    "wide": false
+  },
+  "wolt_cb4ad5d0898f039416f25a64": {
+    "name": "M&M Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68d2716ee8d298cbbe58349d"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-cb4ad5d0898f039416f25a64.png",
+    "wide": false
+  },
+  "wolt_16ad49f54be846ac31515045": {
+    "name": "Flowerstore Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691f6d10374160278db77fae"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-16ad49f54be846ac31515045.png",
+    "wide": false
+  },
+  "wolt_a4d2f598d4ad18a9edd72495": {
+    "name": "Bajuja Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6971f61c356e836bccacf231"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-a4d2f598d4ad18a9edd72495.png",
+    "wide": false
+  },
+  "wolt_d5f33595e09c60255ebfe412": {
+    "name": "Dear Plants",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69aad5c9edaea4c00fb17ccc"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-d5f33595e09c60255ebfe412.png",
+    "wide": false
+  },
+  "wolt_ca8253e4f6f705ed83990f98": {
+    "name": "Florella Flowers Studio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0d9b236baadc2653c994ed"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-ca8253e4f6f705ed83990f98.png",
+    "wide": false
+  },
+  "wolt_8074e42cbaa3e3652e8b86de": {
+    "name": "ზოომაღაზია დობი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a04295a3c9c0081ee765c68"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-8074e42cbaa3e3652e8b86de.png",
+    "wide": false
+  },
+  "wolt_2c8706d50243648880559338": {
+    "name": "Beautique",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cf7824b2921fe7b02a3c83"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-2c8706d50243648880559338.png",
+    "wide": false
+  },
+  "wolt_573e403d45acbd1de42f766c": {
+    "name": "Wilmax Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_623da1b85744415c63e3162e"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-573e403d45acbd1de42f766c.png",
+    "wide": false
+  },
+  "wolt_b97f7211147a8b96d224ec89": {
+    "name": "Beer Market Beer Georgia Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61091e501868e19e1bd93cca"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-b97f7211147a8b96d224ec89.png",
+    "wide": false
+  },
+  "wolt_6d1eb81bf6d095aa792f5ba1": {
+    "name": "AROMA",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_615b04be8929d159f4e54187"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-6d1eb81bf6d095aa792f5ba1.png",
+    "wide": false
+  },
+  "wolt_0b6294f6ec41e78a13201f4b": {
+    "name": "Tsknapa Zoo Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4ca402091ac0e9224c46e2"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-0b6294f6ec41e78a13201f4b.png",
+    "wide": false
+  },
+  "wolt_a7cc0965948d77a390c1d4c6": {
+    "name": "Sophia Flowers Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682c5d00349645e24fe6d017"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-a7cc0965948d77a390c1d4c6.png",
+    "wide": false
+  },
+  "wolt_16ff7480c761441c0edd224e": {
+    "name": "Soul Flame",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6989e7e78fdf4c786afdec7e"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-16ff7480c761441c0edd224e.png",
+    "wide": false
+  },
+  "wolt_f2d9415b65fcd1a35cff7212": {
+    "name": "SkinCare Studio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_664a5e96ac7c279dc4d788b5"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-f2d9415b65fcd1a35cff7212.png",
+    "wide": false
+  },
+  "wolt_f80c5333e51504d7e9c5449c": {
+    "name": "Beer House BINI22",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a7c5fbbe97ba580e12128ae"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-f80c5333e51504d7e9c5449c.png",
+    "wide": false
+  },
+  "wolt_954b50a20afa37c31db572bb": {
+    "name": "Food Fix Guramishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6abba066b84eaaafb10e68e1"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-954b50a20afa37c31db572bb.png",
+    "wide": false
+  },
+  "wolt_a1563bfe3d421020c5621303": {
+    "name": "Popito Nutsubidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_668e6c5ff1b8db5ab97a74a5",
+      "directory_wolt_6697c1af629a85654320a1d2"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-a1563bfe3d421020c5621303.png",
+    "wide": false
+  },
+  "wolt_64b7db65939c988af7f513ec": {
+    "name": "Baristo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682dd6ca068bb1c1ddb34760"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-64b7db65939c988af7f513ec.png",
+    "wide": false
+  },
+  "wolt_b12c023378225437001df66e": {
+    "name": "Disney Vazisubani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698052c38421669393c67072"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-b12c023378225437001df66e.png",
+    "wide": false
+  },
+  "wolt_a35b83ef8ee75e6645bdb142": {
+    "name": "Solmart",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698b1189c122ca8074ac0ac7"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-a35b83ef8ee75e6645bdb142.png",
+    "wide": false
+  },
+  "wolt_6b37f282e88d3bfa061fb0a5": {
+    "name": "Beer Market Eristavi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c534a4374edd81871fb540"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-6b37f282e88d3bfa061fb0a5.png",
+    "wide": false
+  },
+  "wolt_2f5d90fee0117231e4574784": {
+    "name": "Ezos Ludi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a29233203f3892ea1f36a06"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-2f5d90fee0117231e4574784.png",
+    "wide": false
+  },
+  "wolt_f7673623cd4331392f4f2557": {
+    "name": "Ubere Ludi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4217dc8ea4109737cd52ff"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-f7673623cd4331392f4f2557.png",
+    "wide": false
+  },
+  "wolt_e3a9c5e961b7e0389983521c": {
+    "name": "Area",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a06d9623496613800c7a914"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-e3a9c5e961b7e0389983521c.png",
+    "wide": false
+  },
+  "wolt_4c057092d3dac55a95d6969e": {
+    "name": "Mtis Ludi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c42fdc713b30d7c8c039f"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-4c057092d3dac55a95d6969e.png",
+    "wide": false
+  },
+  "wolt_d9def914cde11a659cfcf052": {
+    "name": "Vino & Vino",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64c0df3a5ce9a6cfc39584f6",
+      "osm_node_7679459785"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-d9def914cde11a659cfcf052.png",
+    "wide": false
+  },
+  "wolt_389b6f80ed9842579a0515bc": {
+    "name": "Philips",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65326950bbc468251be21cb7"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-389b6f80ed9842579a0515bc.png",
+    "wide": false
+  },
+  "wolt_fb28d516b650423f415f1b78": {
+    "name": "დისნეი დიღომი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66d839f378efd4009ed99154",
+      "directory_wolt_66446f14832316ced6d7ae41",
+      "directory_wolt_65cf55db8fb76bca80216106",
+      "directory_wolt_6616e7ce34b4a727e3716da2",
+      "directory_wolt_669f64df64a17f9fe3ee1670",
+      "osm_node_11891520027"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-fb28d516b650423f415f1b78.png",
+    "wide": false
+  },
+  "wolt_3a4d6b4a0c77037094ad2316": {
+    "name": "ToyEL Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6788e0aaea0668693333e71c"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-3a4d6b4a0c77037094ad2316.png",
+    "wide": false
+  },
+  "wolt_c43780b20741ce61005fe556": {
+    "name": "Shinauri",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678e16162888a51c56a715f2"
+    ],
+    "categories": [
+      "butcher"
+    ],
+    "file": "wolt-c43780b20741ce61005fe556.png",
+    "wide": false
+  },
+  "wolt_33a45499b99ef6153389321e": {
+    "name": "TechSpace Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68de52c7d4542f73fc59f1ee"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-33a45499b99ef6153389321e.png",
+    "wide": false
+  },
+  "wolt_5cf91af4850609e31238b8c5": {
+    "name": "Caffee Molinari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68fa37c783d04baffa873aab"
+    ],
+    "categories": [
+      "coffee-shop"
+    ],
+    "file": "wolt-5cf91af4850609e31238b8c5.png",
+    "wide": false
+  },
+  "wolt_3487980e15415d32ff942c74": {
+    "name": "ჯეპეტო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691da71cbacd45f7f8ed836b"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-3487980e15415d32ff942c74.png",
+    "wide": false
+  },
+  "wolt_d503946b1c37cdcb6c38484f": {
+    "name": "FantastiClean Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6968c57de1e3eaa6ad183d97"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d503946b1c37cdcb6c38484f.png",
+    "wide": false
+  },
+  "wolt_70c79c8e7b2fadfbb7e034fc": {
+    "name": "TAGY",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69773d0fe1ce8c20fe1edc38"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-70c79c8e7b2fadfbb7e034fc.png",
+    "wide": false
+  },
+  "wolt_ff2c1f03ab53f385b9c9c0a1": {
+    "name": "DIYSIP Party Drinks",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e22238ec1d5f43c217eac8"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-ff2c1f03ab53f385b9c9c0a1.png",
+    "wide": false
+  },
+  "wolt_0b33282fc2792d9fc55bf9e6": {
+    "name": "Easy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64d36e9b6c38c7cc2121cfd2"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-0b33282fc2792d9fc55bf9e6.png",
+    "wide": false
+  },
+  "wolt_8699bed6b946a854be7974a4": {
+    "name": "ILITEK",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_625d552b0b7422c12101d415"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-8699bed6b946a854be7974a4.png",
+    "wide": false
+  },
+  "wolt_4f02223101c666905637c2b6": {
+    "name": "Memory Casa",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a16da98c6edabe0fdb4bd45"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-4f02223101c666905637c2b6.png",
+    "wide": false
+  },
+  "wolt_8317c3719d9a66110b3bc9e2": {
+    "name": "ოპტიკონ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691c4c463a4d292d26591095",
+      "osm_node_11375394469"
+    ],
+    "categories": [
+      "optician"
+    ],
+    "file": "wolt-8317c3719d9a66110b3bc9e2.png",
+    "wide": false
+  },
+  "wolt_bc3668848060e986f8ea4881": {
+    "name": "Beautycharm.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698066b51dd157e21a90752d"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-bc3668848060e986f8ea4881.png",
+    "wide": false
+  },
+  "wolt_44042f3104f9353a3654c2bf": {
+    "name": "Joonies Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a30fde64c1495db0f03077b"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-44042f3104f9353a3654c2bf.png",
+    "wide": false
+  },
+  "wolt_84bd5636c5c1b25115c431d8": {
+    "name": "Flowers and Gift Salon Artyflora",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6023a9463cf994da419f27c8"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-84bd5636c5c1b25115c431d8.png",
+    "wide": false
+  },
+  "wolt_170598d296eeb63207e0a2dd": {
+    "name": "GD Alco Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6152d70aa130aa168d6f75e5"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-170598d296eeb63207e0a2dd.png",
+    "wide": false
+  },
+  "wolt_e2340d2f173717c7eb220d44": {
+    "name": "Tbilisi Yoga Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64956b2ed0e525558db4abbb"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-e2340d2f173717c7eb220d44.png",
+    "wide": false
+  },
+  "wolt_9902e4ad5690a5bf2a7d64b2": {
+    "name": "Chara",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6690efe028eb0b9cf196309f"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-9902e4ad5690a5bf2a7d64b2.png",
+    "wide": false
+  },
+  "wolt_e6cc89c6f86065ad30a55722": {
+    "name": "მამსი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66b0b5e584c4c6ec925c83c2"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-e6cc89c6f86065ad30a55722.png",
+    "wide": false
+  },
+  "wolt_79d5d247853b1a9577ad33b4": {
+    "name": "Davroe Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67a0943029fffe678a5e14d1"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-79d5d247853b1a9577ad33b4.png",
+    "wide": false
+  },
+  "wolt_39799aa01201733debd3cdff": {
+    "name": "The Ordinary Skin Essentials",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68c17f18e836d687734be933"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-39799aa01201733debd3cdff.png",
+    "wide": false
+  },
+  "wolt_6f9e09dec8691a0e21d0387d": {
+    "name": "Beauty Rituals",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_699414af22081198b815708b"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-6f9e09dec8691a0e21d0387d.png",
+    "wide": false
+  },
+  "wolt_d7fcebc0c0e66fa6c07969f6": {
+    "name": "Skin Seoul",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69eb859d4ccdac376185d94e"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-d7fcebc0c0e66fa6c07969f6.png",
+    "wide": false
+  },
+  "wolt_7dedf9b35022da18fff88d3d": {
+    "name": "Best Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68d11cc30659228b9f648b18"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-7dedf9b35022da18fff88d3d.png",
+    "wide": false
+  },
+  "wolt_3d0c426e5cbcabd44b1adb6d": {
+    "name": "Gen Us",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6acc9d404a111daac2928be0"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-3d0c426e5cbcabd44b1adb6d.png",
+    "wide": false
+  },
+  "wolt_0decc83d8d77ba91ecb24c82": {
+    "name": "Garden of Eden",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6992f5eee15bf97f3093849b"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-0decc83d8d77ba91ecb24c82.png",
+    "wide": false
+  },
+  "wolt_b77d44a42ce98bf94e3e8904": {
+    "name": "Moitsa",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5f7635c7321c58c0337bf5",
+      "osm_node_13985364887"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-b77d44a42ce98bf94e3e8904.png",
+    "wide": false
+  },
+  "wolt_f2cec56af838e1602c3dd39d": {
+    "name": "Moretti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2194d4972df2052470190c"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-f2cec56af838e1602c3dd39d.png",
+    "wide": false
+  },
+  "wolt_e909f767bdb5163e9043aa24": {
+    "name": "Flower Symphony",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e621290afb427f09225d08"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-e909f767bdb5163e9043aa24.png",
+    "wide": false
+  },
+  "wolt_39e1965c032df2d18c9e7964": {
+    "name": "Mimi Toys",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69fb3acee7e99f53a751cba2"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-39e1965c032df2d18c9e7964.png",
+    "wide": false
+  },
+  "wolt_727a8d7857577b96a8039f79": {
+    "name": "Vita Flower Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698af0a4fff4496046a1be6e"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-727a8d7857577b96a8039f79.png",
+    "wide": false
+  },
+  "wolt_b67ad8e971a93068f6dff061": {
+    "name": "Perditta",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691f31af917e642f1c58aae9"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-b67ad8e971a93068f6dff061.png",
+    "wide": false
+  },
+  "wolt_2654506fda3546f36b953e8e": {
+    "name": "Tseretlis Mexican Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a548726c3d04617ce0c870e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2654506fda3546f36b953e8e.png",
+    "wide": false
+  },
+  "wolt_b6cd4dd6299e522c11021cbf": {
+    "name": "3 Shaurma Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69396d5f04545ab6c6051328"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-b6cd4dd6299e522c11021cbf.png",
+    "wide": false
+  },
+  "wolt_e99fb6eba513acefe4fde2c1": {
+    "name": "Kitayka Dighomi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c2c5482a06dccdcb96627"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e99fb6eba513acefe4fde2c1.png",
+    "wide": false
+  },
+  "wolt_2cdfc2f6419e8b93974f94a9": {
+    "name": "Sabatone Gldani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68274aab51ff1d9c2715c1f5",
+      "osm_node_11207957393"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2cdfc2f6419e8b93974f94a9.png",
+    "wide": false
+  },
+  "wolt_4644ba61e03205c27b41fefb": {
+    "name": "Emperor Sushi Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab4eee927a204103b5cc7ec",
+      "directory_wolt_6aa9603a48b0b435cd2e3ca0"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4644ba61e03205c27b41fefb.png",
+    "wide": false
+  },
+  "wolt_433068db712041a5161f832a": {
+    "name": "Best Friends Pekini",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65ae50311f9d2f8b089f9350"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-433068db712041a5161f832a.png",
+    "wide": false
+  },
+  "wolt_67e18eb8a893e798b72b2510": {
+    "name": "8000 Vintages (Wine) Bagebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60f571b239a9591abbd7f856"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-67e18eb8a893e798b72b2510.png",
+    "wide": false
+  },
+  "wolt_b49e9da3f79bc80bacf7058f": {
+    "name": "Tpet Bagebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_678a24b83e9d5412ea4a5c4e"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-b49e9da3f79bc80bacf7058f.png",
+    "wide": false
+  },
+  "wolt_2f52367afeeadebc7215a386": {
+    "name": "iDevice Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6963a2669e51e74feee636c7"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-2f52367afeeadebc7215a386.png",
+    "wide": false
+  },
+  "wolt_0855e4798038df1cb6479c5d": {
+    "name": "Fried Chicken House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ce4343a802b687218a5fbe"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0855e4798038df1cb6479c5d.png",
+    "wide": false
+  },
+  "wolt_9d99b809d72835c16edc9620": {
+    "name": "La Bonta",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695cd4ad8302134462cbb031"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9d99b809d72835c16edc9620.png",
+    "wide": false
+  },
+  "wolt_84bcaf0e91719ae4059c8bd6": {
+    "name": "Waffle Lab",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c11f466ddf77b1afcab46f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-84bcaf0e91719ae4059c8bd6.png",
+    "wide": false
+  },
+  "wolt_71383a2430d18b1086fd6988": {
+    "name": "100 Arabic Restaurant",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a057f3cc957b84d76426359"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-71383a2430d18b1086fd6988.png",
+    "wide": false
+  },
+  "wolt_7694e9a0b02d3d5118e2d7b1": {
+    "name": "Pizza Point Guramishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e86e2faae1d23a7d255283"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-7694e9a0b02d3d5118e2d7b1.png",
+    "wide": false
+  },
+  "wolt_45efe900c7434cd280aeabfa": {
+    "name": "Spusecco",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68f5dfaa0334c50fa84270bb"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-45efe900c7434cd280aeabfa.png",
+    "wide": false
+  },
+  "wolt_d76c2b24bc1238e149758994": {
+    "name": "AlcoZone",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67a07ddde938b95b81265564"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-d76c2b24bc1238e149758994.png",
+    "wide": false
+  },
+  "wolt_a4c7ce13c139d07f22ccba0e": {
+    "name": "Cumbo Pops",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0199dadeb36d4c0c40669a"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-a4c7ce13c139d07f22ccba0e.png",
+    "wide": false
+  },
+  "wolt_cb5d7ccfb36c3f66831aeedc": {
+    "name": "Homey Nook",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695ccdd0fc5cbfd2a07c83fd"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-cb5d7ccfb36c3f66831aeedc.png",
+    "wide": false
+  },
+  "wolt_47657060c690c5706eac4674": {
+    "name": "Zoo Party Varazi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6822f1cddb285e8598827994"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-47657060c690c5706eac4674.png",
+    "wide": false
+  },
+  "wolt_e166d2ff2ee9906a62852a72": {
+    "name": "Student's Cafe Lubliana",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0aca243389424c85090863"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-e166d2ff2ee9906a62852a72.png",
+    "wide": false
+  },
+  "wolt_a846fb7b2f58f1309c260ecc": {
+    "name": "Dar Al Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c4d1823281c5e938e9b03"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-a846fb7b2f58f1309c260ecc.png",
+    "wide": false
+  },
+  "wolt_d39743502cf48bec4897b454": {
+    "name": "Royal Indian Restaurant",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61e688bcbad6c25f5c932b1d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d39743502cf48bec4897b454.png",
+    "wide": false
+  },
+  "wolt_7e62e8d0313ddd81e2717c6b": {
+    "name": "Food Station Beliashvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e62299ec1d5f43c217fab3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7e62e8d0313ddd81e2717c6b.png",
+    "wide": false
+  },
+  "wolt_54c17f385c4949cd2a489f8a": {
+    "name": "Khuti Titi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695f5a304d471087d8963b90"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-54c17f385c4949cd2a489f8a.png",
+    "wide": false
+  },
+  "wolt_d9c293780091c80cd4452fee": {
+    "name": "Craft Meat",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3006961eac78d105739ba5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d9c293780091c80cd4452fee.png",
+    "wide": false
+  },
+  "wolt_e9e6078567f21e2c3fd610a7": {
+    "name": "Brownie's",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a475f0b7311544da4056286"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e9e6078567f21e2c3fd610a7.png",
+    "wide": false
+  },
+  "wolt_3fffe3d69bff9a48802bdf26": {
+    "name": "Main Street",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69d4b839e76da6289d397400"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3fffe3d69bff9a48802bdf26.png",
+    "wide": false
+  },
+  "wolt_3d695a3feb2ed7fb7a53a425": {
+    "name": "Chadrebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4b9ec335fb640cabe09065"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3d695a3feb2ed7fb7a53a425.png",
+    "wide": false
+  },
+  "wolt_201eae5fd41f045495e2ff48": {
+    "name": "Lucciola Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a01958aa4d4a54c2631527f"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-201eae5fd41f045495e2ff48.png",
+    "wide": false
+  },
+  "wolt_dc039cf60837c7ea2c1caeaf": {
+    "name": "Fiore",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69804fcad3ef686682e0acc2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-dc039cf60837c7ea2c1caeaf.png",
+    "wide": false
+  },
+  "wolt_58d31cb098a4b6005737b965": {
+    "name": "Shampurze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b7aa6837c59714820704ba"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-58d31cb098a4b6005737b965.png",
+    "wide": false
+  },
+  "wolt_cb2ab2f0f9c71fab838c06e2": {
+    "name": "Mtis Kubdari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a05744ca93b66e076386700"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-cb2ab2f0f9c71fab838c06e2.png",
+    "wide": false
+  },
+  "wolt_ab975940a0ac11ce4892c282": {
+    "name": "ZHIMARISI BAKERY",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69fc747c7663ee0756f6aeb8"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-ab975940a0ac11ce4892c282.png",
+    "wide": false
+  },
+  "wolt_c96375599c588b259e2d4d87": {
+    "name": "Bamboo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6968dc6de1e3eaa6ad183e19"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c96375599c588b259e2d4d87.png",
+    "wide": false
+  },
+  "wolt_506551ad4c13e274b28607a3": {
+    "name": "Chiken House Halal",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac8a7780c415bdff8ccf1a6"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-506551ad4c13e274b28607a3.png",
+    "wide": false
+  },
+  "wolt_93bc6c2ac958e3cefc3e9831": {
+    "name": "Maxi Pet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a55e662b88e562d41c71a0d"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-93bc6c2ac958e3cefc3e9831.png",
+    "wide": false
+  },
+  "wolt_bf7495e456ca79629366cee7": {
+    "name": "Tameli Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6984b0c62a9431729540d279"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-bf7495e456ca79629366cee7.png",
+    "wide": false
+  },
+  "wolt_4f49bd0931f79795e8824a69": {
+    "name": "Pi-Po",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6683d43fef38e963446c8472"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-4f49bd0931f79795e8824a69.png",
+    "wide": false
+  },
+  "wolt_0aff8b26ed330ce77dfbc65f": {
+    "name": "სამეგრელოს გული",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693ab9112af8e54c260e7385"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-0aff8b26ed330ce77dfbc65f.png",
+    "wide": false
+  },
+  "wolt_e25ff7494f55379cd4523b50": {
+    "name": "Puffy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_697768c4449b454efcde687c"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-e25ff7494f55379cd4523b50.png",
+    "wide": false
+  },
+  "wolt_f88fd7d4115cfc88460254e0": {
+    "name": "Ginger Margarita Ro Ksani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694a82a42e100e80f3f7b0f5"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-f88fd7d4115cfc88460254e0.png",
+    "wide": false
+  },
+  "wolt_7e22ab16ef823500c63f72a3": {
+    "name": "Agara Brewery Beer Bar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ad668dbc6f84f5609140f4"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-7e22ab16ef823500c63f72a3.png",
+    "wide": false
+  },
+  "wolt_00e2996c738e3a3334cbc9ca": {
+    "name": "Petverse (Farmina/M-pets) Sarajishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_623affd6b41f17a81afa1cae"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-00e2996c738e3a3334cbc9ca.png",
+    "wide": false
+  },
+  "wolt_fa3ac3f8849dc42234eadd91": {
+    "name": "Ginger Margarita Ro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_694a82a42e100e80f3f7b0f4"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-fa3ac3f8849dc42234eadd91.png",
+    "wide": false
+  },
+  "wolt_b03d5e20ecfa76c8d14edff9": {
+    "name": "Kids Store Guramishvili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69df3a389f7dcc4600d34ef1",
+      "directory_wolt_69df413eb0c6c8ca1ec47573"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-b03d5e20ecfa76c8d14edff9.png",
+    "wide": false
+  },
+  "wolt_77fd80271fd88e4ff6c6402e": {
+    "name": "Lahili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69733eac7e986533a41816e0"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-77fd80271fd88e4ff6c6402e.png",
+    "wide": false
+  },
+  "wolt_feb32e46159578d70708e1dc": {
+    "name": "Tiflis Fast Food Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_690b32677427d64dce825c0b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-feb32e46159578d70708e1dc.png",
+    "wide": false
+  },
+  "wolt_a1401956dfe217eac71e9786": {
+    "name": "Shaurma XL Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63283f01059b785872d90555"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-a1401956dfe217eac71e9786.png",
+    "wide": false
+  },
+  "wolt_df474dd6d720ca07845c6991": {
+    "name": "Ser Badris Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3bd858e4d42739a405d5d9"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-df474dd6d720ca07845c6991.png",
+    "wide": false
+  },
+  "wolt_43316544c09cb6894277b674": {
+    "name": "PHO Asian Food  Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63f4c8358f118cdcc95d2105"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-43316544c09cb6894277b674.png",
+    "wide": false
+  },
+  "wolt_3d7bf71a416858aec27cf75d": {
+    "name": "Imperi Vazisubani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67f768622318b6edf7b51b89"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-3d7bf71a416858aec27cf75d.png",
+    "wide": false
+  },
+  "wolt_7f7c9b25d4337073e6452147": {
+    "name": "Ori Katkha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6087dcafb0a35816d547dadf",
+      "osm_node_12766134520"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7f7c9b25d4337073e6452147.png",
+    "wide": false
+  },
+  "wolt_7c2c98b532c5472dae183332": {
+    "name": "Affogato",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6998256740dc15961b81d051"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7c2c98b532c5472dae183332.png",
+    "wide": false
+  },
+  "wolt_2badaf904dc4759628b97806": {
+    "name": "საპელმენე N1",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_690d92b96008d8a02836f9cb"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-2badaf904dc4759628b97806.png",
+    "wide": false
+  },
+  "wolt_57636ced2b2c65b2a27f64a7": {
+    "name": "Khachapuris Sakhli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69bbaf4fa85dad0abb2a5987"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-57636ced2b2c65b2a27f64a7.png",
+    "wide": false
+  },
+  "wolt_ab1deeb15be9fe6318b4dd37": {
+    "name": "Lala's Time",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_646200f090f4bfc785cf8a83"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-ab1deeb15be9fe6318b4dd37.png",
+    "wide": false
+  },
+  "wolt_b781a1ee1d175917176241cf": {
+    "name": "Tzatziki Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6572e8275be42088223a899f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b781a1ee1d175917176241cf.png",
+    "wide": false
+  },
+  "wolt_b83f1246cf6e8b69673a1800": {
+    "name": "Dope Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa01da09c5a501587199035"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-b83f1246cf6e8b69673a1800.png",
+    "wide": false
+  },
+  "wolt_dcf5f5b02610a76a6cb7d5d3": {
+    "name": "ShaurMafia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_653f9ff894b2aa179feccabe",
+      "osm_node_11339018790"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-dcf5f5b02610a76a6cb7d5d3.png",
+    "wide": false
+  },
+  "wolt_c961e06217c76cf9b74a6369": {
+    "name": "Leo D'oro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5de63fb49fc00fa01e62ee3f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c961e06217c76cf9b74a6369.png",
+    "wide": false
+  },
+  "wolt_2a5680408a3101afbc321fad": {
+    "name": "City Veranda",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68a7250266cb4b4a75aef98a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2a5680408a3101afbc321fad.png",
+    "wide": false
+  },
+  "wolt_ead394bf27003054a6d15f06": {
+    "name": "Taste of India Avlabari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_641029693649901a973d344e",
+      "directory_wolt_618e399cbe1613e99d633f7e",
+      "osm_node_1499609996"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ead394bf27003054a6d15f06.png",
+    "wide": false
+  },
+  "wolt_cb092ea037df35746905f158": {
+    "name": "Lumier's Chimney Cake East Point",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695193f59622f461327e0491",
+      "directory_wolt_699462a9f0d143a8b3199100"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cb092ea037df35746905f158.png",
+    "wide": false
+  },
+  "wolt_f77e8329651b0e3c926dec1f": {
+    "name": "ABC Shop Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a96bbf5e3a1b0143110578c"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-f77e8329651b0e3c926dec1f.png",
+    "wide": false
+  },
+  "wolt_687d721d2972096a81fffdf4": {
+    "name": "Ghomi da Kveli East Point",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693be5394ade2f472cc81d10"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-687d721d2972096a81fffdf4.png",
+    "wide": false
+  },
+  "wolt_ba1514d893794af719910827": {
+    "name": "Urban Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3004cb4ccbf96ebc51fdd7"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-ba1514d893794af719910827.png",
+    "wide": false
+  },
+  "wolt_b801aa059f35afb83c13da25": {
+    "name": "Sushi Hut Samgori",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685a5f774adb8deef421ea43",
+      "osm_node_14220627494"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-b801aa059f35afb83c13da25.png",
+    "wide": false
+  },
+  "wolt_d932ad8c82993fcc2e56c3b4": {
+    "name": "სუფთა გემო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f847f5e0b6a2dd009a328e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d932ad8c82993fcc2e56c3b4.png",
+    "wide": false
+  },
+  "wolt_c209ea1d026f04b7fb07894e": {
+    "name": "Capri Pizza East Point",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61b348cb888176c6e9e897cd",
+      "osm_node_11758446677"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-c209ea1d026f04b7fb07894e.png",
+    "wide": false
+  },
+  "wolt_a07f4deb63e9c293d8b667d6": {
+    "name": "Flower's boutique",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_64182eb4ff25cbf49d3898dd"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-a07f4deb63e9c293d8b667d6.png",
+    "wide": false
+  },
+  "wolt_6de5db685324124fa9ee681f": {
+    "name": "Confeta Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a96c3c8facddf7c1307aafe"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-6de5db685324124fa9ee681f.png",
+    "wide": false
+  },
+  "wolt_4ff72f5a878a6c4fafd19bbb": {
+    "name": "Kubdari",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69d615a8e76da6289d3980c1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4ff72f5a878a6c4fafd19bbb.png",
+    "wide": false
+  },
+  "wolt_9d39ad2d34e65cc054deb5c1": {
+    "name": "გოლდენ ფრაი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4df7d1c2dbf11abf81ecfd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9d39ad2d34e65cc054deb5c1.png",
+    "wide": false
+  },
+  "wolt_04b48c7d499315389c23b168": {
+    "name": "Mangali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6613cd92b64c58de64883969"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-04b48c7d499315389c23b168.png",
+    "wide": false
+  },
+  "wolt_3753688a55fcc62bacc12f9c": {
+    "name": "Shemogevle",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61a62cc6fddf5416ba84ea21"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3753688a55fcc62bacc12f9c.png",
+    "wide": false
+  },
+  "wolt_d3d48d419eb752e50dd3e3bc": {
+    "name": "Shawarma House Halal",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f3d3a1f1b4c624ac98248fe"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-d3d48d419eb752e50dd3e3bc.png",
+    "wide": false
+  },
+  "wolt_cc5e6edea8320831c6a2e073": {
+    "name": "Mtsvadis Samkaro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_642d75cafe32be082dbcc690"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cc5e6edea8320831c6a2e073.png",
+    "wide": false
+  },
+  "wolt_35685d3f1e0f6f27fcbac295": {
+    "name": "Gldani Express Rustavi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68caa0e2ac1ca729871fd6cd"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-35685d3f1e0f6f27fcbac295.png",
+    "wide": false
+  },
+  "wolt_2141cd8a9880ef07255bf8fc": {
+    "name": "Pepe Vazisubani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4e5ef76df751d7db731a09"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-2141cd8a9880ef07255bf8fc.png",
+    "wide": false
+  },
+  "wolt_6471ad42e31bc885e6be5997": {
+    "name": "Burger Space East Point",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6939713d65200e237a37f6fc"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-6471ad42e31bc885e6be5997.png",
+    "wide": false
+  },
+  "wolt_6043dffcba01f89e3a2467b5": {
+    "name": "Khinkali & Chacha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698c5d8235559e5e21ab35cc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6043dffcba01f89e3a2467b5.png",
+    "wide": false
+  },
+  "wolt_a6abf918cc49f8f42f91ffa3": {
+    "name": "GramPak Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_679b2ccfefac5e3f364a0db2"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-a6abf918cc49f8f42f91ffa3.png",
+    "wide": false
+  },
+  "wolt_5cc3438647768f0039c91765": {
+    "name": "Best Market Javakheti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682dc158213386e6a7ac5a65"
+    ],
+    "categories": [
+      "supermarket"
+    ],
+    "file": "wolt-5cc3438647768f0039c91765.png",
+    "wide": false
+  },
+  "wolt_545d146c6e250f5affc923b3": {
+    "name": "Beer Factory",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6858f2895d26185bf96b3ac3"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-545d146c6e250f5affc923b3.png",
+    "wide": false
+  },
+  "wolt_76a995fa56719f4ac1017845": {
+    "name": "Summug",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68472047813000ebeb9791fe"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-76a995fa56719f4ac1017845.png",
+    "wide": false
+  },
+  "wolt_73c360586f2ee94cda44292c": {
+    "name": "Cafe Creme",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac382f233959d0d6dd41840"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-73c360586f2ee94cda44292c.png",
+    "wide": false
+  },
+  "wolt_037543de2dec6637bfa6dcb0": {
+    "name": "ჩამოსასხმელი ლუდი 3 16",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6715f6d30b6af3a8bf800a76"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-037543de2dec6637bfa6dcb0.png",
+    "wide": false
+  },
+  "wolt_5d270c9d205fa28f95a3a3cd": {
+    "name": "შაურმა სთეიშენი N1",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a86e76f7a73b75017fc0bc8"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-5d270c9d205fa28f95a3a3cd.png",
+    "wide": false
+  },
+  "wolt_94a3faf93d8b300c7262bec4": {
+    "name": "Beer Location",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685bebf6c7037ea12a538f21"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-94a3faf93d8b300c7262bec4.png",
+    "wide": false
+  },
+  "wolt_6f189c4dde6dbd33fd44c174": {
+    "name": "Kubdari House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9683f8b606e3463259c2ff"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6f189c4dde6dbd33fd44c174.png",
+    "wide": false
+  },
+  "wolt_7e7e801809e0f4b269611bae": {
+    "name": "Satskhobis Sakhli Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab37b17c571dc501749f4de",
+      "osm_node_14294272475"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-7e7e801809e0f4b269611bae.png",
+    "wide": false
+  },
+  "wolt_3852a6de7de06c6bf033a7c2": {
+    "name": "გასტრონომიული ეზო",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69312d449685d45652f87451"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3852a6de7de06c6bf033a7c2.png",
+    "wide": false
+  },
+  "wolt_e4581fe43a37229e9856b7e3": {
+    "name": "K&J HOME",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5de32d859ca30acf6fe94f"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-e4581fe43a37229e9856b7e3.png",
+    "wide": false
+  },
+  "wolt_4feadaf53a14cf2833f0ca21": {
+    "name": "Obsidia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a96a4120fdc439d7ac3ef60"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-4feadaf53a14cf2833f0ca21.png",
+    "wide": false
+  },
+  "wolt_9d372a0dd6d5b1c308fe0a68": {
+    "name": "Soso's Ludi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa92d6548b0b435cd2e361a"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-9d372a0dd6d5b1c308fe0a68.png",
+    "wide": false
+  },
+  "wolt_3e595294da152f37d3406cd4": {
+    "name": "Best Pharma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66796ee5a15c186bce94f901"
+    ],
+    "categories": [
+      "pharmacy"
+    ],
+    "file": "wolt-3e595294da152f37d3406cd4.png",
+    "wide": false
+  },
+  "wolt_111af28e9744d0393b639ec1": {
+    "name": "Binsi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68429edb10f475d8d95e689e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-111af28e9744d0393b639ec1.png",
+    "wide": false
+  },
+  "wolt_a41aae16e5100027b20848b2": {
+    "name": "Tsogi's Khinkali Frozen Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6853e14780d5282ba49780c9",
+      "directory_wolt_6853e2a4cf0ac76336b3f65e"
+    ],
+    "categories": [
+      "convenience",
+      "restaurant"
+    ],
+    "file": "wolt-a41aae16e5100027b20848b2.png",
+    "wide": false
+  },
+  "wolt_42fe3e7920a582e11837af80": {
+    "name": "ზოომარი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671a3876fa390c20bd80cf7d"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-42fe3e7920a582e11837af80.png",
+    "wide": false
+  },
+  "wolt_f2d35697d88467d26857976f": {
+    "name": "PetGo Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aaa4e762b01801cd63b6687"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-f2d35697d88467d26857976f.png",
+    "wide": false
+  },
+  "wolt_93bb566e4bd99f63d89dac73": {
+    "name": "Biovet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_684c1ac3a627395264fb44b6"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-93bb566e4bd99f63d89dac73.png",
+    "wide": false
+  },
+  "wolt_eee014a6aa9ad356cb52543a": {
+    "name": "Flowerlab.ge",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a743f5e8748d74ab513b561"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-eee014a6aa9ad356cb52543a.png",
+    "wide": false
+  },
+  "wolt_d09a266ffcb15392f0ed7856": {
+    "name": "Kefi Gelato",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a19895f3df11e063719c7d"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-d09a266ffcb15392f0ed7856.png",
+    "wide": false
+  },
+  "wolt_f77b435d7b15b94e76dc5162": {
+    "name": "Gurmani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693ab120e199602405d37cf1"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-f77b435d7b15b94e76dc5162.png",
+    "wide": false
+  },
+  "wolt_1f236e7c6b8696ddc8784c87": {
+    "name": "Frutika",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698b0fd1c122ca8074ac0ac0"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-1f236e7c6b8696ddc8784c87.png",
+    "wide": false
+  },
+  "wolt_475f9deccd94b803bdb605d5": {
+    "name": "Aroma Avenue",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a19b96d3aead48433a63a1d"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-475f9deccd94b803bdb605d5.png",
+    "wide": false
+  },
+  "wolt_342f79380bc8db91d0c6c9e0": {
+    "name": "Barkopetatelier",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c58aa9c717400ad1a8c59"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-342f79380bc8db91d0c6c9e0.png",
+    "wide": false
+  },
+  "wolt_d2e37d8d48f821cb1c5ce7f2": {
+    "name": "Zoo KiKi Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac745c8ed8450570e350735"
+    ],
+    "categories": [
+      "pet-shop"
+    ],
+    "file": "wolt-d2e37d8d48f821cb1c5ce7f2.png",
+    "wide": false
+  },
+  "wolt_08b1c7071b86bcf775a07342": {
+    "name": "Flora Atelie Flower Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2aa6f35300bd178c4fd881"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-08b1c7071b86bcf775a07342.png",
+    "wide": false
+  },
+  "wolt_6fc06440ad6d627534cd5a59": {
+    "name": "Lilesia Garden",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac73db47df080cd6377feb8"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-6fc06440ad6d627534cd5a59.png",
+    "wide": false
+  },
+  "wolt_3d6286c06694e8c1affb817d": {
+    "name": "ELI Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_692ee5c07e6b4bbcaa54d4e8",
+      "directory_wolt_698b205bc0664611e5e97aa0"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-3d6286c06694e8c1affb817d.png",
+    "wide": false
+  },
+  "wolt_4194bcdd57c007bf6935965e": {
+    "name": "Garburger",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698d7e6efa8a055bd31cf9d8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4194bcdd57c007bf6935965e.png",
+    "wide": false
+  },
+  "wolt_2163700c086a53a42bf1b52c": {
+    "name": "Almiele",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c435edd99163eb8bc1268"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-2163700c086a53a42bf1b52c.png",
+    "wide": false
+  },
+  "wolt_145afb3019c1234742192974": {
+    "name": "ნამუ-ნამუ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66b08f210e246d013eb0af1b"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-145afb3019c1234742192974.png",
+    "wide": false
+  },
+  "wolt_c73df0aa852059da59e70aac": {
+    "name": "La Fusion",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68c90dcbdb1f38ec710132c0"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-c73df0aa852059da59e70aac.png",
+    "wide": false
+  },
+  "wolt_05d226371cf490b3c8166916": {
+    "name": "Tsalka Fresh",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69de23100ddbee8d971b2fc1"
+    ],
+    "categories": [
+      "greengrocer"
+    ],
+    "file": "wolt-05d226371cf490b3c8166916.png",
+    "wide": false
+  },
+  "wolt_4a2cf8a5f62d6f5cc373712d": {
+    "name": "La Bellezza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a427ba5eac8bcdb90eddf7f"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-4a2cf8a5f62d6f5cc373712d.png",
+    "wide": false
+  },
+  "wolt_6bd5b896ec1a7989096147f1": {
+    "name": "Flame Food Varketili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68caaf02c5ba53403b28acff"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-6bd5b896ec1a7989096147f1.png",
+    "wide": false
+  },
+  "wolt_e450f91b45bde443b758d581": {
+    "name": "Shanddar Momo Isani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a22a8229046d68883a52e92"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e450f91b45bde443b758d581.png",
+    "wide": false
+  },
+  "wolt_e6017e7ac363fb9760b6a73c": {
+    "name": "Gourmands House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f1fef3f454ceccd9e4adf3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e6017e7ac363fb9760b6a73c.png",
+    "wide": false
+  },
+  "wolt_1921ba4d20b602c7e7cd10da": {
+    "name": "SADILI",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68db7d65058bc831c62ac08e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1921ba4d20b602c7e7cd10da.png",
+    "wide": false
+  },
+  "wolt_5695bbeb3a629678b8647c44": {
+    "name": "Connect Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b2af754a7a0cd74f081a2b"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-5695bbeb3a629678b8647c44.png",
+    "wide": false
+  },
+  "wolt_7d6a14907d7db4f26c9ab303": {
+    "name": "Urban Taste",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b3b5f3fdef9fccb6b8e936"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7d6a14907d7db4f26c9ab303.png",
+    "wide": false
+  },
+  "wolt_7c1340c88005def38b41f77d": {
+    "name": "Mikasa Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a16dee2c6edabe0fdb4bd52"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-7c1340c88005def38b41f77d.png",
+    "wide": false
+  },
+  "wolt_847527e932770abb403ca22d": {
+    "name": "Guguni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a80dcc1dc4049618b1cbea"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-847527e932770abb403ca22d.png",
+    "wide": false
+  },
+  "wolt_56d558ee7145db75bbe09f99": {
+    "name": "Lumier's Chimney Cake Lisi Lake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67234963f15290aa155ca45b",
+      "osm_node_10822296969"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-56d558ee7145db75bbe09f99.png",
+    "wide": false
+  },
+  "wolt_36984d8bd12538494f453c79": {
+    "name": "Ajisai",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_631f1a852d9d79235f07d010"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-36984d8bd12538494f453c79.png",
+    "wide": false
+  },
+  "wolt_ebdcf7dac83839ccaa3b2624": {
+    "name": "Shanddar Momo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682448427ec142cf72000958"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ebdcf7dac83839ccaa3b2624.png",
+    "wide": false
+  },
+  "wolt_5e36ecc95da26f02508ef359": {
+    "name": "Chikita",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682efd2f985885d95c1099bb"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5e36ecc95da26f02508ef359.png",
+    "wide": false
+  },
+  "wolt_97c9b941abd90919efe77a83": {
+    "name": "GFC",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69b2a17cc52d04d41d3d1f8d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-97c9b941abd90919efe77a83.png",
+    "wide": false
+  },
+  "wolt_388a0c1ab3472763e7e0b4c5": {
+    "name": "Red Velvet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6964bd294d94d330a3e6481d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-388a0c1ab3472763e7e0b4c5.png",
+    "wide": false
+  },
+  "wolt_50e4c2c98a1a7fbe96fa9620": {
+    "name": "Eli Bakery Nutsubidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a38ce1726729b47f4340f2c"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-50e4c2c98a1a7fbe96fa9620.png",
+    "wide": false
+  },
+  "wolt_e6b0cf239818d485a3759a40": {
+    "name": "Sushi Icons",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6878d5a6636f4d8efad7f3f6",
+      "osm_node_11802807146"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e6b0cf239818d485a3759a40.png",
+    "wide": false
+  },
+  "wolt_6558888fdc95f00b4a2b3c04": {
+    "name": "Coffee Era",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6839d78cc7d8bf397c34f3a7"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-6558888fdc95f00b4a2b3c04.png",
+    "wide": false
+  },
+  "wolt_09e9e9d143b26729580c52e1": {
+    "name": "Boli Samtsvade",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9a76b937cf6fd88fab1aa8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-09e9e9d143b26729580c52e1.png",
+    "wide": false
+  },
+  "wolt_b0ca618378a147b52c764fc8": {
+    "name": "Check In",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3276b27cadbc7185b1b75a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b0ca618378a147b52c764fc8.png",
+    "wide": false
+  },
+  "wolt_1a257d24e1bac8eb76c41039": {
+    "name": "ფიტმილი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_673498ab5da5a3748b35133d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-1a257d24e1bac8eb76c41039.png",
+    "wide": false
+  },
+  "wolt_73abb935b3c81db6c810afaf": {
+    "name": "2 Ludi | Platoze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a798ad967ba72467c292583"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-73abb935b3c81db6c810afaf.png",
+    "wide": false
+  },
+  "wolt_da31ed260bcc9da6ed270a8b": {
+    "name": "Namu•Namu",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65dc41e25c5dd637fe748313"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-da31ed260bcc9da6ed270a8b.png",
+    "wide": false
+  },
+  "wolt_6a013134071af72aa3b329d4": {
+    "name": "Florist Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a8c3bbe7ecaaba2fb1fe883"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-6a013134071af72aa3b329d4.png",
+    "wide": false
+  },
+  "wolt_e905905df621a6e07a1378fe": {
+    "name": "Amouré",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68db8605353913848670993a"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-e905905df621a6e07a1378fe.png",
+    "wide": false
+  },
+  "wolt_c83897c587b3efdfc6684bec": {
+    "name": "Gildia.Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0ec8b3f96e369ed0ad7f2a"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-c83897c587b3efdfc6684bec.png",
+    "wide": false
+  },
+  "wolt_a2de69fdedfdbed9a2d99373": {
+    "name": "Best Coffee Budapeshti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69a809aa82765cdac6a4ae79",
+      "osm_node_13591221852"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-a2de69fdedfdbed9a2d99373.png",
+    "wide": false
+  },
+  "wolt_cf4212e33ba8fb5155a0edb3": {
+    "name": "Miele Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63a179598c5952e8d1a86414"
+    ],
+    "categories": [
+      "houseware"
+    ],
+    "file": "wolt-cf4212e33ba8fb5155a0edb3.png",
+    "wide": false
+  },
+  "wolt_e19bde9eee09c80a0a1e066f": {
+    "name": "Gourmesso",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5fb223399ff3ebda063eb101"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-e19bde9eee09c80a0a1e066f.png",
+    "wide": false
+  },
+  "wolt_6361293c37d93c6afb854538": {
+    "name": "Alcorium Tskneti",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67dab211ab9d4fc6bc84d9fc",
+      "osm_node_9424893746"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-6361293c37d93c6afb854538.png",
+    "wide": false
+  },
+  "wolt_854e46cbea6663a2664ae2d6": {
+    "name": "Texas BBQ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69fc7db05826c2ecee806d58"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-854e46cbea6663a2664ae2d6.png",
+    "wide": false
+  },
+  "wolt_8d9b61e38d58f8009bad4dc0": {
+    "name": "Quanto Cuesta",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6980a69c1dd157e21a907741",
+      "osm_node_13609522401"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8d9b61e38d58f8009bad4dc0.png",
+    "wide": false
+  },
+  "wolt_7a9403811f23f3af70e52e27": {
+    "name": "Mr.chin",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1424c8faf005b3b6c584cc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7a9403811f23f3af70e52e27.png",
+    "wide": false
+  },
+  "wolt_5c812bea599a60bea97d93ed": {
+    "name": "Puer Rangers Tea Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_680f281f87b97fbcdb8ff2e3"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-5c812bea599a60bea97d93ed.png",
+    "wide": false
+  },
+  "wolt_b871e543806f9b3a0e826fb6": {
+    "name": "მაკდონალდს რივერსაიდ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66d6c8d644061d7b1dd43461"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-b871e543806f9b3a0e826fb6.png",
+    "wide": false
+  },
+  "wolt_2cf026e54e7a0016f4954347": {
+    "name": "Mugsy's Burger Vazha Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d2d8ab8af108201d60b1d77",
+      "osm_node_5563448025",
+      "directory_wolt_64da195869fba52057c5bfdf"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2cf026e54e7a0016f4954347.png",
+    "wide": false
+  },
+  "wolt_ce36a8e95dfd158aa121af1f": {
+    "name": "Napoli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61dc2e18d673dbf2af5a39a9",
+      "osm_node_10857829805"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ce36a8e95dfd158aa121af1f.png",
+    "wide": false
+  },
+  "wolt_f8b24684f58b756618ddc8d6": {
+    "name": "3 Shaurma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60e57125d7a8a2896eac1c4e",
+      "osm_node_10904100605"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-f8b24684f58b756618ddc8d6.png",
+    "wide": false
+  },
+  "wolt_c693b561dbc202402ea546cc": {
+    "name": "HB Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a33b2cc50e7fe93aae80d50"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c693b561dbc202402ea546cc.png",
+    "wide": false
+  },
+  "wolt_45a5b8c3d0b53d48a09d7015": {
+    "name": "Olio Pizza Napoletana",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67693309977c18361f36f0e5",
+      "osm_node_12403317078"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-45a5b8c3d0b53d48a09d7015.png",
+    "wide": false
+  },
+  "wolt_a1cbca54912fb3c49ed9be56": {
+    "name": "Plov Center",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68527e6d307285bb82ff5f22"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a1cbca54912fb3c49ed9be56.png",
+    "wide": false
+  },
+  "wolt_78e9d40d5ecb1dbb37cc521b": {
+    "name": "Keria Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6968c4686e84712d06364434",
+      "osm_node_13477010701"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-78e9d40d5ecb1dbb37cc521b.png",
+    "wide": false
+  },
+  "wolt_7ac350dbc134418c25620b9b": {
+    "name": "Sushi Hut Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63985234ee9374c41939dfb0",
+      "osm_node_12015310569"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-7ac350dbc134418c25620b9b.png",
+    "wide": false
+  },
+  "wolt_03e38245bf0d213967b2dc65": {
+    "name": "Sachebureke N1 Pekini",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5d8c59c9915a09a9cdc79b4a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-03e38245bf0d213967b2dc65.png",
+    "wide": false
+  },
+  "wolt_d0c4ff9e9fb3972abcb8dab0": {
+    "name": "Sushico Sushi Vazha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cf78318de30dcaf816f8b7"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d0c4ff9e9fb3972abcb8dab0.png",
+    "wide": false
+  },
+  "wolt_052cac7424f2b08b404fdbc6": {
+    "name": "Teremok",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5be926147bf4e7000a5a0aef",
+      "osm_node_1401085006"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-052cac7424f2b08b404fdbc6.png",
+    "wide": false
+  },
+  "wolt_5980e1cbc653d4ec7849a0a3": {
+    "name": "Kievuri",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_62d00c459c5e981c1044db2f"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5980e1cbc653d4ec7849a0a3.png",
+    "wide": false
+  },
+  "wolt_09cbfe660e9117553e182d8a": {
+    "name": "Mardebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab0e0214a88d4f720999786"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-09cbfe660e9117553e182d8a.png",
+    "wide": false
+  },
+  "wolt_375e2c1243bfd379313e2950": {
+    "name": "ცხელი ვოკი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66f134de76d3361d8a3dd9ad"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-375e2c1243bfd379313e2950.png",
+    "wide": false
+  },
+  "wolt_1f46a9ab6819a552d20afdc5": {
+    "name": "Tiziano By Legateau",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f772fc6a905b23ee71a5f32"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-1f46a9ab6819a552d20afdc5.png",
+    "wide": false
+  },
+  "wolt_bc8589bb953213b55d01a56e": {
+    "name": "Grill More Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_671b5ddae1ece3207807af3d",
+      "osm_node_10795544565"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-bc8589bb953213b55d01a56e.png",
+    "wide": false
+  },
+  "wolt_5053097bced0acb5b55e6ad8": {
+    "name": "Good Choice BBQ",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a327fdc1940445ac324f2b1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-5053097bced0acb5b55e6ad8.png",
+    "wide": false
+  },
+  "wolt_dc3a3c1a3e8d147870db8bec": {
+    "name": "Borsch & Pelmeni Vake",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_667d44e416a65d7b95b008ba"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-dc3a3c1a3e8d147870db8bec.png",
+    "wide": false
+  },
+  "wolt_3be9d004c7c679e123f8ad09": {
+    "name": "Shua Kalaki Vazha Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d27fe36d6c99530b044231",
+      "osm_node_841947149"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3be9d004c7c679e123f8ad09.png",
+    "wide": false
+  },
+  "wolt_79f8fb0e50c0ba2d4b4456ff": {
+    "name": "Fork",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5c65c6eb860a00000c17643c",
+      "osm_node_1734172601"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-79f8fb0e50c0ba2d4b4456ff.png",
+    "wide": false
+  },
+  "wolt_cd9d330ad750a773c91f3e6d": {
+    "name": "Czech Beer House",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5bd02e4093f4f3000ccdfc0c",
+      "osm_node_4639672996"
+    ],
+    "categories": [
+      "pub"
+    ],
+    "file": "wolt-cd9d330ad750a773c91f3e6d.png",
+    "wide": false
+  },
+  "wolt_a054e1a65573429e520faae6": {
+    "name": "Begheli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_646cb4779f1d8df935d437ce",
+      "osm_node_411668809"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a054e1a65573429e520faae6.png",
+    "wide": false
+  },
+  "wolt_c4b207f9322bfc1c42ade8a4": {
+    "name": "Sushico Vazha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cf79678de30dcaf816f905"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c4b207f9322bfc1c42ade8a4.png",
+    "wide": false
+  },
+  "wolt_e116358e5ecb6aae41b4edf6": {
+    "name": "Megruli Kera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67865c0ff868aa72944bcba0"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e116358e5ecb6aae41b4edf6.png",
+    "wide": false
+  },
+  "wolt_170ac99e120e220590186eb0": {
+    "name": "Kievuri Nutsubidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_666310412cc57679ef6e50cb",
+      "osm_node_12228117865"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-170ac99e120e220590186eb0.png",
+    "wide": false
+  },
+  "wolt_2f682dcfa417c749c7156ca4": {
+    "name": "Nekni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698ef5cf3a4e1937d6dbe864"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-2f682dcfa417c749c7156ca4.png",
+    "wide": false
+  },
+  "wolt_97f6a3c9db0c8c6929078d75": {
+    "name": "Sameo City Mall",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5a63460718ed6a51b165b9"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-97f6a3c9db0c8c6929078d75.png",
+    "wide": false
+  },
+  "wolt_a5d001527be3dce65a0b95cf": {
+    "name": "Chiko's",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e1fe44ec1d5f43c217e627",
+      "osm_node_10095670618"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-a5d001527be3dce65a0b95cf.png",
+    "wide": false
+  },
+  "wolt_7d5264696048f62e909863f9": {
+    "name": "Lucme",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1d52ea8973e81ca9d26354"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7d5264696048f62e909863f9.png",
+    "wide": false
+  },
+  "wolt_3abb063dab31888fa76e33f7": {
+    "name": "Zetsiuri Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6981e84cae7b768aa2dd7c41"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-3abb063dab31888fa76e33f7.png",
+    "wide": false
+  },
+  "wolt_9f63c8463d0167509ab10e44": {
+    "name": "Kado Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa795741a65be7c2c39e964"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9f63c8463d0167509ab10e44.png",
+    "wide": false
+  },
+  "wolt_73c70b6fa4bce33f6343729f": {
+    "name": "Manano Family Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67c83026ef81c50486aed13d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-73c70b6fa4bce33f6343729f.png",
+    "wide": false
+  },
+  "wolt_0a35ac26fda521136b59b7fd": {
+    "name": "sTrEAT BBQ&GRILL",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a33af325a7a3146daaed99e"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0a35ac26fda521136b59b7fd.png",
+    "wide": false
+  },
+  "wolt_da8579e4d2a7a18aa2410ed7": {
+    "name": "Rtveli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63773ffe3aa53622259142d7",
+      "osm_node_10998080606"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-da8579e4d2a7a18aa2410ed7.png",
+    "wide": false
+  },
+  "wolt_2055f4d185a9d3fad87caa9d": {
+    "name": "Burger Bar Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5e70a04a721934e0d53bbb6b",
+      "osm_node_4438713162"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-2055f4d185a9d3fad87caa9d.png",
+    "wide": false
+  },
+  "wolt_8c5db7060ba880077fefb163": {
+    "name": "Alive Flowers",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa7ebcb1a65be7c2c3a0d80"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-8c5db7060ba880077fefb163.png",
+    "wide": false
+  },
+  "wolt_68302cb504e19335a743474e": {
+    "name": "Atsma Cooked By Shemomechama",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67fe56262e1b588af4e51e1b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-68302cb504e19335a743474e.png",
+    "wide": false
+  },
+  "wolt_8c6f086b29c013e0ee1fb45b": {
+    "name": "Sormoni",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5cd2c5cb6e2f876cba2ef10d",
+      "osm_node_4030312535"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8c6f086b29c013e0ee1fb45b.png",
+    "wide": false
+  },
+  "wolt_e2486eafb20dfd2abc810678": {
+    "name": "Break",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a05795ca8e61e57733d3e9b"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e2486eafb20dfd2abc810678.png",
+    "wide": false
+  },
+  "wolt_8c82c2ae2d31a186c3fe6f6a": {
+    "name": "Paulaner Fan Club",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6000103b17600f6dbc9abb65"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-8c82c2ae2d31a186c3fe6f6a.png",
+    "wide": false
+  },
+  "wolt_a540f32911de60740446db17": {
+    "name": "Dzveli Kera",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69de340fc40785da2000b9e7"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-a540f32911de60740446db17.png",
+    "wide": false
+  },
+  "wolt_c9e35d388b44cfca81d2bc44": {
+    "name": "Food and Market",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_606d96f501b0319f226bc1d1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-c9e35d388b44cfca81d2bc44.png",
+    "wide": false
+  },
+  "wolt_836141db1b05144424acc25b": {
+    "name": "ეკომი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f45050685a11b8eb7ee900"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-836141db1b05144424acc25b.png",
+    "wide": false
+  },
+  "wolt_63cc85e5c333c8c1fad222ef": {
+    "name": "MooQy QooQy",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_61768fac5a9eb198e0ff3a98"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-63cc85e5c333c8c1fad222ef.png",
+    "wide": false
+  },
+  "wolt_d956d67189a2d3149fc5b783": {
+    "name": "Kichili",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0c094fe3e11dfcfdd7bec2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-d956d67189a2d3149fc5b783.png",
+    "wide": false
+  },
+  "wolt_3023b618dc7025c12e5ca1d0": {
+    "name": "Ready Rooster",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6890968e5bc98683d55b28f5",
+      "osm_node_11971756069"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-3023b618dc7025c12e5ca1d0.png",
+    "wide": false
+  },
+  "wolt_222cc4bb91e47654bffd17e9": {
+    "name": "Veloria",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5631268445211fe68f4b7a"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-222cc4bb91e47654bffd17e9.png",
+    "wide": false
+  },
+  "wolt_9ec4d40e0943785e7d5782b1": {
+    "name": "Shiraki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5de005c4a60929bb2209c6"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-9ec4d40e0943785e7d5782b1.png",
+    "wide": false
+  },
+  "wolt_c98cf18c4f72a56cdf72561c": {
+    "name": "Rachvelebi Vazha-Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_659d2162779c5a241c80f992",
+      "osm_node_12400694374"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-c98cf18c4f72a56cdf72561c.png",
+    "wide": false
+  },
+  "wolt_916caa71a4abde23cd1a5549": {
+    "name": "Tiali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69f4703feb7cb52c220d955d"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-916caa71a4abde23cd1a5549.png",
+    "wide": false
+  },
+  "wolt_61a985fa8ebcb4246af3643a": {
+    "name": "Costa Coffee Kazbegi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68babb63265d5040067ff34d"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-61a985fa8ebcb4246af3643a.png",
+    "wide": false
+  },
+  "wolt_e34a82c4e09422e70dad4ade": {
+    "name": "Akve Delisze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63972fe2c44e4b9ba41723f6"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-e34a82c4e09422e70dad4ade.png",
+    "wide": false
+  },
+  "wolt_431ffd719c0a48ddfbf61fc2": {
+    "name": "ლა კროსტა",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67226e7f191e81a2671ed271"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-431ffd719c0a48ddfbf61fc2.png",
+    "wide": false
+  },
+  "wolt_e49130712ed847f8516a9444": {
+    "name": "Grosetto Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68eca462a688d02296b23ec2"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-e49130712ed847f8516a9444.png",
+    "wide": false
+  },
+  "wolt_be1cd20d63827b992e55001b": {
+    "name": "De Camille",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_65d8700dd1987e019e2a4f92"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-be1cd20d63827b992e55001b.png",
+    "wide": false
+  },
+  "wolt_045203d8400e0c1bfdd5c2b2": {
+    "name": "Scarlet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6852c5cfec610bc356041993"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-045203d8400e0c1bfdd5c2b2.png",
+    "wide": false
+  },
+  "wolt_3d70a20d0a9c239cb36c2066": {
+    "name": "Casa Italia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a70a6d1c15323d82abb728a"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3d70a20d0a9c239cb36c2066.png",
+    "wide": false
+  },
+  "wolt_4d6945f65e871ce04291ce21": {
+    "name": "Yellowpot Vegan Food",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66cc4d54419aae71755b4c73"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-4d6945f65e871ce04291ce21.png",
+    "wide": false
+  },
+  "wolt_9b4aa67b69603adaa25b0d47": {
+    "name": "Aurelion Pizza",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ac5f68fe5a47be75b6b1fc0"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-9b4aa67b69603adaa25b0d47.png",
+    "wide": false
+  },
+  "wolt_a3dc7976d80b9ea449cb6324": {
+    "name": "Cherry Land Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a5e210f018d21e497179ecc"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a3dc7976d80b9ea449cb6324.png",
+    "wide": false
+  },
+  "wolt_efe2c1370c377c3ffe0d3178": {
+    "name": "Bistro By Gastronome",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_60a4eb14bf7cb6d9fde71d76",
+      "osm_relation_17845195"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-efe2c1370c377c3ffe0d3178.png",
+    "wide": false
+  },
+  "wolt_9632da62e84dd7557d98de8f": {
+    "name": "Steakhouse By Gastronome Vazha Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4259f4cd089684d46969a5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-9632da62e84dd7557d98de8f.png",
+    "wide": false
+  },
+  "wolt_3a1d3229c49e607612f86e57": {
+    "name": "Mshia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a06ce153bcfe10517936748"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-3a1d3229c49e607612f86e57.png",
+    "wide": false
+  },
+  "wolt_a928b00069060b21b18f9a7a": {
+    "name": "Juxianju",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68a5d060597543cf09ba213b",
+      "osm_node_13674869101"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-a928b00069060b21b18f9a7a.png",
+    "wide": false
+  },
+  "wolt_25406d4d7c955da97b620b67": {
+    "name": "Quesadillas",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5f3e3d4eb64ade2b13ed70a5"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-25406d4d7c955da97b620b67.png",
+    "wide": false
+  },
+  "wolt_498e5753bb946a0c602c8f7e": {
+    "name": "მუსი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a043ef15d8f1c7e6b86ef9e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-498e5753bb946a0c602c8f7e.png",
+    "wide": false
+  },
+  "wolt_0c0ca9814a2987c7287de158": {
+    "name": "Pelmenina",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6983017b5a199b63060afa17"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-0c0ca9814a2987c7287de158.png",
+    "wide": false
+  },
+  "wolt_87100c46f4486749fed43334": {
+    "name": "Unity Bistro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a7af3e53c5e7d838b49d619",
+      "osm_node_9891993723"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-87100c46f4486749fed43334.png",
+    "wide": false
+  },
+  "wolt_b6a115f915d0da920216fe96": {
+    "name": "Bloom Baby",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4b78e08bfe427946044a92"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-b6a115f915d0da920216fe96.png",
+    "wide": false
+  },
+  "wolt_34a7aa1e0fb1533b3d0dd55e": {
+    "name": "Verdine Flowers Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aace5a448b0b435cd2e9ccd"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-34a7aa1e0fb1533b3d0dd55e.png",
+    "wide": false
+  },
+  "wolt_f97d9870532dd03e0221d42e": {
+    "name": "ბულანჟერია ბრეტონი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_66d5aaf509b0b0eb17c2fa4e",
+      "directory_wolt_66d5a356199e9023506a4448"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-f97d9870532dd03e0221d42e.png",
+    "wide": false
+  },
+  "wolt_0a625d7c3fd14e242dc0aba1": {
+    "name": "Jaffa Shawarma",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e09b52fb9e4f6854790a0b",
+      "osm_node_10998482652"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0a625d7c3fd14e242dc0aba1.png",
+    "wide": false
+  },
+  "wolt_cb71941378fe90e29d92812e": {
+    "name": "Corner82",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68be92aa24096912a9ed63b0"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-cb71941378fe90e29d92812e.png",
+    "wide": false
+  },
+  "wolt_899d54bd0c6a3f2700b4c99f": {
+    "name": "Keppe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6842ab8a8c2561bb2fd43097"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-899d54bd0c6a3f2700b4c99f.png",
+    "wide": false
+  },
+  "wolt_a5aaefeda24807a0d3b0d300": {
+    "name": "Sane Mzareulo Frozen",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a6b255007548be1fbae8875",
+      "directory_wolt_6a6b0d1ab64f30e6898f4a32"
+    ],
+    "categories": [
+      "convenience",
+      "restaurant"
+    ],
+    "file": "wolt-a5aaefeda24807a0d3b0d300.png",
+    "wide": false
+  },
+  "wolt_13461d9b56a9f5a353da5921": {
+    "name": "Kerki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_693817ac3b72d2b4d8c8225e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-13461d9b56a9f5a353da5921.png",
+    "wide": false
+  },
+  "wolt_ab88b3f104633184f5178c7c": {
+    "name": "Roitel",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3a2d6c008147146c387afa"
+    ],
+    "categories": [
+      "electronics"
+    ],
+    "file": "wolt-ab88b3f104633184f5178c7c.png",
+    "wide": false
+  },
+  "wolt_e2d33e2bb8b8bfe4b130d51b": {
+    "name": "Filicori Zecchini",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3b9dd3c4084f22218737b8"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-e2d33e2bb8b8bfe4b130d51b.png",
+    "wide": false
+  },
+  "wolt_693b595d8919d5f28fa1684d": {
+    "name": "MONCHI",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aba4b965312ca90f07294f0"
+    ],
+    "categories": [
+      "toys"
+    ],
+    "file": "wolt-693b595d8919d5f28fa1684d.png",
+    "wide": false
+  },
+  "wolt_31eb55622cd2da7cb16bc158": {
+    "name": "Sanctea - Chinese Tea",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ee2151cbac51fc5a603c0e"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-31eb55622cd2da7cb16bc158.png",
+    "wide": false
+  },
+  "wolt_52d7e96d4a8b14e6f1313aaa": {
+    "name": "შირნჰოფერი",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_5cb6e34092c364000ecee73c",
+      "osm_node_11891350069"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-52d7e96d4a8b14e6f1313aaa.png",
+    "wide": false
+  },
+  "wolt_fda1cf3a6de0f35d9bc4e301": {
+    "name": "Livin",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_609cf27bfa92ca539dbd7cc2",
+      "osm_node_11288930021"
+    ],
+    "categories": [
+      "furniture"
+    ],
+    "file": "wolt-fda1cf3a6de0f35d9bc4e301.png",
+    "wide": false
+  },
+  "wolt_9711180041ed2224dd49611c": {
+    "name": "Lemme",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a1413f5345844ed9c3ac167"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-9711180041ed2224dd49611c.png",
+    "wide": false
+  },
+  "wolt_11d657ddb0e5570c0a7db790": {
+    "name": "Spacebox Saburtalo 2",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68dfce475ddff8ba5ce93098"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-11d657ddb0e5570c0a7db790.png",
+    "wide": false
+  },
+  "wolt_47fc2c260b4b3c0232b11e2a": {
+    "name": "ABC Desserts",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67eb909122fac043138ee743"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-47fc2c260b4b3c0232b11e2a.png",
+    "wide": false
+  },
+  "wolt_3a22175a9c0130a34d7d1cd9": {
+    "name": "Europharma Asatiani",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69c56f37b71b876cc8a967d3",
+      "directory_wolt_69c56ea96c751d494511910b"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-3a22175a9c0130a34d7d1cd9.png",
+    "wide": false
+  },
+  "wolt_acf10a69ef976a45b901d9ed": {
+    "name": "Lit4u",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a292a1887e79eae11d06f66"
+    ],
+    "categories": [
+      "gifts"
+    ],
+    "file": "wolt-acf10a69ef976a45b901d9ed.png",
+    "wide": false
+  },
+  "wolt_1315583018fff878cda8cc7b": {
+    "name": "Fm World Georgia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a105997cdaaf66c553e1578"
+    ],
+    "categories": [
+      "cosmetics"
+    ],
+    "file": "wolt-1315583018fff878cda8cc7b.png",
+    "wide": false
+  },
+  "wolt_1cd737ead52a64dfd95cb82f": {
+    "name": "Granella Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a4cc74a84429c84a0d423d6"
+    ],
+    "categories": [
+      "coffee-shop"
+    ],
+    "file": "wolt-1cd737ead52a64dfd95cb82f.png",
+    "wide": false
+  },
+  "wolt_dc14da8ab882a3bd3531a451": {
+    "name": "Bloom - Flowers & Gifts",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68b550e35a8ba2008a8c1427"
+    ],
+    "categories": [
+      "florist"
+    ],
+    "file": "wolt-dc14da8ab882a3bd3531a451.png",
+    "wide": false
+  },
+  "wolt_75622937b6fee6d0b8f554b3": {
+    "name": "Ramos MacShaurma Sandro Euli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a568c50b6ffe12416b60224",
+      "osm_node_13923096505"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-75622937b6fee6d0b8f554b3.png",
+    "wide": false
+  },
+  "wolt_7529912623ccefd35f78e418": {
+    "name": "Assorti Nutsubidze",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6406f84be1fc0416adf0481a",
+      "osm_node_5892511187",
+      "directory_wolt_67dc5f572e75c70c555c9991"
+    ],
+    "categories": [
+      "bakery",
+      "confectionery"
+    ],
+    "file": "wolt-7529912623ccefd35f78e418.png",
+    "wide": false
+  },
+  "wolt_90100ca2f33383aef1a51773": {
+    "name": "iSushi Saburtalo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6aa795741a65be7c2c39e965"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-90100ca2f33383aef1a51773.png",
+    "wide": false
+  },
+  "wolt_0980f18bf52c4b06dd9191ef": {
+    "name": "Lafshico Vazha",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69cf80b0b1141df885fa4805"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0980f18bf52c4b06dd9191ef.png",
+    "wide": false
+  },
+  "wolt_4c676755ed707dbe3c216c8d": {
+    "name": "SUSHI YUZU",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e62102e52932b7e5784836"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-4c676755ed707dbe3c216c8d.png",
+    "wide": false
+  },
+  "wolt_261fce0ff124c6592b429c7d": {
+    "name": "Spacebox",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6152e8881ae318de90c6ee2f"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-261fce0ff124c6592b429c7d.png",
+    "wide": false
+  },
+  "wolt_f8cfaa2f3b02353e17b10934": {
+    "name": "Modi Bosho",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_691ec2f952d938eb57b521e8"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-f8cfaa2f3b02353e17b10934.png",
+    "wide": false
+  },
+  "wolt_fb735773ed2f22683ee3c140": {
+    "name": "Satoro Sushi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d95547da79af5992dbe394"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-fb735773ed2f22683ee3c140.png",
+    "wide": false
+  },
+  "wolt_0e2a4762e7c46b1ec19cc7db": {
+    "name": "Trident",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0edc2c3cd38ba762494df3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-0e2a4762e7c46b1ec19cc7db.png",
+    "wide": false
+  },
+  "wolt_c1ceec83e6c4704f9b7e5c5b": {
+    "name": "Pizza & Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6852db6a46128ed62584dcfb"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-c1ceec83e6c4704f9b7e5c5b.png",
+    "wide": false
+  },
+  "wolt_6dbee0c254340a9267343850": {
+    "name": "Miraki",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0180a2e7fc956163078811",
+      "osm_node_14003222801"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-6dbee0c254340a9267343850.png",
+    "wide": false
+  },
+  "wolt_30b29daccece5e2324a41eb5": {
+    "name": "Kaffachio",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68b813544959a43057aadc40"
+    ],
+    "categories": [
+      "coffee-shop"
+    ],
+    "file": "wolt-30b29daccece5e2324a41eb5.png",
+    "wide": false
+  },
+  "wolt_d932fcd27673f05140bfcb6b": {
+    "name": "Lomidze Winery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9e7754fbb2657426ad95c7"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-d932fcd27673f05140bfcb6b.png",
+    "wide": false
+  },
+  "wolt_2fcf929861c1962bdd7ffd33": {
+    "name": "Saojakho Gemo",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a86d1e680b2699149fe0d74"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-2fcf929861c1962bdd7ffd33.png",
+    "wide": false
+  },
+  "wolt_7cff175196e8a242c549fc9e": {
+    "name": "Student's Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695f673797434e36695127c2",
+      "osm_node_12778811501"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-7cff175196e8a242c549fc9e.png",
+    "wide": false
+  },
+  "wolt_6de17355dc1f564635fde972": {
+    "name": "Burger Planet",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6979eee25157e4cc9ab0be40"
+    ],
+    "categories": [
+      "fast-food"
+    ],
+    "file": "wolt-6de17355dc1f564635fde972.png",
+    "wide": false
+  },
+  "wolt_18d5795b7056d461e1887762": {
+    "name": "Sairme Bakery - Bistro",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_695d1268fc5cbfd2a07c84aa"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-18d5795b7056d461e1887762.png",
+    "wide": false
+  },
+  "wolt_ec4b614daa9580b8e3ea2f06": {
+    "name": "Mela Vazha Pshavela",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6502e67e504f14daf8c39fa3"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-ec4b614daa9580b8e3ea2f06.png",
+    "wide": false
+  },
+  "wolt_cc642f4f72885573b89346b7": {
+    "name": "YiYi Korean Restaurant",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef52e1685693124fd474a8"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-cc642f4f72885573b89346b7.png",
+    "wide": false
+  },
+  "wolt_f0b19860b9b09fd70702b094": {
+    "name": "Tserti Cafe",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_664df39bab3d6b9a54eb459b"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-f0b19860b9b09fd70702b094.png",
+    "wide": false
+  },
+  "wolt_e910a761617595c0891cae6b": {
+    "name": "Kudigora",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0eecd2d17b148b9d19fee7",
+      "osm_node_10781831228"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-e910a761617595c0891cae6b.png",
+    "wide": false
+  },
+  "wolt_48305ca7e2a4ee4019c92c42": {
+    "name": "Fluffy Box",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a9e6abbfbb2657426ad91f4"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-48305ca7e2a4ee4019c92c42.png",
+    "wide": false
+  },
+  "wolt_18b11c03c20af1d78147c1cb": {
+    "name": "GRANO BAKERY",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a0b0459ca464a5a5422e625"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-18b11c03c20af1d78147c1cb.png",
+    "wide": false
+  },
+  "wolt_994f2991c67f60c2a122f7da": {
+    "name": "Ocha Bar",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6ab63ce4426d8eb391883780"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-994f2991c67f60c2a122f7da.png",
+    "wide": false
+  },
+  "wolt_d76cb511945254a12dd3b834": {
+    "name": "Hot Taste",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69ef2889a077195bf83906c7"
+    ],
+    "categories": [
+      "bakery"
+    ],
+    "file": "wolt-d76cb511945254a12dd3b834.png",
+    "wide": false
+  },
+  "wolt_2ff8b2524dfd96816168caeb": {
+    "name": "Lucky Bakery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69e0c6b86bcf23698977bc66"
+    ],
+    "categories": [
+      "confectionery"
+    ],
+    "file": "wolt-2ff8b2524dfd96816168caeb.png",
+    "wide": false
+  },
+  "wolt_551188e31f77cd5fde04dfac": {
+    "name": "Prime Cut",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a2b3d178082700adc7d79bc"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-551188e31f77cd5fde04dfac.png",
+    "wide": false
+  },
+  "wolt_18617cdba2e27b7e9244d33a": {
+    "name": "Tkveni Mosavali",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67a0b27cefac5e3f364a0fec"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-18617cdba2e27b7e9244d33a.png",
+    "wide": false
+  },
+  "wolt_2e75e95635e5d08802564279": {
+    "name": "Pea.nut Store admins",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_69414d5382b8f8204a7d2cca"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-2e75e95635e5d08802564279.png",
+    "wide": false
+  },
+  "wolt_3e0b0132a9e736997b58dffe": {
+    "name": "Fragola Shop",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67d9180caa9b4161ab51de4b",
+      "osm_node_11681819276"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-3e0b0132a9e736997b58dffe.png",
+    "wide": false
+  },
+  "wolt_618b5785567dbc6bc030ae6f": {
+    "name": "Kvareli Winery",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_685ba47607f09ac9b83ddf27"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-618b5785567dbc6bc030ae6f.png",
+    "wide": false
+  },
+  "wolt_085d3e9df3b03760f7ce73e0": {
+    "name": "Mtiuli",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6081181f89e116bcefa41f04"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-085d3e9df3b03760f7ce73e0.png",
+    "wide": false
+  },
+  "wolt_06ae3b1c708b75d999b6755c": {
+    "name": "Kaklebi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_682aefec3761bfe5822bd44e",
+      "osm_node_12670063418"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-06ae3b1c708b75d999b6755c.png",
+    "wide": false
+  },
+  "wolt_34a9fc320cda6ea27b8473f0": {
+    "name": "Alze Barbecue",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3ce526c67ece321b1063b1"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-34a9fc320cda6ea27b8473f0.png",
+    "wide": false
+  },
+  "wolt_2a22b410cce88d67cbdf85ca": {
+    "name": "Chona Craft Beer Store",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6a3a46becacdc0d3067812b4"
+    ],
+    "categories": [
+      "alcohol"
+    ],
+    "file": "wolt-2a22b410cce88d67cbdf85ca.png",
+    "wide": false
+  },
+  "wolt_e971c97da5d0b933f7b8b4f7": {
+    "name": "ნიბლე",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_63da1d77540359bf4fb4601c",
+      "osm_node_11052609805"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-e971c97da5d0b933f7b8b4f7.png",
+    "wide": false
+  },
+  "wolt_feec3a49c2d06b5eb329cde7": {
+    "name": "Tempeh Tbilisi",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_6969f4480c74ba1473bba573"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-feec3a49c2d06b5eb329cde7.png",
+    "wide": false
+  },
+  "wolt_4d3c725bc4de74825a31b65e": {
+    "name": "4 პასტა",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_698c5856eecb7a35161171bf"
+    ],
+    "categories": [
+      "convenience"
+    ],
+    "file": "wolt-4d3c725bc4de74825a31b65e.png",
+    "wide": false
+  },
+  "wolt_28aea3200cdb76e510c43386": {
+    "name": "Siesta 365",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_68ff6ee500cafb6fa4fc19a8",
+      "osm_node_12786164001"
+    ],
+    "categories": [
+      "cafe"
+    ],
+    "file": "wolt-28aea3200cdb76e510c43386.png",
+    "wide": false
+  },
+  "wolt_246e1d7eb4e6c07961a2b854": {
+    "name": "Okros Varia",
+    "aliases": [],
+    "placeIds": [
+      "directory_wolt_67408fd32bea98002de703f2"
+    ],
+    "categories": [
+      "restaurant"
+    ],
+    "file": "wolt-246e1d7eb4e6c07961a2b854.png",
+    "wide": false
+  }
+};

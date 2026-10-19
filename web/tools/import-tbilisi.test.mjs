@@ -68,11 +68,15 @@ test('published snapshot shards are complete, attributed and all directory links
   assert.ok(manifest.source.sourceDate && manifest.attribution.includes('OpenStreetMap'));
   assert.equal(manifest.license,'ODbL-1.0');
   assert.ok(records.every(p=>readCoordinates(p)));
-  assert.ok(records.every(p=>p.id.startsWith('osm_') ? p.raw.sourceUrl.startsWith('https://www.openstreetmap.org/') : p.raw.source==='official-directory' && p.raw.sourceCertainty && manifest.officialSources.includes(p.raw.sourceUrl)));
+  assert.ok(records.every(p=>p.id.startsWith('osm_') ? p.raw.sourceUrl.startsWith('https://www.openstreetmap.org/') : ['official-directory','merchant-directory'].includes(p.raw.source) && p.raw.sourceCertainty && (manifest.directorySources || manifest.officialSources).includes(p.raw.sourceUrl)));
   assert.equal(records.filter(p=>p.id.startsWith('directory_')).length,manifest.supplementalPlaceCount);
   assert.equal(records.filter(p=>p.raw.originalSourceCenter).length,manifest.coordinateCorrections);
   for(const place of records.filter(p=>p.raw.parentPlaceId)) assert.ok(ids.has(place.raw.parentPlaceId),`Missing indoor parent ${place.raw.parentPlaceId}`);
-  assert.ok(records.every(p=>!p.photos && !p.rating && !p.price));
+  assert.ok(records.every(p=>!p.rating && !p.price));
+  for (const record of records.filter(place=>place.photos?.length)) {
+    assert.equal(record.photos.length,record.raw.photoCredits.length);
+    assert.ok(record.photos.every(url=>record.raw.photoCredits.some(photo=>photo.url===url && photo.sourceUrl && photo.originalUrl && photo.sha256)),'published photos have exact source attribution');
+  }
   for(const mall of records.filter(p=>p.raw.tenantIds)) for(const id of mall.raw.tenantIds) assert.ok(ids.has(id),`Missing mall tenant ${id}`);
   const sourceIds=new Set();
   for(const shard of manifest.shards) {

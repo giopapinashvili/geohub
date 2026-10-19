@@ -1,0 +1,3291 @@
+{
+  "checkedAt": "2026-10-19",
+  "records": 729,
+  "byMall": {
+    "galleria": 161,
+    "city-mall-saburtalo": 265,
+    "city-mall-gldani": 67,
+    "eastpoint": 227
+  },
+  "matchedExisting": 316,
+  "matches": [
+    {
+      "id": "directory_mall_galleria_c5468bc72d46",
+      "matchedPlaceId": "osm_node_10295008356",
+      "name": "Afflelou Paris",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_1416056edfd2",
+      "matchedPlaceId": "osm_node_10295008359",
+      "name": "Armani Exchange",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_f83331e9c1c4",
+      "matchedPlaceId": "osm_node_10295008361",
+      "name": "Arttime",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_23743baad8aa",
+      "matchedPlaceId": "osm_node_10295008393",
+      "name": "Atrio",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_e791b9670956",
+      "matchedPlaceId": "osm_node_10295008422",
+      "name": "Avtandil",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_1c775d81c37e",
+      "matchedPlaceId": "osm_node_10295008431",
+      "name": "AW Lab",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_3530ddd434f0",
+      "matchedPlaceId": "osm_node_13907937933",
+      "name": "Bang & Olufsen",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_4e2487235ea8",
+      "matchedPlaceId": "osm_node_10295008369",
+      "name": "Beauty Vision",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_59d250391614",
+      "matchedPlaceId": "osm_node_10295008404",
+      "name": "Bene Shoes",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_52482187787a",
+      "matchedPlaceId": "osm_node_10295008426",
+      "name": "Biblusi",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_070c92057a8d",
+      "matchedPlaceId": "osm_node_10295008353",
+      "name": "Calzedonia",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_eed7a36dfd94",
+      "matchedPlaceId": "osm_node_10295008424",
+      "name": "Carter's",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_c100eef81776",
+      "matchedPlaceId": "osm_node_10295008360",
+      "name": "Delfos",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_5bc4d375edf3",
+      "matchedPlaceId": "osm_node_10295008416",
+      "name": "Espacho",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_e7b47fcbd1c4",
+      "matchedPlaceId": "osm_node_10295008382",
+      "name": "Factory",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_0e3b95507467",
+      "matchedPlaceId": "osm_node_10295008347",
+      "name": "Franco Fontana",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_93fd2dfd3263",
+      "matchedPlaceId": "osm_node_10295008400",
+      "name": "Furla",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_06df82ecb127",
+      "matchedPlaceId": "osm_node_10295008405",
+      "name": "Gant",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_f5cbdcff59fd",
+      "matchedPlaceId": "osm_node_10295008378",
+      "name": "Goodwill",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_25273deef821",
+      "matchedPlaceId": "osm_node_10295008391",
+      "name": "guess",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_2ea2ef968819",
+      "matchedPlaceId": "osm_node_6455969395",
+      "name": "H&M",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_ee6d2140ccfe",
+      "matchedPlaceId": "osm_node_10295008397",
+      "name": "iSpace",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_26dadf502b98",
+      "matchedPlaceId": "osm_node_10295008373",
+      "name": "JBL",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_b7bcdca33a28",
+      "matchedPlaceId": "osm_node_10295008362",
+      "name": "JYSK",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_8b600e9ef2c0",
+      "matchedPlaceId": "osm_node_10295008410",
+      "name": "Kenari",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_6cca4e94aa64",
+      "matchedPlaceId": "osm_node_10295008423",
+      "name": "Kid’s Gallery",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_ce5a4eb789d6",
+      "matchedPlaceId": "osm_node_13266845201",
+      "name": "L'OCCITANE",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_fa939e44ec5a",
+      "matchedPlaceId": "osm_node_10295008430",
+      "name": "LACE UP",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_2a89798b2e10",
+      "matchedPlaceId": "osm_node_10295008394",
+      "name": "Lacoste",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_9ba7bb2cefdc",
+      "matchedPlaceId": "osm_node_6777069673",
+      "name": "Lc Waikiki",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_c6e9a733a430",
+      "matchedPlaceId": "osm_node_10295008387",
+      "name": "Levi's",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_c45e257bb9d6",
+      "matchedPlaceId": "osm_node_10295008408",
+      "name": "Lion of Porches",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_1766b6383312",
+      "matchedPlaceId": "osm_node_10295008344",
+      "name": "Lutecia",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_e4d386072dad",
+      "matchedPlaceId": "osm_node_10295008346",
+      "name": "M·A·C Cosmetics",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_b865e015e5b9",
+      "matchedPlaceId": "osm_node_10295008377",
+      "name": "Madame Coco",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_28ae3b696bcc",
+      "matchedPlaceId": "osm_node_10295008414",
+      "name": "Mayoral",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_a85c6d6f9c76",
+      "matchedPlaceId": "osm_node_10295008364",
+      "name": "Mobo",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_9157fd482643",
+      "matchedPlaceId": "osm_node_10295008412",
+      "name": "MONNALISA",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_c8d57289beb0",
+      "matchedPlaceId": "osm_node_10295008350",
+      "name": "New Yorker",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_5107bba1b17b",
+      "matchedPlaceId": "osm_node_10295008411",
+      "name": "Original Marines",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_5953c0601aad",
+      "matchedPlaceId": "osm_node_10295008358",
+      "name": "Pandora",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_d4ad0f0f4df0",
+      "matchedPlaceId": "osm_node_10295008390",
+      "name": "Patrizia Pepe",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_d16f27bd9fb0",
+      "matchedPlaceId": "osm_node_10295008384",
+      "name": "Pepe Jeans",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_3e10f528d57f",
+      "matchedPlaceId": "osm_node_10295008398",
+      "name": "Piel Naturals",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_ca1b3c756612",
+      "matchedPlaceId": "osm_node_10295008389",
+      "name": "Pinko",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_1a97db711779",
+      "matchedPlaceId": "osm_node_10295008396",
+      "name": "POSH TBILISI",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_89f5d6e0b1b1",
+      "matchedPlaceId": "osm_node_10295008342",
+      "name": "Redberry",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_b994f1b612a5",
+      "matchedPlaceId": "osm_node_10295008407",
+      "name": "Roberto Bravo",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_9445936b6c81",
+      "matchedPlaceId": "osm_node_10295008395",
+      "name": "Roman",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_824417b66036",
+      "matchedPlaceId": "osm_node_10295008385",
+      "name": "Samsonite",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_ec6880e001c4",
+      "matchedPlaceId": "osm_node_10295008372",
+      "name": "Shark/Ninja",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_62f7023cae49",
+      "matchedPlaceId": "osm_node_10295008428",
+      "name": "SPX",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_178501a051ca",
+      "matchedPlaceId": "osm_node_10295008374",
+      "name": "Stenders",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_9f6e426d07db",
+      "matchedPlaceId": "osm_node_10295008406",
+      "name": "Superdry",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_64266c3393cf",
+      "matchedPlaceId": "osm_node_6726841085",
+      "name": "The North Face",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_71fe3ed28276",
+      "matchedPlaceId": "osm_node_10295008402",
+      "name": "Timberland",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_cbb111b8ebe9",
+      "matchedPlaceId": "osm_node_9741224448",
+      "name": "TopSport",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_29e92a5dc543",
+      "matchedPlaceId": "osm_node_10295008401",
+      "name": "Trussardi",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_57f059c66856",
+      "matchedPlaceId": "osm_node_10295008380",
+      "name": "United Colors of Benetton",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_021b82e24b89",
+      "matchedPlaceId": "osm_node_11403235847",
+      "name": "Vaporia",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_e851d20d6883",
+      "matchedPlaceId": "osm_node_10295008418",
+      "name": "Women’secret",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_2140f2d9c038",
+      "matchedPlaceId": "osm_node_10295008425",
+      "name": "XS Toys",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_450fd67afd40",
+      "matchedPlaceId": "osm_node_10295008352",
+      "name": "Yves Rocher",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_e25065a607ac",
+      "matchedPlaceId": "osm_node_14108319599",
+      "name": "Almondero",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_8ddc5f48b47d",
+      "matchedPlaceId": "osm_node_12066485069",
+      "name": "Bangkok",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_7ee3bb4f22ac",
+      "matchedPlaceId": "osm_node_10295008338",
+      "name": "BE YO",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_643a3d649a70",
+      "matchedPlaceId": "osm_node_13825409703",
+      "name": "Brunch by Gastronome",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_a95d831209c6",
+      "matchedPlaceId": "osm_node_13936840120",
+      "name": "Burger Lions",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_cbf50191013d",
+      "matchedPlaceId": "osm_node_13825409502",
+      "name": "cinnabon",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_9ca3df33f8cb",
+      "matchedPlaceId": "osm_node_10295008337",
+      "name": "Coffeesta",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_89ab0e5ab5c1",
+      "matchedPlaceId": "osm_node_14108319600",
+      "name": "GeGelato",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_4274b75308d4",
+      "matchedPlaceId": "osm_node_6744430387",
+      "name": "KFC",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_24960bd8277c",
+      "matchedPlaceId": "osm_node_10295008371",
+      "name": "Luca Polare",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_bb7426cec9a0",
+      "matchedPlaceId": "osm_node_5803284653",
+      "name": "McDonalds",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_209b6a920ec1",
+      "matchedPlaceId": "osm_node_13825409701",
+      "name": "Shaurma Time",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_4e64c6f01ff1",
+      "matchedPlaceId": "osm_node_6778980785",
+      "name": "Silvio D'Italia",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_1840560fa2d8",
+      "matchedPlaceId": "osm_node_10295008336",
+      "name": "Wendy's",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_49818b04363c",
+      "matchedPlaceId": "osm_node_10295008339",
+      "name": "YAKUDZA",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_3b234aa4c0f4",
+      "matchedPlaceId": "osm_node_10295008370",
+      "name": "Podium",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_01a7f88c869a",
+      "matchedPlaceId": "osm_node_10295008376",
+      "name": "PSP",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_galleria_cc7e881a6714",
+      "matchedPlaceId": "osm_node_10295008333",
+      "name": "Ballroom",
+      "mall": "galleria"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_fb155cfd375d",
+      "matchedPlaceId": "osm_relation_17844562",
+      "name": "ზარა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7dd0498bbae1",
+      "matchedPlaceId": "osm_relation_17841706",
+      "name": "ალტა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ff84f5a02d42",
+      "matchedPlaceId": "osm_relation_17841683",
+      "name": "ივ როშე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_3a4a29ef879c",
+      "matchedPlaceId": "osm_relation_17844563",
+      "name": "სტრადივარიუსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_eae97128b14c",
+      "matchedPlaceId": "osm_relation_17841698",
+      "name": "ართთაიმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_aa6cecc8d87b",
+      "matchedPlaceId": "osm_relation_17841714",
+      "name": "ბერგჰოფი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e1f15ca303f8",
+      "matchedPlaceId": "osm_relation_17841722",
+      "name": "რონიკო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_9447e4df4db6",
+      "matchedPlaceId": "osm_relation_17844577",
+      "name": "ბერშკა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b9922c3b286f",
+      "matchedPlaceId": "osm_relation_17844575",
+      "name": "ფულ & ბეარი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c2403b30465b",
+      "matchedPlaceId": "osm_relation_17844554",
+      "name": "ბოლსერო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ea140d4ab9b4",
+      "matchedPlaceId": "osm_relation_17844839",
+      "name": "ჩარლზ & კეისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_bfa60ff57f1a",
+      "matchedPlaceId": "osm_relation_17844536",
+      "name": "პეტიტ ბატო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2df6541ae77d",
+      "matchedPlaceId": "osm_relation_17844579",
+      "name": "კოლინსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_8b9d098af3d3",
+      "matchedPlaceId": "osm_relation_17844578",
+      "name": "ოიშო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_62406e51100f",
+      "matchedPlaceId": "osm_relation_17841697",
+      "name": "ოპტიმისტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b29b2d277e85",
+      "matchedPlaceId": "osm_node_14280080201",
+      "name": "კოსტა კოფი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_66222617e0b4",
+      "matchedPlaceId": "osm_relation_17844838",
+      "name": "ფლორმარი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_047d46301618",
+      "matchedPlaceId": "osm_relation_17841739",
+      "name": "ჰოუმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d1677e42759f",
+      "matchedPlaceId": "osm_relation_17849485",
+      "name": "იპეკიოლი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_990e94613841",
+      "matchedPlaceId": "osm_relation_17841746",
+      "name": "კენარი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_934c075d69fc",
+      "matchedPlaceId": "osm_relation_17844883",
+      "name": "ნიუ ბალანსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ca3db22b1f3e",
+      "matchedPlaceId": "osm_relation_17841738",
+      "name": "მეამა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b9872263ce52",
+      "matchedPlaceId": "osm_relation_17844574",
+      "name": "მასიმო დუტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_313d6a392594",
+      "matchedPlaceId": "osm_relation_17845186",
+      "name": "მეჯიქ სითი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_916af520e871",
+      "matchedPlaceId": "osm_relation_17841699",
+      "name": "მაკ კოსმეტიკსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_daf384b0c559",
+      "matchedPlaceId": "osm_relation_17841700",
+      "name": "ლუტეცია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_6d42c7856705",
+      "matchedPlaceId": "osm_relation_17841713",
+      "name": "ლოქსიტანი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_95d3b30da50c",
+      "matchedPlaceId": "osm_relation_17844542",
+      "name": "ლი კუპერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_9eee0d75345c",
+      "matchedPlaceId": "osm_relation_17844844",
+      "name": "დიზელი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_8dd44401b66c",
+      "matchedPlaceId": "osm_relation_17841681",
+      "name": "ფრანკო ფონტანა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_64716f1f07d8",
+      "matchedPlaceId": "osm_relation_17844572",
+      "name": "პედრო დელ ჰიერო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7817a2bf5093",
+      "matchedPlaceId": "osm_relation_17841721",
+      "name": "ისი პარი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7909030ebb35",
+      "matchedPlaceId": "osm_relation_17841686",
+      "name": "ინტიმისიმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_edd90254d8e0",
+      "matchedPlaceId": "osm_relation_17844876",
+      "name": "აისფეისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_97d6732a3d0b",
+      "matchedPlaceId": "osm_relation_17844875",
+      "name": "Aromateque",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_1b76b5f49eb9",
+      "matchedPlaceId": "osm_relation_17841704",
+      "name": "რედბერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_25cf7588ae0c",
+      "matchedPlaceId": "osm_relation_17841690",
+      "name": "პსპ",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e33211b5e832",
+      "matchedPlaceId": "osm_relation_17845184",
+      "name": "მაგელანი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_85ebdb6fe4a5",
+      "matchedPlaceId": "osm_relation_17841747",
+      "name": "პოდიუმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_f1b8029a39f6",
+      "matchedPlaceId": "osm_relation_17841723",
+      "name": "აი ტექნიკსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b4da90bd8c96",
+      "matchedPlaceId": "osm_relation_17845188",
+      "name": "12 რაუნდი ბოქსის კლუბი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2ee1ff715cdc",
+      "matchedPlaceId": "osm_relation_17841744",
+      "name": "ბოდი შოპი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0c8db079ddd1",
+      "matchedPlaceId": "osm_relation_17844877",
+      "name": "Boggi Milano",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_424cee30f945",
+      "matchedPlaceId": "osm_relation_17841705",
+      "name": "მატალანი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_429349422a63",
+      "matchedPlaceId": "osm_relation_17844867",
+      "name": "BOSS",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c6cf9052db66",
+      "matchedPlaceId": "osm_relation_17841715",
+      "name": "მადამ კოკო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_67be89b10b1a",
+      "matchedPlaceId": "osm_relation_17841724",
+      "name": "მი სთორი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c8063210a836",
+      "matchedPlaceId": "osm_relation_17844566",
+      "name": "დრესარიუმ ქიდსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_3a520a3be1a4",
+      "matchedPlaceId": "osm_relation_17841726",
+      "name": "ინგლიშ ჰოუმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c6572122b38c",
+      "matchedPlaceId": "osm_relation_17844880",
+      "name": "ჰ&მ",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_14c1685e0cdc",
+      "matchedPlaceId": "osm_relation_17844544",
+      "name": "ჯეი ბი მარტინ",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_50c9e36d3e93",
+      "matchedPlaceId": "osm_relation_17844560",
+      "name": "კედდო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_814dd74e0a39",
+      "matchedPlaceId": "osm_node_14280080103",
+      "name": "ოლოვანდერსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_6d3e3d224737",
+      "matchedPlaceId": "osm_relation_17841701",
+      "name": "პენტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b7d1b8b0a55b",
+      "matchedPlaceId": "osm_relation_17844571",
+      "name": "სისლეი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c7146516e01f",
+      "matchedPlaceId": "osm_relation_17844556",
+      "name": "რეგალია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_1efa7cd1a415",
+      "matchedPlaceId": "osm_relation_17841688",
+      "name": "იამამაი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7172763b8858",
+      "matchedPlaceId": "osm_relation_17844868",
+      "name": "Hugo",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2d2b34809658",
+      "matchedPlaceId": "osm_node_12739527701",
+      "name": "სინაბონი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2a3cc0729b9a",
+      "matchedPlaceId": "osm_relation_17844540",
+      "name": "ესპანელი მეწაღე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_aacb1811b8c6",
+      "matchedPlaceId": "osm_relation_17841733",
+      "name": "სუპერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_042874304802",
+      "matchedPlaceId": "osm_relation_17841680",
+      "name": "თაიმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d261b923a802",
+      "matchedPlaceId": "osm_relation_17850770",
+      "name": "ადიდასი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_597dd82a8f12",
+      "matchedPlaceId": "osm_relation_17844549",
+      "name": "ბატა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2aa9f97c5a99",
+      "matchedPlaceId": "osm_relation_17845199",
+      "name": "ბურგერ კინგი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_bb60888e14e8",
+      "matchedPlaceId": "osm_relation_17841685",
+      "name": "კალცედონია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e86a4570a8b7",
+      "matchedPlaceId": "osm_relation_17841669",
+      "name": "ტოუსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c42db72d7caa",
+      "matchedPlaceId": "osm_node_14280080301",
+      "name": "კაპინატნ ქენდი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_fda17aa4800e",
+      "matchedPlaceId": "osm_relation_17844567",
+      "name": "კარტერსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_027fc6edf79b",
+      "matchedPlaceId": "osm_relation_17845198",
+      "name": "დანკინი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_fd221429f02f",
+      "matchedPlaceId": "osm_relation_17845194",
+      "name": "სესილია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_5e20c16b766e",
+      "matchedPlaceId": "osm_relation_17844546",
+      "name": "კორსო იტალია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ba41efff9fe2",
+      "matchedPlaceId": "osm_relation_17844545",
+      "name": "ფექტორი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_850db65c342f",
+      "matchedPlaceId": "osm_relation_17844553",
+      "name": "გეიმ ზონა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_119f48ad8d4e",
+      "matchedPlaceId": "osm_relation_17844837",
+      "name": "ჟაკადი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_178681650d84",
+      "matchedPlaceId": "osm_node_14280080802",
+      "name": "ჯეი ბი ელი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_91ebbf98ba9d",
+      "matchedPlaceId": "osm_relation_17844853",
+      "name": "განტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_4e5d5489220f",
+      "matchedPlaceId": "osm_relation_17841693",
+      "name": "ჯი ემ თი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_6f0f2051298f",
+      "matchedPlaceId": "osm_relation_17844855",
+      "name": "გესი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_62743f9f3bc0",
+      "matchedPlaceId": "osm_relation_17844884",
+      "name": "ქიდს გალერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_8b26e2ce4f88",
+      "matchedPlaceId": "osm_relation_17844854",
+      "name": "ლაკოსტე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0b7a5920835c",
+      "matchedPlaceId": "osm_relation_17844850",
+      "name": "ელ სი ვაიკიკი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0a8734d7a9cf",
+      "matchedPlaceId": "osm_relation_17844840",
+      "name": "რეფლაი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ca3e66a45c42",
+      "matchedPlaceId": "osm_relation_17841672",
+      "name": "სელფი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e431df62639d",
+      "matchedPlaceId": "osm_relation_17844859",
+      "name": "მავი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_5586dede55d3",
+      "matchedPlaceId": "osm_relation_17841702",
+      "name": "ტეზენისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_f3355cf6d916",
+      "matchedPlaceId": "osm_relation_17844580",
+      "name": "ვუმენ'სეკრეტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_f0cc00ba483e",
+      "matchedPlaceId": "osm_relation_17844860",
+      "name": "ლიი ვრანგლერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_235e2d598396",
+      "matchedPlaceId": "osm_relation_17844861",
+      "name": "ლივაისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_43e856f56f2e",
+      "matchedPlaceId": "osm_relation_17844856",
+      "name": "ტომი ჯინსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_91c758f659ff",
+      "matchedPlaceId": "osm_relation_17841604",
+      "name": "გუდვილი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0700ffd2fa49",
+      "matchedPlaceId": "osm_relation_17845197",
+      "name": "ქეი ეფ სი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c690571138a6",
+      "matchedPlaceId": "osm_relation_17841742",
+      "name": "ჯპს",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_3eb33e1192ce",
+      "matchedPlaceId": "osm_node_14280080601",
+      "name": "თოლია",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_258b118a9e18",
+      "matchedPlaceId": "osm_relation_17841748",
+      "name": "ბიბლუსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e0b0d998d690",
+      "matchedPlaceId": "osm_relation_17845642",
+      "name": "ვენდისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_8a7fb8f411de",
+      "matchedPlaceId": "osm_relation_17841751",
+      "name": "ზუმერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_5283a146b4aa",
+      "matchedPlaceId": "osm_relation_17841703",
+      "name": "კიკო მილანო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_92112d229d63",
+      "matchedPlaceId": "osm_relation_17845191",
+      "name": "იაკუძა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_db6463e4b960",
+      "matchedPlaceId": "osm_relation_17844582",
+      "name": "ნიუ იორკერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_931b903ddd77",
+      "matchedPlaceId": "osm_relation_17841774",
+      "name": "იქს ეს თოისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7a9251238f60",
+      "matchedPlaceId": "osm_relation_17845640",
+      "name": "სუში რუმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_87e078ff1887",
+      "matchedPlaceId": "osm_relation_17844548",
+      "name": "სკარპიერა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_47cc74f44322",
+      "matchedPlaceId": "osm_relation_17845190",
+      "name": "კოფი ლაბი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_7372a0c68451",
+      "matchedPlaceId": "osm_relation_17845193",
+      "name": "პიცა დი რომა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_8881c52761bd",
+      "matchedPlaceId": "osm_relation_17841732",
+      "name": "სუპერი სათამაშოები",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c5966335be4e",
+      "matchedPlaceId": "osm_relation_17841737",
+      "name": "მეჯიქ ქენდი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_02cf61f22725",
+      "matchedPlaceId": "osm_relation_17841741",
+      "name": "ვიშლისტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_19c9305e51af",
+      "matchedPlaceId": "osm_relation_17844555",
+      "name": "ვორტმანი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_6a7802c85ce9",
+      "matchedPlaceId": "osm_relation_17844551",
+      "name": "ვულე ვუ",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_62d44a1d9eca",
+      "matchedPlaceId": "osm_relation_17849494",
+      "name": "ზიპი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_4b3014209df5",
+      "matchedPlaceId": "osm_relation_17849484",
+      "name": "ალდო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_80b9c2b8947c",
+      "matchedPlaceId": "osm_relation_17844857",
+      "name": "არმანი იქსჩეინჯი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_3c2458dea10a",
+      "matchedPlaceId": "osm_relation_17844882",
+      "name": "ატრიო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_f163b3441f6b",
+      "matchedPlaceId": "osm_relation_17844869",
+      "name": "AVTANDIL",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_446bbfc620d9",
+      "matchedPlaceId": "osm_relation_17844543",
+      "name": "ავ ლაბი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b18302ce0367",
+      "matchedPlaceId": "osm_relation_17844858",
+      "name": "ქელვინ კლეინი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b75939a879c6",
+      "matchedPlaceId": "osm_node_13609545752",
+      "name": "კროქსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_85ca5c1c2040",
+      "matchedPlaceId": "osm_relation_17844852",
+      "name": "დან ჯონი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_4410e2152855",
+      "matchedPlaceId": "osm_relation_17841677",
+      "name": "ეტამი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0d7cf453ef07",
+      "matchedPlaceId": "osm_relation_17844871",
+      "name": "Hackett London",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_52042ede49cc",
+      "matchedPlaceId": "osm_relation_17841731",
+      "name": "იუსკი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_44a45d7b4875",
+      "matchedPlaceId": "osm_relation_17844872",
+      "name": "ლაიონ ოფ ფორჩის",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_afcded877efe",
+      "matchedPlaceId": "osm_relation_17844550",
+      "name": "შუზ ლოფტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_9d7d009cb5a4",
+      "matchedPlaceId": "osm_relation_17844565",
+      "name": "მანგო ქიდს",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_aaf386e6d7c8",
+      "matchedPlaceId": "osm_relation_17844873",
+      "name": "Marc O'Polo",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0f3e263c2503",
+      "matchedPlaceId": "osm_relation_17845185",
+      "name": "ნაპაპირი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_0dfff1e3d864",
+      "matchedPlaceId": "osm_relation_17841691",
+      "name": "ფართი დეკო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d041df3d8e37",
+      "matchedPlaceId": "osm_relation_17844538",
+      "name": "სალამანდრა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d6024833756b",
+      "matchedPlaceId": "osm_relation_17844866",
+      "name": "Posh Tbilisi",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b15c48204521",
+      "matchedPlaceId": "osm_relation_17844557",
+      "name": "სამსონაიტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_5cfc698a9aad",
+      "matchedPlaceId": "osm_relation_17844843",
+      "name": "ნორს ფეისი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d3d0a453c591",
+      "matchedPlaceId": "osm_node_14280080801",
+      "name": "ტიმბერლენდი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_649800643bfc",
+      "matchedPlaceId": "osm_relation_17844863",
+      "name": "Toreli",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_d6aed2e3abed",
+      "matchedPlaceId": "osm_relation_17844573",
+      "name": "იუ.ეს. პოლო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_1e742404203b",
+      "matchedPlaceId": "osm_relation_17841763",
+      "name": "ვილეროი & ბოხი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_adeb5e74e942",
+      "matchedPlaceId": "osm_relation_17841679",
+      "name": "პანდორა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e937dc35e38e",
+      "matchedPlaceId": "osm_node_12739517405",
+      "name": "პოლი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_efc7feb33205",
+      "matchedPlaceId": "osm_relation_17844541",
+      "name": "კოსმო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_db5185660a66",
+      "matchedPlaceId": "osm_relation_17841740",
+      "name": "კურა-კურა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_84f875f475ee",
+      "matchedPlaceId": "osm_relation_17844881",
+      "name": "სტუდიო ბაი შუზ გალერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_dbc06993f9ee",
+      "matchedPlaceId": "osm_relation_17841695",
+      "name": "ფარმადეპო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b6d5fa23654f",
+      "matchedPlaceId": "osm_node_10774297544",
+      "name": "ლუკა პოლარე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b596522cbe20",
+      "matchedPlaceId": "osm_relation_17845192",
+      "name": "ფუდ & მარკეტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_e32a03d460d2",
+      "matchedPlaceId": "osm_relation_17845196",
+      "name": "მაკ დონალდსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_214bf8a9a4bc",
+      "matchedPlaceId": "osm_relation_17845201",
+      "name": "კავეა",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_1090efffb9a7",
+      "matchedPlaceId": "osm_relation_17841689",
+      "name": "ბიუთი ქორნერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_eb5f3d0067b7",
+      "matchedPlaceId": "osm_node_11549690069",
+      "name": "ბრანჩი გასტრონომისგან",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_38c93bd59735",
+      "matchedPlaceId": "osm_relation_17841673",
+      "name": "აიქოსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ea8fefae2e72",
+      "matchedPlaceId": "osm_node_10803218020",
+      "name": "ლე მონდე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_2ab52876a149",
+      "matchedPlaceId": "osm_node_14280080502",
+      "name": "ლოლი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_b5abe636bbcb",
+      "matchedPlaceId": "osm_node_14280080101",
+      "name": "ტუტო ბენე",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_085b84e44233",
+      "matchedPlaceId": "osm_node_12739500301",
+      "name": "მუსიკის სახლი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_49993521c921",
+      "matchedPlaceId": "osm_relation_17841671",
+      "name": "სილქნეტი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_198d52db7860",
+      "matchedPlaceId": "osm_relation_17844558",
+      "name": "გრეიდერი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ee4242152a8e",
+      "matchedPlaceId": "osm_relation_17841745",
+      "name": "სმაგლერსი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_a5f0a208e71f",
+      "matchedPlaceId": "osm_node_14280080102",
+      "name": "აის ქრიმი",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_40d6f9e91bf2",
+      "matchedPlaceId": "osm_relation_17841717",
+      "name": "მინისო",
+      "mall": "city-mall-saburtalo"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_aa81a8f80ee0",
+      "matchedPlaceId": "osm_node_10819509708",
+      "name": "ალტა",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_120dd1a1da1d",
+      "matchedPlaceId": "osm_node_11208472106",
+      "name": "ივ როშე",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_082aa99d2e08",
+      "matchedPlaceId": "osm_node_9709820914",
+      "name": "მანამო ჰოუმი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_e8d0b2be96d4",
+      "matchedPlaceId": "osm_node_10819509706",
+      "name": "პეპელა",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_9f56f11bbba8",
+      "matchedPlaceId": "osm_node_4887716321",
+      "name": "ქეი ეფ სი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_eb2382a1aaf9",
+      "matchedPlaceId": "osm_node_11212129427",
+      "name": "ჯპს",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_8395d883fe95",
+      "matchedPlaceId": "osm_node_13666676501",
+      "name": "თოლია",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_9e0386a9849c",
+      "matchedPlaceId": "osm_node_9930101659",
+      "name": "ბიბლუსი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_9feed3afb4bb",
+      "matchedPlaceId": "osm_node_9863841055",
+      "name": "რონიკო",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_297c313b2fae",
+      "matchedPlaceId": "osm_node_10819509710",
+      "name": "ელ სი ვაიკიკი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_747d918f8211",
+      "matchedPlaceId": "osm_node_10303614755",
+      "name": "მი სთორი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_e4c33c164ba6",
+      "matchedPlaceId": "osm_node_11203151903",
+      "name": "თიბისი ბანკი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_913c08845861",
+      "matchedPlaceId": "osm_node_4470255389",
+      "name": "მაკ დონალდსი",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_5312c969d2ab",
+      "matchedPlaceId": "osm_node_9709820913",
+      "name": "გორგია",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_b4434512e3c6",
+      "matchedPlaceId": "osm_node_8499810288",
+      "name": "მინისო",
+      "mall": "city-mall-gldani"
+    },
+    {
+      "id": "directory_mall_eastpoint_318c73191760",
+      "matchedPlaceId": "osm_node_4421730090",
+      "name": "აისტაილი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_e74d3069d3a0",
+      "matchedPlaceId": "osm_node_11758046820",
+      "name": "აისფეისი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_516d51b2955c",
+      "matchedPlaceId": "osm_node_4128170335",
+      "name": "ალდო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_c5de86654f0e",
+      "matchedPlaceId": "osm_node_11758046813",
+      "name": "ალკორიუმი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_18c6b6f84040",
+      "matchedPlaceId": "osm_node_4578894596",
+      "name": "ალტა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_04db56ea3df5",
+      "matchedPlaceId": "osm_node_12050599266",
+      "name": "კრისტალი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_7e08ff98fa58",
+      "matchedPlaceId": "osm_node_4128170339",
+      "name": "სტრადივარიუსი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_390797e1f0b8",
+      "matchedPlaceId": "osm_node_11758446683",
+      "name": "სუპერი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_f1ef71e79455",
+      "matchedPlaceId": "osm_node_11758046827",
+      "name": "ჯეკ & ჯონსი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_3fd388b5f0ae",
+      "matchedPlaceId": "osm_node_11758046812",
+      "name": "ჯიპისი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_25053d832935",
+      "matchedPlaceId": "osm_node_4128145291",
+      "name": "დეფაქტო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_7d2371aaf1df",
+      "matchedPlaceId": "osm_node_4128351565",
+      "name": "დომინო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_a815067c3d78",
+      "matchedPlaceId": "osm_node_4128139280",
+      "name": "ელსი ვაიკიკი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_a57d4e24594d",
+      "matchedPlaceId": "osm_node_11758046797",
+      "name": "საკემატა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_8bd05bcba665",
+      "matchedPlaceId": "osm_node_11758046840",
+      "name": "სკარპიერა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_afc1690a3312",
+      "matchedPlaceId": "osm_node_5383016263",
+      "name": "ნიუ ბალანსი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_b1390a8dc4b5",
+      "matchedPlaceId": "osm_node_4157902089",
+      "name": "ნიუ იორკერი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_04ad14d9946a",
+      "matchedPlaceId": "osm_node_11758046834",
+      "name": "ეტამი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_6c0aaf090861",
+      "matchedPlaceId": "osm_node_12709775228",
+      "name": "ვერო მოდა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_c8a2bd870c13",
+      "matchedPlaceId": "osm_node_4128170338",
+      "name": "ზარა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_dc57c1fc055e",
+      "matchedPlaceId": "osm_node_11758046845",
+      "name": "ზუმერი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_295c4d159559",
+      "matchedPlaceId": "osm_node_11758046855",
+      "name": "თაიმი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_112b89e61925",
+      "matchedPlaceId": "osm_node_4128369454",
+      "name": "კარფური",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_09a0dcb0bb26",
+      "matchedPlaceId": "osm_node_4128145289",
+      "name": "კენარი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_f91f00516f6b",
+      "matchedPlaceId": "osm_node_12709775223",
+      "name": "კიაბი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_6ab2c7d137d3",
+      "matchedPlaceId": "osm_node_11758046839",
+      "name": "კიკო მილანო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_bfeb4fe71a02",
+      "matchedPlaceId": "osm_node_11449958923",
+      "name": "ლუკა პოლარე",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_baf64c5bd986",
+      "matchedPlaceId": "osm_node_11758046846",
+      "name": "ლუტეცია",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_88552e1c2d4d",
+      "matchedPlaceId": "osm_node_11758046832",
+      "name": "მავი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_44db4e7dd7d6",
+      "matchedPlaceId": "osm_node_4381911395",
+      "name": "მაკდონალდსი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_7cd788de2f5f",
+      "matchedPlaceId": "osm_node_11758046826",
+      "name": "მარკო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_360acfeb7e54",
+      "matchedPlaceId": "osm_node_5383016251",
+      "name": "მასიმო დუტი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_8fbd1be8db88",
+      "matchedPlaceId": "osm_node_11758046811",
+      "name": "მეამა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_92e83f839fb4",
+      "matchedPlaceId": "osm_node_4128359311",
+      "name": "მეგატექნიკა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_c30d2c58c630",
+      "matchedPlaceId": "osm_node_8499810287",
+      "name": "მინისო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_0663ba1a1822",
+      "matchedPlaceId": "osm_node_5924047088",
+      "name": "ჯომა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_04e729a9c402",
+      "matchedPlaceId": "osm_node_11758046848",
+      "name": "ინსთრითი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_f1d7fa1b12bf",
+      "matchedPlaceId": "osm_node_11758446697",
+      "name": "იოიოსო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_24a47a476d5c",
+      "matchedPlaceId": "osm_node_4381941991",
+      "name": "კავეა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_137c149a3ed1",
+      "matchedPlaceId": "osm_node_11758446677",
+      "name": "კაპრი პიცა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_03340dc42c49",
+      "matchedPlaceId": "osm_node_11758046825",
+      "name": "ტოპსპორტი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_33adbae8f837",
+      "matchedPlaceId": "osm_node_5383016265",
+      "name": "ფლო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_bef1552cfd69",
+      "matchedPlaceId": "osm_node_11758046831",
+      "name": "ფლორმარი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_a9695960eb99",
+      "matchedPlaceId": "osm_node_11758046805",
+      "name": "ამამია",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_77c929f89b86",
+      "matchedPlaceId": "osm_node_11758046857",
+      "name": "ართთაიმი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_20c4373a5455",
+      "matchedPlaceId": "osm_node_11758046796",
+      "name": "ბატა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_736eb54066e3",
+      "matchedPlaceId": "osm_node_4128170334",
+      "name": "ბერშკა",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_125c53fdf1e7",
+      "matchedPlaceId": "osm_node_11758446682",
+      "name": "ბიბლუსი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_7a84a9b5bf05",
+      "matchedPlaceId": "osm_node_11758046801",
+      "name": "ბოლსერო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_71c4994de8c7",
+      "matchedPlaceId": "osm_node_11758046859",
+      "name": "რონიკო",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_385439f2708f",
+      "matchedPlaceId": "osm_node_11758446690",
+      "name": "საბვეი",
+      "mall": "eastpoint"
+    },
+    {
+      "id": "directory_mall_eastpoint_d0d54d0f71b3",
+      "matchedPlaceId": "osm_node_11758446686",
+      "name": "ხინკლის აკადემია",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/khinklis-akademia/ names ხინკლის აკადემია; its reviewed brand artwork confirms the English identity Khinkali Academy. Exactly one existing OpenStreetMap tenant with that identity (Khinkali Academy, osm_node_11758446686) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_1d8090bacab3",
+      "matchedPlaceId": "osm_node_11758046808",
+      "name": "ჯეოქსი",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/jeogsi/ names ჯეოქსი; its reviewed brand artwork confirms the English identity Geox. Exactly one existing OpenStreetMap tenant with that identity (Geox, osm_node_11758046808) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_d325ff4e3fd4",
+      "matchedPlaceId": "osm_node_11758446676",
+      "name": "ჯი-ჰოუმი",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/ji-houmi/ names ჯი-ჰოუმი; its reviewed brand artwork confirms the English identity G-Home. Exactly one existing OpenStreetMap tenant with that identity (G-Home, osm_node_11758446676) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_7b6d57a3fcb8",
+      "matchedPlaceId": "osm_node_5383016269",
+      "name": "ეკო",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/eko/ names ეკო; its reviewed brand artwork confirms the English identity Ecco. Exactly one existing OpenStreetMap tenant with that identity (Ecco, osm_node_5383016269) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_9955f4a562ef",
+      "matchedPlaceId": "osm_node_11758046842",
+      "name": "ენზა ჰოუმ",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/enza-home/ names ენზა ჰოუმ; its reviewed brand artwork confirms the English identity Enza Home. Exactly one existing OpenStreetMap tenant with that identity (Enza Home, osm_node_11758046842) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_e8743787bbef",
+      "matchedPlaceId": "osm_node_11758046844",
+      "name": "კოლინსი",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/colins/ names კოლინსი; its reviewed brand artwork confirms the English identity Colins / Colin's. Exactly one existing OpenStreetMap tenant with that identity (კოლინ'ს, osm_node_11758046844) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_af545f4ae604",
+      "matchedPlaceId": "osm_node_11758046807",
+      "name": "კოლუმბია",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/kolumbia/ names კოლუმბია; its reviewed brand artwork confirms the English identity Columbia. Exactly one existing OpenStreetMap tenant with that identity (Columbia, osm_node_11758046807) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_66eba0f8578c",
+      "matchedPlaceId": "osm_node_5960629985",
+      "name": "ჯორდანო",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/jordano/ names ჯორდანო; its reviewed brand artwork confirms the English identity Giordano. Exactly one existing OpenStreetMap tenant with that identity (Giordano, osm_node_5960629985) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_3b37ef6a1be3",
+      "matchedPlaceId": "osm_node_11758046851",
+      "name": "კალცედონია",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/calzedonia/ names კალცედონია; its reviewed brand artwork confirms the English identity Calzedonia. Exactly one existing OpenStreetMap tenant with that identity (Calzedonia, osm_node_11758046851) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_4429da70810d",
+      "matchedPlaceId": "osm_node_4754110434",
+      "name": "ფოკუს მოკუსი",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/fokus-mokusi/ names ფოკუს მოკუსი; its reviewed brand artwork confirms the English identity Focus Mocus. Exactly one existing OpenStreetMap tenant with that identity (Focus Mocus, osm_node_4754110434) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "id": "directory_mall_eastpoint_f2a0f718b02f",
+      "matchedPlaceId": "osm_node_4128359312",
+      "name": "ბეკო",
+      "mall": "eastpoint",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/beko/ names ბეკო; its reviewed brand artwork confirms the English identity Beko. Exactly one existing OpenStreetMap tenant with that identity (Beko, osm_node_4128359312) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    }
+  ],
+  "unresolvedMatches": [
+    {
+      "id": "directory_mall_galleria_c9dc6862d702",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008419",
+        "osm_node_14073255375"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_23fac5b94b4a",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008363",
+        "osm_node_13836824387"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_30f7d94522ad",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_8499810290",
+        "osm_node_10295008375"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_1b77151c493b",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008351",
+        "osm_node_10295008381",
+        "osm_node_10295008429"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_e80b2700969f",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008436",
+        "osm_node_10295008437"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_63f83edcb116",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008366",
+        "osm_node_10295008367",
+        "osm_node_12046436110",
+        "osm_node_13900012101"
+      ]
+    },
+    {
+      "id": "directory_mall_galleria_edf44bd8fc9b",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10295008415",
+        "osm_node_13448286408"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_ebac99c0a00d",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_relation_17841674",
+        "osm_relation_17841743"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_a87113e4df54",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10744981805",
+        "osm_relation_17841694"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_522f521cd670",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_relation_17844565",
+        "osm_relation_17844568",
+        "osm_relation_17844569"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_5c7e37cc453d",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_14092386613",
+        "osm_relation_17845183"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_97ed83ac6752",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10851652331",
+        "osm_node_10851652349",
+        "osm_node_10994561314",
+        "osm_node_11013764492",
+        "osm_node_11013825475",
+        "osm_relation_17841687"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_a19e9eaf6658",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10819509707",
+        "osm_node_11240815655",
+        "osm_node_11240841131"
+      ]
+    },
+    {
+      "id": "directory_mall_city_mall_gldani_01be322fbd75",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10851652343",
+        "osm_node_10910659775",
+        "osm_node_11013764491",
+        "osm_node_11013825373",
+        "osm_node_11013825526"
+      ]
+    },
+    {
+      "id": "directory_mall_eastpoint_618102f275d5",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_10848365584",
+        "osm_node_10848365768",
+        "osm_node_10910789507",
+        "osm_node_10936777294",
+        "osm_node_11758446680"
+      ]
+    },
+    {
+      "id": "directory_mall_eastpoint_c69d3e1929d4",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_11758046849",
+        "osm_node_11758446691"
+      ]
+    },
+    {
+      "id": "directory_mall_eastpoint_14cf3f00fb27",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_4128174472",
+        "osm_node_11758046814",
+        "osm_node_11758671152",
+        "osm_node_13059613975"
+      ]
+    },
+    {
+      "id": "directory_mall_eastpoint_ab86fe44dea1",
+      "reason": "multiple-exact-osm-candidates",
+      "candidates": [
+        "osm_node_11758046800",
+        "osm_node_11758046852",
+        "osm_node_11758446687"
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "sourceUrl": "https://tbilisimall.com/",
+      "reason": "Underlying store directory returned 401; no authenticated retrieval attempted."
+    },
+    {
+      "sourceUrl": "https://eastpoint.ge/wp-json/wp/v2/types",
+      "reason": "Restricted API returned 401; used public HTML directory instead."
+    }
+  ],
+  "sourceUrls": [
+    "https://galleria.ge/afflelou-paris",
+    "https://galleria.ge/altersocks",
+    "https://galleria.ge/anishko",
+    "https://galleria.ge/armani-exchange",
+    "https://galleria.ge/arttime",
+    "https://galleria.ge/at-store",
+    "https://galleria.ge/atrio",
+    "https://galleria.ge/avtandil",
+    "https://galleria.ge/aw-lab",
+    "https://galleria.ge/bang-olufsen",
+    "https://galleria.ge/beardge",
+    "https://galleria.ge/beauty-corner",
+    "https://galleria.ge/beauty-vision",
+    "https://galleria.ge/bene-shoes",
+    "https://galleria.ge/biblusi",
+    "https://galleria.ge/blue-tabla",
+    "https://galleria.ge/calvin-klein-jeans",
+    "https://galleria.ge/calzedonia",
+    "https://galleria.ge/carters",
+    "https://galleria.ge/cat-products-georgia",
+    "https://galleria.ge/chirifruit",
+    "https://galleria.ge/crystal-jewelry",
+    "https://galleria.ge/dan-john",
+    "https://galleria.ge/delfos",
+    "https://galleria.ge/delfy",
+    "https://galleria.ge/details",
+    "https://galleria.ge/diesel",
+    "https://galleria.ge/dkny",
+    "https://galleria.ge/elena-miro",
+    "https://galleria.ge/erborian",
+    "https://galleria.ge/eshvi",
+    "https://galleria.ge/espacho",
+    "https://galleria.ge/factory",
+    "https://galleria.ge/film-house",
+    "https://galleria.ge/flower-bar",
+    "https://galleria.ge/franco-fontana",
+    "https://galleria.ge/fujifilm",
+    "https://galleria.ge/furla",
+    "https://galleria.ge/game-zone",
+    "https://galleria.ge/gant",
+    "https://galleria.ge/georgian-designers-corner",
+    "https://galleria.ge/georgian-kalata",
+    "https://galleria.ge/gianfranco-ferre",
+    "https://galleria.ge/gladiators-accesories",
+    "https://galleria.ge/gmt",
+    "https://galleria.ge/goodwill",
+    "https://galleria.ge/guess",
+    "https://galleria.ge/hm",
+    "https://galleria.ge/hackett",
+    "https://galleria.ge/hogan",
+    "https://galleria.ge/ismart",
+    "https://galleria.ge/ispace",
+    "https://galleria.ge/izipizi",
+    "https://galleria.ge/jacadi-georgia",
+    "https://galleria.ge/jbl",
+    "https://galleria.ge/just-cavalli",
+    "https://galleria.ge/jysk",
+    "https://galleria.ge/kalta-bedniereba",
+    "https://galleria.ge/karl-lagerfeld",
+    "https://galleria.ge/kenari",
+    "https://galleria.ge/kids-gallery",
+    "https://galleria.ge/kocos-korean-cosmetics",
+    "https://galleria.ge/loccitane",
+    "https://galleria.ge/lace-up",
+    "https://galleria.ge/lacoste",
+    "https://galleria.ge/lc-waikiki",
+    "https://galleria.ge/lee-wrangler",
+    "https://galleria.ge/levis",
+    "https://galleria.ge/lion-of-porches",
+    "https://galleria.ge/luisa-spagnoli",
+    "https://galleria.ge/lutecia",
+    "https://galleria.ge/mac-cosmetics",
+    "https://galleria.ge/madame-coco",
+    "https://galleria.ge/magellan",
+    "https://galleria.ge/magic-candy",
+    "https://galleria.ge/manamo-home",
+    "https://galleria.ge/mandarina",
+    "https://galleria.ge/marc-opolo",
+    "https://galleria.ge/mayoral",
+    "https://galleria.ge/miniso",
+    "https://galleria.ge/missepo",
+    "https://galleria.ge/mobo",
+    "https://galleria.ge/monnalisa",
+    "https://galleria.ge/new-yorker",
+    "https://galleria.ge/nicolo",
+    "https://galleria.ge/no-one",
+    "https://galleria.ge/nugbari",
+    "https://galleria.ge/nyx-professional-makeup",
+    "https://galleria.ge/okaidi",
+    "https://galleria.ge/okkia",
+    "https://galleria.ge/old-supra",
+    "https://galleria.ge/original-marines",
+    "https://galleria.ge/pandora",
+    "https://galleria.ge/patrizia-pepe",
+    "https://galleria.ge/pendant",
+    "https://galleria.ge/pepe-jeans",
+    "https://galleria.ge/piel-naturals",
+    "https://galleria.ge/pinko",
+    "https://galleria.ge/posh-tbilisi",
+    "https://galleria.ge/redberry",
+    "https://galleria.ge/roberto-bravo",
+    "https://galleria.ge/roman",
+    "https://galleria.ge/roniko",
+    "https://galleria.ge/samsonite",
+    "https://galleria.ge/sharkninja",
+    "https://galleria.ge/spx",
+    "https://galleria.ge/stenders",
+    "https://galleria.ge/studio-by-shoes-gallery-ecco-geox",
+    "https://galleria.ge/sulakauri-publishing",
+    "https://galleria.ge/superdry",
+    "https://galleria.ge/the-north-face",
+    "https://galleria.ge/time-georgia",
+    "https://galleria.ge/timberland",
+    "https://galleria.ge/tobacco-market",
+    "https://galleria.ge/tommy-hilfiger",
+    "https://galleria.ge/topsport",
+    "https://galleria.ge/tresor",
+    "https://galleria.ge/trussardi",
+    "https://galleria.ge/twinset-milano",
+    "https://galleria.ge/united-colors-of-benetton",
+    "https://galleria.ge/vaporia",
+    "https://galleria.ge/womensecret",
+    "https://galleria.ge/xiaomi-authorised-mi-store",
+    "https://galleria.ge/xs-toys",
+    "https://galleria.ge/yves-rocher",
+    "https://galleria.ge/zapatero-espanol",
+    "https://galleria.ge/zarapkhana",
+    "https://galleria.ge/almondero",
+    "https://galleria.ge/bangkok",
+    "https://galleria.ge/be-yo",
+    "https://galleria.ge/big-sams-street-food-bar",
+    "https://galleria.ge/brunch-by-gastronome",
+    "https://galleria.ge/burger-king",
+    "https://galleria.ge/burger-lions",
+    "https://galleria.ge/chito-pan-asian-european-food",
+    "https://galleria.ge/cinnabon",
+    "https://galleria.ge/coffeesta",
+    "https://galleria.ge/gegelato",
+    "https://galleria.ge/illy-caffe",
+    "https://galleria.ge/kfc",
+    "https://galleria.ge/luca-polare",
+    "https://galleria.ge/mcdonalds",
+    "https://galleria.ge/sakhachapure-n1",
+    "https://galleria.ge/shaurma-time",
+    "https://galleria.ge/silvio-ditalia",
+    "https://galleria.ge/ska",
+    "https://galleria.ge/wendys",
+    "https://galleria.ge/yakudza",
+    "https://galleria.ge/3d-painter",
+    "https://galleria.ge/cellfie",
+    "https://galleria.ge/currency-exchange",
+    "https://galleria.ge/gpc-pharmacy-and-more",
+    "https://galleria.ge/jsc-silknet",
+    "https://galleria.ge/podium",
+    "https://galleria.ge/psp",
+    "https://galleria.ge/tbc-bank",
+    "https://galleria.ge/ballroom",
+    "https://galleria.ge/cavea-galleria-tbilisi",
+    "https://galleria.ge/griboedov-theatre",
+    "https://galleria.ge/liberty-theater",
+    "https://galleria.ge/ria-ria",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zara",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/alta",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/yves-rocher-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/anouki-beauty",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/triumph-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/stradivarius-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/arttime",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/berghoff",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/roniko-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bershka",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pull-and-bear-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bolsero",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/charles-keith",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/petit-bateau-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/colins",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/oysho-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/optimist-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/costa-coffe",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ea7-emporio-armani",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/elite-electronics",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/flormar",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/home",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ipekyol",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jo-malone",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kenari",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/new-balance-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/meama-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/massimo-dutti-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/magic-city-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mac-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lutecia-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/beard-ge",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/loccitane-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lee-cooper-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/diesel",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/franco-fonatan",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pedro-del-hierro-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ralph-lauren-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/swarovski-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ici-paris",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/superdry-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/intimisimi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ska-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ispace",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/remember-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/izipizi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/aromateque",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sense-premium",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sseason-store",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/redberry-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/psp-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/magellan",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mandarina",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/podium-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ninja",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/palas-das-thes",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/i-technics-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/12-rounds",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/anoukii-beauty",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/aromaco",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/united-colors-of-benetton",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/blue-tabla",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/manamo-home-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/the-body-shop",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/boggi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/matalan-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/boss",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/madame-coco-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/delfy",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mi-store-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/dressarium-kids",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/english-home",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/eshvi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/felino-milano",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/h-m",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jb-martin",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/keddo",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/okto-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/old-supra-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ollivanders-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/penti-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sisley-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/smeg-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/regalia-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/yamamay-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/afflelou-paris",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/exquise-cosmetics",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/hugo",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/cinnabon",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/nike-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zapatero-espanol-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/super-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/skechers-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tbc-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/velvet-and-vivid-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mango-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/time-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/planetarium-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/wilmax-home-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/adidas-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bambino",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/baccarat-jewelry",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bata",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/burger-king",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/calzedonia",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tous-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/captain-candy",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/carters",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/dunkin-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/cecilia",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/corso-italy",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/factory-tbilisi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/cortefiel",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/dyson",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/game-zone",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jacadi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jbl",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/okaidi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/gant-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/okkia",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bistro-gastronome-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/gmt-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/guess-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/piel-naturals",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kids-gallery-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lacoste-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lc-waikiki-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/replay",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/celfie",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mavi-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/shark",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pepela-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/top-sport-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tezenis",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/womensecreat",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/wrangler-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/evita-peroni-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/levis-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/puma-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tommy-jeans-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/goodwill-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kfc-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/gpc-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tolia",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/biblusi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/atelier-rebul",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/wendy-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jeans-gallery-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/giordano",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zoomer-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kiko-milano",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/casio",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/messy-weekend-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/yakudza-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/new-yourker",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/xs-toys-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sushi-room-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/medane-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sunglass-hut",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/scarpiera",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jungle-fever-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/coffee-lab-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/nassomato-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/craft-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pizza-di-roma-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/crystal",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bonjiorno",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/georgias-naturals",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tiziana-terenzi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/super-toys",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/magic-candy",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/wishlist",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/wortmann",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bagatt",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/voulez-vous",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zippy",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/aldo",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/armani-exchange",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/atrio",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/avtandil",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/aw-lab",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/brandsfield",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/calvin-klein",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/collectors",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/crocs",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/dan-john",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/delfoss",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/etam",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/geox",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/hackett-london",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/jysk",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/karl-lagerfield",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kocos-corean-cosmetics",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lion-of-porches",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/shoes-loft",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/maizen",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mango-kids",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/marc-opolo",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/napapijri",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/party-deco",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/salamander",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/posh-tbilisi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/samsonite",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sergent-major",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/scotch-and-soda",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/the-north-face",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bakur-sulakauri-pilishing",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/timberland",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/toreli",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/us-polo-assn",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/villeroy-and-bochi",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pandora",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/paul",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/corner",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/cosmo",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/kura-kura",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/studio-by-shoes-gallery",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pharmadepot-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/luca-polare-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/food-and-market-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/mc-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/cavea-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/beauty-corner-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ismart-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/victorinox-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/brunch-by-gastronome-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/iqos-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/bank-of-georgia-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/le-monde-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/nicolo-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lagidze-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/lolly-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/shaurma-time-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/ballroom-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/100-bamba",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/steiff-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/collection-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tuto-bene",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/more-beauty-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tresor-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/pendant-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zag",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/tonak",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/alcosphere",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/white-studio",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/zarapxana",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/fujifilm-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/gladiators-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/music-house-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/vicky-christina-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/silknet",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/nuki-cosmetics",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/greyder-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/sigara-house",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/elisabetta-franchi-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/smugglers",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/top-toys",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/icase-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/iroom-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/food-good-sabu",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/icecrime",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/parafina",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/copter",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/miniso",
+    "https://thecitymall.ge/city-mall-saburtalo/brands/biodroga",
+    "https://thecitymall.ge/city-mall-gldani/brands/aleksander-gardi",
+    "https://thecitymall.ge/city-mall-gldani/brands/alta-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/colins",
+    "https://thecitymall.ge/city-mall-gldani/brands/defacto",
+    "https://thecitymall.ge/city-mall-gldani/brands/elite-electronics",
+    "https://thecitymall.ge/city-mall-gldani/brands/flortmar",
+    "https://thecitymall.ge/city-mall-gldani/brands/yves-rocher",
+    "https://thecitymall.ge/city-mall-gldani/brands/lutecia-gld",
+    "https://thecitymall.ge/city-mall-gldani/brands/franco-fontana-gldai",
+    "https://thecitymall.ge/city-mall-gldani/brands/ispace-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/izipizi-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/manamo-home-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/madame-coco-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/garfield",
+    "https://thecitymall.ge/city-mall-gldani/brands/time-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/barambo-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/bambino-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/bata-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/carters-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/corso-italy-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/koton",
+    "https://thecitymall.ge/city-mall-gldani/brands/gmt-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/factory-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/wilmax-home-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/pepela-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/piel-naturals-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/felino-milani-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/bolsero-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/the-body-shop-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/topsport-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/kfc-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/gpc-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/tolia-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/aden-cosmetics",
+    "https://thecitymall.ge/city-mall-gldani/brands/biblus-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/atelier-rebul-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/zoomer-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/kiko-milano-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/roniko-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/new-yourker-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/parfois",
+    "https://thecitymall.ge/city-mall-gldani/brands/uno-shoes",
+    "https://thecitymall.ge/city-mall-gldani/brands/scarpiera-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/flo",
+    "https://thecitymall.ge/city-mall-gldani/brands/lc-waikiki-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/bluetabla-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/mandarina-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/jungle-fever-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/jbl-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/shark-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/ninja-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/mistore-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/baccarat-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/kontakt-home",
+    "https://thecitymall.ge/city-mall-gldani/brands/magic-candy-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/tbc-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/mc-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/bank-of-georgia-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/nicolo-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/gorgia-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/pandora-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/pendant-gldn",
+    "https://thecitymall.ge/city-mall-gldani/brands/cosmo-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/collectors-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/miniso-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/more-beauty-gldani",
+    "https://thecitymall.ge/city-mall-gldani/brands/okaid-gldani",
+    "https://eastpoint.ge/place/100-kotoni/",
+    "https://eastpoint.ge/place/8-elementi/",
+    "https://eastpoint.ge/place/m110/",
+    "https://eastpoint.ge/place/aden-kosmetiksi/",
+    "https://eastpoint.ge/place/adidasi/",
+    "https://eastpoint.ge/place/aversi/",
+    "https://eastpoint.ge/place/ai-si-ar-sporti/",
+    "https://eastpoint.ge/place/ai-si-ar-homi/",
+    "https://eastpoint.ge/place/aikosi/",
+    "https://eastpoint.ge/place/aistaili/",
+    "https://eastpoint.ge/place/aisfeisi-2/",
+    "https://eastpoint.ge/place/aldo-shoes/",
+    "https://eastpoint.ge/place/alkoriumi/",
+    "https://eastpoint.ge/place/alta/",
+    "https://eastpoint.ge/place/alter-sogsi/",
+    "https://eastpoint.ge/place/korso-italia/",
+    "https://eastpoint.ge/place/kosmo/",
+    "https://eastpoint.ge/place/koton/",
+    "https://eastpoint.ge/place/kofista/",
+    "https://eastpoint.ge/place/kristali/",
+    "https://eastpoint.ge/place/krogsi/",
+    "https://eastpoint.ge/place/lat-liv/",
+    "https://eastpoint.ge/place/le-monde/",
+    "https://eastpoint.ge/place/lebowski/",
+    "https://eastpoint.ge/place/levisi/",
+    "https://eastpoint.ge/place/li-vrangleri/",
+    "https://eastpoint.ge/place/li-kuperi/",
+    "https://eastpoint.ge/place/liberdi-banki/",
+    "https://eastpoint.ge/place/lilati/",
+    "https://eastpoint.ge/place/loli/",
+    "https://eastpoint.ge/place/skivri/",
+    "https://eastpoint.ge/place/smart-fotos/",
+    "https://eastpoint.ge/place/sorvela-parfume/",
+    "https://eastpoint.ge/place/sportis-galerea/",
+    "https://eastpoint.ge/place/stradivariusi/",
+    "https://eastpoint.ge/place/studio-fekhsacmlis-galerea/",
+    "https://eastpoint.ge/place/suveni/",
+    "https://eastpoint.ge/place/sulakauris-wignis-maghazia/",
+    "https://eastpoint.ge/place/super-satamashoebi/",
+    "https://eastpoint.ge/place/superdrai-ko/",
+    "https://eastpoint.ge/place/superi/",
+    "https://eastpoint.ge/place/tashir-pizza/",
+    "https://eastpoint.ge/place/tach/",
+    "https://eastpoint.ge/place/termiti/",
+    "https://eastpoint.ge/place/togasi/",
+    "https://eastpoint.ge/place/gids-galeri/",
+    "https://eastpoint.ge/place/goul-haani/",
+    "https://eastpoint.ge/place/gul-glabi/",
+    "https://eastpoint.ge/place/ghomi-da-yveli/",
+    "https://eastpoint.ge/place/sharki/",
+    "https://eastpoint.ge/place/chiko/",
+    "https://eastpoint.ge/place/khinklis-akademia/",
+    "https://eastpoint.ge/place/jangl-feveri/",
+    "https://eastpoint.ge/place/jei-bi-eli/",
+    "https://eastpoint.ge/place/jei-bi-martini/",
+    "https://eastpoint.ge/place/jek-jonsi/",
+    "https://eastpoint.ge/place/jeogsi/",
+    "https://eastpoint.ge/place/ji-houmi/",
+    "https://eastpoint.ge/place/jiemti/",
+    "https://eastpoint.ge/place/gpc/",
+    "https://eastpoint.ge/place/gril-stopi/",
+    "https://eastpoint.ge/place/daimondi/",
+    "https://eastpoint.ge/place/daisoni/",
+    "https://eastpoint.ge/place/dakaro/",
+    "https://eastpoint.ge/place/dankin-donatsi/",
+    "https://eastpoint.ge/place/devid-arms/",
+    "https://eastpoint.ge/place/defagto/",
+    "https://eastpoint.ge/place/domino/",
+    "https://eastpoint.ge/place/dresarium-gidsi/",
+    "https://eastpoint.ge/place/drou-bogsi/",
+    "https://eastpoint.ge/place/eko/",
+    "https://eastpoint.ge/place/elit-elegtroniksi/",
+    "https://eastpoint.ge/place/elsi-vaikiki/",
+    "https://eastpoint.ge/place/enza-home/",
+    "https://eastpoint.ge/place/espaneli-mewaghe/",
+    "https://eastpoint.ge/place/satamasho/",
+    "https://eastpoint.ge/place/sakemata/",
+    "https://eastpoint.ge/place/salamander/",
+    "https://eastpoint.ge/place/bank-of-georgia/",
+    "https://eastpoint.ge/place/selfi/",
+    "https://eastpoint.ge/place/segcia-40/",
+    "https://eastpoint.ge/place/silibistro/",
+    "https://eastpoint.ge/place/silgneti/",
+    "https://eastpoint.ge/place/sinabon/",
+    "https://eastpoint.ge/place/sinsei/",
+    "https://eastpoint.ge/place/sisauri/",
+    "https://eastpoint.ge/place/ska/",
+    "https://eastpoint.ge/place/skalpersi/",
+    "https://eastpoint.ge/place/skarpiera/",
+    "https://eastpoint.ge/place/skechersi/",
+    "https://eastpoint.ge/place/mor-biuti/",
+    "https://eastpoint.ge/place/musera/",
+    "https://eastpoint.ge/place/nai-nai/",
+    "https://eastpoint.ge/place/neim-it/",
+    "https://eastpoint.ge/place/negsti/",
+    "https://eastpoint.ge/place/nikolo/",
+    "https://eastpoint.ge/place/ninja/",
+    "https://eastpoint.ge/place/niu-balansi/",
+    "https://eastpoint.ge/place/new-time/",
+    "https://eastpoint.ge/place/niu-iorkeri/",
+    "https://eastpoint.ge/place/nuki/",
+    "https://eastpoint.ge/place/o-vi-esi/",
+    "https://eastpoint.ge/place/okaidi-obaibi/",
+    "https://eastpoint.ge/place/optimisti/",
+    "https://eastpoint.ge/place/orgestra/",
+    "https://eastpoint.ge/place/etam/",
+    "https://eastpoint.ge/place/vaporia/",
+    "https://eastpoint.ge/place/vendi/",
+    "https://eastpoint.ge/place/vero-moda/",
+    "https://eastpoint.ge/place/womens-secret/",
+    "https://eastpoint.ge/place/vinoriumi/",
+    "https://eastpoint.ge/place/vishlisti/",
+    "https://eastpoint.ge/place/wortmann/",
+    "https://eastpoint.ge/place/zara/",
+    "https://eastpoint.ge/place/zipp/",
+    "https://eastpoint.ge/place/zumeri/",
+    "https://eastpoint.ge/place/pandora/",
+    "https://eastpoint.ge/place/tamo-sgini/",
+    "https://eastpoint.ge/place/tibisi-banki/",
+    "https://eastpoint.ge/place/top-toys/",
+    "https://eastpoint.ge/place/kaprisa/",
+    "https://eastpoint.ge/place/kartersi/",
+    "https://eastpoint.ge/place/karfuri/",
+    "https://eastpoint.ge/place/kasio/",
+    "https://eastpoint.ge/place/kedo/",
+    "https://eastpoint.ge/place/keig-it/",
+    "https://eastpoint.ge/place/kelme/",
+    "https://eastpoint.ge/place/kenari/",
+    "https://eastpoint.ge/place/kiabi-2/",
+    "https://eastpoint.ge/place/kiko-milano/",
+    "https://eastpoint.ge/place/kokito/",
+    "https://eastpoint.ge/place/colins/",
+    "https://eastpoint.ge/place/kolumbia/",
+    "https://eastpoint.ge/place/konversi-mustangi/",
+    "https://eastpoint.ge/place/kontakt/",
+    "https://eastpoint.ge/place/loto-ji/",
+    "https://eastpoint.ge/place/luka-polare/",
+    "https://eastpoint.ge/place/lumiersi/",
+    "https://eastpoint.ge/place/lutecia/",
+    "https://eastpoint.ge/place/mavi/",
+    "https://eastpoint.ge/place/makdonaldsi/",
+    "https://eastpoint.ge/place/manamo/",
+    "https://eastpoint.ge/place/mango/",
+    "https://eastpoint.ge/place/mandarina/",
+    "https://eastpoint.ge/place/marko/",
+    "https://eastpoint.ge/place/masimo-duti/",
+    "https://eastpoint.ge/place/majig-gendi/",
+    "https://eastpoint.ge/place/meama/",
+    "https://eastpoint.ge/place/megategnika/",
+    "https://eastpoint.ge/place/miniso/",
+    "https://eastpoint.ge/place/joma/",
+    "https://eastpoint.ge/place/jordano/",
+    "https://eastpoint.ge/place/hm/",
+    "https://eastpoint.ge/place/tolia/",
+    "https://eastpoint.ge/place/tousi/",
+    "https://eastpoint.ge/place/iakudza/",
+    "https://eastpoint.ge/place/iv-roshe/",
+    "https://eastpoint.ge/place/ili/",
+    "https://eastpoint.ge/place/english-home/",
+    "https://eastpoint.ge/place/instriti/",
+    "https://eastpoint.ge/place/ioioso/",
+    "https://eastpoint.ge/place/ios-jorjia/",
+    "https://eastpoint.ge/place/isi-pari/",
+    "https://eastpoint.ge/place/polo/",
+    "https://eastpoint.ge/place/xs-toys/",
+    "https://eastpoint.ge/place/kavea/",
+    "https://eastpoint.ge/place/calzedonia/",
+    "https://eastpoint.ge/place/kapri/",
+    "https://eastpoint.ge/place/top-gardi/",
+    "https://eastpoint.ge/place/topsporti/",
+    "https://eastpoint.ge/place/uno-shoes/",
+    "https://eastpoint.ge/place/faktori/",
+    "https://eastpoint.ge/place/firali/",
+    "https://eastpoint.ge/place/fitnes-formula/",
+    "https://eastpoint.ge/place/flo/",
+    "https://eastpoint.ge/place/flormari/",
+    "https://eastpoint.ge/place/fokus-mokusi/",
+    "https://eastpoint.ge/place/forumi-akhali-natebisgan/",
+    "https://eastpoint.ge/place/galta-bedniereba/",
+    "https://eastpoint.ge/place/gartveli-dizainerebis-kutkhe/",
+    "https://eastpoint.ge/place/gafs-end-glaudsi/",
+    "https://eastpoint.ge/place/gei-ef-si/",
+    "https://eastpoint.ge/place/gelvin-gleini/",
+    "https://eastpoint.ge/place/amamia/",
+    "https://eastpoint.ge/place/ander-armuri/",
+    "https://eastpoint.ge/place/under-ground/",
+    "https://eastpoint.ge/place/arttaimi/",
+    "https://eastpoint.ge/place/armani/",
+    "https://eastpoint.ge/place/aromako/",
+    "https://eastpoint.ge/place/afogato/",
+    "https://eastpoint.ge/place/akhali-nateba/",
+    "https://eastpoint.ge/place/bakara/",
+    "https://eastpoint.ge/place/baldi/",
+    "https://eastpoint.ge/place/bambino/",
+    "https://eastpoint.ge/place/barneri/",
+    "https://eastpoint.ge/place/bata/",
+    "https://eastpoint.ge/place/beko/",
+    "https://eastpoint.ge/place/benetoni/",
+    "https://eastpoint.ge/place/berd-ji/",
+    "https://eastpoint.ge/place/bershka/",
+    "https://eastpoint.ge/place/biblusi/",
+    "https://eastpoint.ge/place/bleizer-kafe/",
+    "https://eastpoint.ge/place/blu-tabla/",
+    "https://eastpoint.ge/place/bodi-shopi/",
+    "https://eastpoint.ge/place/bolsero-2/",
+    "https://eastpoint.ge/place/bosi/",
+    "https://eastpoint.ge/place/burger-sfeisi/",
+    "https://eastpoint.ge/place/galerea-agcenti/",
+    "https://eastpoint.ge/place/garmiti/",
+    "https://eastpoint.ge/place/gajeti/",
+    "https://eastpoint.ge/place/giglsi/",
+    "https://eastpoint.ge/place/grand-elegtronigs/",
+    "https://eastpoint.ge/place/greideri/",
+    "https://eastpoint.ge/place/pandora-2/",
+    "https://eastpoint.ge/place/panko/",
+    "https://eastpoint.ge/place/panuozo/",
+    "https://eastpoint.ge/place/pendanti/",
+    "https://eastpoint.ge/place/penti/",
+    "https://eastpoint.ge/place/piel-naturalsi/",
+    "https://eastpoint.ge/place/pica-di-roma/",
+    "https://eastpoint.ge/place/podsi/",
+    "https://eastpoint.ge/place/pol/",
+    "https://eastpoint.ge/place/djakadi/",
+    "https://eastpoint.ge/place/regalia/",
+    "https://eastpoint.ge/place/remags/",
+    "https://eastpoint.ge/place/roniko/",
+    "https://eastpoint.ge/place/subway/"
+  ],
+  "crossSourceMatches": [
+    {
+      "id": "directory_mall_galleria_0d54e2cbc545",
+      "matchedPlaceId": "directory_cellfie_652",
+      "evidence": "Exact Cellfie tenant in this named mall is independently listed by the operator https://cellfie.ge/private-customers/shops at the same named mall and address; source record directory_cellfie_652. Mall corroboration: https://galleria.ge/cellfie."
+    },
+    {
+      "id": "directory_mall_eastpoint_c9e11021f83d",
+      "matchedPlaceId": "directory_cellfie_656",
+      "evidence": "Exact Cellfie tenant in this named mall is independently listed by the operator https://cellfie.ge/private-customers/shops at the same named mall and address; source record directory_cellfie_656. Mall corroboration: https://eastpoint.ge/place/selfi/."
+    }
+  ],
+  "health": {
+    "records": 9,
+    "matchedExisting": 7,
+    "actualPhotos": 2,
+    "rejectedImages": 12,
+    "imageRejection": "All12 Evex supplied image assets are generic branch identity cards, not actual photographs.",
+    "pending": [
+      {
+        "sourceRecordId": 19,
+        "name": "ევექსის კლინიკა მთაწმინდაზე",
+        "sourceUrl": "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-mtatsmindis-poliklinika",
+        "reason": "Invalid publisher coordinates1,1; exact site anchor not proven."
+      },
+      {
+        "sourceRecordId": 31,
+        "name": "კარავი - ევექსის ბავშვთა ნეიროგანვითარების ცენტრი",
+        "sourceUrl": "https://www.evex.ge/ka/archive/klinikebi/karavi-eveksis-bavshvta-neiroganvitarebis-tsentri",
+        "reason": "Invalid publisher coordinates1,1; exact site anchor not proven."
+      },
+      {
+        "sourceRecordId": 28,
+        "name": "ევექსის კლინიკა დადიანზე",
+        "sourceUrl": "https://www.evex.ge/ka/archive/klinikebi/shps-mkurnali-2002-dadianis-poliklinika",
+        "reason": "Publisher rounded point conflicts with Dadiani site; exact address anchor unconfirmed."
+      },
+      {
+        "sourceRecordId": 24,
+        "name": "ევექსის კლინიკა დიდ დიღომში",
+        "sourceUrl": "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-didi-dighmis-poliklinika",
+        "reason": "Potential nearby OSM branch has different street/number; site identity requires additional evidence before merge."
+      },
+      {
+        "sourceRecordId": 22,
+        "name": "ევექსის კლინიკა ისანში",
+        "sourceUrl": "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-isnis-poliklinika",
+        "reason": "Potential nearby OSM branch has different street/number; site identity requires additional evidence before merge."
+      }
+    ],
+    "sources": [
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-varketilis-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-vazisubnis-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-gldanis-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-guramishvilis-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-saburtalos-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-didubis-poliklinika",
+      "https://www.evex.ge/ka/archive/klinikebi/ss-eveksi-tsintsadzis-poliklinika",
+      "https://cmchospital.ge/ge/contact",
+      "https://gh.ge/clinic/tbilisis-mravalprofiluri-samedicino-centri/"
+    ]
+  },
+  "reviewedCategoryCorrections": [
+    {
+      "id": "directory_mall_city_mall_saburtalo_b4da90bd8c96",
+      "from": "sports-shop",
+      "to": "gym",
+      "evidence": "Explicit official tenant name12 Rounds Boxing Club; canonical OSM sports facility, not retail sports shop.",
+      "sourceUrl": "https://thecitymall.ge/city-mall-saburtalo/brands/12-rounds"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_c8d0d4501983",
+      "from": "sports-shop",
+      "to": "gym",
+      "evidence": "Official directory explicitly names Octopus Fitness Club.",
+      "sourceUrl": "https://thecitymall.ge/city-mall-saburtalo/brands/okto-sabu"
+    },
+    {
+      "id": "directory_mall_city_mall_saburtalo_09d2f5541a85",
+      "from": "shopping",
+      "to": "bowling",
+      "evidence": "Official tenant name explicitly Ballroom Bowling; Galleria sibling also published bowling category.",
+      "sourceUrl": "https://thecitymall.ge/city-mall-saburtalo/brands/ballroom-sabu"
+    },
+    {
+      "id": "directory_mall_eastpoint_7d2371aaf1df",
+      "from": "supermarket",
+      "to": "hardware",
+      "evidence": "Exact matched Domino home-improvement hypermarket OSM4128351565 is hardware; broad source hypermarket is not grocery.",
+      "sourceUrl": "https://eastpoint.ge/place/domino/"
+    },
+    {
+      "id": "directory_mall_eastpoint_618102f275d5",
+      "from": "shopping",
+      "to": "bank",
+      "evidence": "Official directory tenant explicitly Bank of Georgia, not a retail shop.",
+      "sourceUrl": "https://eastpoint.ge/place/bank-of-georgia/"
+    },
+    {
+      "id": "directory_mall_eastpoint_4429da70810d",
+      "from": "shopping",
+      "to": "playground",
+      "evidence": "Official Focus Mocus identity and same-complex canonical OSM playground identify a children entertainment venue, not a retail shop.",
+      "sourceUrl": "https://eastpoint.ge/place/fokus-mokusi/"
+    }
+  ],
+  "reviewedBilingualTenantMatches": [
+    {
+      "directoryId": "directory_mall_eastpoint_d0d54d0f71b3",
+      "canonicalId": "osm_node_11758446686",
+      "name": "ხინკლის აკადემია",
+      "aliases": [
+        "Khinkali Academy"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/khinklis-akademia/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/khinklis-akademia/ names ხინკლის აკადემია; its reviewed brand artwork confirms the English identity Khinkali Academy. Exactly one existing OpenStreetMap tenant with that identity (Khinkali Academy, osm_node_11758446686) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_1d8090bacab3",
+      "canonicalId": "osm_node_11758046808",
+      "name": "ჯეოქსი",
+      "aliases": [
+        "Geox"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jeogsi/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/jeogsi/ names ჯეოქსი; its reviewed brand artwork confirms the English identity Geox. Exactly one existing OpenStreetMap tenant with that identity (Geox, osm_node_11758046808) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_d325ff4e3fd4",
+      "canonicalId": "osm_node_11758446676",
+      "name": "ჯი-ჰოუმი",
+      "aliases": [
+        "G-Home"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/ji-houmi/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/ji-houmi/ names ჯი-ჰოუმი; its reviewed brand artwork confirms the English identity G-Home. Exactly one existing OpenStreetMap tenant with that identity (G-Home, osm_node_11758446676) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_7b6d57a3fcb8",
+      "canonicalId": "osm_node_5383016269",
+      "name": "ეკო",
+      "aliases": [
+        "Ecco"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/eko/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/eko/ names ეკო; its reviewed brand artwork confirms the English identity Ecco. Exactly one existing OpenStreetMap tenant with that identity (Ecco, osm_node_5383016269) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_9955f4a562ef",
+      "canonicalId": "osm_node_11758046842",
+      "name": "ენზა ჰოუმ",
+      "aliases": [
+        "Enza Home"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/enza-home/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/enza-home/ names ენზა ჰოუმ; its reviewed brand artwork confirms the English identity Enza Home. Exactly one existing OpenStreetMap tenant with that identity (Enza Home, osm_node_11758046842) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_e8743787bbef",
+      "canonicalId": "osm_node_11758046844",
+      "name": "კოლინსი",
+      "aliases": [
+        "Colins",
+        "Colin's"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/colins/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/colins/ names კოლინსი; its reviewed brand artwork confirms the English identity Colins / Colin's. Exactly one existing OpenStreetMap tenant with that identity (კოლინ'ს, osm_node_11758046844) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_af545f4ae604",
+      "canonicalId": "osm_node_11758046807",
+      "name": "კოლუმბია",
+      "aliases": [
+        "Columbia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/kolumbia/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/kolumbia/ names კოლუმბია; its reviewed brand artwork confirms the English identity Columbia. Exactly one existing OpenStreetMap tenant with that identity (Columbia, osm_node_11758046807) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_66eba0f8578c",
+      "canonicalId": "osm_node_5960629985",
+      "name": "ჯორდანო",
+      "aliases": [
+        "Giordano"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jordano/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/jordano/ names ჯორდანო; its reviewed brand artwork confirms the English identity Giordano. Exactly one existing OpenStreetMap tenant with that identity (Giordano, osm_node_5960629985) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_3b37ef6a1be3",
+      "canonicalId": "osm_node_11758046851",
+      "name": "კალცედონია",
+      "aliases": [
+        "Calzedonia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/calzedonia/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/calzedonia/ names კალცედონია; its reviewed brand artwork confirms the English identity Calzedonia. Exactly one existing OpenStreetMap tenant with that identity (Calzedonia, osm_node_11758046851) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_4429da70810d",
+      "canonicalId": "osm_node_4754110434",
+      "name": "ფოკუს მოკუსი",
+      "aliases": [
+        "Focus Mocus"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/fokus-mokusi/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/fokus-mokusi/ names ფოკუს მოკუსი; its reviewed brand artwork confirms the English identity Focus Mocus. Exactly one existing OpenStreetMap tenant with that identity (Focus Mocus, osm_node_4754110434) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_f2a0f718b02f",
+      "canonicalId": "osm_node_4128359312",
+      "name": "ბეკო",
+      "aliases": [
+        "Beko"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/beko/",
+      "evidence": "East Point's official tenant page https://eastpoint.ge/place/beko/ names ბეკო; its reviewed brand artwork confirms the English identity Beko. Exactly one existing OpenStreetMap tenant with that identity (Beko, osm_node_4128359312) is linked to the same East Point complex osm_way_371721697. This is an exact same-complex tenant identity match, not a proximity-only match. Existing OSM coordinates are preserved."
+    }
+  ],
+  "reviewedAliases": [
+    {
+      "directoryId": "directory_mall_eastpoint_83a0a0655c53",
+      "name": "კორსო იტალია",
+      "aliases": [
+        "Corso Italia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/korso-italia/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_f14196515232",
+      "name": "კოფისტა",
+      "aliases": [
+        "Coffeesta"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/kofista/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_817fbc1c4386",
+      "name": "ლე მონდე",
+      "aliases": [
+        "Le Monde"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/le-monde/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_d0d54d0f71b3",
+      "name": "ხინკლის აკადემია",
+      "aliases": [
+        "Khinkali Academy"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/khinklis-akademia/",
+      "matchedPlaceId": "osm_node_11758446686",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_20dadd51a498",
+      "name": "ჯეი ბი ელი",
+      "aliases": [
+        "JBL"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jei-bi-eli/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_b9443c4e519c",
+      "name": "ჯეი ბი მარტინი",
+      "aliases": [
+        "JB Martin"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jei-bi-martini/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_1d8090bacab3",
+      "name": "ჯეოქსი",
+      "aliases": [
+        "Geox"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jeogsi/",
+      "matchedPlaceId": "osm_node_11758046808",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_d325ff4e3fd4",
+      "name": "ჯი-ჰოუმი",
+      "aliases": [
+        "G-Home"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/ji-houmi/",
+      "matchedPlaceId": "osm_node_11758446676",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_1a6bb835cc2f",
+      "name": "დაისონი",
+      "aliases": [
+        "Dyson"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/daisoni/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_7b6d57a3fcb8",
+      "name": "ეკო",
+      "aliases": [
+        "Ecco"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/eko/",
+      "matchedPlaceId": "osm_node_5383016269",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_9955f4a562ef",
+      "name": "ენზა ჰოუმ",
+      "aliases": [
+        "Enza Home"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/enza-home/",
+      "matchedPlaceId": "osm_node_11758046842",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_cb4802988b93",
+      "name": "კელმე",
+      "aliases": [
+        "Kelme"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/kelme/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_e8743787bbef",
+      "name": "კოლინსი",
+      "aliases": [
+        "Colins",
+        "Colin's"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/colins/",
+      "matchedPlaceId": "osm_node_11758046844",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_af545f4ae604",
+      "name": "კოლუმბია",
+      "aliases": [
+        "Columbia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/kolumbia/",
+      "matchedPlaceId": "osm_node_11758046807",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_826aaa9db20b",
+      "name": "მანგო",
+      "aliases": [
+        "Mango"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/mango/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_66eba0f8578c",
+      "name": "ჯორდანო",
+      "aliases": [
+        "Giordano"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/jordano/",
+      "matchedPlaceId": "osm_node_5960629985",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_ab86fe44dea1",
+      "name": "თოლია",
+      "aliases": [
+        "Tolia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/tolia/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": [
+        "osm_node_11758046800",
+        "osm_node_11758046852",
+        "osm_node_11758446687"
+      ]
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_4c930e78b5ae",
+      "name": "ილი",
+      "aliases": [
+        "Illy"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/ili/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_3b37ef6a1be3",
+      "name": "კალცედონია",
+      "aliases": [
+        "Calzedonia"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/calzedonia/",
+      "matchedPlaceId": "osm_node_11758046851",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_4429da70810d",
+      "name": "ფოკუს მოკუსი",
+      "aliases": [
+        "Focus Mocus"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/fokus-mokusi/",
+      "matchedPlaceId": "osm_node_4754110434",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_f2a0f718b02f",
+      "name": "ბეკო",
+      "aliases": [
+        "Beko"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/beko/",
+      "matchedPlaceId": "osm_node_4128359312",
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_7c2355534ecc",
+      "name": "ბლუ ტაბლა",
+      "aliases": [
+        "Blue Tabla",
+        "Bluetabla"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/blu-tabla/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    },
+    {
+      "directoryId": "directory_mall_eastpoint_f58c4c4ec4bb",
+      "name": "პოლ",
+      "aliases": [
+        "Paul"
+      ],
+      "sourceUrl": "https://eastpoint.ge/place/pol/",
+      "matchedPlaceId": null,
+      "unresolvedCandidates": []
+    }
+  ],
+  "reviewedFloorField": {
+    "records": 491,
+    "field": "facets.level",
+    "reason": "Preserve explicitly published mall directory floor labels in the existing UI facet."
+  },
+  "finalStats": {
+    "records": 729,
+    "mallTenants": 720,
+    "healthSites": 9,
+    "matchedRecords": 325,
+    "matchedOSM": 323,
+    "matchedPriorDirectory": 2,
+    "newPlaces": 404,
+    "posts": 1458,
+    "logos": 534,
+    "actualSitePhotos": 2,
+    "publishedFloorLabels": 491
+  }
+}

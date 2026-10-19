@@ -1,0 +1,405 @@
+{
+  "version": 1,
+  "retrievedAt": "2026-10-19",
+  "notice": "Official institution identifiers; rights remain with the corresponding institutions. No affiliation implied.",
+  "logos": [
+    {
+      "id": "institution_emis_10",
+      "name": "ქალაქ თბილისის №175 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1351883690",
+        "directory_emis_school_10"
+      ],
+      "website": "https://skolebi.emis.ge/schools/10",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=3108",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-10.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "48764fa05ce65aec1fd60a2faf6c0b8a3a68221ef902a3c9ebefff5264338ca8",
+      "sourceOriginalSHA": "3ead0c858cf1e3fd6501041916705a309f657159a405840fe243693dc2c718e0",
+      "width": 360,
+      "height": 180,
+      "bytes": 74700,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_11",
+      "name": "ქალაქ თბილისის №177 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_184914281",
+        "directory_emis_school_11"
+      ],
+      "website": "https://skolebi.emis.ge/schools/11",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=2790",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-11.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "2f7e5d42f37d08233854a58fcd003babc2497370a6e0bd242cad7b5af03bc9f9",
+      "sourceOriginalSHA": "545dea6455c61776a2dc66afe6f3e5f0124cfde86027933f9d1f38514e51cd1a",
+      "width": 384,
+      "height": 192,
+      "bytes": 69598,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_13",
+      "name": "ქალაქ თბილისის №190 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_709632487",
+        "directory_emis_school_13"
+      ],
+      "website": "https://skolebi.emis.ge/schools/13",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=38724",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-13.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "137037c5884dd2a90345c221ea048c119b4b04a4acb0d385b474cf437d7df0c7",
+      "sourceOriginalSHA": "6211a738a2091233f6b95a70d0146d294020462f36684c537892545d9f5480b7",
+      "width": 384,
+      "height": 190,
+      "bytes": 43000,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_24",
+      "name": "ქალაქ თბილისის №116 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_744602139",
+        "directory_emis_school_24"
+      ],
+      "website": "https://skolebi.emis.ge/schools/24",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=14999",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-24.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "38b454bb13161c40b5bffb5842f8d81680b530130fe82f086ceba365b88720f8",
+      "sourceOriginalSHA": "4a66573ceaec784b0eab777e860cba21a5e9590503320563695826f09e5850c6",
+      "width": 384,
+      "height": 192,
+      "bytes": 130635,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_30",
+      "name": "ქალაქ თბილისის №155 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1257195216",
+        "directory_emis_school_30"
+      ],
+      "website": "https://skolebi.emis.ge/schools/30",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=2268",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-30.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "8c27bb1bd4df9f940ea842f962166c403869563fa1d471087f16e60c41b07080",
+      "sourceOriginalSHA": "415bb4d2a05d9b93383131bfc8b4c89d1ca260eebf28515bf6eedc936264d1e9",
+      "width": 384,
+      "height": 192,
+      "bytes": 52647,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_42",
+      "name": "ქალაქ თბილისის №31 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_574695662",
+        "directory_emis_school_42"
+      ],
+      "website": "https://skolebi.emis.ge/schools/42",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=13218",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-42.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "a65544423cec8f4116f9014cea7eac76aa88ed51274508e1e6a4e1ec1e6282fb",
+      "sourceOriginalSHA": "50615d8fd64ebda80edbe826c3880b25bde90f1ff34fc97a10e34bcb7fa35980",
+      "width": 384,
+      "height": 192,
+      "bytes": 47200,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_44",
+      "name": "ქალაქ თბილისის №37 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_744597681",
+        "directory_emis_school_44"
+      ],
+      "website": "https://skolebi.emis.ge/schools/44",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=18687",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-44.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "2896c8ae477e3b15f946f40ef692d4fe32b8bc66890f79b3736de7cbe30df114",
+      "sourceOriginalSHA": "8e4f53584f6bdea6c9e249b70eb6b05e1aaa8450f065a8ef6386a45016968318",
+      "width": 384,
+      "height": 192,
+      "bytes": 38882,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_109",
+      "name": "ქალაქ თბილისის №142 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1336221508",
+        "directory_emis_school_109"
+      ],
+      "website": "https://skolebi.emis.ge/schools/109",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=42901",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-109.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "53a43c94f220a95eb45c2d1b8f28b3fb56756f311c92e06c3229740e4010e66b",
+      "sourceOriginalSHA": "084f7598834fcfa8e0dae92582a99d29337f20f10ff81b132b97eeded7f95e09",
+      "width": 384,
+      "height": 192,
+      "bytes": 54104,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_182",
+      "name": "ქალაქ თბილისის №203 საჯარო სკოლა",
+      "placeIds": [
+        "directory_emis_school_182"
+      ],
+      "website": "https://skolebi.emis.ge/schools/182",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=19509",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-182.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "813c5b505e16f2a7a6ba6d0ab466e189ca0b4795247dd7df0fe6db7b9d968c1b",
+      "sourceOriginalSHA": "04d5ff80d481269eacda180e8172cca0a9a57717e59ea1ab979af26e44647f3a",
+      "width": 384,
+      "height": 192,
+      "bytes": 60395,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_193",
+      "name": "ჟიული შარტავას სახელობის ქალაქ თბილისის №62 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1351899866",
+        "directory_emis_school_193"
+      ],
+      "website": "https://skolebi.emis.ge/schools/193",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=19247",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-193.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "d366437686cf06ee3164f5c9da06a0d1dab3ef8f432a8d5f7ad41062569d87d5",
+      "sourceOriginalSHA": "4bb66890e9cc4fffa8a54ccba31e8759b9b8a41f6f1986d96288203f460d2a68",
+      "width": 384,
+      "height": 192,
+      "bytes": 137311,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_249",
+      "name": "ქალაქ თბილისის №145 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1119668123",
+        "directory_emis_school_249"
+      ],
+      "website": "https://skolebi.emis.ge/schools/249",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=2497",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-249.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "0f5c7b9f34134f2dc4e2c50de74161670eaf0ba59e41a1644ab7a3960b133c5a",
+      "sourceOriginalSHA": "4148f6d06f0356042f58aaf667bfd036709c039bfe3746461166e1c6b68e87b9",
+      "width": 384,
+      "height": 192,
+      "bytes": 88069,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_260",
+      "name": "გოგიტა კიკნაძის სახელობის ქალაქ თბილისის №182 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_696645928",
+        "directory_emis_school_260"
+      ],
+      "website": "https://skolebi.emis.ge/schools/260",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=16572",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-260.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "b04e9be5dc4198e4579ee40837724d19c1623d37c6b050427a8cb801e7e14b55",
+      "sourceOriginalSHA": "6e233d3bf1bc018a91e9d65f23b84a180b2e1bed306a282a85ba51d511875ca2",
+      "width": 384,
+      "height": 192,
+      "bytes": 31843,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_269",
+      "name": "ქალაქ თბილისის №81 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_494061501",
+        "directory_emis_school_269"
+      ],
+      "website": "https://skolebi.emis.ge/schools/269",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=20800",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-269.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "1bf4bded4ebcbd6af2998ab69e4f77c2fcba808a6cea2e5fb7a680abf3bc105d",
+      "sourceOriginalSHA": "ea8d123218056c90bc945393a5b38af1e4b289a64e99450b3486286b9a4e1700",
+      "width": 384,
+      "height": 192,
+      "bytes": 81352,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_270",
+      "name": "ქალაქ თბილისის №82 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_583458554",
+        "directory_emis_school_270"
+      ],
+      "website": "https://skolebi.emis.ge/schools/270",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=1174",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-270.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "18aa885450fa742300d4831c0d65e8351f51e6f88c6edd0962c007bd2da8ce9d",
+      "sourceOriginalSHA": "0ae69dd51ff9cd8047fd39fd32fa9dd1668132131105d334fa07db8c386e1d09",
+      "width": 313,
+      "height": 313,
+      "bytes": 86391,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_271",
+      "name": "ქალაქ თბილისის №83 საჯარო სკოლა",
+      "placeIds": [
+        "directory_emis_school_271"
+      ],
+      "website": "https://skolebi.emis.ge/schools/271",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=11945",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-271.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "8187fdf957d28f8fa84f1d448ef991e9a0c2ad072422f556928815d6bf1a1095",
+      "sourceOriginalSHA": "441154060c2fd1502b5762eb40c6c18e6aecc07dd65b2203ee6c1f2b4eeb8bc2",
+      "width": 384,
+      "height": 381,
+      "bytes": 138123,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_394",
+      "name": "ქალაქ თბილისის №58 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1042704566",
+        "directory_emis_school_394"
+      ],
+      "website": "https://skolebi.emis.ge/schools/394",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=1747",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-394.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "b4f461e9038dd7b0202b663a6e5c8582d2086c3863fe599011b2c6de57f0f6af",
+      "sourceOriginalSHA": "dabe36fb860649538d840db0c37cb57a3201d2a91450bcac48f35e160c910334",
+      "width": 384,
+      "height": 192,
+      "bytes": 31598,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_396",
+      "name": "ქალაქ თბილისის №21 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1004459424",
+        "directory_emis_school_396"
+      ],
+      "website": "https://skolebi.emis.ge/schools/396",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=2282",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-396.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "a65a8b6696f97fcece4cea47b50ce9cbf33f2f9d683d605f4171eec9657cf255",
+      "sourceOriginalSHA": "3d4b51cf79f2c367f919b980c3e9632b83c7195768659f4a5cbc3cb3e13d8e3d",
+      "width": 384,
+      "height": 192,
+      "bytes": 32606,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_400",
+      "name": "ქალაქ თბილისის №47 საჯარო სკოლა",
+      "placeIds": [
+        "osm_relation_15923606",
+        "directory_emis_school_400"
+      ],
+      "website": "https://skolebi.emis.ge/schools/400",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=4438",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-400.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "fa968cf80de9a3ba918897d2dd7c3605c87b6f1e52381ee3d6578a5ac35cd61a",
+      "sourceOriginalSHA": "d475adf283b5acaf30b8f620236cfd882e4ff0ac5d299fc4e1231fdf6266a3c0",
+      "width": 384,
+      "height": 192,
+      "bytes": 57520,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_2043",
+      "name": "ნიკოლოზ ბარათაშვილის სახელობის ქალაქ თბილისის №212 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1153741446",
+        "directory_emis_school_2043"
+      ],
+      "website": "https://skolebi.emis.ge/schools/2043",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=47936",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-2043.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "2c6c63f4329af1b5f7a8373d6d507ae8d5f6d84b4fe5e047c479f2b2c3e42273",
+      "sourceOriginalSHA": "f2eda97197e75bb296735d91df8ff62e521b27d0b65b0600cbc1e5e6e2908795",
+      "width": 384,
+      "height": 192,
+      "bytes": 127772,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    },
+    {
+      "id": "institution_emis_2070",
+      "name": "ქალაქ თბილისის №211 საჯარო სკოლა",
+      "placeIds": [
+        "osm_way_1037322717",
+        "directory_emis_school_2070"
+      ],
+      "website": "https://skolebi.emis.ge/schools/2070",
+      "sourceUrl": "https://skolebi.emis.ge/back/imagedownload?attachmentId=12320",
+      "publisher": "EMIS-ის საჯარო სასკოლო ცნობარი",
+      "file": "institution-emis-2070.png",
+      "downloadedAt": "2026-10-19",
+      "sha256": "f0692079857878c17fc2a5faa7d88fe9388fe025386ba82afabfb75964a8a0a7",
+      "sourceOriginalSHA": "ff0de320e2ab5e7a3f3646be65a0e0117f2fbb9213d8b2e02d09e436254186c0",
+      "width": 384,
+      "height": 192,
+      "bytes": 42468,
+      "rights": "source-published",
+      "note": "Institution-specific school name/number visually verified on official profile artwork. Thumbnail only; original artwork unchanged and original source retained."
+    }
+  ]
+}

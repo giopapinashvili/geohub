@@ -5,7 +5,7 @@ const ASSET = /^(manifest|(?:overview|lookup|search-index|places--?\d+_-?\d+)-[a
 const MANIFEST_TTL = 5 * 60 * 1000;
 
 export function createPublicPlaceCache({ fetcher = (...args) => fetch(...args), now = Date.now,
-  maxBytes = 12 * 1024 * 1024, maxEntries = 40 } = {}) {
+  maxBytes = 24 * 1024 * 1024, maxEntries = 40 } = {}) {
   const completed = new Map();
   const pending = new Map();
   let bytes = 0;
@@ -33,8 +33,9 @@ export function createPublicPlaceCache({ fetcher = (...args) => fetch(...args), 
       if (!response.ok) throw new Error(`Place data unavailable (${response.status})`);
       if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('Invalid place data response');
       const value = await response.json();
-      // Manifest sizes are small. Imported assets carry their verified byte
-      // counts; avoid keeping a second copy of the decoded search index here.
+      // The budget fits the metadata/lookup and nearby enriched shards together.
+      // Imported assets carry verified byte counts; the decoded search index
+      // opts out so a second copy cannot displace the active viewport.
       const size = Number.isSafeInteger(expectedBytes) && expectedBytes > 0
         ? expectedBytes : JSON.stringify(value).length * 3;
       if (retain && size <= maxBytes) {

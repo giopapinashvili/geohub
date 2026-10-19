@@ -49,9 +49,11 @@ cache the hash-named data assets immutably without making refreshes stale.
 - `mergeImportedPlaces()` preserves native IDs. Without an explicit source ID,
   only exact name + category + address within 20 m suppresses an imported duplicate
   in display. Unnamed objects and distinct branches remain separate.
-- Mall directory links derive from mapped POI points within a mapped mall polygon.
-  The page labels the list as partial. Relation-only malls currently have no
-  inferred tenants. Floor labels are source values, not guaranteed local numbering.
+- Mall directory links combine mapped POI points inside a mall polygon with
+  explicitly reviewed tenant records from the mall's own directory. Relation-only
+  malls can have these explicit links. The page labels the list as partial.
+  Floor labels use `facets.level` and retain the publisher's numbering. Shared
+  building coordinates are never presented as surveyed indoor shop positions.
 - Brand counts use explicit `brand`/`brand:wikidata`, not guessed business names.
   Points within 20 m on the same mapped level are counted once. Branch counts
   exclude ATMs and payment/vending machines. Coverage is this snapshot only.
@@ -75,6 +77,55 @@ The record keeps the official facts URL separate from its coordinate evidence;
 publisher map centers, shared indoor building positions and address-matched building
 centers stay approximate. The manifest lists these official sources and counts
 separately from OSM. See `PLACE-COVERAGE-AUDIT.md` for measured coverage and known gaps.
+
+## Public-directory reconciliation
+
+`source-directory-definitions.mjs` combines the previously published institutional
+supplement with reviewed chain, bank, school, university, library, museum, postal,
+mall, healthcare and merchant-directory sources. The source-specific audit files
+record accepted, matched, ambiguous, out-of-area and unavailable rows. A source
+row must have a stable ID, explicit category, coordinate evidence and source URL.
+
+`source-directory-policy.mjs` merges only an explicit `matchedPlaceId` backed by
+`matchEvidence`; it never deduplicates a branch just because another point is
+nearby. Later sources can reference an earlier source ID that has itself been
+merged to an OSM ID. Canonical page IDs, coordinates and existing owner data stay
+intact. Reviewed name/address/category corrections require separate evidence.
+New facts, photos and source-based posts enrich the canonical page. These posts
+are labelled GeoHub directory content and are separate from user/merchant posts.
+
+Wolt is labelled `merchant-directory`, not an official institutional register.
+The source's delivery listing is not evidence of walk-in access, dine-in service,
+stock, opening hours, food preparation time or dietary certification. Virtual
+restaurants without a confirmed visitor address and ambiguous same-business
+matches remain in the audit, outside publication. Each accepted image is linked
+to that merchant's source page and labelled as a listing illustration where its
+subject is a dish/product rather than a verified branch exterior.
+
+Source-published photographs and logos do not acquire a Creative Commons license.
+Credits retain their publisher, original URL, checked date and byte hash; unknown
+capture dates remain unknown. Local previews are resized for loading performance.
+Logo registries require reviewed artwork; ambiguous generic names use exact
+canonical place IDs, and category guards prevent unrelated businesses receiving
+the same logo. An unavailable image remains missing instead of borrowing another
+branch's photograph. The existing licensed Commons images retain their licenses.
+
+After changing accepted sources, rebuild the publication and native display bridge:
+
+```powershell
+node web/tools/import-tbilisi-osm.mjs
+node web/tools/generate-native-place-source-records.mjs
+node --test web/tools/directory-publication.test.mjs web/tools/source-directory-*.test.mjs web/tools/place-brand-assets.test.mjs web/tools/native-place-enrichment.test.mjs
+npm run build
+```
+
+The dataset manifest distinguishes source-row counts, unique enriched places,
+new records and mapped structures. Neither record totals nor a successful import
+prove that every Tbilisi business, entrance, office or tenant has been found.
+The parsed public-data LRU is capped at 24 MiB so the manifest, lookup and dense
+source-enriched shards can coexist; it still excludes account/credential data
+and a second copy of the search index. Share-preview reads use the same bounded
+24 MiB per-file allowance as the importer.
 
 ## Global and catalog search
 

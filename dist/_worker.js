@@ -21,7 +21,7 @@
 //   headers (copied from _headers at build time) are attached here.
 
 const SECURITY_HEADERS = {"X-Content-Type-Options":"nosniff","X-Frame-Options":"SAMEORIGIN","Referrer-Policy":"strict-origin-when-cross-origin","Permissions-Policy":"camera=(self), microphone=(self), geolocation=(self), payment=(self)","Content-Security-Policy":"default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' blob: https://res.cloudinary.com https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://api.cloudinary.com https://res.cloudinary.com https://geohub-payments.gio-papinashvili20-bd3.workers.dev https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://tiles.mapterhorn.com; worker-src 'self' blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://geohub-main.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"};
-const WORKER_VERSION = "92e48da476";
+const WORKER_VERSION = "6be1e82e25";
 // Public, read-only source adapter. No merchant credentials or user data.
 // Only hardcoded official hosts are fetched; caller input never chooses a URL.
 function parseZoommerOffers(html, observedAtMs = Date.now()) {
@@ -258,7 +258,8 @@ async function directoryJson(env, origin, path) {
   const response = await env.ASSETS.fetch(new Request(new URL(path, origin)));
   if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) return null;
   const length = Number(response.headers.get('content-length'));
-  if (length > 8 * 1024 * 1024) return null;
+  // Match the importer's bounded shard limit, including attributed source facts.
+  if (length > 24 * 1024 * 1024) return null;
   return response.json();
 }
 
@@ -280,7 +281,8 @@ export async function loadImportedPlaceMeta(id, env, origin) {
     directoryJson(env, origin, '/place-media/institutions-credits.json').catch(() => null),
     directoryJson(env, origin, '/place-media/credits.json').catch(() => null),
   ]);
-  const photo = [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
+  const directPhoto = arr(place.raw?.photoCredits).find(entry => entry.url === place.image && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|jpeg|webp|png)$/.test(entry.url));
+  const photo = directPhoto || [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
   const name = clean(place.name) || SITE;
   const details = [clean(place.address), clean(place.city)].filter(Boolean).join(' · ');
   const photoSize = photo?.preview;

@@ -45,14 +45,15 @@ export function importedPlaceEntries(place) {
   const photos = (Array.isArray(raw.photoCredits) ? raw.photoCredits : []).filter(photo => {
     if (!photo || !photoUrls.has(photo.url) || used.has(photo.url)) return false;
     const imageSafe = /^\/place-media\/[\w.-]+$/.test(photo.url) || sourceHttpUrl(photo.url).startsWith('https://');
-    if (!imageSafe || !sourceHttpUrl(photo.sourceUrl) || !sourceHttpUrl(photo.licenseUrl) || !text(photo.license) || !text(photo.author)) return false;
+    const rightsKnown = photo.rights === 'source-published' ? !!sourceHttpUrl(photo.originalUrl) : !!(sourceHttpUrl(photo.licenseUrl) && text(photo.license));
+    if (!imageSafe || !sourceHttpUrl(photo.sourceUrl) || !rightsKnown || !text(photo.author)) return false;
     used.add(photo.url); return true;
   }).map(photo => ({ ...photo, sourceUrl: sourceHttpUrl(photo.sourceUrl), licenseUrl: sourceHttpUrl(photo.licenseUrl), authorUrl: sourceHttpUrl(photo.authorUrl), caption: text(photo.caption) || place.name, dateLabel: photoDateLabel(photo.dateTaken) }));
   return { placeId: place.id, placeHref: `/place/${place.id}`, mapHref: `/map?place=${place.id}`, name: place.name, category,
     isImported, guide: placeVisitGuide(place),
     editorialPosts: (raw.editorial?.posts || []).filter(post => typeof post.title === 'string' && typeof post.body === 'string').map(post => ({ ...post, sourceUrl: sourceHttpUrl(post.sourceUrl) })),
     sources: (raw.editorial?.sources || []).map(source => ({ ...source, url: sourceHttpUrl(source.url) })).filter(source => source.url),
-    sourceUrl, sourceDate: sourceDateLabel(raw.sourceDate), updatedDate: sourceDateLabel(raw.sourceUpdatedAt),
+    sourceUrl, sourceDate: sourceDateLabel(['official-directory','merchant-directory'].includes(raw.source) ? raw.sourceCheckedAt : raw.sourceDate), updatedDate: sourceDateLabel(raw.sourceUpdatedAt),
     description: text(place.description), facts, amenities, photos,
     summary: `${category.label}${place.address ? ` · ${place.address}` : ''}`,
   };

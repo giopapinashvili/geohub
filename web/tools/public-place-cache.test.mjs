@@ -53,3 +53,13 @@ test('concurrent requests coalesce, failed/HTML responses are not retained, retr
   assert.deepEqual(await cache.read(shard(1)), ['ok']);
   assert.equal(calls, 2);
 });
+
+test('enriched directory metadata, lookup and a dense city shard fit together without repeated parsing',async()=>{
+ const calls=[];
+ const cache=createPublicPlaceCache({fetcher:async url=>{calls.push(url);return response({ok:true});}});
+ const assets=[{file:'manifest.json',bytes:4*1024*1024},{file:'lookup-abcdef123456.json',bytes:3*1024*1024},{file:'places-1_2-abcdef123456.json',bytes:8*1024*1024}];
+ for(let visit=0;visit<5;visit++)for(const asset of assets)await cache.read(asset);
+ assert.equal(calls.length,3);
+ assert.equal(cache.stats().entries,3);
+ assert.ok(cache.stats().bytes<=24*1024*1024);
+});

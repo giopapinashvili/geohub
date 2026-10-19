@@ -140,7 +140,7 @@ function Visitors({ placeId }) {
 
 function Posts({ place }) {
   const { data, loading, error, reload } = useAsync(() => placePosts(place.id, 30), [place.id]);
-  const imported = ['openstreetmap', 'official-directory'].includes(place.raw?.source);
+  const imported = ['openstreetmap', 'official-directory', 'merchant-directory'].includes(place.raw?.source);
   return <div class="feed"><ImportedPlacePosts key={place.id} place={place}/>{imported && <h2 class="imported-community-heading">მომხმარებლებისა და ბიზნესების პოსტები</h2>}{error ? <Card><Empty compact icon="warning" title="პოსტები ვერ ჩაიტვირთა" action={<Button onClick={reload}>{t('common.reload')}</Button>}/></Card> : loading ? <div class="center-pad"><Spinner /></div> : data?.length ? data.map((p) => <PostCard key={p.id} post={p} />) : <Card><Empty compact icon="note-pencil" title={imported ? 'ამ ადგილზე საზოგადოებას პოსტი ჯერ არ დაუმატებია' : t('place.noPosts')} /></Card>}</div>;
 }
 
@@ -168,7 +168,7 @@ export default function Place({ params }) {
   const stats = reviewStats(reviews || [], place);
   const photos = [place.image, ...place.photos].filter((x, i, a) => x && a.indexOf(x) === i);
   const own = place.creatorId === uid.value;
-  const editable = !['openstreetmap', 'official-directory'].includes(place.raw?.source) && (own || isAdmin.value);
+  const editable = !['openstreetmap', 'official-directory', 'merchant-directory'].includes(place.raw?.source) && (own || isAdmin.value);
 
   return (
     <div class="place-page">

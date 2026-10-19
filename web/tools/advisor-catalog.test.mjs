@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import { importedAdvisorRecords, loadAdvisorCity, commerceAdvisorRecords, loadExpandedAdvisorCatalog } from './advisor-catalog.mjs';
 import { selectCandidates, makeAdvisorPrompt } from './advisor-data.mjs';
 
@@ -95,6 +96,7 @@ test('new source retrieval supports typos and sends explicit price/branch facts 
 
 test('published city snapshot loads entirely inside the private server without making network requests', async () => {
   const result = await loadAdvisorCity();
-  assert.equal(result.records.length, 43577);
+  const manifest=JSON.parse(await readFile(new URL('../public/place-data/manifest.json',import.meta.url),'utf8'));
+  assert.equal(result.records.length, manifest.osmPlaceCount);
   assert.ok(result.records.every(record => record.key.startsWith('place:osm_') && record.source === 'OpenStreetMap'));
 });

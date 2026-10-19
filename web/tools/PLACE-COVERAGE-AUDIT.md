@@ -1,5 +1,63 @@
 # Place coverage review — 19 October 2026
 
+## Latest public-directory expansion
+
+Compared with the previously published 45,637-object snapshot, the current
+publication contains **49,159 mapped objects: 3,522 additions and zero removed
+previous IDs**. Another **2,604 previously published places** received reviewed
+source enrichment. These are location records, not a count of unique companies
+or a claim that every Tbilisi location has been found.
+
+The accepted source inventory contains 6,356 rows: 2,805 official institutional,
+chain, mall and service-directory rows, plus 3,551 public Wolt merchant listings.
+It reconciles Nikora, SPAR, Pharmadepot, Liberty, Magti, Cellfie, 2 Nabiji, Libre,
+Fresco, Europroduct, TBC, Basisbank, Credo, PSP, Aversi, Georgia Post, EMIS, EQE,
+municipal libraries/museums, four mall directories and selected clinic sources.
+Rows can enrich the same canonical place, so source counts are not added together
+to produce a city completeness percentage.
+
+- 4,090 accepted source rows have their own source-associated photograph or
+  listing illustration; 3,149 distinct local photo files preserve provenance.
+- 1,611 new logo assets bring the registry to 1,820 reviewed artworks. Brand
+  resolution identifies 9,326 mapped objects, including branches and equipment.
+- 720 source-backed mall tenants are reconciled with existing mapped tenants;
+  11 bilingual duplicates were merged. The combined mall directories contain
+  1,158 links across 14 of the 15 mapped malls. 491 source floor labels are kept.
+- 238 school rows, 42 university rows, 8 municipal library rows and 8 museum rows
+  were accepted from the reviewed institutional directories. These do not prove
+  full coverage of every campus, classroom, public/private school or library.
+- PSP and Aversi contribute 266 accepted rows (220 source matches, 46 additions)
+  and 225 reviewed real branch photographs. The source inventory accounts for
+  all 344 reviewed candidates and retains 78 ambiguous rows outside publication.
+- Wolt's 4,009 observed listings yield 3,551 accepted rows (1,091 source matches,
+  2,460 additions); 458 unresolved, virtual or conflicting candidates remain
+  withheld. Listing visibility depends on the queried delivery areas. Images
+  of dishes/products are explicitly labelled as listing illustrations.
+
+Source-backed editorial content is labelled **GeoHub directory**; it does not
+pretend to be a merchant-authored announcement or a customer review. No ratings,
+stock, discounts, preparation times or opening hours were inferred from Wolt.
+Publisher media is not assigned an invented open license or capture date.
+
+Known gaps remain explicit in `source-directory-institutions.audit.json`,
+`source-directory-food.audit.json` and `source-audits/`: 51 unresolved school
+rows, 6 municipal library branches with unresolved address geometry, disputed
+clinic coordinates, ambiguous chain/ATM/pharmacy matches, unavailable source
+photos and GPC's empty locator response. These are reasons for further review,
+not evidence that the locations do not exist. OSM is still the primary broad
+source for infrastructure, transport, offices, services and street furniture.
+
+Validation checks canonical IDs, parent/tenant links, taxonomy, photo/logo hashes,
+source URLs and preservation of native owner fields. Desktop/mobile browser checks
+cover source-photo pages, school/chain/hospital logos, mall-to-tenant navigation,
+map search and existing real-offer links. Earlier published hashed assets are
+retained for already-open tabs; unpublished intermediate builds are not shipped.
+
+## Previous extraction expansion
+
+The sections below describe the earlier 45,637-object extraction release; the
+latest totals and source limitations are documented above.
+
 The 17 October 2026 Geofabrik source was re-extracted with broader selectors.
 The source rectangle is `[44.60, 41.58, 45.05, 41.91]`; it includes parts of the
 surrounding area, including Mtskheta. These numbers describe mapped objects,
