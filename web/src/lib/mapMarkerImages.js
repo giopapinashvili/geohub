@@ -17,7 +17,7 @@ function badge(icon, tone, image, brand) {
   ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
   ctx.beginPath();
   ctx.roundRect(4, 4, width - 8, 54, brand?.wide ? 18 : 27);
-  ctx.fillStyle = image ? '#ffffff' : knownTone(tone);
+  ctx.fillStyle = image ? (brand.background || '#ffffff') : knownTone(tone);
   ctx.fill(); ctx.shadowColor = 'transparent';
   ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.stroke();
   if (image) {

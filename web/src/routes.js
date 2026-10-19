@@ -36,6 +36,7 @@ export const ROUTES = [
   { path: '/search', component: page(() => import('./pages/Search.jsx')), layout: 'page', nav: 'explore' },
   { path: '/map', component: page(() => import('./pages/MapPage.jsx')), layout: 'full', nav: 'map' },
   { path: '/discounts', component: page(() => import('./pages/Discounts.jsx')), layout: 'page', nav: 'discounts' },
+  { path: '/brands/:id', component: page(() => import('./pages/BrandDirectory.jsx')), layout: 'page', nav: 'business' },
   ...(DEMO_ENABLED ? [{ path: '/discounts/demo/:id', component: page(() => import('./pages/DemoMerchant.jsx')), layout: 'page', nav: 'discounts' }] : []),
   { path: '/place/:id', component: page(() => import('./pages/Place.jsx')), layout: 'page', nav: 'explore' },
   { path: '/u/:id', component: page(() => import('./pages/Profile.jsx')), layout: 'page', nav: 'profile' },

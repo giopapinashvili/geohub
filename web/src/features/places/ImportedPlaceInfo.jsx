@@ -57,7 +57,7 @@ function SourceDetails({ place }) {
   const [error,setError]=useState(false);
   const load=()=>{ setError(false); getImportedManifest().then(setManifest).catch(()=>setError(true)); };
   const raw=place.raw;
-  const url=httpUrl(raw.sourceUrl);
+  const url=httpUrl(raw.linkedSourceUrl || raw.sourceUrl);
   return (
     <details class="imported-place-source" onToggle={event=>{if(event.currentTarget.open && !manifest)load();}}>
       <summary><Icon name="info" size={16}/><span>წყარო და მონაცემების მდგომარეობა</span></summary>
@@ -75,7 +75,7 @@ function SourceDetails({ place }) {
 
 /** Facts imported from an attributed snapshot. Never fabricates reviews/photos. */
 export function ImportedPlaceInfo({ place, showFacts=true }) {
-  if (place?.raw?.source!=='openstreetmap') return null;
+  if (!place?.raw || (!['openstreetmap','official-directory'].includes(place.raw.source) && !place.raw.linkedOsmId)) return null;
   const raw=place.raw;
   const facets=place.facets || {};
   const website=httpUrl(raw.website);
@@ -86,6 +86,9 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
     facets.outdoorSeating ? 'გარე დასაჯდომი სივრცე' : '',facets.takeaway ? 'წასაღებად' : '',facets.delivery ? 'მიტანა' : ''].filter(Boolean);
   return (
     <div class="imported-place-info">
+      {raw.operatingStatus === 'source-reports-inactive' && <p class="imported-place-location-note"><Icon name="info" size={16}/><span>{raw.sourceNote || 'წყაროს მიხედვით ამჟამად არ ფუნქციონირებს.'}</span></p>}
+      {raw.editorial?.highlights?.length > 0 && <ul class="imported-place-facets">{raw.editorial.highlights.map(label => <li key={label}>{label}</li>)}</ul>}
+      {raw.editorial?.sources?.length > 0 && <div class="imported-editorial-sources"><span>ინფორმაციის წყარო:</span>{raw.editorial.sources.filter(source => httpUrl(source.url)).map(source => <a key={source.url} href={httpUrl(source.url)} target="_blank" rel="noopener noreferrer">{source.label}<Icon name="arrow-up-right" size={13}/></a>)}</div>}
       {raw.coordinateAccuracy==='approximate-center' && <p class="imported-place-location-note"><Icon name="crosshair" size={16}/><span>კოორდინატი აღნიშნავს ობიექტის სავარაუდო ცენტრს; შესასვლელი შეიძლება სხვა მხარეს იყოს.</span></p>}
       {showFacts && <div class="imported-place-facts">
         {raw.openingHours && <p><Icon name="clock" size={17}/><span><small>სამუშაო საათები წყაროს მიხედვით</small>{raw.openingHours}</span></p>}
@@ -96,7 +99,7 @@ export function ImportedPlaceInfo({ place, showFacts=true }) {
       {['private','no','customers','permit','members'].includes(facets.access) && <p class="muted small">წყაროში მითითებულია შესვლის შეზღუდვა: {({private:'კერძო ტერიტორია',no:'საჯარო შესვლა აკრძალულია',customers:'მხოლოდ მომხმარებლებისთვის',permit:'საჭიროა ნებართვა',members:'მხოლოდ წევრებისთვის'})[facets.access]}.</p>}
       {raw.mallId && <a class="imported-place-mall-link" href={`/place/${raw.mallId}`}><Icon name="buildings" size={17}/>{raw.mallName || 'სავაჭრო ცენტრი'}<Icon name="arrow-up-right" size={13}/></a>}
       <MallDirectory key={place.id} place={place}/>
-      <SourceDetails key={place.id} place={place}/>
+      {raw.source === 'openstreetmap' || raw.linkedOsmId ? <SourceDetails key={place.id} place={place}/> : httpUrl(raw.sourceUrl) && <a class="imported-source-post-link" href={httpUrl(raw.sourceUrl)} target="_blank" rel="noopener noreferrer">დაწესებულების ოფიციალური წყარო<Icon name="arrow-up-right" size={15}/></a>}
     </div>
   );
 }

@@ -2,8 +2,16 @@
 
 These marks identify the corresponding places. They do not imply sponsorship,
 ownership or affiliation with GeoHub. Brand names and marks remain the property
-of their respective owners. Downloaded 2026-10-19; no changes to stored originals.
-Map badges scale the artwork; the 2 Nabiji badge omits the image's white margin.
+of their respective owners. Downloaded 2026-10-19. Shapes and colors are retained;
+local PNG derivatives are resized and may omit empty outer canvas margins.
+The shared 2 Nabiji derivative uses the original map crop. White/light artwork
+(including Nikora, SEU, City Mall and SOCAR) is presented on a contrasting surface.
+
+The expanded source inventory, exact local filenames and SHA-256 hashes are in
+[credits.json](./credits.json). It includes official brand and university sites,
+the Pharmaceutical Companies Association of Georgia, the Georgian government's
+Ekalata directory, and Karvasla's official public Facebook page. A logo describes
+brand identity, not a photograph of a specific branch.
 
 | File | Source |
 | --- | --- |
@@ -19,6 +27,7 @@ its scaled map presentation is provided under the same license. Direct file:
 https://upload.wikimedia.org/wikipedia/commons/2/28/Metro_Tbilisi_logo.svg .
 
 Semantic category symbols come from the application's existing Phosphor Icons.
-Only explicitly identified brands use a brand mark. Missing/unverified artwork
-falls back to the category symbol. Branch counts refer to distinct mapped
-locations in the source snapshot, not an asserted count of the whole chain.
+Reviewed exact brand names, exact aliases and official domains can establish
+identity. Category restrictions disambiguate names such as Karvasla mall/hotel.
+Fuzzy place search never assigns a logo. Missing/unverified artwork falls back to
+the category symbol; all verified logos are shown irrespective of branch count.

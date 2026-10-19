@@ -8,6 +8,7 @@
 import { tsToMillis } from '../lib/format.js';
 import { readCoordinates } from '../lib/coordinates.js';
 import { youtubeIdFrom, validYouTubeId } from '../lib/videoSource.js';
+import { enrichNativePlace } from '../lib/enrichNativePlace.js';
 export { youtubeIdFrom } from '../lib/videoSource.js';
 
 const s = (v) => (typeof v === 'string' ? v : v == null ? '' : String(v));
@@ -201,7 +202,7 @@ export function normBiz(id, d = {}) {
 export function normPlace(id, d = {}) {
   const photos = arr(d.photos).filter((x) => typeof x === 'string');
   const coords = readCoordinates(d);
-  return {
+  return enrichNativePlace({
     id,
     name: s(first(d.name, d.title)) || '—',
     description: s(first(d.description, d.shortDescription)),
@@ -215,6 +216,8 @@ export function normPlace(id, d = {}) {
     lng: coords?.lng ?? null,
     image: s(first(d.coverImage, d.imageUrl, d.photoUrl, d.image, photos[0])),
     photos,
+    aliases: arr(d.aliases),
+    facets: d.facets || {},
     rating: n(d.rating),
     reviewCount: n(d.reviewCount),
     checkinCount: n(d.checkinCount ?? d.visitCount),
@@ -225,7 +228,7 @@ export function normPlace(id, d = {}) {
     status: s(d.status || 'active'),
     createdAt: tsToMillis(d.createdAt),
     raw: d,
-  };
+  });
 }
 
 export function normGroup(id, d = {}) {

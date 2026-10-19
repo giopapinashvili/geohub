@@ -6,6 +6,7 @@ import { Card, Empty, Spinner } from '../ui/misc.jsx';
 import { t } from '../lib/i18n.js';
 import { useTitle } from '../lib/hooks.js';
 import { listDiscounts } from '../data/commerce.js';
+import { listOfficialOffers } from '../data/officialOffers.js';
 import { commerceOfferState, priceToMinor } from '../lib/commerce.js';
 import { matchesDiscountFilters } from '../lib/discountWatchlist.js';
 import { OfferCard, ITEM_ICONS } from '../features/commerce/OfferCard.jsx';
@@ -23,6 +24,17 @@ export default function Discounts() {
   const [maxPrice, setMaxPrice] = useState('');
   const [sort, setSort] = useState('new');
   const [items, setItems] = useState([]);
+  const [official, setOfficial] = useState([]);
+  const [officialError, setOfficialError] = useState(false);
+  const [officialBusy, setOfficialBusy] = useState(true);
+  const [displayLimit, setDisplayLimit] = useState(24);
+  useEffect(() => { setDisplayLimit(24); }, [q, type, maxPrice, sort, mode]);
+  useEffect(() => {
+    let alive = true;
+    const load = () => listOfficialOffers().then(rows => { if (alive) { setOfficial(rows); setOfficialError(false); } }).catch(() => { if (alive) setOfficialError(true); }).finally(() => { if (alive) setOfficialBusy(false); });
+    load(); const timer = setInterval(load, 15 * 60000);
+    return () => { alive = false; clearInterval(timer); };
+  }, []);
   const [cursor, setCursor] = useState(null);
   const [more, setMore] = useState(false);
   const [busy, setBusy] = useState(true);
@@ -58,12 +70,12 @@ export default function Discounts() {
   const visible = useMemo(() => {
     let maxPriceMinor;
     try { maxPriceMinor = priceToMinor(maxPrice); } catch { maxPriceMinor = NaN; }
-    const rows = (mode === 'demo' ? DEMO_OFFERS : items).filter((o) =>
+    const rows = (mode === 'demo' ? DEMO_OFFERS : [...items, ...official]).filter((o) =>
       (o.isDemo || commerceOfferState(o, now) === 'active') && matchesDiscountFilters(o, { term: q, type, maxPriceMinor }));
     if (sort === 'price') rows.sort((a, b) => a.currency.localeCompare(b.currency) || a.priceMinor - b.priceMinor);
     if (sort === 'discount') rows.sort((a, b) => (b.originalPriceMinor - b.priceMinor) / b.originalPriceMinor - (a.originalPriceMinor - a.priceMinor) / a.originalPriceMinor);
     return rows;
-  }, [mode, items, q, type, maxPrice, sort, now]);
+  }, [mode, items, official, q, type, maxPrice, sort, now]);
   return <div class="page-pad deals-page">
     <header class="deals-hero">
       <div><span class="deals-eyebrow"><Icon name="seal-percent" size={18} /> GEOHUB</span><h1>{t('deals.heading')}</h1><p>{t('deals.subtitle')}</p></div>
@@ -82,14 +94,17 @@ export default function Discounts() {
         {['', 'product', 'dish', 'service', 'bundle'].map((v) => <button key={v} type="button" class={`chip${v === type ? ' is-active' : ''}`} aria-pressed={v === type} onClick={() => setType(v)}>{v && <Icon name={ITEM_ICONS[v]} size={17} />}{v ? t(`commerce.type.${v}`) : t('common.all')}</button>)}
       </div>
     </section>
-    {mode === 'real' && <DiscountWatchlist query={{ term: q, type, maxPrice }} offers={items} now={now} onSelect={entry => { setQ(entry.term); setType(entry.type); setMaxPrice(entry.maxPriceMinor === null ? '' : String(entry.maxPriceMinor / 100)); setMode('real'); }} />}
+    {mode === 'real' && <DiscountWatchlist query={{ term: q, type, maxPrice }} offers={[...items, ...official]} now={now} onSelect={entry => { setQ(entry.term); setType(entry.type); setMaxPrice(entry.maxPriceMinor === null ? '' : String(entry.maxPriceMinor / 100)); setMode('real'); }} />}
     {mode === 'demo' && <p class="deals-notice"><Icon name="info" size={20} />{t('deals.demoNotice')}</p>}
     {mode === 'real' && more && <p class="small muted">{t('deals.loadedScope', { n: items.length })}</p>}
     <p class="small muted" role="status" aria-live="polite">{t('deals.results', { n: visible.length })}</p>
-    {visible.length > 0 && <div class="deals-grid">{visible.map((o) => <OfferCard key={o.id} offer={o} />)}</div>}
+    {mode === 'real' && official.length > 0 && <p class="small muted">ოფიციალური ონლაინ მაღაზიის ფასს წყაროს ბმული და შემოწმების დრო ახლავს. ფილიალის მარაგი ცალკე გადაამოწმე.</p>}
+    {officialError && <p class="small muted">ოფიციალური მაღაზიების შეთავაზებები დროებით ვერ ჩაიტვირთა.</p>}
+    {visible.length > 0 && <div class="deals-grid">{visible.slice(0, displayLimit).map((o) => <OfferCard key={o.id} offer={o} />)}</div>}
+    {displayLimit < visible.length && <div class="center-pad"><Button onClick={() => setDisplayLimit(n => n + 24)}>{t('common.loadMore')}</Button></div>}
     {error && <Card><Empty icon="warning" title={t('deals.loadError')} action={<Button onClick={() => cursor ? loadMore() : setRefresh((n) => n + 1)}>{t('common.reload')}</Button>} /></Card>}
-    {!busy && !error && !visible.length && <Card><Empty icon="seal-percent" title={t(q || type || maxPrice ? 'deals.noMatch' : 'deals.noOffers')} text={t('deals.noOffersText')} action={DEMO_ENABLED && mode === 'real' ? <Button variant="primary" onClick={() => setMode('demo')}>{t('deals.demo')}</Button> : <Button onClick={() => { setQ(''); setType(''); setMaxPrice(''); }}>{t('deals.reset')}</Button>} /></Card>}
-    {busy && <div class="center-pad"><Spinner size={28} /></div>}
+    {!busy && !officialBusy && !error && !visible.length && <Card><Empty icon="seal-percent" title={t(q || type || maxPrice ? 'deals.noMatch' : 'deals.noOffers')} text={t('deals.noOffersText')} action={DEMO_ENABLED && mode === 'real' ? <Button variant="primary" onClick={() => setMode('demo')}>{t('deals.demo')}</Button> : <Button onClick={() => { setQ(''); setType(''); setMaxPrice(''); }}>{t('deals.reset')}</Button>} /></Card>}
+    {(busy || officialBusy) && <div class="center-pad"><Spinner size={28} /></div>}
     {more && mode === 'real' && <div class="center-pad"><Button loading={busy} onClick={loadMore}>{t('common.loadMore')}</Button></div>}
   </div>;
 }

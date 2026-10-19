@@ -1,3 +1,4 @@
+/* global publicOffersResponse, isExcludedCuratedPhoto */
 // Cloudflare Pages "advanced mode" worker (built to dist/_worker.js).
 //
 // Share previews: when Facebook, Messenger, Telegram, Viber, WhatsApp,
@@ -21,6 +22,8 @@
 
 const SECURITY_HEADERS = '__SECURITY_HEADERS__';
 const WORKER_VERSION = '__WORKER_VERSION__';
+/*__PUBLIC_OFFERS__*/
+/*__CURATED_EXCLUSIONS__*/
 
 const PROJECT = 'geohub-main';
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
@@ -58,6 +61,7 @@ export default {
 
 async function handle(request, env, ctx) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/public-offers') return withHeaders(await publicOffersResponse(request, env, ctx));
   const asset = await env.ASSETS.fetch(request);
   const wantsPreview = request.method === 'GET'
     && (BOTS.test(request.headers.get('user-agent') || '') || url.searchParams.has('og'));
@@ -185,7 +189,7 @@ async function directoryJson(env, origin, path) {
 }
 
 export async function loadImportedPlaceMeta(id, env, origin) {
-  if (!/^osm_(node|way|relation)_\d+$/.test(id)) return null;
+  if (!/^(?:osm_(node|way|relation)_\d+|directory_[a-z0-9_]+)$/.test(id)) return null;
   const manifest = await directoryJson(env, origin, '/place-data/manifest.json');
   const assetName = value => typeof value === 'string' && /^(lookup|places)-[a-zA-Z0-9_-]+\.json$/.test(value);
   const lookupFile = typeof manifest?.lookup === 'string' ? manifest.lookup : manifest?.lookup?.file;
@@ -198,8 +202,11 @@ export async function loadImportedPlaceMeta(id, env, origin) {
   const rows = await directoryJson(env, origin, `/place-data/${shard.file}`);
   const place = Array.isArray(rows) ? rows.find(row => row?.id === id) : null;
   if (gone(place)) return null;
-  const credits = await directoryJson(env, origin, '/place-media/credits.json').catch(() => null);
-  const photo = arr(credits?.photos).find(entry => entry.placeId === id && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
+  const [institutions, credits] = await Promise.all([
+    directoryJson(env, origin, '/place-media/institutions-credits.json').catch(() => null),
+    directoryJson(env, origin, '/place-media/credits.json').catch(() => null),
+  ]);
+  const photo = [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
   const name = clean(place.name) || SITE;
   const details = [clean(place.address), clean(place.city)].filter(Boolean).join(' · ');
   const photoSize = photo?.preview;
@@ -275,7 +282,7 @@ async function loadMeta({ kind, id }, env, origin) {
     };
   }
   if (kind === 'place') {
-    if (/^osm_(node|way|relation)_\d+$/.test(id)) return loadImportedPlaceMeta(id, env, origin);
+    if (/^(?:osm_(node|way|relation)_\d+|directory_[a-z0-9_]+)$/.test(id)) return loadImportedPlaceMeta(id, env, origin);
     const d = await getDocument(env, `places/${id}`);
     if (gone(d)) return null;
     const name = clean(first(d.name, d.title)) || SITE;

@@ -31,6 +31,7 @@ import { PlacePhotoCredits } from '../features/places/PlacePhotoCredits.jsx';
 import { PlaceLocationDialog } from '../features/places/PlaceLocationDialog.jsx';
 import { ImportedPlaceInfo } from '../features/places/ImportedPlaceInfo.jsx';
 import { ImportedPlacePosts } from '../features/places/ImportedPlacePosts.jsx';
+import { PlaceBrand } from '../features/places/PlaceBrand.jsx';
 import { importedPlaceEntries } from '../lib/importedPlacePosts.js';
 import { PostCard } from '../features/post/PostCard.jsx';
 import { Lightbox } from '../features/post/Lightbox.jsx';
@@ -139,7 +140,7 @@ function Visitors({ placeId }) {
 
 function Posts({ place }) {
   const { data, loading, error, reload } = useAsync(() => placePosts(place.id, 30), [place.id]);
-  const imported = place.raw?.source === 'openstreetmap';
+  const imported = ['openstreetmap', 'official-directory'].includes(place.raw?.source);
   return <div class="feed"><ImportedPlacePosts key={place.id} place={place}/>{imported && <h2 class="imported-community-heading">მომხმარებლებისა და ბიზნესების პოსტები</h2>}{error ? <Card><Empty compact icon="warning" title="პოსტები ვერ ჩაიტვირთა" action={<Button onClick={reload}>{t('common.reload')}</Button>}/></Card> : loading ? <div class="center-pad"><Spinner /></div> : data?.length ? data.map((p) => <PostCard key={p.id} post={p} />) : <Card><Empty compact icon="note-pencil" title={imported ? 'ამ ადგილზე საზოგადოებას პოსტი ჯერ არ დაუმატებია' : t('place.noPosts')} /></Card>}</div>;
 }
 
@@ -167,7 +168,7 @@ export default function Place({ params }) {
   const stats = reviewStats(reviews || [], place);
   const photos = [place.image, ...place.photos].filter((x, i, a) => x && a.indexOf(x) === i);
   const own = place.creatorId === uid.value;
-  const editable = place.raw?.source !== 'openstreetmap' && (own || isAdmin.value);
+  const editable = !['openstreetmap', 'official-directory'].includes(place.raw?.source) && (own || isAdmin.value);
 
   return (
     <div class="place-page">
@@ -183,7 +184,7 @@ export default function Place({ params }) {
         <PlacePhotoCredits place={place}/>
         <div class="place-head">
           <span class="place-cat-chip" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={14} />{cat.label}</span>
-          <h1 class="place-name">{place.name}{place.verified && <Icon name="seal-check-fill" size={22} class="tone-brand" label={t('common.verified')} />}</h1>
+          <h1 class="place-name"><PlaceBrand place={place} size="heading"/>{place.name}{place.verified && <Icon name="seal-check-fill" size={22} class="tone-brand" label={t('common.verified')} />}</h1>
           <p class="place-meta">
             {(place.address || place.city) && <span><Icon name="map-pin" size={15} />{[place.address !== place.city ? place.address : '', cityLabel(place.city)].filter(Boolean).join(', ')}</span>}
             {stats.avg > 0 && <span class="place-rating"><Icon name="star-fill" size={15} />{stats.avg.toFixed(1).replace('.', ',')} <span class="muted">({tn('place.reviews', stats.count)})</span></span>}
@@ -227,6 +228,7 @@ export default function Place({ params }) {
                 </div>
               )}
             </Card>
+            <ImportedPlacePosts key={place.id} place={place} includePhotos={false}/>
             {reviews?.length > 0 && (
               <Card>
                 <div class="card-head"><h2 class="card-title">{t('place.reviewsTab')}</h2><button type="button" class="link" onClick={() => setQuery({ tab: 'reviews' })}>{t('common.seeAll')}</button></div>

@@ -24,6 +24,8 @@ import { PlacePhotoCredits } from './PlacePhotoCredits.jsx';
 import { placePageHref } from '../../lib/placeLinks.js';
 import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
 import { ImportedPlaceInfo } from './ImportedPlaceInfo.jsx';
+import { ImportedPlacePosts } from './ImportedPlacePosts.jsx';
+import { PlaceBrand } from './PlaceBrand.jsx';
 import { Lightbox } from '../post/Lightbox.jsx';
 import { StoryViewer } from '../story/StoryViewer.jsx';
 import { PlaceCommerce } from '../commerce/PlaceCommerce.jsx';
@@ -33,6 +35,7 @@ const SECTIONS = [
   { id: 'about', key: 'place.about' },
   { id: 'photos', key: 'map.photos' },
   { id: 'catalog', key: 'commerce.menuCatalog' },
+  { id: 'posts', key: 'place.posts' },
   { id: 'reviews', key: 'place.reviewsTab' },
   { id: 'checkins', key: 'map.checkins' },
   { id: 'stories', key: 'stories.title' },
@@ -203,7 +206,7 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
 
         <section class="map-detail-intro">
           <span class="map-detail-category" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={14} />{[cat.label, cityLabel(place.city)].filter(Boolean).join(' · ')}</span>
-          <h2 id={headingId}>{place.name}{place.verified && <Icon name="seal-check-fill" size={21} class="tone-brand" label={t('common.verified')} />}</h2>
+          <h2 id={headingId}><PlaceBrand place={place} size="heading"/>{place.name}{place.verified && <Icon name="seal-check-fill" size={21} class="tone-brand" label={t('common.verified')} />}</h2>
           {stats.avg > 0 && <div class="map-detail-rating"><Stars value={stats.avg} size={14} /><strong>{stats.avg.toFixed(1).replace('.', ',')}</strong><button type="button" class="link muted small" onClick={() => jump('reviews')}>{tn('place.reviews', stats.count)}</button></div>}
           <p class="map-detail-summary">{place.description || t('place.noDescription')}</p>
           <MatchedCatalogItem place={place} />
@@ -241,6 +244,10 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
           <PlaceCommerce place={place} />
         </section>
 
+        <section class="map-detail-section" {...sectionProps('posts')}>
+          <h3>{t('place.posts')}</h3>
+          <ImportedPlacePosts key={place.id} place={place} includePhotos={false}/>
+        </section>
         <section class="map-detail-section" {...sectionProps('reviews')}>
           <h3>{t('map.reviewsAndComments')}</h3>
           {reviewError ? <ActivityError onRetry={() => setReviewRetry((n) => n + 1)} /> : !reviews ? <div class="map-detail-loading"><Spinner /></div> : <>

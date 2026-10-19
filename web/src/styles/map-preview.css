@@ -124,7 +124,10 @@
   cursor: pointer;
   z-index: 1;
 }
-.map-selected-pin:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; border-radius: 50%; }
+.map-selected-pin:focus-visible { outline: 3px solid var(--brand); outline-offset: 4px; }
+.map-selected-pin.is-branded { background: var(--selected-brand-background, #fff); }
+.map-selected-pin.is-branded.is-wide { width: 78px; border-radius: 15px; }
+.map-selected-pin-logo { display: block; width: 100%; height: 100%; padding: 6px; object-fit: contain; pointer-events: none; }
 .map-selected-pin-label {
   position: absolute;
   top: calc(100% + 8px);

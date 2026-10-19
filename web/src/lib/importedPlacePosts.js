@@ -1,6 +1,7 @@
 import { formatCoordinates } from './coordinates.js';
 import { taxonomyCategory } from './placeTaxonomy.js';
 import { photoDateLabel } from './photoDate.js';
+import { placeVisitGuide } from './placeVisitGuide.js';
 
 const DIETS = { vegan: 'ვეგანური არჩევანი', vegetarian: 'ვეგეტარიანული არჩევანი', halal: 'ჰალალის არჩევანი', kosher: 'კოშერის არჩევანი', 'gluten-free': 'უგლუტენო არჩევანი', 'lactose-free': 'ლაქტოზის გარეშე' };
 const ACCESS = { private: 'კერძო ტერიტორია', no: 'საჯარო შესვლა აკრძალულია', customers: 'მხოლოდ მომხმარებლებისთვის', permit: 'საჭიროა ნებართვა', members: 'მხოლოდ წევრებისთვის' };
@@ -15,13 +16,15 @@ export function sourceDateLabel(value) {
 
 /** Directory entries, never authored merchant posts, reviews or recent activity. */
 export function importedPlaceEntries(place) {
-  const match = /^osm_(node|way|relation)_(\d+)$/.exec(place?.id || '');
-  if (!match || place?.raw?.source !== 'openstreetmap') return null;
-  const raw = place.raw, facets = place.facets || {}, category = taxonomyCategory(place.category);
-  const sourceUrl = `https://www.openstreetmap.org/${match[1]}/${match[2]}`;
+  if (!place?.id || !place.name) return null;
+  const raw = place.raw || {}, facets = place.facets || {}, category = taxonomyCategory(place.category);
+  const match = /^osm_(node|way|relation)_(\d+)$/.exec(raw.linkedOsmId || place.id);
+  const isImported = !!match && (raw.source === 'openstreetmap' || !!raw.linkedOsmId);
+  const sourceUrl = match ? `https://www.openstreetmap.org/${match[1]}/${match[2]}` : sourceHttpUrl(raw.sourceUrl);
   const text = value => typeof value === 'string' ? value.trim() : '';
   const facts = [{ icon: category.icon, label: 'კატეგორია', value: category.label }];
   const add = (icon, label, value, href) => { if (value) facts.push({ icon, label, value, ...(href ? { href } : {}) }); };
+  if (raw.operatingStatus === 'source-reports-inactive') add('info', 'მდგომარეობა წყაროს მიხედვით', raw.sourceNote || 'წყაროს მიხედვით ამჟამად არ ფუნქციონირებს.');
   add('map-pin', 'მისამართი', text(place.address));
   add('crosshair', raw.coordinateAccuracy === 'approximate-center' ? 'ობიექტის სავარაუდო ცენტრი' : 'კოორდინატები', formatCoordinates(place));
   add('clock', 'სამუშაო საათები წყაროს მიხედვით', text(raw.openingHours));
@@ -46,6 +49,9 @@ export function importedPlaceEntries(place) {
     used.add(photo.url); return true;
   }).map(photo => ({ ...photo, sourceUrl: sourceHttpUrl(photo.sourceUrl), licenseUrl: sourceHttpUrl(photo.licenseUrl), authorUrl: sourceHttpUrl(photo.authorUrl), caption: text(photo.caption) || place.name, dateLabel: photoDateLabel(photo.dateTaken) }));
   return { placeId: place.id, placeHref: `/place/${place.id}`, mapHref: `/map?place=${place.id}`, name: place.name, category,
+    isImported, guide: placeVisitGuide(place),
+    editorialPosts: (raw.editorial?.posts || []).filter(post => typeof post.title === 'string' && typeof post.body === 'string').map(post => ({ ...post, sourceUrl: sourceHttpUrl(post.sourceUrl) })),
+    sources: (raw.editorial?.sources || []).map(source => ({ ...source, url: sourceHttpUrl(source.url) })).filter(source => source.url),
     sourceUrl, sourceDate: sourceDateLabel(raw.sourceDate), updatedDate: sourceDateLabel(raw.sourceUpdatedAt),
     description: text(place.description), facts, amenities, photos,
     summary: `${category.label}${place.address ? ` · ${place.address}` : ''}`,

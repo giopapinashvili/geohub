@@ -3,6 +3,8 @@
 .imported-place-location-note > .icon { flex: none; margin-top: 2px; }
 .imported-place-facts { display: grid; gap: 10px; }
 .imported-place-facts:empty { display: none; }
+.imported-editorial-sources { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; font-size: 11px; color: var(--text-3); }
+.imported-editorial-sources a { display: inline-flex; gap: 5px; align-items: center; color: var(--brand-text); min-height: 32px; }
 .imported-place-facts > :is(p,a) { display: flex; align-items: center; gap: 9px; margin: 0; color: var(--text-2); font-size: 13px; overflow-wrap: anywhere; }
 .imported-place-facts small { display: block; font-size: 11px; color: var(--text-3); margin-bottom: 2px; }
 .imported-place-facts .icon { flex: none; }
@@ -43,6 +45,9 @@
 .imported-source-post p { font-size: 13px; line-height: 1.7; }
 .imported-source-post-link { display: flex; align-items: center; gap: 6px; color: var(--brand-text); font-size: 13px; min-height: 44px; }
 .imported-directory-feed { display: grid; gap: 16px; min-width: 0; }
+.imported-guide-list { margin: 0; padding-left: 22px; display: grid; gap: 12px; font-size: 13px; line-height: 1.8; color: var(--text-2); }
+.map-detail-section .imported-source-fact-list { grid-template-columns: minmax(0, 1fr); }
+.map-detail-section .imported-source-post { padding: 16px; }
 .imported-source-badge { align-self: start; padding: 4px 7px; border: 1px solid var(--border); border-radius: 6px; font-size: 10px; color: var(--text-2); background: var(--surface-2); flex: none; }
 .imported-source-post h3 { font-size: 17px; line-height: 1.5; }
 .imported-source-post h3 a { color: var(--text); text-decoration: none; }

@@ -4,7 +4,7 @@ import { createPublicPlaceCache } from './publicPlaceCache.js';
 import { applyCuratedPlaceMedia } from '../lib/curatedPlaceMedia.js';
 
 const downloads = createPublicPlaceCache();
-const IMPORT_ID = /^osm_(node|way|relation)_\d+$/;
+const IMPORT_ID = /^(?:osm_(?:node|way|relation)_\d+|directory_[a-z0-9_]+)$/;
 const json = (asset, options) => downloads.read(asset, options);
 
 export const isImportedPlaceId = id => IMPORT_ID.test(String(id || ''));
@@ -23,9 +23,10 @@ function hydrate(record, manifest) {
   return applyCuratedPlaceMedia({
     description:'',address:'',city:'',image:'',photos:[],rating:0,reviewCount:0,checkinCount:0,saveCount:0,
     verified:false,creatorId:'',status:'active',createdAt:0,aliases:[], ...record,
-    raw:{ ...record.raw, dataSource:'openstreetmap',source:'openstreetmap',sourceDate:manifest.source.sourceDate,
+    raw:{ dataSource:'openstreetmap',source:'openstreetmap',sourceDate:manifest.source.sourceDate,
       datasetId:manifest.datasetId,license:manifest.license,licenseUrl:manifest.licenseUrl,
       attribution:manifest.attribution,attributionUrl:manifest.attributionUrl,
+      ...record.raw,
     },
   });
 }
@@ -89,9 +90,10 @@ function searchRows(payload) {
   const prefixes={n:'osm_node',w:'osm_way',r:'osm_relation',an:'address_node',aw:'address_way',ar:'address_relation',sn:'street_node',sw:'street_way',sr:'street_relation'};
   return payload.rows.map(row=>{
     const id=/^([a-z]+)(\d+)$/.exec(row[0]);
-    if (!id || !prefixes[id[1]]) return null;
+    const directoryId = /^directory_[a-z0-9_]+$/.test(row[0]) ? row[0] : null;
+    if (!directoryId && (!id || !prefixes[id[1]])) return null;
     const name=strings[row[1]];
-    return [`${prefixes[id[1]]}_${id[2]}`,name,row[2].map(index=>strings[index]),strings[row[3]] || (row[7]===1 ? name : ''),strings[row[4]],row[5],row[6],row[7]===1 ? 'address' : 'place',strings[row[8]],row[9]===1 ? 'approximate-center' : 'source-point',row[10] || {}];
+    return [directoryId || `${prefixes[id[1]]}_${id[2]}`,name,row[2].map(index=>strings[index]),strings[row[3]] || (row[7]===1 ? name : ''),strings[row[4]],row[5],row[6],row[7]===1 ? 'address' : 'place',strings[row[8]],row[9]===1 ? 'approximate-center' : 'source-point',row[10] || {}];
   }).filter(Boolean);
 }
 /** Load on first search only. Works in a worker and does not touch the DOM. */

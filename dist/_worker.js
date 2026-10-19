@@ -1,3 +1,4 @@
+/* global publicOffersResponse, isExcludedCuratedPhoto */
 // Cloudflare Pages "advanced mode" worker (built to dist/_worker.js).
 //
 // Share previews: when Facebook, Messenger, Telegram, Viber, WhatsApp,
@@ -20,7 +21,83 @@
 //   headers (copied from _headers at build time) are attached here.
 
 const SECURITY_HEADERS = {"X-Content-Type-Options":"nosniff","X-Frame-Options":"SAMEORIGIN","Referrer-Policy":"strict-origin-when-cross-origin","Permissions-Policy":"camera=(self), microphone=(self), geolocation=(self), payment=(self)","Content-Security-Policy":"default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' blob: https://res.cloudinary.com https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://api.cloudinary.com https://res.cloudinary.com https://geohub-payments.gio-papinashvili20-bd3.workers.dev https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://tiles.mapterhorn.com; worker-src 'self' blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://geohub-main.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"};
-const WORKER_VERSION = "a738d37b7e";
+const WORKER_VERSION = "92e48da476";
+// Public, read-only source adapter. No merchant credentials or user data.
+// Only hardcoded official hosts are fetched; caller input never chooses a URL.
+function parseZoommerOffers(html, observedAtMs = Date.now()) {
+  if (typeof html !== 'string' || html.length > 5 * 1024 * 1024) throw new Error('Invalid source size');
+  const match = html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+  if (!match) throw new Error('Official source format changed');
+  const next = JSON.parse(match[1]);
+  const home = next?.props?.pageProps?.dehydratedState?.queries?.find(query => query.queryKey === 'homePageData')?.state?.data;
+  if (!Array.isArray(home?.section)) throw new Error('Official source has no products');
+  const offers = new Map();
+  for (const section of home.section) for (const item of section.products || []) {
+    if (!Number.isSafeInteger(item.id) || item.id <= 0 || item.disableBuyButton || item.preOrder || item.comingSoonText) continue;
+    const priceValue = value => typeof value === 'number' || (typeof value === 'string' && /^\d+(?:\.\d{1,2})?$/.test(value.trim()));
+    if (!priceValue(item.price) || !priceValue(item.previousPrice)) continue;
+    const price = Number(item.price), old = Number(item.previousPrice);
+    if (!Number.isFinite(price) || !Number.isFinite(old) || price <= 0 || old <= price || old > 1e6) continue;
+    const priceMinor = Math.round(price * 100), originalPriceMinor = Math.round(old * 100);
+    if (priceMinor <= 0 || originalPriceMinor <= priceMinor) continue;
+    if (typeof item.name !== 'string' || !item.name.trim() || item.name.length > 250 || typeof item.route !== 'string') continue;
+    let source, image;
+    try { source = new URL(item.route, 'https://zoommer.ge/'); image = new URL(item.imageUrl); } catch { continue; }
+    if (source.origin !== 'https://zoommer.ge' || source.username || source.password || image.username || image.password || image.protocol !== 'https:' || !['s3.zoommer.ge','zoommer.ge'].includes(image.hostname)) continue;
+    const title = item.name.trim();
+    offers.set(item.id, { id: `source-zoommer-${item.id}`, itemId: `zoommer-${item.id}`, businessId: '', brandId: 'zoommer',
+      businessName: 'ზუმერი', merchantHref: '/brands/zoommer', title, itemTitle: title, type: 'product', categoryId: 'electronics',
+      description: [item.parentCategoryName, item.brandName].filter(value => typeof value === 'string').join(' · '),
+      priceMinor, originalPriceMinor, currency: 'GEL', imageUrl: image.href,
+      sourceUrl: source.href, sourceName: 'Zoommer.ge', sourceKind: 'official-website', observedAtMs,
+      freshnessUntilMs: observedAtMs + 72 * 3600000, isDemo: false, status: 'published', availabilityScope: 'online',
+      allBranches: false, branchIds: [], conditions: 'ფასი დაფიქსირებულია ზუმერის ოფიციალურ ონლაინ მაღაზიაში. კონკრეტული ფილიალის მარაგი და საბოლოო ფასი გადაამოწმე მაღაზიის გვერდზე.',
+    });
+  }
+  const result = [...offers.values()].slice(0, 300);
+  return { version: 1, source: 'https://zoommer.ge/', observedAtMs, offers: result };
+}
+
+async function publicOffersResponse(request, env, ctx) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+  const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300, s-maxage=3600', 'X-Content-Type-Options': 'nosniff' };
+  const key = new Request(new URL('/api/public-offers?v=1', request.url));
+  const cache = globalThis.caches?.default;
+  const cached = cache && await cache.match(key);
+  if (cached) return request.method === 'HEAD' ? new Response(null, { headers: cached.headers }) : cached;
+  let data, sourceIssue = 'network-unavailable';
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const upstream = await fetch('https://zoommer.ge/', { redirect: 'manual', signal: controller.signal, headers: { Accept: 'text/html', 'User-Agent': 'GeoHub-Public-Directory/1.0' }, cf: { cacheTtl: 3600, cacheEverything: true } });
+    sourceIssue = upstream.ok ? 'source-format' : `http-${upstream.status}`;
+    if (!upstream.ok || Number(upstream.headers.get('content-length')) > 5 * 1024 * 1024) throw new Error('Official source unavailable');
+    const reader = upstream.body.getReader(), chunks = []; let bytes = 0;
+    while (true) { const { done, value } = await reader.read(); if (done) break; bytes += value.length; if (bytes > 5 * 1024 * 1024) { await reader.cancel(); throw new Error('Source too large'); } chunks.push(value); }
+    const joined = new Uint8Array(bytes); let offset = 0; for (const chunk of chunks) { joined.set(chunk, offset); offset += chunk.length; }
+    data = parseZoommerOffers(new TextDecoder().decode(joined));
+  } catch {
+    if (controller.signal.aborted) sourceIssue = 'source-timeout';
+    const fallback = await env.ASSETS.fetch(new Request(new URL('/commerce-data/official-offers.json', request.url)));
+    data = fallback.ok ? await fallback.json().catch(() => null) : null;
+    if (!data?.offers) return new Response(JSON.stringify({ version: 1, offers: [], unavailable: true }), { status: 503, headers: { ...headers, 'Cache-Control': 'no-store' } });
+    data = { ...data, fallback: true, sourceIssue, offers: data.offers.filter(offer => offer.freshnessUntilMs > Date.now()) };
+  } finally { clearTimeout(timer); }
+  const response = new Response(JSON.stringify(data), { headers });
+  if (cache && !data.fallback) ctx.waitUntil(cache.put(key, response.clone()));
+  return request.method === 'HEAD' ? new Response(null, { headers }) : response;
+}
+
+// Reviewed 2026-10-19. Entity-wide Wikidata P18 may depict a different campus
+// from the current representative pin; keep exclusions stable across regeneration.
+const exclusions = {
+  osm_relation_16507696: ['File:Georgische Technische Universität - 1. Korpus.jpg'],
+};
+
+function isExcludedCuratedPhoto(placeId, sourceTitle) {
+  return exclusions[placeId]?.includes(sourceTitle) || false;
+}
+
 
 const PROJECT = 'geohub-main';
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
@@ -58,6 +135,7 @@ export default {
 
 async function handle(request, env, ctx) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/public-offers') return withHeaders(await publicOffersResponse(request, env, ctx));
   const asset = await env.ASSETS.fetch(request);
   const wantsPreview = request.method === 'GET'
     && (BOTS.test(request.headers.get('user-agent') || '') || url.searchParams.has('og'));
@@ -185,7 +263,7 @@ async function directoryJson(env, origin, path) {
 }
 
 export async function loadImportedPlaceMeta(id, env, origin) {
-  if (!/^osm_(node|way|relation)_\d+$/.test(id)) return null;
+  if (!/^(?:osm_(node|way|relation)_\d+|directory_[a-z0-9_]+)$/.test(id)) return null;
   const manifest = await directoryJson(env, origin, '/place-data/manifest.json');
   const assetName = value => typeof value === 'string' && /^(lookup|places)-[a-zA-Z0-9_-]+\.json$/.test(value);
   const lookupFile = typeof manifest?.lookup === 'string' ? manifest.lookup : manifest?.lookup?.file;
@@ -198,8 +276,11 @@ export async function loadImportedPlaceMeta(id, env, origin) {
   const rows = await directoryJson(env, origin, `/place-data/${shard.file}`);
   const place = Array.isArray(rows) ? rows.find(row => row?.id === id) : null;
   if (gone(place)) return null;
-  const credits = await directoryJson(env, origin, '/place-media/credits.json').catch(() => null);
-  const photo = arr(credits?.photos).find(entry => entry.placeId === id && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
+  const [institutions, credits] = await Promise.all([
+    directoryJson(env, origin, '/place-media/institutions-credits.json').catch(() => null),
+    directoryJson(env, origin, '/place-media/credits.json').catch(() => null),
+  ]);
+  const photo = [...arr(institutions?.photos), ...arr(credits?.photos)].find(entry => entry.placeId === id && !isExcludedCuratedPhoto(id, entry.sourceTitle) && /^\/place-media\/[a-zA-Z0-9_-]+\.(jpg|webp|png)$/.test(entry.url));
   const name = clean(place.name) || SITE;
   const details = [clean(place.address), clean(place.city)].filter(Boolean).join(' · ');
   const photoSize = photo?.preview;
@@ -275,7 +356,7 @@ async function loadMeta({ kind, id }, env, origin) {
     };
   }
   if (kind === 'place') {
-    if (/^osm_(node|way|relation)_\d+$/.test(id)) return loadImportedPlaceMeta(id, env, origin);
+    if (/^(?:osm_(node|way|relation)_\d+|directory_[a-z0-9_]+)$/.test(id)) return loadImportedPlaceMeta(id, env, origin);
     const d = await getDocument(env, `places/${id}`);
     if (gone(d)) return null;
     const name = clean(first(d.name, d.title)) || SITE;

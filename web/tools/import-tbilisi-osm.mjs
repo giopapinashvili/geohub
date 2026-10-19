@@ -8,12 +8,13 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { categoryFromOsm, facetsFromOsm, taxonomyCategory } from '../src/lib/placeTaxonomy.js';
 import { readCoordinates } from '../src/lib/coordinates.js';
+import { VERIFIED_PLACE_SUPPLEMENT, VERIFIED_SITE_ANCHORS } from './verified-place-supplement.mjs';
 
-const TAGS = /^(name(:ka|:en|:ru)?|alt_name(:ka|:en)?|short_name|brand(:wikidata)?|operator|amenity|shop|tourism|leisure|office|craft|healthcare(:speciality)?|public_transport|railway|station|subway|bus|train|highway|building|historic|natural|man_made|emergency|addr:(street|street:ka|street:en|housenumber|city|postcode|place|unit)|contact:(phone|website|email)|phone|website|url|email|opening_hours|cuisine|diet:[\w_]+|wheelchair|outdoor_seating|indoor|internet_access|takeaway|delivery|reservation|access|fee|level|description(:ka|:en)?|wikidata|wikipedia|check_date|source|entrance|ref|network|vending|drinking_water|sport|payment:[\w_]+)$/;
+const TAGS = /^(name(:ka|:en|:ru)?|alt_name(:ka|:en)?|short_name(:ka|:en)?|brand(:wikidata)?|operator|amenity|shop|tourism|leisure|office|craft|healthcare(:speciality)?|public_transport|railway|station|subway|bus|train|highway|building|education|landuse|historic|natural|man_made|emergency|addr:(street|street:ka|street:en|housenumber|city|postcode|place|unit)|contact:(phone|mobile|website|email)|phone|mobile|website|url|email|opening_hours|cuisine|diet:[\w_]+|wheelchair|outdoor_seating|indoor|internet_access|takeaway|delivery|reservation|access|fee|level|description(:ka|:en)?|wikidata|wikipedia|check_date|source|entrance|ref|network|vending|drinking_water|sport|payment:[\w_]+)$/;
 const text = (value, max = 300) => typeof value === 'string' ? value.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '';
 const unique = values => [...new Set(values.filter(Boolean))];
 const inactive = tags => ['disused','abandoned','demolished','razed','removed'].some(key => tags[key] === 'yes') || ['no','vacant','disused','closed','abandoned'].includes(tags.shop) || ['no','disused','closed'].includes(tags.amenity);
-const aliases = tags => unique(['name:ka','name:en','name:ru','name','alt_name','alt_name:ka','alt_name:en','short_name','brand','operator'].flatMap(key => text(tags[key]).split(';').map(v=>v.trim())));
+const aliases = tags => unique(['name:ka','name:en','name:ru','name','alt_name','alt_name:ka','alt_name:en','short_name','short_name:ka','short_name:en','brand','operator'].flatMap(key => text(tags[key]).split(';').map(v=>v.trim())));
 export const shardKey = (lat, lng) => `${Math.floor((lng - 44.6) / 0.025)}_${Math.floor((lat - 41.58) / 0.025)}`;
 const sourceUrl = element => `https://www.openstreetmap.org/${element.type}/${element.id}`;
 
@@ -34,9 +35,23 @@ export function normalizeOsmPlace(element) {
     coordinateAccuracy: element.type === 'node' ? 'source-point' : 'approximate-center',
     named: !!named, tags,
   };
+  const formerUse = Object.fromEntries(Object.entries(original).filter(([key]) => /^(disused|abandoned|was):/.test(key)));
+  if (Object.keys(formerUse).length) {
+    raw.formerUse = formerUse;
+    if (!['amenity','shop','office','healthcare','craft','tourism','leisure'].some(key=>original[key])) {
+      raw.operatingStatus = 'source-reports-inactive';
+      if (tags.opening_hours) {raw.formerOpeningHours=tags.opening_hours;delete tags.opening_hours;}
+    }
+    if (original.note) raw.sourceNote = text(original.note, 1000);
+  }
+  if (tags.building && !['amenity','shop','office','healthcare','craft','tourism','leisure'].some(key=>tags[key])) {
+    raw.recordKind = 'mapped-building';
+    raw.buildingUse = tags.building;
+  }
   if (element.timestamp) raw.sourceUpdatedAt = element.timestamp;
-  const phone = text(tags['contact:phone'] || tags.phone);
-  const website = text(tags['contact:website'] || tags.website || tags.url);
+  const phone = text(tags['contact:phone'] || tags.phone || tags['contact:mobile'] || tags.mobile);
+  const websiteValue = text(tags['contact:website'] || tags.website || tags.url).split(';')[0].trim();
+  const website = /^www\.[^\s/]+\.[a-z]{2,}(\/|$)/i.test(websiteValue) ? `https://${websiteValue}` : websiteValue;
   if (phone) raw.phone = phone;
   if (/^https?:\/\//i.test(website)) raw.website = website;
   if (tags.opening_hours) raw.openingHours = tags.opening_hours;
@@ -51,6 +66,57 @@ export function normalizeOsmPlace(element) {
     ...(tags.brand ? {brand:tags.brand} : {}), ...(tags['brand:wikidata'] ? {brandWikidata:tags['brand:wikidata']} : {}),
     ...(Object.keys(facets).length ? { facets } : {}), raw,
   };
+}
+
+const elementId = element => `osm_${element.type}_${element.id}`;
+const elementCoordinates = element => element && readCoordinates({lat:element.lat ?? element.center?.lat,lng:element.lon ?? element.center?.lon});
+
+/** A directory assertion and its coordinate evidence are recorded separately. */
+export function createVerifiedSupplement(elements, definitions = VERIFIED_PLACE_SUPPLEMENT) {
+  const index = new Map(elements.map(element => [elementId(element),element]));
+  return definitions.map(definition => {
+    const coordinateElement = definition.coordinateSourceId && index.get(definition.coordinateSourceId);
+    const coords = definition.coordinateSourceId ? elementCoordinates(coordinateElement) : readCoordinates(definition);
+    if (!coords) throw new Error(`Verified directory record has no coordinate evidence: ${definition.id}`);
+    if (!definition.id.startsWith('directory_') || !/^https:\/\//.test(definition.sourceUrl) || !definition.sourceCertainty) throw new Error(`Invalid directory provenance: ${definition.id}`);
+    return {
+      id:definition.id,name:definition.name,category:definition.category,...coords,
+      address:definition.address,city:'თბილისი',aliases:definition.aliases || [],description:definition.description,
+      ...(definition.indoor ? {facets:{indoor:true}} : {}),
+      raw:{
+        source:'official-directory',sourceUrl:definition.sourceUrl,sourceCheckedAt:'2026-10-19',named:true,
+        sourceCertainty:definition.sourceCertainty,coordinateAccuracy:definition.coordinateAccuracy,
+        coordinateNote:definition.coordinateNote,website:definition.website,
+        ...(definition.phone ? {phone:definition.phone} : {}),
+        ...(definition.parentPlaceId ? {parentPlaceId:definition.parentPlaceId} : {}),
+        ...(coordinateElement ? {coordinateSourceId:definition.coordinateSourceId,coordinateSourceUrl:sourceUrl(coordinateElement)} : {coordinateSourceUrl:definition.sourceUrl}),
+      },
+    };
+  });
+}
+
+/** A campus relation's bounding rectangle is not a valid entrance/location. */
+export function applyVerifiedSiteAnchors(places, elements, definitions = VERIFIED_SITE_ANCHORS) {
+  const index = new Map(elements.map(element => [elementId(element),element]));
+  const byId = new Map(places.map(place=>[place.id,place]));
+  let corrected=0;
+  for (const definition of definitions) {
+    const place = byId.get(definition.id);
+    if (!place) continue;
+    const anchor = index.get(definition.anchorId), coords = elementCoordinates(anchor);
+    if (!coords) throw new Error(`Verified campus anchor is missing: ${definition.anchorId}`);
+    place.raw.originalSourceCenter = {lat:place.lat,lng:place.lng};
+    place.raw.coordinateSourceId = definition.anchorId;
+    place.raw.coordinateSourceUrl = sourceUrl(anchor);
+    place.raw.coordinateEvidenceUrl = definition.sourceUrl;
+    place.raw.sourceCertainty = 'official-address-matched-campus-building';
+    place.raw.coordinateAccuracy = 'approximate-center';
+    place.raw.coordinateNote = 'ოფიციალურ მისამართთან შეჯერებული ადმინისტრაციული შენობის ან კამპუსის სავარაუდო ცენტრი; უნივერსიტეტს სხვა კორპუსებიც აქვს.';
+    if (place.address && place.address !== definition.address) place.raw.originalSourceAddress = place.address;
+    Object.assign(place,coords,{address:definition.address});
+    corrected++;
+  }
+  return corrected;
 }
 
 function insidePolygon(point, polygon) {
@@ -151,7 +217,8 @@ export function packSearchRows(rows) {
   const prefixes={osm_node:'n',osm_way:'w',osm_relation:'r',address_node:'an',address_way:'aw',address_relation:'ar',street_node:'sn',street_way:'sw',street_relation:'sr'};
   return {v:2,strings,rows:rows.map(row=>{
     const parts=row[0].split('_');
-    const compactId=`${prefixes[`${parts[0]}_${parts[1]}`]}${parts[2]}`;
+    const prefix=prefixes[`${parts[0]}_${parts[1]}`];
+    const compactId=prefix ? `${prefix}${parts[2]}` : row[0];
     return [compactId,intern(row[1]),row[2].filter(value=>value!==row[1]).map(intern),intern(row[7]==='address' && row[3]===row[1] ? '' : row[3]),intern(row[4]),Number(row[5].toFixed(6)),Number(row[6].toFixed(6)),row[7]==='address' ? 1 : 0,intern(row[8]),row[9]==='approximate-center' ? 1 : 0,...(row[10] ? [row[10]] : [])];
   })};
 }
@@ -161,7 +228,10 @@ export async function buildDataset(input, output) {
   const source=snapshot.source;
   if (!source?.url || !source.sourceDate || !Array.isArray(source.bbox)) throw new Error('Input must include source URL, snapshot date and bbox');
   const uniqueElements=[...new Map(snapshot.elements.map(element=>[`${element.type}:${element.id}`,element])).values()];
-  const places=uniqueElements.map(normalizeOsmPlace).filter(Boolean).sort((a,b)=>a.id.localeCompare(b.id));
+  const osmPlaces=uniqueElements.map(normalizeOsmPlace).filter(Boolean);
+  const coordinateCorrections=applyVerifiedSiteAnchors(osmPlaces,uniqueElements);
+  const supplementalPlaces=createVerifiedSupplement(uniqueElements);
+  const places=[...osmPlaces,...supplementalPlaces].sort((a,b)=>a.id.localeCompare(b.id));
   const brands=assignBrands(places);
   const malls=assignMallTenants(places,uniqueElements);
   const {rows,addressCount,streetCount}=createSearchRows(places,uniqueElements);
@@ -191,7 +261,7 @@ export async function buildDataset(input, output) {
   const lookupInfo=await writeJson('lookup.json',lookup);
   const searchInfo=await writeJson('search-index.json',packSearchRows(rows));
   const categoryCounts={}; for(const place of places)categoryCounts[place.category]=(categoryCounts[place.category]||0)+1;
-  const manifest={version:1,datasetId:`tbilisi-osm-${source.sourceDate}`,generatedAt:new Date().toISOString(),source,license:'ODbL-1.0',licenseUrl:'https://opendatacommons.org/licenses/odbl/1-0/',attribution:'© OpenStreetMap contributors',attributionUrl:'https://www.openstreetmap.org/copyright',coverageNote:'Bounding rectangle around Tbilisi and surroundings; only objects present in the source snapshot. Not a complete business directory. Opening hours, contacts and names may be outdated.',totalPlaces:places.length,addressCount,streetCount,sourceElements:uniqueElements.length,categoryCounts,brands,malls,overview:{file:'overview.json',count:overview.length,...overviewInfo},lookup:{file:'lookup.json',...lookupInfo},search:{file:'search-index.json',count:rows.length,...searchInfo},shards:shardEntries.sort((a,b)=>a.key.localeCompare(b.key))};
+  const manifest={version:1,datasetId:`tbilisi-osm-${source.sourceDate}`,generatedAt:new Date().toISOString(),source,license:'ODbL-1.0',licenseUrl:'https://opendatacommons.org/licenses/odbl/1-0/',attribution:'© OpenStreetMap contributors',attributionUrl:'https://www.openstreetmap.org/copyright',coverageNote:'Bounding rectangle around Tbilisi and surroundings. OSM records plus individually attributed official directory facts; not a complete city directory. Building outlines and individual campus buildings are not counted as separate active institutions. Opening hours, contacts and names may be outdated.',totalPlaces:places.length,osmPlaceCount:osmPlaces.length,supplementalPlaceCount:supplementalPlaces.length,coordinateCorrections,officialSources:unique(supplementalPlaces.map(place=>place.raw.sourceUrl)),mappedBuildingCount:osmPlaces.filter(place=>place.raw.recordKind==='mapped-building').length,addressCount,streetCount,sourceElements:uniqueElements.length,categoryCounts,brands,malls,overview:{file:'overview.json',count:overview.length,...overviewInfo},lookup:{file:'lookup.json',...lookupInfo},search:{file:'search-index.json',count:rows.length,...searchInfo},shards:shardEntries.sort((a,b)=>a.key.localeCompare(b.key))};
   await writeJson('manifest.json',manifest);
   // Only obsolete unhashed files generated by this importer are removed.
   // Hashed snapshots remain valid for already-open tabs across an update.
@@ -199,7 +269,7 @@ export async function buildDataset(input, output) {
     if (/^(overview|lookup|search-index|places--?\d+_-?\d+)\.json$/.test(name)) await unlink(join(output,name));
   }
   const totalBytes=(await Promise.all(shardEntries.map(entry=>stat(join(output,entry.file))))).reduce((sum,entry)=>sum+entry.size,0)+overviewInfo.bytes+lookupInfo.bytes+searchInfo.bytes;
-  return {places:places.length,addressCount,streetCount,shards:shards.size,totalBytes,largestShard:Math.max(...shardEntries.map(entry=>entry.bytes)),brands:brands.slice(0,12),malls,categoryCounts};
+  return {places:places.length,osmPlaces:osmPlaces.length,supplementalPlaces:supplementalPlaces.length,coordinateCorrections,addressCount,streetCount,shards:shards.size,totalBytes,largestShard:Math.max(...shardEntries.map(entry=>entry.bytes)),brands:brands.slice(0,12),malls,categoryCounts};
 }
 
 if (process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {

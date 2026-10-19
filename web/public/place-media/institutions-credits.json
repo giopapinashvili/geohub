@@ -1,0 +1,1057 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-19",
+  "photos": [
+    {
+      "placeId": "osm_relation_900361",
+      "url": "/place-media/institution-d13044bc8ff5.jpg",
+      "caption": "თსუ-ს პირველი კორპუსი",
+      "author": "Mehman Ibragimov for UG Georgia",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Mehman",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2018-12-24",
+      "rawDateTaken": "2018-12-24 14:04:11",
+      "sourceTitle": "File:TSU Main Building in 2018 (2).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:TSU_Main_Building_in_2018_(2).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/43/TSU_Main_Building_in_2018_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 171312,
+      "sha256": "d13044bc8ff54567c6e4aa2f88d425e3db7e76830aabad2d1c5ed1464ffc4e17",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q37008 P18; exact first-building Q42662646; university representative site",
+        "osmUrl": "https://www.openstreetmap.org/relation/900361"
+      },
+      "description": "Tbilisi State University main building in 2018.",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Images by Wikimedia Georgia",
+        "Category:Personality rights warning",
+        "Category:Photos by Mehman Ibragimov",
+        "Category:Self-published work",
+        "Category:Tbilisi State University Building 1"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.695Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_16510616",
+      "url": "/place-media/institution-d13044bc8ff5.jpg",
+      "caption": "თსუ-ს პირველი კორპუსი",
+      "author": "Mehman Ibragimov for UG Georgia",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Mehman",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2018-12-24",
+      "rawDateTaken": "2018-12-24 14:04:11",
+      "sourceTitle": "File:TSU Main Building in 2018 (2).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:TSU_Main_Building_in_2018_(2).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/43/TSU_Main_Building_in_2018_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 171312,
+      "sha256": "d13044bc8ff54567c6e4aa2f88d425e3db7e76830aabad2d1c5ed1464ffc4e17",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q37008 P18; exact first-building Q42662646; university representative site",
+        "osmUrl": "https://www.openstreetmap.org/relation/16510616"
+      },
+      "description": "Tbilisi State University main building in 2018.",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Images by Wikimedia Georgia",
+        "Category:Personality rights warning",
+        "Category:Photos by Mehman Ibragimov",
+        "Category:Self-published work",
+        "Category:Tbilisi State University Building 1"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.698Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_1200123",
+      "url": "/place-media/institution-78deede27ef5.jpg",
+      "caption": "სტუ-ს პირველი კორპუსი",
+      "author": "Sven Teschke , Büdingen",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Steschke",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "dateTaken": "2006-08-09",
+      "rawDateTaken": "2006-08-09",
+      "sourceTitle": "File:Georgische Technische Universität - 1. Korpus.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Georgische_Technische_Universit%C3%A4t_-_1._Korpus.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/7/75/Georgische_Technische_Universit%C3%A4t_-_1._Korpus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 639
+      },
+      "bytes": 106118,
+      "sha256": "78deede27ef50b59887ff8e2b614ce2016be830a32418bf0d7b0638dce92be07",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Exact first-building Wikidata Q42642907; not the separate administrative site",
+        "osmUrl": "https://www.openstreetmap.org/relation/1200123"
+      },
+      "description": "Georgian Technical University",
+      "categories": [
+        "Category:2006 in Tbilisi",
+        "Category:Automobiles in Tbilisi",
+        "Category:Buildings in Georgia (country) photographed in 2006",
+        "Category:CC-BY-SA-2.0-DE",
+        "Category:CC-BY-SA-3.0-migrated",
+        "Category:Files by User:Steschke",
+        "Category:GFDL",
+        "Category:Georgian Technical University Building 1",
+        "Category:Illuminated buildings in Tbilisi",
+        "Category:License migration completed",
+        "Category:Self-published work",
+        "Category:Unidentified automobiles"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.710Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_1200123",
+      "url": "/place-media/institution-72442859abc5.jpg",
+      "caption": "საქართველოს ტექნიკური უნივერსიტეტის პირველი კორპუსი",
+      "author": "Андрей Романенко",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9_%D0%A0%D0%BE%D0%BC%D0%B0%D0%BD%D0%B5%D0%BD%D0%BA%D0%BE",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2011-06-14",
+      "rawDateTaken": "Taken on 14 June 2011, 12:31:08",
+      "sourceTitle": "File:Technical University of Georgia, Building 1.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Technical_University_of_Georgia,_Building_1.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/82/Technical_University_of_Georgia%2C_Building_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "bytes": 177604,
+      "sha256": "72442859abc5bc59afe7c4cab60806f4dd4f6e765db688e18fce7f1794d08fd7",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons description explicitly identifies Building 1 of Georgian Technical University",
+        "osmUrl": "https://www.openstreetmap.org/relation/1200123"
+      },
+      "description": "Technical University of Georgia, Building 1",
+      "categories": [
+        "Category:2011 in Tbilisi",
+        "Category:Buildings in Georgia (country) photographed in 2011",
+        "Category:CC-BY-SA-4.0",
+        "Category:Entrances in Tbilisi",
+        "Category:Georgia (country) photographs taken on 2011-06-14",
+        "Category:Georgian Technical University Building 1",
+        "Category:Lanterns in Georgia (country)",
+        "Category:Outside stairs in Tbilisi",
+        "Category:Porticos in Georgia (country)",
+        "Category:Self-published work",
+        "Category:Stalinist rotundas",
+        "Category:Street lights in Tbilisi"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.720Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_20406737",
+      "url": "/place-media/institution-b903a90d40da.jpg",
+      "caption": "სტუ-ს ადმინისტრაციული კორპუსი",
+      "author": "Anano Mtchedlishvili",
+      "authorUrl": "https://commons.wikimedia.org/w/index.php?title=User:Anano_Mtchedlishvili&action=edit&redlink=1",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "",
+      "rawDateTaken": "9 July 2026 (upload date)",
+      "sourceTitle": "File:Georgian Technical University administrative building.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Georgian_Technical_University_administrative_building.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/83/Georgian_Technical_University_administrative_building.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 770
+      },
+      "bytes": 211669,
+      "sha256": "b903a90d40da531d2394226a17bbf601f0ff52e1d80fd56da4973deb0b566f56",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact administrative-building title; parent university uses this official administrative-site anchor",
+        "osmUrl": "https://www.openstreetmap.org/relation/20406737"
+      },
+      "description": "Administrative building of Georgian Technical University, Tbilisi",
+      "categories": [
+        "Category:Administration buildings",
+        "Category:CC-BY-SA-4.0",
+        "Category:Education buildings in Tbilisi",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Flags in Tbilisi",
+        "Category:Georgian Technical University",
+        "Category:Konstantine Gamsakhurdia Avenue, Tbilisi",
+        "Category:Mikheil Shavishvili",
+        "Category:Outside stairs in Tbilisi",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.732Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_4236723661",
+      "url": "/place-media/institution-b903a90d40da.jpg",
+      "caption": "სტუ-ს ადმინისტრაციული კორპუსი",
+      "author": "Anano Mtchedlishvili",
+      "authorUrl": "https://commons.wikimedia.org/w/index.php?title=User:Anano_Mtchedlishvili&action=edit&redlink=1",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "",
+      "rawDateTaken": "9 July 2026 (upload date)",
+      "sourceTitle": "File:Georgian Technical University administrative building.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Georgian_Technical_University_administrative_building.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/83/Georgian_Technical_University_administrative_building.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 770
+      },
+      "bytes": 211669,
+      "sha256": "b903a90d40da531d2394226a17bbf601f0ff52e1d80fd56da4973deb0b566f56",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact administrative-building title; parent university uses this official administrative-site anchor",
+        "osmUrl": "https://www.openstreetmap.org/node/4236723661"
+      },
+      "description": "Administrative building of Georgian Technical University, Tbilisi",
+      "categories": [
+        "Category:Administration buildings",
+        "Category:CC-BY-SA-4.0",
+        "Category:Education buildings in Tbilisi",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Flags in Tbilisi",
+        "Category:Georgian Technical University",
+        "Category:Konstantine Gamsakhurdia Avenue, Tbilisi",
+        "Category:Mikheil Shavishvili",
+        "Category:Outside stairs in Tbilisi",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.733Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_16507696",
+      "url": "/place-media/institution-b903a90d40da.jpg",
+      "caption": "სტუ-ს ადმინისტრაციული კორპუსი",
+      "author": "Anano Mtchedlishvili",
+      "authorUrl": "https://commons.wikimedia.org/w/index.php?title=User:Anano_Mtchedlishvili&action=edit&redlink=1",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "",
+      "rawDateTaken": "9 July 2026 (upload date)",
+      "sourceTitle": "File:Georgian Technical University administrative building.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Georgian_Technical_University_administrative_building.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/83/Georgian_Technical_University_administrative_building.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 770
+      },
+      "bytes": 211669,
+      "sha256": "b903a90d40da531d2394226a17bbf601f0ff52e1d80fd56da4973deb0b566f56",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact administrative-building title; parent university uses this official administrative-site anchor",
+        "osmUrl": "https://www.openstreetmap.org/relation/16507696"
+      },
+      "description": "Administrative building of Georgian Technical University, Tbilisi",
+      "categories": [
+        "Category:Administration buildings",
+        "Category:CC-BY-SA-4.0",
+        "Category:Education buildings in Tbilisi",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Flags in Tbilisi",
+        "Category:Georgian Technical University",
+        "Category:Konstantine Gamsakhurdia Avenue, Tbilisi",
+        "Category:Mikheil Shavishvili",
+        "Category:Outside stairs in Tbilisi",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.733Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_20078469",
+      "url": "/place-media/institution-cb9f76e6d64d.jpg",
+      "caption": "თსუ-ს მეექვსე კორპუსი",
+      "author": "Giorgi Balakhadze",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Giorgi_Balakhadze",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "dateTaken": "2013-10-11",
+      "rawDateTaken": "2013-10-11 23:51:46",
+      "sourceTitle": "File:Tbilisi, Georgia — Tbilisi State University, VI Corpus.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tbilisi,_Georgia_%E2%80%94_Tbilisi_State_University,_VI_Corpus.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Tbilisi%2C_Georgia_%E2%80%94_Tbilisi_State_University%2C_VI_Corpus.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1280
+      },
+      "bytes": 548957,
+      "sha256": "cb9f76e6d64d6a2346348d0bfa176df00c77290c73e6727f79dfa538ef9faa5a",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact VI corpus title; mapped building 6",
+        "osmUrl": "https://www.openstreetmap.org/relation/20078469"
+      },
+      "description": "Tbilisi, Georgia — Tbilisi State University, VI Corpus",
+      "categories": [
+        "Category:CC-BY-SA-3.0",
+        "Category:Photographs by Giorgi Balakhadze",
+        "Category:Self-published work",
+        "Category:Tbilisi State University"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.743Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_156763778",
+      "url": "/place-media/institution-40de9d446a2e.jpg",
+      "caption": "ილიას სახელმწიფო უნივერსიტეტის A კორპუსი",
+      "author": "Qwelly",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Qwelly",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2016-11-18",
+      "rawDateTaken": "2016-11-18",
+      "sourceTitle": "File:Iliauni1korpusi.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Iliauni1korpusi.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/3/34/Iliauni1korpusi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 540
+      },
+      "bytes": 240544,
+      "sha256": "40de9d446a2eebd3124c56471eac6e704783e7ee86f396e5e818ecc9dbb09acf",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q2324420 P18 and exact A building only; university representative anchor is elsewhere",
+        "osmUrl": "https://www.openstreetmap.org/way/156763778"
+      },
+      "description": "ილიას სახელმწიფო უნივერსიტეტის A კორპუსი",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Ilia University",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.754Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_161757318",
+      "url": "/place-media/institution-8d07e275e8c7.jpg",
+      "caption": "თავისუფალი და აგრარული უნივერსიტეტების კამპუსის ბიბლიოთეკა",
+      "author": "Free University of Tbilisi",
+      "authorUrl": "",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2014-10-09",
+      "rawDateTaken": "2014-10-09 15:09:49",
+      "sourceTitle": "File:Free University of Tbilisi Library.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Free_University_of_Tbilisi_Library.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/06/Free_University_of_Tbilisi_Library.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 179495,
+      "sha256": "8d07e275e8c7408d9dfb7227019ff76f8478cbde37c6afe108d5d38da287b4d5",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q16375275 P18; shared Free/Agricultural campus",
+        "osmUrl": "https://www.openstreetmap.org/way/161757318"
+      },
+      "description": "The inside view of the Library of Free University of Tbilisi",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Free University of Tbilisi",
+        "Category:Items with VRTS permission confirmed",
+        "Category:Taken with Canon EOS 5D Mark III"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.762Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_161757318",
+      "url": "/place-media/institution-e5436217a3cc.jpg",
+      "caption": "თავისუფალი უნივერსიტეტის კამპუსის ბაღი",
+      "author": "Beka Kokaia",
+      "authorUrl": "",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2014-10-17",
+      "rawDateTaken": "2014-10-17 12:25:18",
+      "sourceTitle": "File:Free University of Tbilisi Garden.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Free_University_of_Tbilisi_Garden.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Free_University_of_Tbilisi_Garden.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 326193,
+      "sha256": "e5436217a3cc6563b0b5eca8dee0b72b1d89a107a72a33dc63f227c481e4896c",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact campus description; shared Free/Agricultural campus",
+        "osmUrl": "https://www.openstreetmap.org/way/161757318"
+      },
+      "description": "The inside view of the Garden of Free University of Tbilisi",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Free University of Tbilisi",
+        "Category:Items with VRTS permission confirmed",
+        "Category:Self-published work",
+        "Category:Taken with Canon EOS 7D"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.770Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_17405902",
+      "url": "/place-media/institution-7f39521e9b28.jpg",
+      "caption": "სამხატვრო აკადემია — გრიბოედოვის ქუჩის შენობა",
+      "author": "Alexandra Gabunia ( talk · contribs )",
+      "authorUrl": "https://ka.wikipedia.org/wiki/User:Alexandra_Gabunia",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "dateTaken": "2010-12-23",
+      "rawDateTaken": "Taken on 23 December 2010",
+      "sourceTitle": "File:სამხატვრო აკადემიის შენობა გრიბოედოვის ქუჩაზე.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%E1%83%A1%E1%83%90%E1%83%9B%E1%83%AE%E1%83%90%E1%83%A2%E1%83%95%E1%83%A0%E1%83%9D_%E1%83%90%E1%83%99%E1%83%90%E1%83%93%E1%83%94%E1%83%9B%E1%83%98%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90_%E1%83%92%E1%83%A0%E1%83%98%E1%83%91%E1%83%9D%E1%83%94%E1%83%93%E1%83%9D%E1%83%95%E1%83%98%E1%83%A1_%E1%83%A5%E1%83%A3%E1%83%A9%E1%83%90%E1%83%96%E1%83%94.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e5/%E1%83%A1%E1%83%90%E1%83%9B%E1%83%AE%E1%83%90%E1%83%A2%E1%83%95%E1%83%A0%E1%83%9D_%E1%83%90%E1%83%99%E1%83%90%E1%83%93%E1%83%94%E1%83%9B%E1%83%98%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90_%E1%83%92%E1%83%A0%E1%83%98%E1%83%91%E1%83%9D%E1%83%94%E1%83%93%E1%83%9D%E1%83%95%E1%83%98%E1%83%A1_%E1%83%A5%E1%83%A3%E1%83%A9%E1%83%90%E1%83%96%E1%83%94.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 800,
+        "height": 600
+      },
+      "bytes": 279302,
+      "sha256": "7f39521e9b282414072df854e62d4ae9fb6e23be98ecf811808cce7a741c91a0",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons Arshakuni Palace category and exact Georgian title",
+        "osmUrl": "https://www.openstreetmap.org/relation/17405902"
+      },
+      "description": "თბილისის სამხატვრო აკადემიის შენობა გრიბოედოვის ქუჩაზე. გადაღებულია ჩემს მიერ. 2010 წლის 23 დეკემბერს.",
+      "categories": [
+        "Category:2010 in Tbilisi",
+        "Category:Arshakuni Palace",
+        "Category:Buildings in Georgia (country) photographed in 2010",
+        "Category:Georgia (country) photographs taken on 2010-12-23",
+        "Category:PD-self",
+        "Category:Self-published work",
+        "Category:Taken on missing SDC inception"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.781Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_17405902",
+      "url": "/place-media/institution-fc2170906d96.jpg",
+      "caption": "სამხატვრო აკადემიის შესასვლელი ვესტიბიული",
+      "author": "Alexandra Gabunia ( talk · contribs )",
+      "authorUrl": "https://ka.wikipedia.org/wiki/User:Alexandra_Gabunia",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "dateTaken": "2011-01-24",
+      "rawDateTaken": "24 January 2011 (according to Exif data)",
+      "sourceTitle": "File:სამხატვრო აკადემიის შესასვლელი ვესტიბიული.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%E1%83%A1%E1%83%90%E1%83%9B%E1%83%AE%E1%83%90%E1%83%A2%E1%83%95%E1%83%A0%E1%83%9D_%E1%83%90%E1%83%99%E1%83%90%E1%83%93%E1%83%94%E1%83%9B%E1%83%98%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%A1%E1%83%90%E1%83%A1%E1%83%95%E1%83%9A%E1%83%94%E1%83%9A%E1%83%98_%E1%83%95%E1%83%94%E1%83%A1%E1%83%A2%E1%83%98%E1%83%91%E1%83%98%E1%83%A3%E1%83%9A%E1%83%98.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/60/%E1%83%A1%E1%83%90%E1%83%9B%E1%83%AE%E1%83%90%E1%83%A2%E1%83%95%E1%83%A0%E1%83%9D_%E1%83%90%E1%83%99%E1%83%90%E1%83%93%E1%83%94%E1%83%9B%E1%83%98%E1%83%98%E1%83%A1_%E1%83%A8%E1%83%94%E1%83%A1%E1%83%90%E1%83%A1%E1%83%95%E1%83%9A%E1%83%94%E1%83%9A%E1%83%98_%E1%83%95%E1%83%94%E1%83%A1%E1%83%A2%E1%83%98%E1%83%91%E1%83%98%E1%83%A3%E1%83%9A%E1%83%98.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1440
+      },
+      "bytes": 382254,
+      "sha256": "fc2170906d967a0d873e8d5fc150698dc9361a3bbbc32630db2943a90d2db97d",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact institution vestibule title",
+        "osmUrl": "https://www.openstreetmap.org/relation/17405902"
+      },
+      "description": "სამხატვრო აკადემიის შესასვლელი ვესტიბიულის ამსახველი ფოტო სამხატვრო აკადემიის ფოტოკოლექციიდან. ლიცენზია თავისუფალი",
+      "categories": [
+        "Category:2011 in Tbilisi",
+        "Category:Arshakuni Palace",
+        "Category:Buildings in Georgia (country) photographed in 2011",
+        "Category:Busts in Tbilisi",
+        "Category:Chandeliers in Georgia (country)",
+        "Category:Entrance stairs",
+        "Category:Georgia (country) photographs taken on 2011-01-24",
+        "Category:Indoor stairs in Tbilisi",
+        "Category:PD-self",
+        "Category:Released into the public domain by the copyright holder missing SDC copyright license",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.791Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_17405902",
+      "url": "/place-media/institution-3d284dae1f01.jpg",
+      "caption": "სამხატვრო აკადემიის საარქივო ფოტო",
+      "author": "Dmitri Yermakov",
+      "authorUrl": "https://en.wikipedia.org/wiki/en:Dmitri_Yermakov",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "dateTaken": "1884",
+      "rawDateTaken": "1884",
+      "sourceTitle": "File:Tbilisi Art Acdemy photo from archive.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tbilisi_Art_Acdemy_photo_from_archive.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Tbilisi_Art_Acdemy_photo_from_archive.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 464,
+        "height": 360
+      },
+      "bytes": 60436,
+      "sha256": "3d284dae1f0156ebb1596b8646b57f40e5d3cef3f34a2366365a748fc0243c6c",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q619600 P18; historical image explicitly labelled",
+        "osmUrl": "https://www.openstreetmap.org/relation/17405902"
+      },
+      "description": "Dmitri Ivanovich Yermakov. Tbilisi Academy of Arts building",
+      "categories": [
+        "Category:1884 in Tbilisi",
+        "Category:Arshakuni Palace",
+        "Category:Black and white photographs of Georgia (country) in the 1880s",
+        "Category:CC-PD-Mark",
+        "Category:PD-old-100",
+        "Category:PD-old missing SDC copyright status",
+        "Category:Photos of Tbilisi by Dimitri Ermakov"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.798Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_18222383",
+      "url": "/place-media/institution-aa6d6b316916.jpg",
+      "caption": "თბილისის სახელმწიფო კონსერვატორია",
+      "author": "Alex Maisuradze",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Alsandro",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2009-09",
+      "rawDateTaken": "2009-09",
+      "sourceTitle": "File:Tbilisi Conservatoire.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tbilisi_Conservatoire.JPG",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/08/Tbilisi_Conservatoire.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 168225,
+      "sha256": "aa6d6b31691659a01da8a0175931586bb37710b75462cce7e7fad9441e50e75d",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q2478876 P18",
+        "osmUrl": "https://www.openstreetmap.org/relation/18222383"
+      },
+      "description": "Tbilisi State Conservatoire building facade",
+      "categories": [
+        "Category:Buildings by Aleksander Szymkiewicz",
+        "Category:CC-BY-SA-4.0,3.0,2.5,2.0,1.0",
+        "Category:GFDL",
+        "Category:License migration redundant",
+        "Category:Self-published work",
+        "Category:Taken with Canon EOS 20D",
+        "Category:Tbilisi State Conservatoire"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.805Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_18222383",
+      "url": "/place-media/institution-fcf4c181484f.jpg",
+      "caption": "თბილისის სახელმწიფო კონსერვატორიის დიდი დარბაზი",
+      "author": "George Mel",
+      "authorUrl": "https://www.flickr.com/people/42573295@N02",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "dateTaken": "2009-10-07",
+      "rawDateTaken": "2009-10-07 11:57",
+      "sourceTitle": "File:Tbilisi State Conservatoire main hall.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tbilisi_State_Conservatoire_main_hall.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Tbilisi_State_Conservatoire_main_hall.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "bytes": 193283,
+      "sha256": "fcf4c181484ff0e5d396ebce6b87a6f5632e07f0fcde8846d219cf18000dddc8",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact main hall title; institution interior",
+        "osmUrl": "https://www.openstreetmap.org/relation/18222383"
+      },
+      "description": "Tbilisi State Conservatoire (in Georgian: თბილისის სახელმწიფო კონსერვატორია ) is the State Conservatoire of Georgia, located in the capital Tbilisi. The Tbilisi Conservatoire was founded on 1 May 1917 under the directorship of N. Nikolaev. It was formally recognised by the Russian Musical Society as a conservatoire later that year. A rival conservatoire was also founded in 1921 by D. Arakishvili, and it was not until 1924 that the situation was resolved by the Soviet regime in favour of the original foundation. Since 1947 it has borne the name of Georgian singer Vano Sarajishvili.",
+      "categories": [
+        "Category:CC-BY-SA-2.0",
+        "Category:Flickr images reviewed by File Upload Bot (Magnus Manske)",
+        "Category:Taken with Nokia N81",
+        "Category:Tbilisi State Conservatoire"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.812Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_10300242379",
+      "url": "/place-media/institution-84f484c53efc.jpg",
+      "caption": "შოთა რუსთაველის თეატრისა და კინოს უნივერსიტეტის შენობა",
+      "author": "Giorgi Balakhadze",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Giorgi_Balakhadze",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2016-06-25",
+      "rawDateTaken": "2016-06-25 16:14:46",
+      "sourceTitle": "File:Shota Rustaveli Theatre and Film University.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shota_Rustaveli_Theatre_and_Film_University.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/97/Shota_Rustaveli_Theatre_and_Film_University.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 541
+      },
+      "bytes": 216704,
+      "sha256": "84f484c53efcba563155e039136239d2f7fd8f55be0fe38a7097b937b24e38e1",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Wikidata Q4453142 P18; geographically matching primary building only",
+        "osmUrl": "https://www.openstreetmap.org/node/10300242379"
+      },
+      "description": "Shota Rustaveli Theatre and Film University",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Photographs by Giorgi Balakhadze",
+        "Category:Rustaveli Theatre",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.818Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_991902757",
+      "url": "/place-media/institution-3f60ed65dee7.jpg",
+      "caption": "კავკასიის უნივერსიტეტის კამპუსი ქალაქის ხედში",
+      "author": "Mostafameraji",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Mostafameraji",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2017-10-12",
+      "rawDateTaken": "Taken on 12 October 2017, 10:42:50",
+      "sourceTitle": "File:Tbilisi City - Urban Photos (16).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tbilisi_City_-_Urban_Photos_(16).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Tbilisi_City_-_Urban_Photos_%2816%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 237014,
+      "sha256": "3f60ed65dee73de4d4723e2cef220ad9d13d056fb884d8b7698325757de81a9c",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons category explicitly Caucasus University; historic seminary building identity reviewed visually",
+        "osmUrl": "https://www.openstreetmap.org/way/991902757"
+      },
+      "description": "Tbilisi is die hoofstad van Georgië. Met 'n bevolking van 1,15 miljoen in 2010 en 'n oppervlakte van 726 km² (waarvan 70 km² beboude gebiede) is dit die grootste en mees bevolkte stad in die land.",
+      "categories": [
+        "Category:2017 in Tbilisi",
+        "Category:Antenna towers in Tbilisi",
+        "Category:CC-BY-SA-4.0",
+        "Category:Cityscapes of Tbilisi seen from Sololaki Range",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Georgia (country) photographs taken on 2017-10-12",
+        "Category:Images with annotations",
+        "Category:Landscape photography",
+        "Category:Nersisyan School",
+        "Category:Pages with local object coordinates and mismatching SDC coordinates",
+        "Category:Photographs by Mostafa Meraji",
+        "Category:Self-published work",
+        "Category:Taken with Canon EOS M3"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.825Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_11427406837",
+      "url": "/place-media/institution-57608216ef9d.jpg",
+      "caption": "ეროვნული ბიბლიოთეკის III კორპუსი",
+      "author": "Kober",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Kober",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "dateTaken": "2010-03-08",
+      "rawDateTaken": "2010-03-08",
+      "sourceTitle": "File:NPLG building, Tbilisi.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:NPLG_building,_Tbilisi.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4d/NPLG_building%2C_Tbilisi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "bytes": 186255,
+      "sha256": "57608216ef9d2431e2815c0e856afae2c33df0214d31a7f8e42e8586f7e4920b",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons description explicitly Building III, Gudiashvili; coordinate 41.6972,44.8006 within 30m of mapped point",
+        "osmUrl": "https://www.openstreetmap.org/node/11427406837"
+      },
+      "description": "Building III, National Parliamentary Library of Georgia in Gudiashvili St., Tbilisi. The building is built in 1910",
+      "categories": [
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Gudiashvili street, Tbilisi",
+        "Category:National Parliamentary Library of Georgia",
+        "Category:PD-self",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.830Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_11427406837",
+      "url": "/place-media/institution-b35b94e667e0.jpg",
+      "caption": "ეროვნული ბიბლიოთეკის III კორპუსის შესასვლელი",
+      "author": "OlesiaLukaniuk (WMUA)",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:OlesiaLukaniuk_(WMUA)",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2024-05-15",
+      "rawDateTaken": "Taken on 15 May 2024",
+      "sourceTitle": "File:National library of Georgia, located in Tbilisi.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_library_of_Georgia,_located_in_Tbilisi.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b8/National_library_of_Georgia%2C_located_in_Tbilisi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1280
+      },
+      "bytes": 271302,
+      "sha256": "b35b94e667e0891b1d2afb9c42505b828795e448d1b4b979099bacc665e5d061",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Visually identical entrance to NPLG building Tbilisi (Building III), not Building I",
+        "osmUrl": "https://www.openstreetmap.org/node/11427406837"
+      },
+      "description": "Natonal library of Georgia, located in Tbilisi",
+      "categories": [
+        "Category:Buildings in Georgia (country) photographed in 2024",
+        "Category:CC-BY-SA-4.0",
+        "Category:Entrances in Tbilisi",
+        "Category:Georgia (country) photographs taken on 2024-05-15",
+        "Category:HGN meeting, Tbilisi 2024",
+        "Category:National Parliamentary Library of Georgia",
+        "Category:Photographs of flags of Georgia in Tbilisi",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.836Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_11427406837",
+      "url": "/place-media/institution-106197bb903f.jpg",
+      "caption": "ეროვნული ბიბლიოთეკის III კორპუსი — ფრანგული ინსტიტუტის სივრცე",
+      "author": "OlesiaLukaniuk (WMUA)",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:OlesiaLukaniuk_(WMUA)",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2024-05-15",
+      "rawDateTaken": "Taken on 15 May 2024",
+      "sourceTitle": "File:National library of Georgia,Tbilisi. Inside view.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_library_of_Georgia,Tbilisi._Inside_view.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/93/National_library_of_Georgia%2CTbilisi._Inside_view.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1280
+      },
+      "bytes": 163452,
+      "sha256": "106197bb903fc9f054d0902ca85efcf9dd23b34878ea70b5baf3186e60089902",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Visible Institut Francais sign; official NPLG Location lists French mediatheque in Building III",
+        "osmUrl": "https://www.openstreetmap.org/node/11427406837"
+      },
+      "description": "Natonal library of Georgia,Tbilisi. Inside view",
+      "categories": [
+        "Category:Buildings in Georgia (country) photographed in 2024",
+        "Category:CC-BY-SA-4.0",
+        "Category:Georgia (country) photographs taken on 2024-05-15",
+        "Category:HGN meeting, Tbilisi 2024",
+        "Category:Interiors of cultural buildings in Georgia",
+        "Category:Interiors of libraries",
+        "Category:National Parliamentary Library of Georgia",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.842Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_node_11427406837",
+      "url": "/place-media/institution-eb2ed2af217a.jpg",
+      "caption": "ეროვნული ბიბლიოთეკის III კორპუსის საკონფერენციო დარბაზი",
+      "author": "OlesiaLukaniuk (WMUA)",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:OlesiaLukaniuk_(WMUA)",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "dateTaken": "2024-05-15",
+      "rawDateTaken": "2024-05-15",
+      "sourceTitle": "File:National library of Georgia, located in Tbilisi (conference hall).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_library_of_Georgia,_located_in_Tbilisi_(conference_hall).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e9/National_library_of_Georgia%2C_located_in_Tbilisi_%28conference_hall%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1280
+      },
+      "bytes": 221632,
+      "sha256": "eb2ed2af217a6f270e12ee3749c82ff02974c4ab581717c85e064469a0641533",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons institution conference-hall title; official NPLG Location lists conference hall in Building III",
+        "osmUrl": "https://www.openstreetmap.org/node/11427406837"
+      },
+      "description": "Natonal library of Georgia, located in Tbilisi (conference hall)",
+      "categories": [
+        "Category:CC-BY-SA-4.0",
+        "Category:Heritage Guard Network",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:52.848Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_relation_1182326",
+      "url": "/place-media/institution-224a6b12059e.jpg",
+      "caption": "ეროვნული ბიბლიოთეკის I კორპუსი",
+      "author": "Alsandro",
+      "authorUrl": "https://ka.wikipedia.org/wiki/%E1%83%9B%E1%83%9D%E1%83%9B%E1%83%AE%E1%83%9B%E1%83%90%E1%83%A0%E1%83%94%E1%83%91%E1%83%94%E1%83%9A%E1%83%98:Alsandro",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "dateTaken": "2007",
+      "rawDateTaken": "2007",
+      "sourceTitle": "File:National Parliamentary Library of Georgia, Building №1.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_Parliamentary_Library_of_Georgia,_Building_%E2%84%961.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e7/National_Parliamentary_Library_of_Georgia%2C_Building_%E2%84%961.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 915
+      },
+      "bytes": 135726,
+      "sha256": "224a6b12059e44dd6fbfb1d86efd05bf455aca5577ed43281d301486f78188d8",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact building number title; main mapped building",
+        "osmUrl": "https://www.openstreetmap.org/relation/1182326"
+      },
+      "description": "National Parliamentary Library of Georgia, Building #1 located in 3 Gudiashvili St., Tbilisi. It was built as the Bank of Nobility in 1913-16 by architect Anatoly Kalgin and artist Henrik Hrinewsky.",
+      "categories": [
+        "Category:Anatoly Kalgin",
+        "Category:Bank of Nobility",
+        "Category:National Parliamentary Library of Georgia",
+        "Category:PD-user",
+        "Category:Taken with Canon EOS 20D"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.851Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_371721697",
+      "url": "/place-media/institution-af8b1b556ce3.jpg",
+      "caption": "ისთ ფოინთის სავაჭრო სივრცე",
+      "author": "Tiia Monto",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Kulmalukko",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "dateTaken": "2018-05-15",
+      "rawDateTaken": "2018-05-15 17:13",
+      "sourceTitle": "File:East Point, Tbilisi.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:East_Point,_Tbilisi.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/65/East_Point%2C_Tbilisi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 131821,
+      "sha256": "af8b1b556ce3d6b8effad912261c65b2f573a7aee1795c5f693d727d64c78247",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact East Point Tbilisi category and description",
+        "osmUrl": "https://www.openstreetmap.org/way/371721697"
+      },
+      "description": "Tbilisi, Georgia.",
+      "categories": [
+        "Category:2018 in Tbilisi",
+        "Category:Buildings in Georgia (country) photographed in 2018",
+        "Category:CC-BY-SA-3.0",
+        "Category:East Point mall, Tbilisi",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Georgia (country) photographs taken on 2018-05-15",
+        "Category:Taken with Sony DSC-RX100 III",
+        "Category:Uploaded with VicuñaUploader"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.855Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_371721697",
+      "url": "/place-media/institution-84aa392058a0.jpg",
+      "caption": "ისთ ფოინთი თბილისში",
+      "author": "יעקב",
+      "authorUrl": "https://commons.wikimedia.org/w/index.php?title=User:%D7%99%D7%A2%D7%A7%D7%91&action=edit&redlink=1",
+      "license": "CC0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "dateTaken": "2024-06-07",
+      "rawDateTaken": "2024-06-07 14:54:38",
+      "sourceTitle": "File:East point Tbilisi1864.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:East_point_Tbilisi1864.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2e/East_point_Tbilisi1864.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 720
+      },
+      "bytes": 136147,
+      "sha256": "84aa392058a03a991b941aaa0ae929844dea637d5efa60a45ef9d6dd52031f2d",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact East Point mall Tbilisi description",
+        "osmUrl": "https://www.openstreetmap.org/way/371721697"
+      },
+      "description": "East Point mall, Tbilisi",
+      "categories": [
+        "Category:CC-Zero",
+        "Category:East Point mall, Tbilisi",
+        "Category:Mkhedruli signs on buildings in Tbilisi",
+        "Category:Self-published work"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.860Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_559446309",
+      "url": "/place-media/institution-196ff1b1c513.jpg",
+      "caption": "გალერია თბილისი — ხედი რუსთაველის გამზირიდან",
+      "author": "Andrew Milligan sumo",
+      "authorUrl": "https://www.flickr.com/people/24470821@N04",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "dateTaken": "2019-02-12",
+      "rawDateTaken": "Taken on 12 February 2019, 15:04",
+      "sourceTitle": "File:Rustaveli St, Tbilisi (50503459911).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rustaveli_St,_Tbilisi_(50503459911).jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/68/Rustaveli_St%2C_Tbilisi_%2850503459911%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 217437,
+      "sha256": "196ff1b1c5136cf287ce8f27bd55d32d808893cb200c382fd00eb3f1ce3a0fb9",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons Galleria Tbilisi category; facade reviewed visually",
+        "osmUrl": "https://www.openstreetmap.org/way/559446309"
+      },
+      "description": "Rustaveli St, Tbilisi",
+      "categories": [
+        "Category:2019 black and white photographs of Georgia (country)",
+        "Category:2019 in Tbilisi",
+        "Category:Black and white photographs of Tbilisi",
+        "Category:Black and white photographs of buildings",
+        "Category:Buildings in Georgia (country) photographed in 2019",
+        "Category:CC-BY-2.0",
+        "Category:Flickr images reviewed by FlickreviewR 2",
+        "Category:Galleria Tbilisi",
+        "Category:Georgia (country) photographs taken on 2019-02-12",
+        "Category:Photographs of Georgia (country) by Andrew Milligan sumo",
+        "Category:Uploads by Matlin"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.866Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_559446309",
+      "url": "/place-media/institution-47e5c0a8c041.jpg",
+      "caption": "ხედი გალერია თბილისიდან",
+      "author": "Dor Shabashewitz",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Shabashewitz",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "dateTaken": "2024-02-07",
+      "rawDateTaken": "Taken on 7 February 2024, 17:04:56",
+      "sourceTitle": "File:View from Galleria mall in Tbilisi.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_from_Galleria_mall_in_Tbilisi.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6d/View_from_Galleria_mall_in_Tbilisi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 1267
+      },
+      "bytes": 381065,
+      "sha256": "47e5c0a8c0419abfbe251d30e0ebd8b4856e53fd46dc28cfbe13002dbc879136",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons exact viewpoint; caption explicitly view from mall",
+        "osmUrl": "https://www.openstreetmap.org/way/559446309"
+      },
+      "description": "View from Galleria mall in Tbilisi",
+      "categories": [
+        "Category:1 Shota Rustaveli Avenue, Tbilisi",
+        "Category:2024 in Tbilisi",
+        "Category:CC-BY-4.0",
+        "Category:Galleria Tbilisi",
+        "Category:Georgia (country) photographs taken on 2024-02-07",
+        "Category:Glass railings",
+        "Category:Photographs by Dor Shabashewitz",
+        "Category:Photographs by Dor Shabashewitz/Georgia",
+        "Category:Photographs by Dor Shabashewitz taken in 2024",
+        "Category:Railings in Georgia (country)",
+        "Category:Self-published work",
+        "Category:Taken on missing SDC inception"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.875Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    },
+    {
+      "placeId": "osm_way_124320620",
+      "url": "/place-media/institution-46eed91919b0.jpg",
+      "caption": "თბილისის პანორამა — შორეულ ხედში ქარვასლის სავაჭრო ცენტრიც ჩანს",
+      "author": "Mostafameraji",
+      "authorUrl": "https://commons.wikimedia.org/wiki/User:Mostafameraji",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "dateTaken": "2017-10-12",
+      "rawDateTaken": "Taken on 12 October 2017, 16:29:36",
+      "sourceTitle": "File:Houses and Buildings in Tbilisi - mostafa meraji - Georgia Photos - Travel And Tourism 24.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Houses_and_Buildings_in_Tbilisi_-_mostafa_meraji_-_Georgia_Photos_-_Travel_And_Tourism_24.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Houses_and_Buildings_in_Tbilisi_-_mostafa_meraji_-_Georgia_Photos_-_Travel_And_Tourism_24.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "preview": {
+        "width": 960,
+        "height": 640
+      },
+      "bytes": 221543,
+      "sha256": "46eed91919b05cc4efd56890cdd6ead79c0af163de8dbf144ba01268d2ab54aa",
+      "sourceMapping": {
+        "type": "reviewed-institution-exact-site",
+        "proof": "Commons image annotation identifies Karvasla Shopping Mall; panorama, not close exterior",
+        "osmUrl": "https://www.openstreetmap.org/way/124320620"
+      },
+      "description": "Tbilisi, in some countries also still known by its pre-1936 international designation Tiflis is the capital and the largest city of Georgia, lying on the banks of the Kura River with a population of approximately 1.5 million people. Founded in the 5th century AD by Vakhtang I of Iberia, since then Tbilisi served as the capital of various Georgian kingdoms and republics. Between 1801 and 1917, then part of the Russian Empire, Tbilisi was the seat of the Imperial Viceroy, governing both Southern and Northern Caucasus.",
+      "categories": [
+        "Category:2017 in Tbilisi",
+        "Category:Antenna towers in Tbilisi",
+        "Category:CC-BY-SA-3.0",
+        "Category:Files with coordinates missing SDC location of creation",
+        "Category:Georgia (country) photographs taken on 2017-10-12",
+        "Category:Images with annotations",
+        "Category:Landscape photography",
+        "Category:Pages with local object coordinates and missing SDC coordinates",
+        "Category:Photographs by Mostafa Meraji",
+        "Category:Self-published work",
+        "Category:Taken with Canon EOS M3",
+        "Category:Views of Tbilisi from Mtatsminda"
+      ],
+      "downloadedAt": "2026-10-19T08:53:53.883Z",
+      "changes": "Wikimedia thumbnail; displayed resized and cropped to fit."
+    }
+  ]
+}

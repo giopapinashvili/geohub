@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { importedPlaceEntries } from '../src/lib/importedPlacePosts.js';
-import { DEMO_MERCHANTS, DEMO_OFFERS, DEMO_BATCH_ID, getDemoMerchant } from '../src/features/commerce/demo.js';
+import { DEMO_ENABLED, DEMO_MERCHANTS, DEMO_OFFERS, DEMO_BATCH_ID, getDemoMerchant } from '../src/features/commerce/demo.js';
 import { ICONS } from '../src/ui/icons.js';
 
 const place = { id: 'osm_node_42', name: 'წყარო', category: 'cafe', lat: 0, lng: 44.7, raw: { source: 'openstreetmap', sourceDate: '2026-10-18T00:00:00Z' } };
@@ -15,8 +15,9 @@ test('directory entries contain only present source facts, with canonical place 
   assert.equal(entry.photos.length, 0); assert.deepEqual(entry.amenities, []);
   for (const key of ['rating', 'likes', 'authorId', 'publishedAt', 'price', 'openingHours']) assert.equal(entry[key], undefined);
   assert.ok(entry.facts.every(fact => ICONS[fact.icon]));
-  assert.equal(importedPlaceEntries({ ...place, id: 'real_merchant' }), null);
-  assert.equal(importedPlaceEntries({ ...place, raw: { source: 'business' } }), null);
+  assert.equal(importedPlaceEntries({ ...place, id: 'real_merchant', raw: {} }).isImported, false);
+  assert.equal(importedPlaceEntries({ ...place, id: 'real_merchant', raw: {} }).sourceUrl, '');
+  assert.ok(importedPlaceEntries({ ...place, raw: { source: 'business' } }).guide.points.length >= 2);
 });
 
 test('source photos require matching place media and explicit license/author; unsafe/missing links never render', () => {
@@ -63,7 +64,8 @@ test('all six demo offers resolve to populated fictional pages and catalog items
   assert.equal(DEMO_MERCHANTS.length, 6); assert.equal(DEMO_OFFERS.length, 6);
   assert.equal(new Set(DEMO_MERCHANTS.map(merchant => merchant.id)).size, 6);
   for (const offer of DEMO_OFFERS) {
-    const merchant = getDemoMerchant(offer.demoMerchantId);
+    const merchant = DEMO_MERCHANTS.find(value => value.id === offer.demoMerchantId);
+    assert.equal(getDemoMerchant(offer.demoMerchantId), DEMO_ENABLED ? merchant : null);
     assert.ok(merchant); assert.equal(offer.demoPageHref, merchant.href);
     assert.equal(offer.itemId, merchant.item.id); assert.equal(offer.businessId, '');
     assert.equal(merchant.demoBatchId, DEMO_BATCH_ID); assert.equal(offer.demoBatchId, DEMO_BATCH_ID);

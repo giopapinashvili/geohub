@@ -8,6 +8,7 @@ import { categoryOf } from './categories.js';
 import { PlaceCoordinates } from './PlaceCoordinates.jsx';
 import { placePageHref } from '../../lib/placeLinks.js';
 import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
+import { PlaceBrand } from './PlaceBrand.jsx';
 import '../../styles/map-preview.css';
 
 /** A selected map pin opens this preview; expanding it keeps the map mounted. */
@@ -28,8 +29,9 @@ export function MapPlacePreview({ place, onExpand, onClose, onCheckin }) {
             width={240}
             eager
             alt=""
-            fallback={<span class="map-place-preview-fallback" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={34} /></span>}
+            fallback={<PlaceBrand place={place} size="tile" fallback={<span class="map-place-preview-fallback" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={34} /></span>} />}
           />
+          {place.image && <PlaceBrand place={place} class="place-brand-overlay" />}
         </span>
         <span class="map-place-preview-text">
           <strong class="map-place-preview-name">{place.name}</strong>

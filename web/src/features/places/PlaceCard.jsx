@@ -4,6 +4,7 @@ import { tn, formatCount } from '../../lib/i18n.js';
 import { cityLabel, formatDistance } from '../../lib/geo.js';
 import { categoryOf } from './categories.js';
 import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
+import { PlaceBrand } from './PlaceBrand.jsx';
 
 function Rating({ place }) {
   if (!place.rating) return null;
@@ -21,7 +22,7 @@ export function PlaceCard({ place, distance, compact, showDescription, active, o
   if (compact) {
     return (
       <a href={href} class={`place-row${active ? ' is-active' : ''}`} onClick={onClick}>
-        <span class="place-row-img"><Img src={place.image} width={160} alt="" fallback={<span class="place-row-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={24} /></span>} /></span>
+        <span class="place-row-img"><Img src={place.image} width={160} alt="" fallback={<PlaceBrand place={place} size="tile" fallback={<span class="place-row-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={24} /></span>} />} />{place.image && <PlaceBrand place={place} class="place-brand-overlay" />}</span>
         <span class="place-row-text">
           <strong class="ellipsis">{place.name}</strong>
           <span class="muted small ellipsis">{cat.label}{meta ? ` · ${meta}` : ''}</span>
@@ -35,7 +36,8 @@ export function PlaceCard({ place, distance, compact, showDescription, active, o
   return (
     <a href={href} class="card place-card" onClick={onClick}>
       <span class="place-card-img">
-        <Img src={place.image} width={560} alt="" fallback={<span class="place-card-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={40} /></span>} />
+        <Img src={place.image} width={560} alt="" fallback={<PlaceBrand place={place} size="tile" fallback={<span class="place-card-ico" style={{ '--tone': cat.tone }}><Icon name={cat.icon} size={40} /></span>} />} />
+        {place.image && <PlaceBrand place={place} class="place-brand-overlay" />}
         <span class="place-card-cat"><Icon name={cat.icon} size={14} />{cat.label}</span>
       </span>
       <span class="place-card-body">

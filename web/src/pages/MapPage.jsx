@@ -21,6 +21,7 @@ import { searchImported } from '../lib/discoveryClient.js';
 import { searchCatalogPlaces } from '../data/search.js';
 import { loadCommunityTagPlaces } from '../data/reviewTags.js';
 import { placePageHref, isCatalogLocationId } from '../lib/placeLinks.js';
+import { placeBrand } from '../lib/placeBrands.js';
 import { rankRecords } from '../lib/discoverySearch.js';
 import { EMPTY_PLACE_FILTERS, matchesPlaceFilters } from '../lib/discoveryFilters.js';
 import { PlaceCard } from '../features/places/PlaceCard.jsx';
@@ -92,6 +93,9 @@ export default function MapPage() {
   const [bounds, setBounds] = useState(null);
   const [cat, setCat] = useState('all');
   const [q, setQ] = useState('');
+  const [listLimit, setListLimit] = useState(60);
+  const [searchLimit, setSearchLimit] = useState(120);
+  useEffect(() => { setListLimit(60); setSearchLimit(120); }, [q, cat, filters]);
   const searchingCity = q.trim().length >= 2;
   const discovering = searchingCity || !!filters.diet || !!filters.preparationMax || !!filters.experienceTag;
   const selectedId = query.value.get('place') || null;
@@ -157,7 +161,7 @@ export default function MapPage() {
     setSearching(true);
     const timer = setTimeout(() => {
       Promise.allSettled([
-        searchImported(q, { channel: 'map', category: cat, filters, limit: 80, allowEmpty: true,
+        searchImported(q, { channel: 'map', category: cat, filters, limit: searchLimit, allowEmpty: true,
           ...(allowedPlaceIds ? { allowedPlaceIds: [...allowedPlaceIds] } : {}) }),
         searchCatalogPlaces(q, 80, { filters, category: cat }),
       ]).then(([importedResult, catalogResult]) => {
@@ -165,12 +169,12 @@ export default function MapPage() {
         if (importedResult.status === 'fulfilled') setSearchResults(importedResult.value);
         if (catalogResult.status === 'fulfilled') setCatalogResults(catalogResult.value);
         setSearchError(importedResult.status === 'rejected' || catalogResult.status === 'rejected' || catalogResult.value?.coverage?.unavailable);
-        setSearchTruncated(catalogResult.value?.coverage?.truncated === true);
+        setSearchTruncated(catalogResult.value?.coverage?.truncated === true || importedResult.value?.length >= searchLimit);
       }).catch(() => { if (active) setSearchError(true); })
         .finally(() => { if (active) setSearching(false); });
     }, 220);
     return () => { active = false; clearTimeout(timer); };
-  }, [q, cat, filters, community, communityError]);
+  }, [q, cat, filters, community, communityError, searchLimit]);
   const knownSelection = catalogResults.find(p => p.id === selectedId) || discoveryPlaces.find(p => p.id === selectedId);
   // A shared place link can point outside the first page of map results.
   useEffect(() => {
@@ -188,15 +192,15 @@ export default function MapPage() {
     const matching = discoveryPlaces.filter(matches);
     if (!discovering) return matching;
     const byId = new Map(discoveryPlaces.map((p) => [p.id, p]));
-    const combined = new Map(rankRecords(matching, q, { limit: 80 }).map((p) => [p.id, p]));
+    const combined = new Map(rankRecords(matching, q, { limit: searchLimit }).map((p) => [p.id, p]));
     for (const hit of searchResults.filter((p) => p.kind === 'place')) {
       if (!combined.has(hit.id) && matches(hit)) combined.set(hit.id, { ...(byId.get(hit.id) || { rating: 0, reviewCount: 0, checkinCount: 0, image: '', photos: [] }), ...hit });
     }
     for (const hit of catalogResults) {
       if (matches(hit)) combined.set(hit.id, { ...byId.get(hit.id), ...hit, searchScore: Math.max(combined.get(hit.id)?.searchScore || 0, hit.searchScore || 0) });
     }
-    return [...combined.values()].sort((a, b) => b.searchScore - a.searchScore).slice(0, 80);
-  }, [discoveryPlaces, filters, cat, q, discovering, searchResults, catalogResults, allowedPlaceIds]);
+    return [...combined.values()].sort((a, b) => b.searchScore - a.searchScore).slice(0, searchLimit);
+  }, [discoveryPlaces, filters, cat, q, discovering, searchResults, catalogResults, allowedPlaceIds, searchLimit]);
   const addressResults = searchResults.filter((p) => p.kind !== 'place').slice(0, 12);
   const geojson = useMemo(() => placesToGeoJSON(
     selected && !filtered.some((p) => p.id === selected.id) ? [...filtered, selected] : filtered,
@@ -205,13 +209,13 @@ export default function MapPage() {
   const geoRef = useRef(geojson);
   geoRef.current = geojson;
 
-  const visible = useMemo(() => {
+  const viewResults = useMemo(() => {
     const list = bounds && !discovering ? filtered.filter((p) => isMapCoordinate(p) && bounds.contains([p.lng, p.lat])) : filtered;
     const ref = me || null;
     return list.map((p) => ({ p, d: ref ? distanceKm(ref, p) : Infinity }))
-      .sort((a, b) => discovering ? b.p.searchScore - a.p.searchScore : (ref ? a.d - b.d : (b.p.checkinCount || 0) - (a.p.checkinCount || 0)))
-      .slice(0, 80);
+      .sort((a, b) => discovering ? b.p.searchScore - a.p.searchScore : (ref ? a.d - b.d : (b.p.checkinCount || 0) - (a.p.checkinCount || 0)));
   }, [filtered, bounds, me, discovering]);
+  const visible = viewResults.slice(0, listLimit);
 
   // Create the map once.
   useEffect(() => {
@@ -345,6 +349,32 @@ export default function MapPage() {
     const icon = ICONS[categoryOf(selected).icon] || ICONS['map-pin'];
     // Only bundled, static icon paths go into this SVG.
     element.innerHTML = `<svg width="23" height="23" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">${icon}</svg>`;
+    const fallback = element.firstElementChild;
+    const brand = placeBrand(selected);
+    let disposed = false;
+    let artwork;
+    if (brand) {
+      artwork = new Image();
+      artwork.className = 'map-selected-pin-logo';
+      artwork.alt = '';
+      artwork.setAttribute('aria-hidden', 'true');
+      artwork.onload = () => {
+        if (disposed) return;
+        fallback.replaceWith(artwork);
+        element.classList.add('is-branded');
+        element.classList.toggle('is-wide', !!brand.wide);
+        element.style.setProperty('--selected-brand-background', brand.background);
+        element.dataset.brand = brand.id;
+      };
+      artwork.onerror = () => {
+        if (disposed) return;
+        if (artwork.parentNode === element) artwork.replaceWith(fallback);
+        element.classList.remove('is-branded', 'is-wide');
+        element.style.removeProperty('--selected-brand-background');
+        delete element.dataset.brand;
+      };
+      artwork.src = brand.src;
+    }
     const label = document.createElement('span');
     label.className = 'map-selected-pin-label';
     label.textContent = selected.name;
@@ -355,8 +385,12 @@ export default function MapPage() {
     element.setAttribute('aria-label', `${selected.name} — ${t('map.details')}`);
     const open = (event) => { event?.stopPropagation(); showSidebar.current(); setQuery({ details: '1' }); };
     element.addEventListener('click', open);
-    return () => marker.remove();
-  }, [selected?.id, selected?.lat, selected?.lng, ready, lang.value]);
+    return () => {
+      disposed = true;
+      if (artwork) artwork.onload = artwork.onerror = null;
+      marker.remove();
+    };
+  }, [selected?.id, selected?.lat, selected?.lng, selected?.name, selected?.category, selected?.raw?.brand, selected?.raw?.operator, selected?.raw?.website, ready, lang.value]);
 
   // "My location" dot for the phone button (desktop uses MapLibre's control).
   useEffect(() => {
@@ -408,6 +442,7 @@ export default function MapPage() {
     {!places && !allPlaces.length && !coverage ? <div class="center-pad"><Spinner /></div> : visible.length ? (
     <div class="map-list">
       {visible.map(({ p, d }) => <div key={p.id}>{p.searchMatch === 'fuzzy' && <small class="muted">{t('map.similarResult')}</small>}<PlaceCard place={p} distance={d} compact showDescription active={p.id === selectedId} href={placePageHref(p)} onClick={(e) => { e.preventDefault(); select(p); }} />{filters.experienceTag && community?.counts?.[p.id] > 0 && <small class="muted">{t('map.communityVotes', { n: community.counts[p.id] })}</small>}</div>)}
+      {(visible.length < viewResults.length || (discovering && searchTruncated && searchLimit < 5000)) && <Button variant="secondary" loading={searching} onClick={() => { setListLimit(n => n + 60); if (listLimit + 60 >= viewResults.length && discovering && searchTruncated) setSearchLimit(n => Math.min(5000, n + 120)); }}>{t('common.loadMore')}</Button>}
     </div>
   ) : !searching && !addressResults.length ? <Empty compact icon="map-trifold" title={t('map.nothingHere')} text={t('map.nothingHereText')} /> : null}
     {coverage && <p class="map-data-note"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · {coverage.sourceDate?.slice(0, 10)}{coverage.mode === 'overview' ? ` · ${t('map.overviewPlaces')}` : ''}</p>}
@@ -429,7 +464,7 @@ export default function MapPage() {
           </div>
           <SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('map.searchPlaces')} />
           {chips}
-          <p class="muted small map-count">{tn('map.placesInView', visible.length)}</p>
+          <p class="muted small map-count">{tn('map.placesInView', viewResults.length)}{visible.length < viewResults.length ? ` · სიაში ${visible.length}` : ''}</p>
           {(placesTruncated || coverage?.truncated || searchTruncated || community?.truncated) && <p class="muted small">{t('map.partialPlaces')}</p>}
           {list}
         </aside>
@@ -471,7 +506,7 @@ export default function MapPage() {
           <div class={`map-sheet${sheet ? ' is-open' : ''}`}>
             <button type="button" class="map-sheet-handle" onClick={() => setSheet((s) => !s)} aria-expanded={sheet}>
               <span class="map-sheet-grip" />
-              <span class="bold">{tn('map.placesInView', visible.length)}</span>
+              <span class="bold">{tn('map.placesInView', viewResults.length)}</span>
               <Icon name={sheet ? 'caret-down' : 'caret-up'} size={18} />
             </button>
             {sheet && <div class="map-sheet-body">{list}</div>}

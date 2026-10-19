@@ -1,4 +1,7 @@
 import { authors, licenses, images, places } from './curatedPlaceMedia.generated.js';
+import { getPlaceEditorial } from './curatedPlaceEditorial.js';
+import { getInstitutionPhotos } from './curatedInstitutionMedia.generated.js';
+import { isExcludedCuratedPhoto } from './curatedPlaceMediaExclusions.js';
 
 // Exact OSM matches only. The generated entries use explicit Commons/Wikidata
 // source links; full linkage, source and SHA metadata is /place-media/credits.json.
@@ -17,10 +20,15 @@ const MEDIA = {
 };
 
 export function applyCuratedPlaceMedia(place) {
-  const generated = places[place?.id];
-  const manual = MEDIA[place?.id];
-  if (!generated && !manual) return place;
-  const media = [...(manual || []), ...(generated || []).map(([imageIndex, caption]) => {
+  const sourceId = place?.raw?.linkedOsmId || place?.id;
+  const editorial = getPlaceEditorial(sourceId);
+  if (editorial) place = { ...place, description: place.description || editorial.description,
+    raw: { ...place.raw, editorial, website: place.raw?.website || editorial.website } };
+  const generated = places[sourceId];
+  const manual = MEDIA[sourceId];
+  const institution = getInstitutionPhotos(sourceId);
+  if (!generated && !manual && !institution.length) return place;
+  const media = [...institution, ...(manual || []), ...(generated || []).filter(([imageIndex]) => !isExcludedCuratedPhoto(sourceId, images[imageIndex][1])).map(([imageIndex, caption]) => {
     const [hash, sourceTitle, authorIndex, licenseIndex, dateTaken] = images[imageIndex];
     const [author, authorUrl] = authors[authorIndex];
     const [license, licenseUrl] = licenses[licenseIndex];

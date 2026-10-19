@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "include": ["/post/*", "/u/*", "/place/*", "/business/*", "/events/*", "/groups/*", "/marketplace/*", "/watch/*", "/reels/*", "/video/channel/*"],
+  "include": ["/api/public-offers", "/post/*", "/u/*", "/place/*", "/business/*", "/events/*", "/groups/*", "/marketplace/*", "/watch/*", "/reels/*", "/video/channel/*"],
   "exclude": []
 }

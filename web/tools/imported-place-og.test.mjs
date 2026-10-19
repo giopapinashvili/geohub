@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const worker = await fs.readFile(new URL('../worker/og-worker.js', import.meta.url), 'utf8');
+const exclusions = await fs.readFile(new URL('../src/lib/curatedPlaceMediaExclusions.js', import.meta.url), 'utf8');
+const worker = (await fs.readFile(new URL('../worker/og-worker.js', import.meta.url), 'utf8')).replace('/*__CURATED_EXCLUSIONS__*/', exclusions.replace(/^export /gm, ''));
 const { loadImportedPlaceMeta } = await import(`data:text/javascript;base64,${Buffer.from(worker).toString('base64')}`);
 const root = path.resolve('web/public');
 
@@ -27,7 +28,7 @@ test('shared imported places use their real directory identity and exact license
   assert.equal(meta.width, 1280);
   assert.equal(meta.height, 960);
   assert.equal(env.paths.filter(value => value.startsWith('/place-data/places-')).length, 1);
-  assert.ok(env.paths.every(value => value.startsWith('/place-data/') || value === '/place-media/credits.json'));
+  assert.ok(env.paths.every(value => value.startsWith('/place-data/') || ['/place-media/credits.json', '/place-media/institutions-credits.json'].includes(value)));
 });
 
 test('unknown imported IDs and malformed manifest asset paths never become invented cards or fetches', async () => {

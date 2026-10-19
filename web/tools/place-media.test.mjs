@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { applyCuratedPlaceMedia } from '../src/lib/curatedPlaceMedia.js';
+import { isExcludedCuratedPhoto } from '../src/lib/curatedPlaceMediaExclusions.js';
 import { jpegDimensions } from './place-media-utils.mjs';
 
 const publicRoot = path.resolve('web/public');
@@ -37,8 +38,8 @@ test('all curated image files retain verifiable author, date, source, license an
       }
     }
     const place = applyCuratedPlaceMedia({ id: photo.placeId, photos: [], raw: {} });
-    assert.ok(place.photos.includes(photo.url));
-    assert.ok(place.raw.photoCredits.some((credit) => credit.url === photo.url));
+    assert.equal(place.photos.includes(photo.url), !isExcludedCuratedPhoto(photo.placeId, photo.sourceTitle));
+    assert.equal(place.raw.photoCredits.some((credit) => credit.url === photo.url), !isExcludedCuratedPhoto(photo.placeId, photo.sourceTitle));
   }
 });
 

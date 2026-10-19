@@ -18,6 +18,7 @@ the website's dependencies do not change:
 npm.cmd install --prefix .codex/artifacts/place-import/runtime --no-save --no-package-lock osm-pbf-parser@2.3.0
 node web/tools/import-tbilisi-extract.mjs --download
 node web/tools/import-tbilisi-osm.mjs
+node web/tools/generate-native-place-source-records.mjs
 node --test web/tools/coordinates.test.mjs web/tools/import-tbilisi.test.mjs
 ```
 
@@ -60,6 +61,20 @@ No photos, ratings, prices, reviews, menus, dietary claims or preparation times
 are fabricated. Diet and accessibility filters use explicit OSM tags only.
 Lifecycle tags (`disused`, `abandoned`, vacant shops, etc.) suppress inactive POIs.
 Source timestamps, category mappings and deduplication deserve review on updates.
+
+The broader extraction policy also retains office/retail/commercial structures
+and educational areas. These are not verified operating businesses; building-only
+records carry `raw.recordKind`. Structures with historical/disused uses can remain
+as locations with `raw.operatingStatus: source-reports-inactive`, while their old
+opening hours are stored separately and not treated as current.
+
+`verified-place-supplement.mjs` adds reviewed `directory_*` records from official
+institutional sources and corrects six multi-campus relation centers using explicit
+building/site anchors. Never invent coordinates for a source with only an address.
+The record keeps the official facts URL separate from its coordinate evidence;
+publisher map centers, shared indoor building positions and address-matched building
+centers stay approximate. The manifest lists these official sources and counts
+separately from OSM. See `PLACE-COVERAGE-AUDIT.md` for measured coverage and known gaps.
 
 ## Global and catalog search
 

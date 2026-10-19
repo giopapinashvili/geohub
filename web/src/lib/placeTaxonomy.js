@@ -40,6 +40,7 @@ const ROWS = {
     ['alcohol','ალკოჰოლის მაღაზია','wine'], ['tobacco','თამბაქოს მაღაზია','storefront'], ['second-hand','მეორადი ნივთები','shopping-bag'],
     ['wholesale','საბითუმო მაღაზია','package'], ['outdoor-shop','ლაშქრობის აღჭურვილობა','tent'], ['fabric','ქსოვილები','t-shirt'],
     ['musical-instrument','მუსიკალური ინსტრუმენტები','music-notes'], ['garden-centre','ბაღის მაღაზია','tree'],
+    ['retail-building','სავაჭრო შენობა','buildings'],
   ],
   health: [
     ['health','ჯანმრთელობის მომსახურება','first-aid'],
@@ -73,6 +74,7 @@ const ROWS = {
     ['language-school','ენების სკოლა','translate'], ['music-school','მუსიკისა და სიმღერის სწავლება','music-notes'],
     ['dance-school','ცეკვის სკოლა','music-notes'], ['art-school','ხელოვნების სკოლა','palette'], ['driving-school','ავტოსკოლა','car'],
     ['coding-school','პროგრამირების სკოლა','laptop'], ['training','კურსები და ტრენინგი','book-open'],
+    ['education-campus','საგანმანათლებლო სივრცე','graduation-cap'],
   ],
   entertainment: [
     ['gaming','გეიმინგ ცენტრი','game-controller'], ['internet-cafe','ინტერნეტკაფე','laptop'], ['vr','ვირტუალური რეალობა','game-controller'], ['cinema','კინოთეატრი','film-strip'],
@@ -102,6 +104,8 @@ const ROWS = {
   stay: [
     ['hotel','სასტუმრო','bed'], ['hostel','ჰოსტელი','bed'], ['guest-house','საოჯახო სასტუმრო','house-line'],
     ['apartment','აპარტამენტი','buildings'], ['motel','მოტელი','bed'],
+    ['dormitory','საერთო საცხოვრებელი','buildings'],
+    ['lodging-building','სასტუმროს შენობა','buildings'],
   ],
   services: [
     ['office','ოფისი','briefcase'], ['real-estate','უძრავი ქონების სააგენტო','house-line'], ['telecom','ინტერნეტისა და კავშირის ოფისი','phone'],
@@ -112,6 +116,7 @@ const ROWS = {
     ['phone-repair','ტელეფონის შეკეთება','device-mobile'], ['repair','შეკეთების სერვისი','wrench'], ['tailor','ატელიე','t-shirt'],
     ['locksmith','გასაღებები და საკეტები','key'], ['printing','ბეჭდვა და ასლები','copy'], ['photography','ფოტოსტუდია','camera'],
     ['craft','სახელოსნო','wrench'], ['cleaning','დასუფთავება','sparkle'], ['logistics','ლოჯისტიკა','truck'],
+    ['office-building','საოფისე შენობა','buildings'], ['commercial-building','კომერციული შენობა','buildings'],
   ],
   public: [
     ['post-office','ფოსტა','envelope'], ['police','პოლიცია','shield-check'], ['fire-station','სახანძრო','fire'],
@@ -181,6 +186,22 @@ const LEISURE = { park:'park', garden:'garden', nature_reserve:'nature-reserve',
 const TOURISM = { hotel:'hotel', hostel:'hostel', guest_house:'guest-house', apartment:'apartment', motel:'motel', camp_site:'camping', caravan_site:'camping', museum:'museum', gallery:'gallery', attraction:'attraction', artwork:'artwork', viewpoint:'viewpoint', zoo:'zoo', theme_park:'theme-park', picnic_site:'picnic-site', information:'information' };
 const OFFICES = { estate_agent:'real-estate', telecommunication:'telecom', lawyer:'lawyer', accountant:'accountant', insurance:'insurance', employment_agency:'employment-agency', it:'it-services', coworking:'coworking', government:'government', diplomatic:'embassy', educational_institution:'training', logistics:'logistics', financial:'financial-services', financial_advisor:'financial-services' };
 
+// A building-use tag describes the mapped structure, not a verified operating
+// merchant. Keep generic commercial structures separate from actual shops.
+export const OSM_BUILDING_CATEGORIES = {
+  warehouse:'warehouse', industrial:'industrial', works:'industrial', school:'school', hospital:'hospital',
+  university:'university', college:'college', kindergarten:'kindergarten', library:'library',
+  fire_station:'fire-station', government:'government', public:'public-service', civic:'public-service',
+  train_station:'rail-station', office:'office-building', commercial:'commercial-building',
+  retail:'retail-building', dormitory:'dormitory', hotel:'lodging-building', church:'church',
+  cinema:'cinema', stadium:'stadium', sports_centre:'sports',
+};
+const EDUCATION = { university:'university', school:'school', college:'college', kindergarten:'kindergarten',
+  language_school:'language-school', language:'language-school', music_school:'music-school', music:'music-school',
+  driving_school:'driving-school', driving:'driving-school', art_school:'art-school', art:'art-school',
+  dance:'dance-school', tutoring:'tutoring', training:'training', course:'training', centre:'training',
+};
+
 export function categoryFromOsm(tags = {}) {
   if (tags.aeroway === 'aerodrome') return 'airport';
   if (tags.aerialway === 'station') return 'cable-car';
@@ -200,13 +221,18 @@ export function categoryFromOsm(tags = {}) {
   if (tags.office) return OFFICES[tags.office] || 'office';
   if (tags.craft) return ({car_repair:'car-repair',electrician:'repair',electronics_repair:'repair',shoemaker:'repair',tailor:'tailor',locksmith:'locksmith',photographer:'photography',printer:'printing',cleaning:'cleaning'})[tags.craft] || 'craft';
   if (tags.amenity) return 'public-service';
+  if (tags.education && !['no','yes','none'].includes(tags.education)) {
+    if (tags['disused:amenity'] || tags['abandoned:amenity'] || tags['was:amenity']) return 'education-campus';
+    return EDUCATION[tags.education] || 'education-campus';
+  }
+  if (tags.landuse === 'education') return 'education-campus';
   if (tags.railway === 'station' || tags.railway === 'halt') return 'rail-station';
   if (tags.public_transport) return 'transit-stop';
   if (tags.emergency) return 'emergency-point';
   if (tags.historic) return ({monument:'monument',memorial:'memorial'})[tags.historic] || 'history';
   if (tags.natural) return ({spring:'spring',peak:'peak',beach:'beach'})[tags.natural] || 'nature';
   if (tags.man_made === 'water_tap' || tags.man_made === 'water_well') return tags.drinking_water === 'yes' ? 'drinking-water' : 'water-point';
-  if (tags.building) return ({warehouse:'warehouse',industrial:'industrial',school:'school',hospital:'hospital',university:'university',kindergarten:'kindergarten',fire_station:'fire-station',government:'government',public:'public-service',train_station:'rail-station'})[tags.building] || null;
+  if (tags.building) return OSM_BUILDING_CATEGORIES[tags.building] || null;
   return null;
 }
 

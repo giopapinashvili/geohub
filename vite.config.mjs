@@ -49,7 +49,9 @@ function pagesWorker() {
     name: 'geohub-pages-worker',
     apply: 'build',
     writeBundle(opts) {
-      const src = readFileSync(join(root, 'worker/og-worker.js'), 'utf8');
+      const helpers = readFileSync(join(root, 'worker/public-offers.js'), 'utf8').replace(/^export /gm, '');
+      const exclusions = readFileSync(join(root, 'src/lib/curatedPlaceMediaExclusions.js'), 'utf8').replace(/^export /gm, '');
+      const src = readFileSync(join(root, 'worker/og-worker.js'), 'utf8').replace('/*__PUBLIC_OFFERS__*/', helpers).replace('/*__CURATED_EXCLUSIONS__*/', exclusions);
       const headers = siteHeaders(readFileSync(join(root, 'public/_headers'), 'utf8'));
       if (!headers['Content-Security-Policy']) throw new Error('_headers: no site-wide Content-Security-Policy found');
       const out = src.replace("'__SECURITY_HEADERS__'", JSON.stringify(headers));

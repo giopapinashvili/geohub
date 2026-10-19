@@ -5,6 +5,8 @@ import { Empty, Spinner } from '../../ui/misc.jsx';
 import { t } from '../../lib/i18n.js';
 import { OfficialPlaceMenus } from './OfficialPlaceMenus.jsx';
 import { officialMenuSources } from '../../lib/officialMenuSources.js';
+import { officialMerchantForPlace } from '../../lib/officialMerchants.js';
+import { OfficialMerchantCatalog } from './OfficialMerchantCatalog.jsx';
 
 /** Only explicit place/business relationships may expose a merchant catalog. */
 export function PlaceCommerce({ place }) {
@@ -17,7 +19,8 @@ export function PlaceCommerce({ place }) {
   }, [place.id, place.businessId, place.raw?.businessId]);
   const menu = /^(food|restaurant|cafe|bar|pub|bakery|fast[-_]food|food[-_]court|ice[-_]cream)$/.test(place.category);
   const official = officialMenuSources(place);
-  return <div class="place-commerce-content"><OfficialPlaceMenus place={place}/>{biz === undefined ? <div class="center-pad"><Spinner /></div>
+  const merchant = officialMerchantForPlace(place);
+  return <div class="place-commerce-content"><OfficialPlaceMenus place={place}/>{merchant && <OfficialMerchantCatalog merchant={merchant} compact/>}{biz === undefined ? <div class="center-pad"><Spinner /></div>
     : biz ? <BusinessCatalog biz={biz} menu={menu} branchId={place.branchId || place.raw?.branchId || ''} itemId={place.itemId || ''} />
-      : error || !official ? <Empty compact icon={menu ? 'fork-knife' : 'shopping-bag'} title={t(error ? 'commerce.loadError' : 'commerce.empty')} text={!error && t('commerce.emptyHint')} /> : null}</div>;
+      : error || (!official && !merchant) ? <Empty compact icon={menu ? 'fork-knife' : 'shopping-bag'} title={t(error ? 'commerce.loadError' : 'commerce.empty')} text={!error && t('commerce.emptyHint')} /> : null}</div>;
 }

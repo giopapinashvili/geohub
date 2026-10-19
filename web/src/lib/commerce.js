@@ -146,6 +146,10 @@ export function normalizeBusinessBranch(input) {
 /** Display state must be recomputed, including for an already-open page. */
 export function commerceOfferState(offer, now = Date.now()) {
   if (offer.status !== 'published') return offer.status || 'draft';
+  if (offer.sourceKind === 'official-website') {
+    if (offer.isDemo || !Number.isFinite(offer.observedAtMs) || !Number.isFinite(offer.freshnessUntilMs) || offer.freshnessUntilMs <= offer.observedAtMs) return 'invalid';
+    return now >= offer.freshnessUntilMs ? 'expired' : now < offer.observedAtMs ? 'scheduled' : 'active';
+  }
   if (!Number.isFinite(offer.startsAtMs) || !Number.isFinite(offer.endsAtMs) || offer.endsAtMs <= offer.startsAtMs) return 'invalid';
   if (now < offer.startsAtMs) return 'scheduled';
   if (now >= offer.endsAtMs) return 'expired';

@@ -5,6 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 import { Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { isRelevantOsmElement } from './place-extraction-policy.mjs';
 const require = createRequire(import.meta.url);
 const option=name=>{const index=process.argv.indexOf(name);return index<0 ? '' : process.argv[index+1];};
 const input=resolve(option('--input') || '.codex/artifacts/place-import/georgia.osm.pbf');
@@ -26,7 +27,7 @@ const bbox = [44.60, 41.58, 45.05, 41.91];
 const nodes = new Map(), ways = new Map(), elements = [], relations = [];
 let seenNodes = 0, seenWays = 0;
 const inside = (lat, lon) => lat >= bbox[1] && lat <= bbox[3] && lon >= bbox[0] && lon <= bbox[2];
-const relevant = (t) => ['amenity', 'shop', 'tourism', 'leisure', 'office', 'craft', 'healthcare', 'public_transport', 'emergency', 'historic', 'addr:housenumber'].some(k => t[k]) || t.aeroway==='aerodrome' || t.aerialway==='station' || /^(station|subway_entrance|halt)$/.test(t.railway || '') || /^(bus_stop|traffic_signals|services|rest_area)$/.test(t.highway || '') || (t.highway && (t.name || t['name:ka'] || t['name:en'])) || /^(warehouse|industrial|public|government|school|hospital|university|kindergarten|train_station|fire_station)$/.test(t.building || '') || /^(water_tap|water_well)$/.test(t.man_made || '') || /^(spring|peak|beach)$/.test(t.natural || '');
+const relevant = isRelevantOsmElement;
 const boundsOf = (points) => [Math.min(...points.map(p=>p[1])),Math.min(...points.map(p=>p[0])),Math.max(...points.map(p=>p[1])),Math.max(...points.map(p=>p[0]))];
 const clean = (item) => ({type:item.type,id:item.id,tags:item.tags, ...(item.info?.timestamp ? {timestamp:new Date(item.info.timestamp).toISOString()} : {})});
 await pipeline(createReadStream(input), parse(), new Writable({ objectMode:true, write(items,enc,next) {
