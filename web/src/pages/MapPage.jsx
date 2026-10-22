@@ -13,6 +13,7 @@ import { loadMapLibre, styleUrl, localizeLabels, addPlaceLayers, setPlaceData, a
 import { applyMapAppearance } from '../lib/mapAppearance.js';
 import { updateBuildingPerspective, TBILISI_MAP_DATA, getTbilisiMapDataStatus } from '../lib/tbilisiBasemap.js';
 import { isMapCoordinate, readCoordinates, formatCoordinates } from '../lib/coordinates.js';
+import { isPlaceLocationHeld } from '../lib/reviewedPlaceStatus.js';
 import { theme } from '../lib/theme.js';
 import { ICONS } from '../ui/icons.js';
 import { getPlace, listMapPlaces } from '../data/places.js';
@@ -335,7 +336,7 @@ export default function MapPage() {
     selectedRef.current = selectedId;
     if (!selectedId || !selected) return;
     map.setFeatureState({ source: 'gh-places', id: selectedId }, { selected: true });
-    if (isMapCoordinate(selected)) {
+    if (isMapCoordinate(selected) && !isPlaceLocationHeld(selected)) {
       const inView = map.getBounds().contains([selected.lng, selected.lat]);
       if (!inView || map.getZoom() < 11) map.flyTo({ center: [selected.lng, selected.lat], zoom: Math.max(map.getZoom(), 13), speed: 1.4 });
     }
@@ -345,7 +346,7 @@ export default function MapPage() {
   useEffect(() => {
     const map = mapRef.current;
     const lib = libRef.current;
-    if (!ready || !map || !lib || !isMapCoordinate(selected)) return undefined;
+    if (!ready || !map || !lib || !isMapCoordinate(selected) || isPlaceLocationHeld(selected)) return undefined;
     const element = document.createElement('button');
     element.type = 'button';
     element.className = 'map-selected-pin';
@@ -408,7 +409,7 @@ export default function MapPage() {
 
   const select = (p) => {
     setQuery({ place: p.id, details: null, lat: null, lng: null, label: null }); setSheet(false);
-    if (isMapCoordinate(p)) mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: Math.max(16, mapRef.current.getZoom()), speed: 1.4 });
+    if (isMapCoordinate(p) && !isPlaceLocationHeld(p)) mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: Math.max(16, mapRef.current.getZoom()), speed: 1.4 });
   };
   const selectAddress = (p) => { setQuery({ place: null, details: null, lat: p.lat, lng: p.lng, label: p.name || p.address }); setSheet(false); };
   const clearSelection = () => setQuery({ place: null, details: null });

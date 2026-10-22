@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { Icon } from '../../ui/Icon.jsx';
 import { t } from '../../lib/i18n.js';
 import { formatCoordinates } from '../../lib/coordinates.js';
+import { isPlaceLocationHeld } from '../../lib/reviewedPlaceStatus.js';
 import '../../styles/place-coordinates.css';
 
 /** Copy the exact displayed pair. If clipboard permission fails, select it. */
 export function PlaceCoordinates({ place, compact = false, showMissing = false }) {
-  const text = formatCoordinates(place);
+  const text = isPlaceLocationHeld(place) ? '' : formatCoordinates(place);
   const valueRef = useRef(null);
   const timerRef = useRef(null);
   const [feedback, setFeedback] = useState('');

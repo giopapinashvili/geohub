@@ -9,7 +9,7 @@ const http = value => { try { const url = new URL(value); return ['https:', 'htt
 const coordinates = value => value && readCoordinates({lat:value.lat ?? value.center?.lat,lng:value.lng ?? value.lon ?? value.center?.lon});
 
 export function directoryEditorial(definition) {
-  const checkedAt = definition.sourceCheckedAt || definition.sourceDate || '2026-10-19';
+  const checkedAt = definition.sourceCheckedAt || definition.sourceDate || null;
   const sources = [{label:definition.sourceName || 'ოფიციალური ცნობარი',url:definition.sourceUrl}, ...(definition.editorial?.sources || [])];
   const explicit = definition.posts || definition.editorial?.posts;
   const posts = explicit || [
@@ -42,7 +42,7 @@ export function createDirectoryRecords(elements, definitions, additionalPlaces =
       aliases:unique(definition.aliases || []), ...(definition.description ? {description:definition.description} : {}),
       ...(definition.brand ? {brand:definition.brand} : {}), ...(definition.brandWikidata ? {brandWikidata:definition.brandWikidata} : {}),
       ...((definition.facets || definition.indoor) ? {facets:{...definition.facets,...(definition.indoor ? {indoor:true} : {})}} : {}),
-      raw:{source:definition.sourceKind==='merchant-directory' ? 'merchant-directory' : 'official-directory',sourceUrl:definition.sourceUrl,sourceCheckedAt:definition.sourceCheckedAt || definition.sourceDate || '2026-10-19',named:true,
+      raw:{source:definition.sourceKind==='merchant-directory' ? 'merchant-directory' : 'official-directory',sourceUrl:definition.sourceUrl,sourceCheckedAt:definition.sourceCheckedAt || definition.sourceDate || null,named:true,
         sourceCertainty:definition.sourceCertainty,coordinateAccuracy:definition.coordinateAccuracy,
         ...(definition.coordinateNote ? {coordinateNote:definition.coordinateNote} : {}),coordinateSourceUrl:coordinateUrl,
         ...(definition.coordinateSourceId ? {coordinateSourceId:definition.coordinateSourceId} : {}),

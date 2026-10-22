@@ -3,6 +3,7 @@ import { normalizeCatalogQuery } from '../lib/catalogSearchTerms.js';
 import { matchesPlaceFilters } from '../lib/discoveryFilters.js';
 import { matchesPlaceCategory } from '../lib/placeTaxonomy.js';
 import { getImportedPlace } from './importedPlaces.js';
+import { isPlaceLocationHeld } from '../lib/reviewedPlaceStatus.js';
 import { readSourceCatalogFile, normalizeSourceCatalog, refreshSourceCatalogIndex, isOutdatedSourceCatalogError } from './sourceCatalogs.js';
 
 const pause = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -117,7 +118,7 @@ export function createDirectoryCatalogSearch({readFile = readSourceCatalogFile, 
         const batch=await Promise.all(candidates.slice(offset,offset+4).map(async({venueId,itemId,venue,match})=>{
           try{
             const place=await getPlace(venue.placeId);
-            if(!place || !matchesPlaceFilters(place,{...filters,diet:''},category))return null;
+            if(!place || isPlaceLocationHeld(place) || !matchesPlaceFilters(place,{...filters,diet:''},category))return null;
             const catalog=await getCatalog(venueId,venue),item=catalog.items.find(entry=>entry.id===itemId);
             if(!item || item.sourceAvailability==='unavailable' || filters.diet && !item.dietaryTags?.includes(filters.diet))return null;
             const pageHref=`/place/${encodeURIComponent(place.id)}?${new URLSearchParams({tab:'catalog',item:item.id,venue:venueId})}`;

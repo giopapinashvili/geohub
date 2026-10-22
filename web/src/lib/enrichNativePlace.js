@@ -1,12 +1,13 @@
 import { NATIVE_PLACE_SOURCE_LINKS } from './nativePlaceSourceLinks.js';
 import { NATIVE_PLACE_SOURCE_RECORDS } from './nativePlaceSourceRecords.generated.js';
 import { applyCuratedPlaceMedia } from './curatedPlaceMedia.js';
+import { applyReviewedPlaceStatus } from './reviewedPlaceStatus.js';
 
 /** Retain page/owner/activity; only explicitly reviewed legacy station points are corrected. */
 export function enrichNativePlace(place) {
   const linkedOsmId = NATIVE_PLACE_SOURCE_LINKS[place?.id];
   const source = NATIVE_PLACE_SOURCE_RECORDS[linkedOsmId];
-  if (!source) return place;
+  if (!source) return applyReviewedPlaceStatus(place);
   const raw = { ...source.raw, ...place.raw, source: place.raw?.source || 'geohub', linkedOsmId,
     linkedSourceUrl: source.raw.sourceUrl, linkedSourceDate: source.raw.sourceDate };
   const mergeBy = (key, first = [], second = []) => [...new Map([...first, ...second].map(value => [value[key], value])).values()];
@@ -24,7 +25,7 @@ export function enrichNativePlace(place) {
     raw.originalNativeName ||= place.name;
     for (const key of ['mapHidden','mapPlaceId','mapCoordinates','metroEntranceIds','coordinateNote','coordinateAccuracy','coordinateSourceUrl']) raw[key] = source.raw[key];
   }
-  return applyCuratedPlaceMedia({ ...place,
+  return applyReviewedPlaceStatus(applyCuratedPlaceMedia({ ...place,
     ...(metro ? {name:source.name,category:'metro',lat:source.lat,lng:source.lng} : {}),
     image: place.image || source.image || '',
     photos: [...new Set([...(place.photos || []), ...(source.photos || [])])],
@@ -32,5 +33,5 @@ export function enrichNativePlace(place) {
     address: place.address || source.address || '', city: place.city || source.city || '',
     aliases: [...new Set([...(place.aliases || []), ...(source.aliases || []), ...(metro ? [raw.originalNativeName] : [])])],
     facets: { ...source.facets, ...place.facets }, raw,
-  });
+  }));
 }

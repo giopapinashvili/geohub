@@ -7,6 +7,7 @@ import { Empty, Img, Spinner } from '../../ui/misc.jsx';
 import { t, tn } from '../../lib/i18n.js';
 import { cityLabel } from '../../lib/geo.js';
 import { readDestinationCoordinates } from '../../lib/coordinates.js';
+import { isPlaceLocationHeld } from '../../lib/reviewedPlaceStatus.js';
 import { phoneContacts } from '../../lib/phoneContacts.js';
 import { timeAgo } from '../../lib/format.js';
 import { uid, isAdmin } from '../../lib/auth.js';
@@ -211,7 +212,7 @@ export function MapPlaceDetails({ place, onClose, onCheckin }) {
           <p class="map-detail-summary">{place.description || t('place.noDescription')}</p>
           <MatchedCatalogItem place={place} />
           <div class="map-detail-actions">
-            <Button variant="primary" size="sm" icon="map-pin" onClick={onCheckin}>{t('checkin.short')}</Button>
+            {!isPlaceLocationHeld(place) && <Button variant="primary" size="sm" icon="map-pin" onClick={onCheckin}>{t('checkin.short')}</Button>}
             <Button variant={saveState.saved ? 'soft' : 'secondary'} size="sm" icon={saveState.saved ? 'bookmark-simple-fill' : 'bookmark-simple'} loading={saveState.busy || saveState.loading} onClick={toggleSave}>{t(saveState.saved ? 'common.saved' : 'post.save')}</Button>
             {coords && <IconButton icon="navigation-arrow" label={t('place.directions')} variant="soft" size={40} href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer" />}
           </div>

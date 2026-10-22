@@ -17,6 +17,7 @@ import { requireLogin } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { cityLabel } from '../lib/geo.js';
 import { readDestinationCoordinates, isMapCoordinate } from '../lib/coordinates.js';
+import { isPlaceLocationHeld } from '../lib/reviewedPlaceStatus.js';
 import {
   listenPlace, listenPlaceReviews, addPlaceReview, deletePlaceReview, reviewStats, placeCheckins, placePosts, deletePlace,
 } from '../data/places.js';
@@ -192,10 +193,10 @@ export default function Place({ params }) {
           </p>
           <PlaceCoordinates key={place.id} place={place} showMissing />
           <div class="place-actions">
-            <Button variant="primary" icon="map-pin" onClick={() => { if (requireLogin('checkin')) setCheckin(true); }}>{t('checkin.short')}</Button>
+            {!isPlaceLocationHeld(place) && <Button variant="primary" icon="map-pin" onClick={() => { if (requireLogin('checkin')) setCheckin(true); }}>{t('checkin.short')}</Button>}
             <Button variant={saved ? 'soft' : 'secondary'} icon={saved ? 'bookmark-simple-fill' : 'bookmark-simple'} loading={savedLoading || savedBusy} onClick={toggleSave}>{t(saved ? 'common.saved' : 'post.save')}</Button>
             {coords && <Button variant="secondary" icon="navigation-arrow" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer">{t('place.directions')}</Button>}
-            {isMapCoordinate(place) && <Button variant="secondary" icon="map-trifold" href={`/map?place=${place.id}`}>{t('place.onMap')}</Button>}
+            {isMapCoordinate(place) && !isPlaceLocationHeld(place) && <Button variant="secondary" icon="map-trifold" href={`/map?place=${place.id}`}>{t('place.onMap')}</Button>}
             <Menu label={t('common.more')} width={240} items={[
               { icon: 'share-fat', label: t('common.copyLink'), onClick: () => copyLink(`${location.origin}/place/${place.id}`) },
               { icon: 'crosshair', label: t('place.editLocation'), hidden: !editable, onClick: () => setEditLocation(true) },

@@ -9,6 +9,7 @@ import { PlaceCoordinates } from './PlaceCoordinates.jsx';
 import { placePageHref } from '../../lib/placeLinks.js';
 import { MatchedCatalogItem } from './MatchedCatalogItem.jsx';
 import { PlaceBrand } from './PlaceBrand.jsx';
+import { isPlaceLocationHeld } from '../../lib/reviewedPlaceStatus.js';
 import '../../styles/map-preview.css';
 
 /** A selected map pin opens this preview; expanding it keeps the map mounted. */
@@ -53,7 +54,7 @@ export function MapPlacePreview({ place, onExpand, onClose, onCheckin }) {
 
       <div class="map-place-preview-actions">
         <Button variant="primary" size="sm" iconRight="caret-up" class="map-place-preview-expand" onClick={onExpand}>{t('map.details')}</Button>
-        {onCheckin && <IconButton icon="map-pin" label={t('checkin.short')} size={44} variant="soft" onClick={onCheckin} />}
+        {onCheckin && !isPlaceLocationHeld(place) && <IconButton icon="map-pin" label={t('checkin.short')} size={44} variant="soft" onClick={onCheckin} />}
         {coords && <IconButton icon="navigation-arrow" label={t('place.directions')} size={44} variant="soft" href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`} target="_blank" rel="noopener noreferrer" />}
         <a data-testid="map-place-page" class="map-place-preview-page" href={pageHref} target="_blank" rel="noopener noreferrer">{t('map.openPage')}<Icon name="arrow-up-right" size={14} /></a>
       </div>

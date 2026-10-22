@@ -2,6 +2,7 @@ import { readCoordinates } from '../lib/coordinates.js';
 import { canonicalCategory } from '../lib/placeTaxonomy.js';
 import { createPublicPlaceCache } from './publicPlaceCache.js';
 import { applyCuratedPlaceMedia } from '../lib/curatedPlaceMedia.js';
+import { applyReviewedPlaceStatus, isPlaceLocationHeld } from '../lib/reviewedPlaceStatus.js';
 
 const downloads = createPublicPlaceCache();
 const IMPORT_ID = /^(?:osm_(?:node|way|relation)_\d+|directory_[a-z0-9_]+)$/;
@@ -19,6 +20,7 @@ export async function getImportedManifest() {
 }
 
 function hydrate(record, manifest) {
+  record = applyReviewedPlaceStatus(record);
   if (!isImportedPlaceId(record?.id) || !readCoordinates(record)) return null;
   return applyCuratedPlaceMedia({
     description:'',address:'',city:'',image:'',photos:[],rating:0,reviewCount:0,checkinCount:0,saveCount:0,
@@ -61,7 +63,7 @@ export async function loadImportedPlaces(bounds, { zoom=14 } = {}) {
     }
     loadedShards=selected.length;
   }
-  const places=records.filter(record=>!record.raw?.mapHidden && contains(box,record)).map(record=>hydrate(record,manifest)).filter(Boolean);
+  const places=records.map(record=>hydrate(record,manifest)).filter(record=>record && !record.raw?.mapHidden && contains(box,record));
   return {places,coverage:{source:'openstreetmap',sourceDate:manifest.source.sourceDate,datasetId:manifest.datasetId,totalPlaces:manifest.totalPlaces,
     loaded:places.length,loadedShards,mode:overview ? 'overview' : 'viewport',truncated,bounds:manifest.source.bbox,
     attribution:manifest.attribution,attributionUrl:manifest.attributionUrl,license:manifest.license}};
@@ -107,7 +109,7 @@ export async function loadImportedSearchIndex() {
         id:row[0],name:row[1],aliases:row[2],address:row[3],category:row[4],lat:row[5],lng:row[6],kind:row[7],shard:row[8],
         coordinateAccuracy:row[9] || undefined,
         facets:row[10] || {},
-      }));
+      })).map(applyReviewedPlaceStatus).filter(place=>!isPlaceLocationHeld(place));
     })();
     const pending=searchIndex;
     pending.catch(()=>{if(searchIndex===pending)searchIndex=null;});
@@ -117,8 +119,8 @@ export async function loadImportedSearchIndex() {
 
 /** Preserve existing IDs/activity. Name-only matches never merge anonymous POIs. */
 export function mergeImportedPlaces(existing=[], imported=[]) {
-  existing=existing.filter(place=>!place.raw?.mapHidden);
-  imported=imported.filter(place=>!place.raw?.mapHidden);
+  existing=existing.map(applyReviewedPlaceStatus).filter(place=>!place.raw?.mapHidden);
+  imported=imported.map(applyReviewedPlaceStatus).filter(place=>!place.raw?.mapHidden);
   const result=existing.slice();
   const byId=new Map(result.map((place,index)=>[place.id,index]));
   const sourceIds=new Set(existing.flatMap(place=>{

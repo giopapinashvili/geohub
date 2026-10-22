@@ -1,5 +1,6 @@
 import { readCoordinates } from './coordinates.js';
 import { canonicalCategory } from './placeTaxonomy.js';
+import { isPlaceLocationHeld } from './reviewedPlaceStatus.js';
 
 export function searchableCatalogItem(item) {
   return !!item && item.status === 'published' && item.isDemo === false && item.available !== false
@@ -34,6 +35,7 @@ export function catalogResult(item, business, branch, place) {
   if (!item.allBranches && (!branch || !item.branchIds?.includes(branch.id))) return null;
   const linkedId = branch ? branch.placeId : business.raw?.placeId;
   const linkedPlace = linkedId && place?.id === linkedId ? place : null;
+  if (isPlaceLocationHeld(linkedPlace) || isPlaceLocationHeld(linkedId)) return null;
   // Coordinates from headquarters cannot stand in for an unlocated branch.
   const coordinates = readCoordinates(branch || business.raw || business) || readCoordinates(linkedPlace);
   const params = new URLSearchParams({ tab: item.type === 'dish' ? 'menu' : 'catalog', item: item.id });

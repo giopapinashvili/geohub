@@ -12,6 +12,7 @@ import { VERIFIED_PLACE_SUPPLEMENT, VERIFIED_SITE_ANCHORS } from './verified-pla
 import { createDirectoryRecords, mergeDirectoryRecords } from './source-directory-policy.mjs';
 import { SOURCE_DIRECTORY_DEFINITIONS } from './source-directory-definitions.mjs';
 import { linkMetroEntrances } from './metro-entrances.mjs';
+import { applyReviewedPlaceStatus } from '../src/lib/reviewedPlaceStatus.js';
 
 const TAGS = /^(name(:ka|:en|:ru)?|alt_name(:ka|:en)?|short_name(:ka|:en)?|brand(:wikidata)?|operator|amenity|shop|tourism|leisure|office|craft|healthcare(:speciality)?|public_transport|railway|station|subway|bus|train|highway|building|education|landuse|historic|natural|man_made|emergency|addr:(street|street:ka|street:en|housenumber|city|postcode|place|unit)|contact:(phone|mobile|website|email)|phone|mobile|website|url|email|opening_hours|cuisine|diet:[\w_]+|wheelchair|outdoor_seating|indoor|internet_access|takeaway|delivery|reservation|access|fee|level|description(:ka|:en)?|wikidata|wikipedia|check_date|source|entrance|ref|network|vending|drinking_water|sport|payment:[\w_]+)$/;
 const text = (value, max = 300) => typeof value === 'string' ? value.replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) : '';
@@ -28,7 +29,7 @@ export function normalizeOsmPlace(element) {
   if (!category) return null;
   const coords = readCoordinates({ lat: element.lat ?? element.center?.lat, lng: element.lon ?? element.center?.lon });
   if (!coords) return null;
-  const tags = Object.fromEntries(Object.entries(original).filter(([key]) => TAGS.test(key)).map(([key, value]) => [key, text(value, key.startsWith('description') ? 1000 : 400)]));
+  const tags = Object.fromEntries(Object.entries(original).filter(([key]) => TAGS.test(key) || /^(survey:date|check_date(?::[\w:]+)?|source:date|note(?::[\w:]+)?|fixme|opening_date|end_date|(?:disused|abandoned|demolished|removed|was):[\w:]+)$/.test(key)).map(([key, value]) => [key, text(value, /^(description|note|fixme)/.test(key) ? 1000 : 400)]));
   const named = text(tags['name:ka'] || tags.name || tags['name:en'] || tags.brand || tags.operator);
   const street = text(tags['addr:street:ka'] || tags['addr:street'] || tags['addr:place']);
   const address = [street, text(tags['addr:housenumber'])].filter(Boolean).join(' ');
@@ -52,6 +53,7 @@ export function normalizeOsmPlace(element) {
     raw.buildingUse = tags.building;
   }
   if (element.timestamp) raw.sourceUpdatedAt = element.timestamp;
+  if (original.note) raw.sourceNote = text(original.note, 1000);
   const phone = text(tags['contact:phone'] || tags.phone || tags['contact:mobile'] || tags.mobile);
   const websiteValue = text(tags['contact:website'] || tags.website || tags.url).split(';')[0].trim();
   const website = /^www\.[^\s/]+\.[a-z]{2,}(\/|$)/i.test(websiteValue) ? `https://${websiteValue}` : websiteValue;
@@ -220,7 +222,7 @@ export async function buildDataset(input, output, definitions = SOURCE_DIRECTORY
   for (const record of directoryRecords) if (record.lng<source.bbox[0] || record.lat<source.bbox[1] || record.lng>source.bbox[2] || record.lat>source.bbox[3]) throw new Error(`Official directory point outside snapshot coverage: ${record.id}`);
   const directoryMerge=mergeDirectoryRecords(osmPlaces,directoryRecords,definitions);
   const supplementalPlaces=directoryMerge.additions;
-  const places=[...osmPlaces,...supplementalPlaces].sort((a,b)=>a.id.localeCompare(b.id));
+  const places=[...osmPlaces,...supplementalPlaces].map(applyReviewedPlaceStatus).sort((a,b)=>a.id.localeCompare(b.id));
   const metro=linkMetroEntrances(places,uniqueElements);
   const brands=assignBrands(places);
   const malls=assignMallTenants(places,uniqueElements);

@@ -2,6 +2,7 @@
 import { lang } from './i18n.js';
 import { ICONS } from '../ui/icons.js';
 import { isMapCoordinate, readCoordinates } from './coordinates.js';
+import { isPlaceLocationHeld } from './reviewedPlaceStatus.js';
 import { markerPriority } from './mapMarkerPolicy.js';
 import { markerBadgeId, preparePlaceImages } from './mapMarkerImages.js';
 
@@ -88,7 +89,7 @@ export function applyPlaceTheme(map, mode = 'light') {
 export function placesToGeoJSON(places, toneOf, iconOf = () => 'map-pin') {
   return {
     type: 'FeatureCollection',
-    features: places.filter(place => isMapCoordinate(place) && place.category !== 'metro' && !place.raw?.mapHidden).map((place) => {
+    features: places.filter(place => isMapCoordinate(place) && place.category !== 'metro' && !place.raw?.mapHidden && !isPlaceLocationHeld(place)).map((place) => {
       const { lat, lng } = readCoordinates(place);
       const tone = toneOf(place);
       const icon = markerIcon(iconOf(place));

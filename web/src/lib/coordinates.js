@@ -1,3 +1,5 @@
+import { isPlaceLocationHeld } from './reviewedPlaceStatus.js';
+
 /** WGS84 coordinates, always latitude first in forms and copied text. */
 function coordinateNumber(value) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -17,6 +19,7 @@ export function readCoordinates(value) {
 
 /** An explicitly linked metro entrance is the routing destination, not its underground platform. */
 export function readDestinationCoordinates(place) {
+  if (isPlaceLocationHeld(place)) return null;
   if (place?.category === 'metro' && place.raw?.mapHidden && place.raw?.mapPlaceId) {
     return readCoordinates(place.raw.mapCoordinates) || readCoordinates(place);
   }

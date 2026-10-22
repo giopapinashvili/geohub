@@ -7,7 +7,7 @@ import { importedPlaceEntries } from '../../lib/importedPlacePosts.js';
 import '../../styles/imported-place-info.css';
 
 function DirectoryHeader({ entry, photos = false }) {
-  return <header><span class="imported-source-post-icon"><Icon name={photos ? 'images' : 'map-trifold'} size={23}/></span><span><strong>GeoHub-ის ცნობარი</strong><small>{photos ? 'ფოტოამბავი · წყაროების მიხედვით' : `ადგილზე წასვლამდე${entry.isImported ? ' · OpenStreetMap' : ''}${entry.sourceDate ? ` · ${entry.sourceDate}` : ''}`}</small></span><span class="imported-source-badge">ცნობარი</span></header>;
+  return <header><span class="imported-source-post-icon"><Icon name={photos ? 'images' : 'map-trifold'} size={23}/></span><span><strong>GeoHub-ის ცნობარი</strong><small>{photos ? 'ფოტოამბავი · წყაროების მიხედვით' : `${entry.locationHeld ? 'მდებარეობა გადასამოწმებელია' : 'ინფორმაცია წყაროების მიხედვით'}${entry.isImported ? ' · OpenStreetMap' : ''}${entry.sourceDate ? ` · ${entry.sourceDateKind}: ${entry.sourceDate}` : ''}`}</small></span><span class="imported-source-badge">ცნობარი</span></header>;
 }
 function DirectoryPhotos({ entry }) {
   const [active, setActive] = useState(-1);
@@ -31,6 +31,7 @@ export function ImportedPlacePosts({ place, includePhotos = true }) {
   const entry = importedPlaceEntries(place);
   if (!entry) return null;
   return <section class="imported-directory-feed" aria-label="GeoHub-ის ცნობარი და ფოტოამბები">
+    {entry.reviewNotice && <p class="imported-source-disclosure" role="status">{entry.reviewNotice}</p>}
     {entry.editorialPosts.map((post, index) => <article key={index} class="card card-pad imported-source-post imported-editorial-post" data-place-id={entry.placeId}><DirectoryHeader entry={entry}/><h3>{post.title}</h3><p>{post.body}</p>{post.sourceUrl && <a class="imported-source-post-link" href={post.sourceUrl} target="_blank" rel="noopener noreferrer">ინფორმაციის წყარო<Icon name="arrow-up-right" size={15}/></a>}</article>)}
     {includePhotos && entry.photos.length > 0 && <DirectoryPhotos key={entry.placeId} entry={entry}/>}
     <article class="card card-pad imported-source-post imported-visitor-post" data-place-id={entry.placeId}>
@@ -40,9 +41,9 @@ export function ImportedPlacePosts({ place, includePhotos = true }) {
       <dl class="imported-source-fact-list">{entry.facts.map((fact,index) => <div key={`${fact.label}:${index}`}><dt><Icon name={fact.icon} size={18}/>{fact.label}</dt><dd>{fact.href ? <a href={fact.href} target={fact.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">{fact.value}</a> : fact.value}</dd></div>)}</dl>
       {entry.amenities.length > 0 && <ul class="imported-place-facets" aria-label="წყაროში მითითებული მახასიათებლები">{entry.amenities.map(label => <li key={label}>{label}</li>)}</ul>}
       <p class="imported-source-disclosure">GeoHub-ის ცნობარის ინფორმაცია წყაროს მონაცემებს ეყრდნობა. საათები და სხვა დეტალები ადგილზე შეიძლება შეცვლილი იყოს.</p>
-      <div class="imported-source-actions"><Button variant="soft" icon="map-trifold" href={entry.mapHref}>რუკაზე ნახვა</Button>{entry.sourceUrl && <a class="imported-source-post-link" href={entry.sourceUrl} target="_blank" rel="noopener noreferrer">წყაროს ჩანაწერი<Icon name="arrow-up-right" size={15}/></a>}</div>
-      {entry.isImported && <footer>{entry.sourceDate && <span>ნაკრების თარიღი: {entry.sourceDate}</span>}{entry.updatedDate && <span>ჩანაწერის ცვლილება წყაროში: {entry.updatedDate}</span>}<span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL</a></span></footer>}
+      <div class="imported-source-actions">{entry.mapHref && <Button variant="soft" icon="map-trifold" href={entry.mapHref}>რუკაზე ნახვა</Button>}{entry.sourceUrl && <a class="imported-source-post-link" href={entry.sourceUrl} target="_blank" rel="noopener noreferrer">წყაროს ჩანაწერი<Icon name="arrow-up-right" size={15}/></a>}</div>
+      {(entry.sourceDates.length > 0 || entry.isImported) && <footer>{entry.sourceDates.map(date => <span key={date.label}>{date.label}: {date.value}</span>)}{entry.isImported && <span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL</a></span>}</footer>}
     </article>
-    <article class="card card-pad imported-source-post imported-guide-post" data-place-id={entry.placeId}><DirectoryHeader entry={entry}/><h3>{entry.guide.title}</h3><ul class="imported-guide-list">{entry.guide.points.map(point => <li key={point}>{point}</li>)}</ul><p class="imported-source-disclosure">{entry.guide.disclosure}</p></article>
+    {entry.guide && <article class="card card-pad imported-source-post imported-guide-post" data-place-id={entry.placeId}><DirectoryHeader entry={entry}/><h3>{entry.guide.title}</h3><ul class="imported-guide-list">{entry.guide.points.map(point => <li key={point}>{point}</li>)}</ul><p class="imported-source-disclosure">{entry.guide.disclosure}</p></article>}
   </section>;
 }

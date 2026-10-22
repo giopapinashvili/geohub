@@ -1,5 +1,6 @@
 import { NATIVE_PLACE_SOURCE_LINKS } from '../lib/nativePlaceSourceLinks.js';
 import { getImportedPlace } from './importedPlaces.js';
+import { isPlaceLocationHeld } from '../lib/reviewedPlaceStatus.js';
 import { rankRecords } from '../lib/discoverySearch.js';
 import { matchesPlaceFilters } from '../lib/discoveryFilters.js';
 
@@ -140,7 +141,7 @@ export async function searchSourceServices(term, n = 20, {filters = {}, category
     for (let offset = 0; offset < candidates.length && output.length < n; offset += 6) {
       const rows = await Promise.all(candidates.slice(offset,offset+6).map(async ({item,placeId}) => {
         const place = await getImportedPlace(placeId);
-        if (!place || !matchesPlaceFilters(place,filters,category)) return null;
+        if (!place || isPlaceLocationHeld(place) || !matchesPlaceFilters(place,filters,category)) return null;
         const href=`/place/${encodeURIComponent(place.id)}?${new URLSearchParams({tab:'catalog',item:item.id})}`;
         return {...place,kind:'place',resultId:`source:${item.id}:${place.id}`,title:item.title,itemTitle:item.title,
           matchedItemTitle:item.title,matchedItemType:'service',itemId:item.id,businessName:item.providerName,branchName:place.name,
